@@ -1,0 +1,129 @@
+import requests
+from datetime import datetime
+
+
+API_KEY = 'da2-qmxd4dl6zfbihixs5ik7uhwor4'
+API_URL = 'https://graphql-prod-4752.prod.aws.worldathletics.org/graphql'  # z.B. aus Zelle B10
+
+
+def fetch_results(athlete_id, year):
+    query = {
+        "operationName": "GetSingleCompetitorResultsDate",
+        "variables": {
+            "resultsByYear": int(year),
+            "resultsByYearOrderBy": "date",
+            "id": int(athlete_id)
+        },
+        "query": """
+        query GetSingleCompetitorResultsDate($id: Int, $resultsByYearOrderBy: String, $resultsByYear: Int) {
+            getSingleCompetitorResultsDate(id: $id, resultsByYear: $resultsByYear, resultsByYearOrderBy: $resultsByYearOrderBy) {
+                resultsByDate {
+                    date
+                    competition
+                    venue
+                    discipline
+                    country
+                    category
+                    race
+                    place
+                    mark
+                    resultScore
+                    remark
+                    competitionId
+                    eventId
+                }
+            }
+        }
+        """
+    }
+
+    headers = {
+        "Content-Type": "application/json",
+        "x-api-key": API_KEY
+    }
+
+    response = requests.post(API_URL, json=query, headers=headers)
+    response.raise_for_status()
+
+    data = response.json()
+    results = data.get("data", {}).get("getSingleCompetitorResultsDate", {}).get("resultsByDate", [])
+    return results
+
+
+def format_date(date_str):
+    # Bsp.: "17 MAY 2024" => "17.05.2024"
+    months = {
+        'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04', 'MAY': '05', 'JUN': '06',
+        'JUL': '07', 'AUG': '08', 'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12'
+    }
+    parts = date_str.split()
+    day = parts[0].zfill(2)
+    month = months.get(parts[1].upper(), '00')
+    year = parts[2]
+    return f"{day}.{month}.{year}"
+
+
+def format_time(time_str, discipline):
+    if not time_str:
+        return ""
+    if ":" not in time_str:
+        return time_str
+
+    if any(key in discipline for key in ["Road", "Cross", "Marathon"]):
+        parts = time_str.split(":")
+        if len(parts) == 2:
+            return f"00:{parts[0].zfill(2)}:{parts[1].zfill(2)}"
+        if len(parts) == 3:
+            return f"{parts[0].zfill(2)}:{parts[1].zfill(2)}:{parts[2].zfill(2)}"
+    else:
+        parts = time_str.split(":")
+        if len(parts) == 2:
+            seconds = parts[1].split(".")[0].zfill(2)
+            millis = parts[1].split(".")[1] if '.' in parts[1] else '00'
+            return f"{parts[0].zfill(2)}:{seconds},{millis.ljust(2, '0')}"
+    return time_str
+
+
+def get_timestamp():
+    now = datetime.now()
+    return now.strftime("%d.%m.%Y %H:%M:%S")
+
+
+def main():
+    athlete_id = input("Athleten-ID eingeben: ").strip()
+    year = input("Jahr eingeben (z.B. 2024): ").strip()
+
+    try:
+        results = fetch_results(athlete_id, year)
+        if not results:
+            print("Keine Ergebnisse gefunden.")
+            return
+
+        for result in results:
+            date = format_date(result['date'])
+            time = format_time(result['mark'], result['discipline'])
+            timestamp = get_timestamp()
+            print([
+                result.get('competition'),
+                result.get('venue'),
+                result.get('discipline'),
+                result.get('country'),
+                result.get('category'),
+                result.get('race'),
+                result.get('place'),
+                time,
+                result.get('resultScore'),
+                result.get('remark'),
+                date,
+                timestamp,
+                "World Athletics"
+            ])
+
+    except requests.exceptions.RequestException as e:
+        print(f"Fehler bei API-Anfrage: {e}")
+    except Exception as e:
+        print(f"Allgemeiner Fehler: {e}")
+
+
+if __name__ == "__main__":
+    main()
