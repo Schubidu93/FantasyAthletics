@@ -7,6 +7,7 @@ from pathlib import Path
 import html
 import requests
 import urllib.parse
+import load_results
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')
@@ -15,10 +16,12 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s: %(mes
 TOPLIST_CSV = Path('toplist_links.csv')
 PARAM_FILE = Path('parameters.json')
 ATHLETES_CSV = Path('Athletenliste.csv')
+RESULTS_CSV = Path('Ergebnisse.csv')
 
 # Defaults
 DEFAULT_THRESHOLD = 975
 MAX_PAGES = 10
+WRITE_BATCH = 50
 
 
 def load_parameters():
@@ -221,12 +224,12 @@ def decode_html_entities(s: str) -> str:
 
 
 def fetch_toplist(url: str, gender: str, score_threshold: int):
-    """Fetch a toplist page (and follow simple pagination) and return rows of athlete dicts."""
+    """Generator: fetch toplist pages and yield athlete dicts as they are found.
+    This streams results and allows caller to stop early.
+    """
     headers = {"User-Agent": "Mozilla/5.0 (compatible; FantasyAthletics/1.0)"}
-    results = []
     to_fetch = [url]
     fetched = set()
-
     try:
         while to_fetch and len(fetched) < MAX_PAGES:
             page_url = to_fetch.pop(0)
@@ -264,7 +267,7 @@ def fetch_toplist(url: str, gender: str, score_threshold: int):
                     'score': score,
                     'country': row_country
                 }
-                results.append(athlete)
+                yield athlete
 
             # find next link
             m_next = re.search(r'<a[^>]+href=["\'](?P<h>[^"\']+)["\'][^>]*>(?:\s*Next\s*|›|»|&raquo;)</a>', text, re.I)
@@ -274,28 +277,48 @@ def fetch_toplist(url: str, gender: str, score_threshold: int):
                 if next_url not in fetched and next_url not in to_fetch:
                     logging.info(f"Found next toplist page: {next_url}")
                     to_fetch.append(next_url)
-
-        return results
     except Exception as e:
         logging.error(f"Error fetching toplist {url}: {e}")
-        return results
+        return
 
 
-def load_existing_names() -> set:
-    """Load existing athlete names from ATHLETES_CSV first column."""
+def load_existing_names() -> tuple:
+    """Load existing athlete names, links and WA IDs from ATHLETES_CSV.
+    Returns (names_set, links_set, waids_set)
+    """
     if not ATHLETES_CSV.exists():
-        return set()
+        return set(), set(), set()
     names = set()
+    links = set()
+    waids = set()
     try:
-        with ATHLETES_CSV.open('r', encoding='utf-8') as f:
+        with ATHLETES_CSV.open('r', encoding='utf-8', newline='') as f:
             reader = csv.reader(f)
-            next(reader, None)
+            header = next(reader, None)
+            name_i = 0
+            link_i = 1
+            wa_i = None
+            if header:
+                for i, h in enumerate(header):
+                    if not h:
+                        continue
+                    hn = h.strip().lower()
+                    if 'world athletics id' in hn:
+                        wa_i = i
+                    if 'link' in hn or 'world athletics link' in hn:
+                        link_i = i
             for row in reader:
-                if row:
-                    names.add(row[0].strip())
+                if not row:
+                    continue
+                if len(row) > name_i and row[name_i].strip():
+                    names.add(row[name_i].strip())
+                if len(row) > link_i and row[link_i].strip():
+                    links.add(row[link_i].strip())
+                if wa_i is not None and len(row) > wa_i and row[wa_i].strip():
+                    waids.add(row[wa_i].strip())
     except Exception as e:
         logging.warning(f"Could not read existing athletes file: {e}")
-    return names
+    return names, links, waids
 
 
 def extract_wa_id(url: str) -> str:
@@ -384,6 +407,8 @@ def update_existing_wa_ids():
     return updated
 
 
+
+
 def append_athletes(new_rows: list):
     """Append new athlete rows (list of lists) to ATHLETES_CSV, create file with header if needed."""
     header = ['Name', 'World Athletics Link', 'World Athletics ID', 'Geschlecht', 'Jahrgang', 'Anmerkung']
@@ -468,8 +493,9 @@ def main():
         logging.error('No toplist links found. Create toplist_links.csv with links.')
         return
 
-    existing = load_existing_names()
-    new_rows = []
+    names_set, links_set, waids_set = load_existing_names()
+    batch = []
+    total_added = 0
 
     for entry in toplist_entries:
         url = entry.get('url')
@@ -479,25 +505,42 @@ def main():
             logging.warning(f"Invalid or empty URL skipped: {url}")
             continue
         logging.info(f"Processing toplist URL: {url} (gender={gender})")
-        athletes = fetch_toplist(url, gender, score_threshold)
-        for a in athletes:
+        for a in fetch_toplist(url, gender, score_threshold):
             name = a['name']
-            if name in existing:
-                continue
-            existing.add(name)
             profile = a['profile_link']
             wa_id = a.get('wa_id', '')
+            # quick existence checks: name, profile link or wa id
+            if (name in names_set) or (profile in links_set) or (wa_id and wa_id in waids_set):
+                continue
+            names_set.add(name)
+            links_set.add(profile)
+            if wa_id:
+                waids_set.add(wa_id)
             gender_label = a['gender']
             year = a['birth_year']
-            new_rows.append([name, profile, wa_id, gender_label, year, discipline])
+            batch.append([name, profile, wa_id, gender_label, year, discipline])
+            if len(batch) >= WRITE_BATCH:
+                append_athletes(batch)
+                total_added += len(batch)
+                batch = []
 
-    if new_rows:
-        append_athletes(new_rows)
+    if batch:
+        append_athletes(batch)
+        total_added += len(batch)
+
+    if total_added:
         remove_duplicates_in_csv()
-        logging.info(f"Added {len(new_rows)} new athletes to {ATHLETES_CSV}")
+        logging.info(f"Added {total_added} new athletes to {ATHLETES_CSV}")
     else:
         logging.info('No new athletes to add.')
 
 
 if __name__ == '__main__':
-    main()
+    # CLI: `python load_athletes.py fetch_results` to fetch results via API and write Ergebnisse.csv
+    if len(sys.argv) > 1 and sys.argv[1] in ('fetch_results', 'results'):
+        load_results.fetch_results_for_config_athletes()
+    elif len(sys.argv) > 2 and sys.argv[1] in ('fetch_athlete', 'athlete'):
+        # usage: python load_athletes.py fetch_athlete 123456
+        load_results.fetch_results_for_athlete(sys.argv[2], write=True)
+    else:
+        main()
