@@ -1,6 +1,6 @@
 {
-  "api_key": "da2-etom5jnibfglhheyikocjx2l3q",
-  "api_url": "https://graphql-prod-4841.edge.aws.worldathletics.org/graphql",
+  "api_key": "da2-kh7djqqqkjczfgysuw3b7hczoq",
+  "api_url": "https://graphql-prod-4843.edge.aws.worldathletics.org/graphql",
   "last_updated": "2026-01-24",
   "note": "Aktualisieren Sie diese Werte mit aktuellen Credentials von World Athletics und speichern Sie die Datei erneut"
 }
