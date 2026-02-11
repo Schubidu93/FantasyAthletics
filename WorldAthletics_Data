@@ -96,6 +96,12 @@ def fetch_results(athlete_id, year):
     response.raise_for_status()
 
     data = response.json()
+    
+    # Debug: Response anzeigen
+    if "errors" in data:
+        print(f"⚠ API-Fehler: {data['errors']}")
+        return []
+    
     results = data.get("data", {}).get("getSingleCompetitorResultsDate", {}).get("resultsByDate", [])
     return results
 
@@ -161,8 +167,10 @@ def main():
             writer.writeheader()
             
             for result in results:
-                date = format_date(result['date'])
-                time = format_time(result['mark'], result['discipline'])
+                if result is None:
+                    continue
+                date = format_date(result.get('date', ''))
+                time = format_time(result.get('mark', ''), result.get('discipline', ''))
                 timestamp = get_timestamp()
                 writer.writerow({
                     'Wettkampf': result.get('competition'),
