@@ -317,6 +317,73 @@ def extract_wa_id(url: str) -> str:
     return ''
 
 
+def update_existing_wa_ids():
+    """Populate missing World Athletics IDs in ATHLETES_CSV by extracting from profile links."""
+    if not ATHLETES_CSV.exists():
+        logging.info(f"{ATHLETES_CSV} not found, nothing to update.")
+        return 0
+
+    try:
+        with ATHLETES_CSV.open('r', encoding='utf-8', newline='') as f:
+            reader = csv.reader(f)
+            rows = list(reader)
+    except Exception as e:
+        logging.error(f"Failed to read {ATHLETES_CSV}: {e}")
+        return 0
+
+    if not rows:
+        logging.info(f"{ATHLETES_CSV} is empty.")
+        return 0
+
+    header = rows[0]
+    # Ensure header has WA ID column
+    if 'World Athletics ID' not in header:
+        # Insert after 'World Athletics Link' if present, else at index 2
+        try:
+            link_idx = header.index('World Athletics Link')
+            wa_idx = link_idx + 1
+        except ValueError:
+            wa_idx = 2
+        header = header[:wa_idx] + ['World Athletics ID'] + header[wa_idx:]
+        # adjust rows
+        new_rows = [header]
+        for r in rows[1:]:
+            # ensure row has enough columns
+            if len(r) <= wa_idx - 1:
+                r = r + [''] * (wa_idx - len(r))
+            r = r[:wa_idx] + [''] + r[wa_idx:]
+            new_rows.append(r)
+        rows = new_rows
+
+    wa_idx = header.index('World Athletics ID')
+    link_idx = header.index('World Athletics Link') if 'World Athletics Link' in header else 1
+
+    updated = 0
+    for i in range(1, len(rows)):
+        row = rows[i]
+        # ensure row length
+        if len(row) <= wa_idx:
+            row += [''] * (wa_idx - len(row) + 1)
+        if not row[wa_idx].strip():
+            profile = row[link_idx] if len(row) > link_idx else ''
+            wa = extract_wa_id(profile)
+            if wa:
+                row[wa_idx] = wa
+                updated += 1
+        rows[i] = row
+
+    try:
+        with ATHLETES_CSV.open('w', encoding='utf-8', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerows(rows)
+    except Exception as e:
+        logging.error(f"Failed to write {ATHLETES_CSV}: {e}")
+        return 0
+
+    logging.info(f"Updated {updated} World Athletics IDs in {ATHLETES_CSV}")
+    return updated
+
+
 def append_athletes(new_rows: list):
     """Append new athlete rows (list of lists) to ATHLETES_CSV, create file with header if needed."""
     header = ['Name', 'World Athletics Link', 'World Athletics ID', 'Geschlecht', 'Jahrgang', 'Anmerkung']
