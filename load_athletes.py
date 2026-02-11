@@ -254,9 +254,11 @@ def fetch_toplist(url: str, gender: str, score_threshold: int):
                 profile = comp.group('href').strip()
                 name_raw = re.sub(r'<[^>]+>', '', comp.group('name')).strip()
                 name = decode_html_entities(name_raw)
+                full_profile = urllib.parse.urljoin(page_url, profile)
                 athlete = {
                     'name': name,
-                    'profile_link': urllib.parse.urljoin(page_url, profile),
+                    'profile_link': full_profile,
+                    'wa_id': extract_wa_id(full_profile),
                     'gender': 'Men' if gender.lower().startswith('m') else 'Women',
                     'birth_year': year_of_birth,
                     'score': score,
@@ -296,14 +298,68 @@ def load_existing_names() -> set:
     return names
 
 
+def extract_wa_id(url: str) -> str:
+    """Extract the World Athletics numeric ID from a profile URL, if present."""
+    if not url:
+        return ''
+    # athlete=123456 pattern
+    m = re.search(r'athlete=(\d+)', url)
+    if m:
+        return m.group(1)
+    # trailing -123456 or -123456/ patterns
+    m = re.search(r'-([0-9]{5,})', url)
+    if m:
+        return m.group(1)
+    # digits at end of path
+    m = re.search(r'/([0-9]{5,})/?$', url)
+    if m:
+        return m.group(1)
+    return ''
+
+
 def append_athletes(new_rows: list):
     """Append new athlete rows (list of lists) to ATHLETES_CSV, create file with header if needed."""
-    header = ['Name', 'World Athletics Link', 'Geschlecht', 'Jahrgang', 'Anmerkung']
-    write_header = not ATHLETES_CSV.exists()
+    header = ['Name', 'World Athletics Link', 'World Athletics ID', 'Geschlecht', 'Jahrgang', 'Anmerkung']
+    # If file doesn't exist, create with full header
+    if not ATHLETES_CSV.exists():
+        with ATHLETES_CSV.open('w', encoding='utf-8', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(header)
+            for r in new_rows:
+                writer.writerow(r)
+        return
+
+    # If file exists, check header and normalize existing rows to include WA ID column if missing
+    try:
+        with ATHLETES_CSV.open('r', encoding='utf-8', newline='') as f:
+            reader = csv.reader(f)
+            existing_header = next(reader, None)
+            existing_rows = list(reader)
+    except Exception:
+        existing_header = None
+        existing_rows = []
+
+    if existing_header and 'World Athletics ID' not in existing_header:
+        # rewrite file with new header, adding empty WA ID column for existing rows
+        new_existing = []
+        for row in existing_rows:
+            # insert empty value after link (index 1) -> new index 2
+            if len(row) >= 2:
+                row = row[:2] + [''] + row[2:]
+            else:
+                row = row + [''] * (6 - len(row))
+            new_existing.append(row)
+        with ATHLETES_CSV.open('w', encoding='utf-8', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(header)
+            writer.writerows(new_existing)
+            for r in new_rows:
+                writer.writerow(r)
+        return
+
+    # Default: append rows (assume header already correct)
     with ATHLETES_CSV.open('a', encoding='utf-8', newline='') as f:
         writer = csv.writer(f)
-        if write_header:
-            writer.writerow(header)
         for r in new_rows:
             writer.writerow(r)
 
@@ -363,9 +419,10 @@ def main():
                 continue
             existing.add(name)
             profile = a['profile_link']
+            wa_id = a.get('wa_id', '')
             gender_label = a['gender']
             year = a['birth_year']
-            new_rows.append([name, profile, gender_label, year, discipline])
+            new_rows.append([name, profile, wa_id, gender_label, year, discipline])
 
     if new_rows:
         append_athletes(new_rows)
