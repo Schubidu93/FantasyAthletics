@@ -2,6 +2,8 @@ import csv
 import json
 import logging
 import re
+import time
+import random
 from pathlib import Path
 from datetime import datetime
 import requests
@@ -10,30 +12,42 @@ import requests
 
 # Files
 PARAM_FILE = Path('parameters.json')
+CONFIG_FILE = Path('config.json')
 ATHLETES_CSV = Path('Athletenliste.csv')
 RESULTS_CSV = Path('Ergebnisse.csv')
 RESULTS_WRITE_BATCH = 200
 
 
 def load_api_config():
-    """Read API url and key (and optional batch settings) from parameters.json.
+    """Read API url and key from config.json, and batch settings from parameters.json.
     Accepts keys: apiUrl/apiKey or url/key, and optional batchSize, startRow, totalAthletes.
     """
-    if not PARAM_FILE.exists():
-        logging.error(f"{PARAM_FILE} not found; cannot load API config.")
-        return {}
-    try:
-        with PARAM_FILE.open('r', encoding='utf-8') as f:
-            cfg = json.load(f)
-    except Exception as e:
-        logging.error(f"Failed to read {PARAM_FILE}: {e}")
-        return {}
-
-    api_url = cfg.get('apiUrl') or cfg.get('url') or cfg.get('api_url') or cfg.get('endpoint')
-    api_key = cfg.get('apiKey') or cfg.get('key') or cfg.get('api_key')
-    batch_size = int(cfg.get('batchSize', cfg.get('batch_size', 0) or 0))
-    start_row = int(cfg.get('startRow', cfg.get('start_row', 2)))
-    total_athletes = int(cfg.get('totalAthletes', cfg.get('total_athletes', 0) or 0))
+    # Load API config from config.json
+    api_url = None
+    api_key = None
+    if CONFIG_FILE.exists():
+        try:
+            with CONFIG_FILE.open('r', encoding='utf-8') as f:
+                cfg = json.load(f)
+            api_url = cfg.get('apiUrl') or cfg.get('url') or cfg.get('api_url') or cfg.get('endpoint')
+            api_key = cfg.get('apiKey') or cfg.get('key') or cfg.get('api_key')
+        except Exception as e:
+            logging.error(f"Failed to read {CONFIG_FILE}: {e}")
+    
+    # Load batch settings from parameters.json
+    batch_size = 0
+    start_row = 2
+    total_athletes = 0
+    if PARAM_FILE.exists():
+        try:
+            with PARAM_FILE.open('r', encoding='utf-8') as f:
+                cfg = json.load(f)
+            batch_size = int(cfg.get('batchSize', cfg.get('batch_size', 0) or 0))
+            start_row = int(cfg.get('startRow', cfg.get('start_row', 2)))
+            total_athletes = int(cfg.get('totalAthletes', cfg.get('total_athletes', 0) or 0))
+        except Exception as e:
+            logging.warning(f"Could not read batch settings from {PARAM_FILE}: {e}")
+    
     return {'api_url': api_url, 'api_key': api_key, 'batch_size': batch_size, 'start_row': start_row, 'total_athletes': total_athletes}
 
 
@@ -81,6 +95,9 @@ def current_timestamp() -> str:
 
 
 def fetch_athlete_results_via_api(athlete_id: int, year: int, api_url: str, api_key: str):
+    # Add random delay to avoid rate limits (1-3 seconds)
+    time.sleep(random.uniform(1, 3))
+    
     query = {
         'operationName': 'GetSingleCompetitorResultsDate',
         'variables': {
@@ -113,16 +130,33 @@ def fetch_athlete_results_via_api(athlete_id: int, year: int, api_url: str, api_
     headers = {'Content-Type': 'application/json'}
     if api_key:
         headers['x-api-key'] = api_key
-    try:
-        resp = requests.post(api_url, json=query, headers=headers, timeout=30)
-        resp.raise_for_status()
-        data = resp.json()
-        if data and isinstance(data, dict):
-            dd = data.get('data', {})
-            payload = dd.get('getSingleCompetitorResultsDate') or {}
-            return payload.get('resultsByDate') or []
-    except Exception as e:
-        logging.error(f"API request failed for athlete {athlete_id} year {year}: {e}")
+    
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            resp = requests.post(api_url, json=query, headers=headers, timeout=30)
+            resp.raise_for_status()
+            data = resp.json()
+            if data and isinstance(data, dict):
+                dd = data.get('data', {})
+                payload = dd.get('getSingleCompetitorResultsDate') or {}
+                return payload.get('resultsByDate') or []
+        except requests.exceptions.HTTPError as e:
+            if resp.status_code == 429:  # Too Many Requests
+                wait_time = (2 ** attempt) + random.uniform(0, 1)  # Exponential backoff
+                logging.warning(f"Rate limit hit for athlete {athlete_id} year {year}, attempt {attempt+1}. Waiting {wait_time:.1f}s")
+                time.sleep(wait_time)
+                continue
+            else:
+                logging.error(f"HTTP error for athlete {athlete_id} year {year}: {e}")
+                break
+        except Exception as e:
+            logging.error(f"API request failed for athlete {athlete_id} year {year}, attempt {attempt+1}: {e}")
+            if attempt < max_retries - 1:
+                wait_time = (2 ** attempt) + random.uniform(0, 1)
+                time.sleep(wait_time)
+            else:
+                break
     return []
 
 
@@ -138,6 +172,8 @@ def get_combined_placement(athlete_name: str, result: dict) -> tuple:
             return '', race
         url = f"https://worldathletics.org/competition/calendar-results/results/{comp_id}?eventId={event_id}"
         try:
+            # Add delay to avoid overwhelming the website
+            time.sleep(random.uniform(0.5, 1.5))
             text = requests.get(url, timeout=20).text
         except Exception:
             return '', race
@@ -258,7 +294,7 @@ def fetch_results_for_config_athletes():
     start_row = cfg.get('start_row', 2)
     total_athletes = cfg.get('total_athletes', 0)
     if not api_url:
-        logging.error('API URL not configured in parameters.json (apiUrl / url). Aborting.')
+        logging.error('API URL not configured in config.json (apiUrl / url). Aborting.')
         return
     # load years either from parameters.json default
     try:
@@ -407,7 +443,7 @@ def fetch_results_for_athlete(athlete_id: str, write: bool = True) -> list:
     api_url = cfg.get('api_url')
     api_key = cfg.get('api_key')
     if not api_url:
-        logging.error('API URL not configured in parameters.json (apiUrl / url). Aborting.')
+        logging.error('API URL not configured in config.json (apiUrl / url). Aborting.')
         return []
     try:
         with PARAM_FILE.open('r', encoding='utf-8') as f:
