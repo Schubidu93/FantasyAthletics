@@ -8,6 +8,8 @@ on:
 jobs:
   load-results:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout repository
@@ -38,7 +40,7 @@ jobs:
 
       - name: Upload Ergebnisse.csv artifact
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ergebnisse-csv
           path: Ergebnisse.csv
