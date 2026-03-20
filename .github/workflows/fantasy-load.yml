@@ -13,10 +13,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@9f265659d3bb64ab1440b03b12f4d47a24320917
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@2e3e4b15a884dc73a63f962bff250a855150a234
         with:
           python-version: '3.11'
 
@@ -40,7 +40,7 @@ jobs:
 
       - name: Upload Ergebnisse.csv artifact
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
         with:
           name: ergebnisse-csv
           path: Ergebnisse.csv
