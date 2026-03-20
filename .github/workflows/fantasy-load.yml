@@ -1,0 +1,44 @@
+name: FantasyAthletics Auto Load
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'  # alle 4 Stunden
+  workflow_dispatch:      # manueller Trigger
+
+jobs:
+  load-results:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests openpyxl
+
+      - name: Create config.json from secrets
+        run: |
+          cat > config.json <<'EOF'
+          {
+            "api_key": "${{ secrets.API_KEY }}",
+            "api_url": "${{ secrets.API_URL }}"
+          }
+          EOF
+
+      - name: Run result loader
+        run: |
+          python load_athletes.py fetch_results
+
+      - name: Upload Ergebnisse.csv artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ergebnisse-csv
+          path: Ergebnisse.csv
