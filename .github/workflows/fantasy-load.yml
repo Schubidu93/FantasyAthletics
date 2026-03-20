@@ -2,7 +2,7 @@ name: FantasyAthletics Auto Load
 
 on:
   schedule:
-    - cron: '0 */4 * * *'  # alle 4 Stunden
+    - cron: '*/20 * * * *'  # alle 20 Minuten
   workflow_dispatch:      # manueller Trigger
 
 jobs:
