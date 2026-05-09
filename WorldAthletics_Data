@@ -1,9 +1,59 @@
 import requests
 from datetime import datetime
+import csv
+import os
+import json
+from pathlib import Path
 
 
-API_KEY = 'da2-qmxd4dl6zfbihixs5ik7uhwor4'
-API_URL = 'https://graphql-prod-4752.prod.aws.worldathletics.org/graphql'  # z.B. aus Zelle B10
+# Konfigurationsdatei für API-Credentials
+CONFIG_FILE = 'config.json'
+
+# Standard API-Credentials (können über Umgebungsvariablen oder config.json überschrieben werden)
+DEFAULT_API_KEY = 'da2-qmxd4dl6zfbihixs5ik7uhwor4'
+DEFAULT_API_URL = 'https://graphql-prod-4752.prod.aws.worldathletics.org/graphql'
+
+
+def load_or_create_config():
+    """Lädt die API-Credentials aus config.json oder erstellt die Datei mit Standardwerten."""
+    config_path = Path(CONFIG_FILE)
+    
+    # Zuerst: Umgebungsvariablen prüfen
+    api_key = os.getenv('WA_API_KEY')
+    api_url = os.getenv('WA_API_URL')
+    
+    if api_key and api_url:
+        return api_key, api_url
+    
+    # Zweiten: config.json prüfen
+    if config_path.exists():
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                return config.get('api_key', DEFAULT_API_KEY), config.get('api_url', DEFAULT_API_URL)
+        except Exception as e:
+            print(f"⚠ Fehler beim Lesen von config.json: {e}")
+    
+    # Drittens: Standard-Werte mit Angebot zum Speichern
+    config = {
+        'api_key': DEFAULT_API_KEY,
+        'api_url': DEFAULT_API_URL,
+        'last_updated': datetime.now().isoformat(),
+        'note': 'Ändern Sie diese Werte und speichern Sie erneut, um die API-Credentials zu aktualisieren.'
+    }
+    
+    try:
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(config, f, indent=2, ensure_ascii=False)
+        print(f"✓ Konfigurationsdatei '{CONFIG_FILE}' erstellt")
+    except Exception as e:
+        print(f"⚠ Konnte config.json nicht erstellen: {e}")
+    
+    return DEFAULT_API_KEY, DEFAULT_API_URL
+
+
+# API-Credentials laden
+API_KEY, API_URL = load_or_create_config()
 
 
 def fetch_results(athlete_id, year):
@@ -46,6 +96,12 @@ def fetch_results(athlete_id, year):
     response.raise_for_status()
 
     data = response.json()
+    
+    # Debug: Response anzeigen
+    if "errors" in data:
+        print(f"⚠ API-Fehler: {data['errors']}")
+        return []
+    
     results = data.get("data", {}).get("getSingleCompetitorResultsDate", {}).get("resultsByDate", [])
     return results
 
@@ -100,6 +156,7 @@ def main():
             print("Keine Ergebnisse gefunden.")
             return
 
+<<<<<<< HEAD
         data = []  # Liste für die Tabelle
 
         for result in results:
@@ -130,11 +187,56 @@ def main():
         # Optional: CSV speichern
         df.to_csv(f"ergebnisse_{athlete_id}_{year}.csv", index=False, encoding='utf-8-sig')
         print(f"\nDatei gespeichert als ergebnisse_{athlete_id}_{year}.csv")
+=======
+        # CSV-Datei speichern
+        csv_filename = f"results_{athlete_id}_{year}.csv"
+        
+        with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
+            fieldnames = [
+                'Wettkampf', 'Ort', 'Disziplin', 'Land', 'Kategorie', 'Rennen',
+                'Platzierung', 'Zeit', 'Punkte', 'Bemerkung', 'Datum', 'Zeitstempel', 'Quelle'
+            ]
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+            
+            for result in results:
+                if result is None:
+                    continue
+                date = format_date(result.get('date', ''))
+                time = format_time(result.get('mark', ''), result.get('discipline', ''))
+                timestamp = get_timestamp()
+                writer.writerow({
+                    'Wettkampf': result.get('competition'),
+                    'Ort': result.get('venue'),
+                    'Disziplin': result.get('discipline'),
+                    'Land': result.get('country'),
+                    'Kategorie': result.get('category'),
+                    'Rennen': result.get('race'),
+                    'Platzierung': result.get('place'),
+                    'Zeit': time,
+                    'Punkte': result.get('resultScore'),
+                    'Bemerkung': result.get('remark'),
+                    'Datum': date,
+                    'Zeitstempel': timestamp,
+                    'Quelle': "World Athletics"
+                })
+        
+        print(f"✓ Ergebnisse erfolgreich in '{csv_filename}' gespeichert!")
+>>>>>>> 8a7d19dd22b88f90923454e278ff832d31d12bf1
 
     except requests.exceptions.RequestException as e:
-        print(f"Fehler bei API-Anfrage: {e}")
+        print(f"❌ Fehler bei API-Anfrage: {e}")
+        print("\n📋 Mögliche Lösungen:")
+        print("1. Überprüfen Sie Ihre Internetverbindung")
+        print("2. API-Credentials aktualisieren in 'config.json':")
+        print(f"   - API_KEY: {API_KEY[:10]}...")
+        print(f"   - API_URL: {API_URL}")
+        print("3. Oder Umgebungsvariablen setzen:")
+        print("   - WA_API_KEY=<neuer_key>")
+        print("   - WA_API_URL=<neue_url>")
+        print("4. World Athletics API-Dokumentation prüfen")
     except Exception as e:
-        print(f"Allgemeiner Fehler: {e}")
+        print(f"❌ Allgemeiner Fehler: {e}")
 
 
 if __name__ == "__main__":
