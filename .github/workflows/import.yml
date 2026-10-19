@@ -1,0 +1,40 @@
+name: WA-Import
+
+on:
+  schedule:
+    - cron: "17 3 * * *"     # Athletenpool: täglich 05:17 MESZ
+    - cron: "41 */4 * * *"   # Ergebnisse: alle 4 Stunden
+  workflow_dispatch:
+    inputs:
+      job:
+        description: "Was importieren?"
+        type: choice
+        options: [both, pool, results]
+        default: both
+
+concurrency:
+  group: wa-import
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      WA_API_URL: ${{ secrets.WA_API_URL }}
+      WA_API_KEY: ${{ secrets.WA_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Athletenpool
+        if: github.event.schedule == '17 3 * * *' || (github.event_name == 'workflow_dispatch' && inputs.job != 'results')
+        run: npm run import:pool
+      - name: Ergebnisse
+        if: (github.event_name == 'schedule' && github.event.schedule != '17 3 * * *') || (github.event_name == 'workflow_dispatch' && inputs.job != 'pool')
+        run: npm run import:results

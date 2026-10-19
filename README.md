@@ -1,125 +1,108 @@
-# Dokumentation: FantasyAthletics Projekt
+# Fantasy Athletics
 
-## Überblick
-Das **FantasyAthletics** Projekt ist ein Python-Skript zur automatischen Erfassung von Athletendaten und Wettkampfergebnissen von der World Athletics Website. Es scrapt Toplisten-Seiten, extrahiert Athleteninformationen und lädt anschließend deren Wettkampfergebnisse über die World Athletics GraphQL-API. Die Daten werden in CSV-Dateien gespeichert und können für Fantasy-Sport-Analysen verwendet werden.
+Fantasy-Leichtathletik für eine Freundesrunde: Über eine Saison (Januar–Dezember) sammelt jedes Team Punkte mit deutschen Läuferinnen und Läufern. Die Ergebnisse kommen automatisch von World Athletics.
 
-## Dateien und deren Funktionen
+Löst die alte Lösung aus Google Sheets, Apps Script und AppSheet ab.
 
-### Konfigurationsdateien
-- **`config.json`**: Enthält die API-Zugangsdaten für World Athletics
-  - `api_url`: GraphQL-Endpunkt-URL
-  - `api_key`: API-Schlüssel für Authentifizierung
-  - `last_updated`: Datum der letzten Aktualisierung
-  - `note`: Hinweis zur Aktualisierung der Credentials
+## Spielregeln (Standard, pro Saison im Admin-Bereich änderbar)
 
-- **`parameters.json`**: Steuerparameter für das Scraping und Laden
-  - `scoreThreshold`: Mindestpunktzahl für Athleten (Standard: 975)
-  - `years`: Liste der Jahre, für die Ergebnisse geladen werden sollen (z.B. [2023, 2024, 2025, 2026])
+| | |
+|---|---|
+| **Athletenpool** | DE-Toplisten (Senioren) des Saisonjahres und des Vorjahres, alle Laufdisziplinen ab 800 m inkl. Hindernis, Halle und Straße. Wer dort ≥ **1000 WA-Punkte** hat, ist im Pool. Wird täglich aktualisiert. |
+| **Draft** | Snake-Draft live in der App, **11 Runden** (= Kadergröße). |
+| **Aufstellung** | Pro Spieltag 8 Positionen: 800, 1500, 5000, 10000, Marathon, Hindernis + 2 Wildcards. Auf eine Gruppen-Position dürfen nur Athleten dieser Gruppe. Die Gruppe ergibt sich aus der besten Toplistenleistung, Admins können sie in `athletes.group_override` überschreiben. |
+| **Spieltage** | Frei definierbare Zeiträume, z. B. alle 14 Tage. Ab Spieltagsbeginn ist die Aufstellung gesperrt. Nur leere Positionen und Positionen, deren Athlet nicht mehr im Kader ist, dürfen noch besetzt werden. Eine Aufstellung gilt weiter, bis man sie ändert. |
+| **Transfers** | Free Agents aus dem Pool holen, sofort und nach dem Prinzip „wer zuerst kommt“. Trades zwischen Teams, die das andere Team annehmen muss. |
+| **Punkte je Ergebnis** | `(max(0, WA-Punkte − 1000) × Leistungsfaktor + Platzierungspunkte × Platzierungsfaktor) × Disziplinfaktor` |
 
-### Hauptskripte
-- **`load_athletes.py`**: Hauptmodul zum Laden von Athleten aus Toplisten
-  - Lädt Toplisten-Links aus `TopListLinks.xlsx` oder `toplist_links.csv`
-  - Scrapt Athletendaten von World Athletics Toplisten-Seiten
-  - Filtert Athleten nach Punktzahl-Schwellenwert
-  - Speichert neue Athleten in `Athletenliste.csv`
-  - Kann auch Ergebnisse für Athleten laden (siehe Ausführung)
+- **Platzierungspunkte** richten sich nach den WA-World-Ranking-Tabellen. Sie hängen ab von Disziplingruppe, Wettkampfkategorie (OW, DF, GW, GL, A–F), Finale oder Halbfinale und Platz. Vorläufe und gesplittete Finals (F1, F2 …) bekommen keine Platzierungspunkte.
+- **Disziplinfaktoren** sind z. B. Marathon 3, Halbmarathon 2, 10.000 m 1,6, Gehen 0. Die Tabellen `disciplines` und `placing_scores` sind aus dem alten Google Sheet übernommen.
+- **Wann ein Ergebnis zählt:** wenn der Athlet im Spieltag aufgestellt war **und** am Wettkampftag im Kader des Teams stand.
 
-- **`load_results.py`**: Modul zum Laden von Wettkampfergebnissen
-  - Verwendet World Athletics GraphQL-API
-  - Lädt Ergebnisse für einzelne Athleten oder alle Athleten aus der Liste
-  - Formatiert Daten und speichert in `Ergebnisse.csv`
-  - Behandelt API-Limits und Fehler
+## Architektur
 
-### Datendateien
-- **`Athletenliste.csv`**: Liste aller erfassten Athleten
-  - Spalten: Name, Profil-Link, WA-ID, Geschlecht, Geburtsjahr, Disziplin
-
-- **`Ergebnisse.csv`**: Wettkampfergebnisse aller Athleten
-  - Spalten: Athleten-ID, Datum, Wettkampf, Ort, Disziplin, Land, Kategorie, Platzierung, Ergebnis, Punkte, etc.
-
-- **`TopListLinks.xlsx`** (oder `toplist_links.csv`): Links zu World Athletics Toplisten
-  - Spalten: Männer-URL, Frauen-URL (oder einzelne Zeilen mit URL und Geschlecht)
-
-### Verzeichnisse
-- **`WorldAthletics_Data/`**: Ordner für zusätzliche Daten oder Cache-Dateien
-- **`__pycache__/`**: Python-Bytecode-Cache (automatisch generiert)
-
-## Zusammenarbeit der Dateien
-
-1. **Konfiguration laden**: Beide Skripte lesen `config.json` und `parameters.json` für API-Zugang und Parameter.
-
-2. **Athleten laden**:
-   - `load_athletes.py` liest Toplisten-Links
-   - Scrapt HTML-Seiten von World Athletics
-   - Extrahiert Athletendaten (Name, Profil-Link, WA-ID, Punkte)
-   - Filtert nach `scoreThreshold`
-   - Speichert in `Athletenliste.csv`
-
-3. **Ergebnisse laden**:
-   - `load_results.py` liest `Athletenliste.csv`
-   - Für jeden Athleten: API-Aufruf an World Athletics GraphQL
-   - Lädt Ergebnisse für konfigurierte Jahre
-   - Formatiert und speichert in `Ergebnisse.csv`
-
-4. **Integration**: `load_athletes.py` importiert `load_results.py` für Ergebnis-Funktionen.
-
-## Ausführung
-
-### Voraussetzungen
-- Python 3.7+
-- Erforderliche Pakete: `requests`, `openpyxl` (für Excel-Dateien)
-- Gültige World Athletics API-Credentials in `config.json`
-
-### Installation
-```bash
-# Virtuelle Umgebung erstellen (empfohlen)
-python -m venv .venv
-.venv\Scripts\activate  # Windows
-# oder .venv/bin/activate  # Linux/Mac
-
-# Pakete installieren
-pip install requests openpyxl
+```
+Next.js (Vercel)  ──►  Supabase (Postgres + Auth + Realtime)  ◄──  GitHub Actions (Importer)
+     App/PWA            Regeln als SQL-Funktionen, Punkte als Views       Toplisten + WA-GraphQL
 ```
 
-### Ausführungsmodi
+| Pfad | Inhalt |
+|---|---|
+| `supabase/migrations/` | Schema, Views für Punkte und Tabellen, alle Spielregeln als RPC-Funktionen, Row Level Security, Referenzdaten |
+| `app/`, `components/`, `lib/` | Web-App (Next.js App Router, Tailwind), installierbar als App auf dem Handy |
+| `importer/` | `sync-pool.ts` (Toplisten scrapen), `sync-results.ts` (Ergebnisse über die WA-GraphQL-API). Der API-Key wird automatisch von worldathletics.org gelesen, wenn er fehlt oder abgelaufen ist. |
+| `tests/` | Tests der Spielregeln gegen die echten Migrationen (PGlite) und des WA-Parsers |
 
-#### 1. Athleten von Toplisten laden
+## Einrichtung
+
+### 1. Supabase
+
+1. Unter [supabase.com](https://supabase.com) ein neues Projekt anlegen (Free Tier reicht).
+2. Migrationen einspielen. Entweder mit der CLI:
+   ```bash
+   npx supabase link --project-ref <ref>
+   npx supabase db push
+   ```
+   Oder den Inhalt der Dateien aus `supabase/migrations/` der Reihe nach im SQL Editor ausführen.
+3. Unter **Authentication → URL Configuration**:
+   - Site URL: `https://<deine-app>.vercel.app`
+   - Redirect URL: `https://<deine-app>.vercel.app/auth/confirm`
+4. Unter **Authentication → Email Templates → Magic Link** das Template so anpassen, dass auch der Code drinsteht. Das ist wichtig für die installierte App auf dem iPhone, weil sich Links dort in Safari öffnen:
+   ```html
+   <h2>Login für Fantasy Athletics</h2>
+   <p>Dein Code: <b>{{ .Token }}</b></p>
+   <p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email">Oder hier klicken</a></p>
+   ```
+5. Optional: Unter **Authentication → Providers → Email** „Allow new users to sign up“ ausschalten, sobald alle registriert sind.
+
+### 2. Vercel
+
+1. Repo in Vercel importieren (Framework: Next.js).
+2. Environment Variables setzen (Werte aus Supabase → Project Settings → API):
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+### 3. GitHub Actions (Import)
+
+Unter **Settings → Secrets and variables → Actions**:
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY` (der **service_role**-Key, niemals in der App verwenden!)
+- optional `WA_API_URL` / `WA_API_KEY`
+
+Danach unter **Actions → WA-Import → Run workflow** einmal mit `both` starten. Zeitplan:
+- Pool: täglich um 05:17 Uhr
+- Ergebnisse: alle 4 Stunden
+
+### 4. Saison starten
+
+1. In der App anmelden und eine **neue Saison anlegen**. Wer sie anlegt, ist Admin.
+2. Den Einladungscode aus dem Admin-Bereich an die Mitspieler schicken. Die melden sich an und treten mit dem Code bei.
+3. Im Admin-Bereich:
+   - Spieltage erzeugen
+   - Draft-Reihenfolge festlegen oder auslosen
+   - Draft starten
+4. Nach dem Draft stellt jedes Team unter „Mein Team“ seine Aufstellung auf.
+
+Um sich selbst zum globalen Admin zu machen (darf u. a. Disziplinfaktoren ändern), im SQL Editor ausführen:
+`update profiles set is_admin = true where id = (select id from auth.users where email = 'du@example.com');`
+
+## Entwicklung
+
 ```bash
-python load_athletes.py
+npm install
+cp .env.example .env.local   # Supabase-URL und Anon-Key eintragen
+npm run dev
+npm test                     # Spielregeln + Parser
+npm run lint                 # TypeScript
 ```
-- Lädt neue Athleten aus `TopListLinks.xlsx`
-- Aktualisiert `Athletenliste.csv`
-- Verwendet `scoreThreshold` aus `parameters.json`
 
-#### 2. Ergebnisse für alle Athleten laden
+Den Importer lokal ausführen (braucht `SUPABASE_URL` und `SUPABASE_SERVICE_ROLE_KEY` in der Umgebung):
+
 ```bash
-python load_athletes.py fetch_results
+npm run import:pool
+npm run import:results
 ```
-- Lädt Wettkampfergebnisse für alle Athleten in `Athletenliste.csv`
-- Speichert in `Ergebnisse.csv`
-- Verwendet Jahre aus `parameters.json`
 
-#### 4. Automatisches Batch-Loading
-```bash
-python auto_batch_load.py
-```
-- Lädt Ergebnisse automatisch in Batches mit Pausen dazwischen
-- Konfiguriere `batchSize` (Anzahl Athleten pro Batch) und `intervalMinutes` (Wartezeit zwischen Batches) in `parameters.json`
-- Beispiel: `"batchSize": 10, "intervalMinutes": 5` lädt 10 Athleten, wartet 5 Minuten, lädt nächste 10, etc.
-- Stoppt automatisch, wenn alle Athleten verarbeitet sind
+### Ergebnisse manuell nachtragen
 
-### Logging
-Alle Skripte verwenden Python-Logging. Ausgaben werden in der Konsole angezeigt mit Zeitstempel und Level (INFO, WARNING, ERROR).
-
-### Fehlerbehandlung
-- API-Fehler werden geloggt und übersprungen
-- Duplikate in CSV-Dateien werden automatisch entfernt
-- Fehlende Konfigurationsdateien werden mit Standardwerten erstellt
-
-### Hinweise
-- Die World Athletics API hat Ratenlimits - das Skript enthält automatische Delays und Retry-Logic bei Fehlern
-- Bei "Too Many Requests" (429) wartet das Skript automatisch mit exponential backoff
-- API-Credentials müssen regelmäßig aktualisiert werden (siehe `config.json`)
-- Für große Athletenlisten kann das Laden der Ergebnisse mehrere Stunden dauern
-- Die Skripte sind robust gegenüber Netzwerkfehlern und versuchen automatisch wiederholte Aufrufe</content>
-<parameter name="filePath">c:\Users\julia\Documents\Python Scripts\FantasyAthletics\README.md
+Für Wettkämpfe, die nicht bei World Athletics stehen: im Supabase Table Editor eine Zeile in `results` mit `source = 'manual'` anlegen. Punkte und Tabellen rechnen sich automatisch neu, weil alles Views sind.
