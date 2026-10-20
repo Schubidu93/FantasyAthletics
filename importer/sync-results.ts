@@ -96,6 +96,11 @@ async function resolveSplitFinals(rows: Record<string, unknown>[], api: ApiConfi
     known.set([r.athlete_id, r.date, r.discipline, r.wa_race, r.competition].join("|"), r.place);
   }
 
+  const ids = [...new Set(split.map((r) => Number(r.athlete_id)))];
+  const { data: athletes, error: nameError } = await db.from("athletes").select("id, name").in("id", ids);
+  if (nameError) throw nameError;
+  const names = new Map((athletes ?? []).map((a) => [Number(a.id), a.name as string]));
+
   const events = new Map<string, Promise<Race[]>>();
   let resolved = 0;
   let missing = 0;
@@ -110,7 +115,9 @@ async function resolveSplitFinals(rows: Record<string, unknown>[], api: ApiConfi
           return [];
         }));
       }
-      place = combinedPlace(await events.get(ek)!, r.mark as string | null);
+      place = combinedPlace(await events.get(ek)!, r.mark as string | null, {
+        id: Number(r.athlete_id), name: names.get(Number(r.athlete_id)),
+      });
     }
     if (place !== null) {
       r.race = "F";

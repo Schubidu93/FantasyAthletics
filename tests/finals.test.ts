@@ -70,6 +70,33 @@ describe("kombinierte Finalplatzierung", () => {
     expect(combinedPlace(extractRacesFromHtml(html, 2), "8:00.00")).toBe(2);
   });
 
+  it("findet den Athleten über ID oder Namen", () => {
+    const races: Race[] = [
+      { name: "Final 1", entries: [{ athleteId: 1, name: "Hannes BURGER", mark: "3:40.00" }, entry("3:41.00")] },
+      { name: "Final 2", entries: [entry("3:39.00"), entry("3:39.50")] },
+    ];
+    // abweichende Zeit in den Athletenergebnissen (z. B. Rundung) -> Treffer über Namen/ID
+    expect(combinedPlace(races, "3:40.01", { name: "hannes  burger" })).toBe(3);
+    expect(combinedPlace(races, "3:40.01", { id: 1 })).toBe(3);
+    expect(combinedPlace(races, "3:40.01")).toBeNull();
+  });
+
+  it("liest Rennen aus HTML-Tabellen (Format der alten WA-Seite)", () => {
+    const html = `
+      <strong>Final<!-- --> 1</strong>
+      <table>
+        <tr><td>1.</td><td>7</td><td class="EventResults_name__x"><a href="/athletes/germany/a-14650473">A</a></td><td>GER</td><td>13:40.10</td></tr>
+        <tr><td>2.</td><td>3</td><td class="EventResults_name__x"><a href="/athletes/germany/b-14984080">B</a></td><td>GER</td><td>13:41.00</td></tr>
+      </table>
+      <strong>Final<!-- --> 2</strong>
+      <table><tr><td>1.</td><td>5</td><td class="EventResults_name__x"><a href="/athletes/kenya/c-14000001">C</a></td><td>KEN</td><td>13:39.00</td></tr></table>`;
+    const races = extractRacesFromHtml(html);
+    expect(races.map((r) => [r.name, r.entries.map((e) => e.mark)])).toEqual([
+      ["Final 1", ["13:40.10", "13:41.00"]], ["Final 2", ["13:39.00"]],
+    ]);
+    expect(combinedPlace(races, "13:41.00", { name: "B" })).toBe(3);
+  });
+
   it("liest Rennen aus HTML-Tabellen", () => {
     const html = `
       <strong>Final<!-- --> 1</strong>

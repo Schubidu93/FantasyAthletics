@@ -3,8 +3,8 @@
 // Beispiel: Athlet A wird in F1 Fünfter, in F2 waren zwei Läufer schneller als er.
 // Dann ist seine kombinierte Platzierung 7 und das Ergebnis wird als Lauf "F" gewertet.
 //
-// Die Detailergebnisse holen wir zuerst über die WA-GraphQL-API. Falls sich deren Schema
-// ändert, lesen wir die Ergebnisseite von worldathletics.org (eingebettete Daten bzw. HTML).
+// Die Detailergebnisse lesen wir wie das alte Apps Script von der Ergebnisseite auf
+// worldathletics.org (eingebettete Daten bzw. HTML-Tabellen), ersatzweise über die GraphQL-API.
 import * as cheerio from "cheerio";
 import type { ApiConfig } from "./wa";
 
@@ -31,17 +31,29 @@ export function parseMark(mark: string | null | undefined): number | null {
   return parts.reduce((acc, p) => acc * 60 + p, 0);
 }
 
+/** "Hannes  BURGER" -> "hannes burger" */
+export function normalizeName(name: string) {
+  return name.normalize("NFC").toLowerCase().replace(/\s+/g, " ").trim();
+}
+
 /**
  * Kombinierter Platz = 1 + Anzahl der Läufer aller Finalläufe mit einer schnelleren Zeit.
- * Gleiche Zeit = gleicher Platz.
+ * Gleiche Zeit = gleicher Platz. Der Athlet wird über ID oder Namen gesucht (wie im alten
+ * Apps Script), ersatzweise über seine Zeit aus den eigenen Ergebnissen.
  */
-export function combinedPlace(races: Race[], mark: string | null): number | null {
-  const mine = parseMark(mark);
-  if (mine === null) return null;
+export function combinedPlace(
+  races: Race[], mark: string | null, athlete: { id?: number; name?: string } = {},
+): number | null {
   const finals = races.filter((r) => isFinalRaceName(r.name));
   if (finals.length < 2) return null;
-  const times = finals.flatMap((r) => r.entries.map((e) => parseMark(e.mark))).filter((t): t is number => t !== null);
-  if (!times.some((t) => t === mine)) return null; // eigene Zeit nicht gefunden -> Daten passen nicht
+  const entries = finals.flatMap((r) => r.entries);
+  const target = athlete.name ? normalizeName(athlete.name) : null;
+  const own = entries.find((e) => athlete.id && e.athleteId === athlete.id)
+    ?? (target ? entries.find((e) => normalizeName(e.name) === target) : undefined);
+  const mine = parseMark(own?.mark ?? mark);
+  if (mine === null) return null;
+  const times = entries.map((e) => parseMark(e.mark)).filter((t): t is number => t !== null);
+  if (!own && !times.some((t) => t === mine)) return null; // Athlet nicht gefunden -> Daten passen nicht
   return 1 + times.filter((t) => t < mine).length;
 }
 
@@ -121,7 +133,8 @@ export function extractRacesFromHtml(html: string, eventId?: number): Race[] {
 
   const races: Race[] = [];
   let current: Race | null = null;
-  const timeRe = /^\d{1,2}(:\d{2}){0,2}(\.\d+)?$/;
+  // Zeit mit Doppelpunkt oder Nachkommastellen, damit Bahn-/Startnummern nicht als Zeit gelten.
+  const timeRe = /^\d{1,2}(:\d{2}){1,2}(\.\d+)?$|^\d{1,2}\.\d+$/;
   $("h1, h2, h3, h4, strong, table").each((_, el) => {
     const node = $(el);
     if (el.tagName !== "table") {
@@ -135,9 +148,12 @@ export function extractRacesFromHtml(html: string, eventId?: number): Race[] {
     if (!current) return;
     node.find("tr").each((__, tr) => {
       const row = $(tr);
-      const link = row.find('a[href*="/athletes/"]').first();
+      const link = row.find('[class*="EventResults_name"] a, a[href*="/athletes/"]').first();
       if (!link.length) return;
-      const mark = row.find("td").toArray().map((td) => $(td).text().trim()).find((t) => timeRe.test(t));
+      // Wie im alten Skript: die erste Zeit nach der Namensspalte.
+      const cells = row.find("td").toArray();
+      const nameIdx = cells.findIndex((td) => $(td).find(link).length > 0);
+      const mark = cells.slice(nameIdx + 1).map((td) => $(td).text().trim()).find((t) => timeRe.test(t));
       if (!mark) return;
       current!.entries.push({ athleteId: idFrom(link.attr("href")), name: link.text().trim(), mark });
     });
@@ -157,30 +173,33 @@ const COMPETITION_QUERY = `
   }`;
 
 export async function fetchEventRaces(api: ApiConfig, competitionId: number, eventId: number): Promise<Race[]> {
+  // 1. Ergebnisseite (so hat es das alte Apps Script gemacht)
+  const url = `https://worldathletics.org/competition/calendar-results/results/${competitionId}?eventId=${eventId}`;
+  let htmlError: string | null = null;
   try {
-    const res = await fetch(api.url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-api-key": api.key },
-      body: JSON.stringify({
-        operationName: "getCalendarCompetitionResults",
-        query: COMPETITION_QUERY,
-        variables: { competitionId, eventId, day: null },
-      }),
-    });
-    if (res.ok) {
-      const body = (await res.json()) as { data?: { getCalendarCompetitionResults?: { eventTitles?: { events?: { eventId?: number }[] }[] } } };
-      // Nur das gesuchte Event, falls die API mehrere liefert.
-      const events = (body.data?.getCalendarCompetitionResults?.eventTitles ?? []).flatMap((t) => t.events ?? []);
-      const event = events.find((e) => Number(e.eventId) === eventId) ?? (events.length === 1 ? events[0] : null);
-      const races = event ? extractRacesFromJson(event) : [];
-      if (races.some((r) => isFinalRaceName(r.name))) return races;
-    }
-  } catch {
-    // Fallback unten
+    const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; FantasyAthletics/2.0)" } });
+    if (!res.ok) throw new Error(String(res.status));
+    const races = extractRacesFromHtml(await res.text(), eventId);
+    if (races.filter((r) => isFinalRaceName(r.name)).length >= 2) return races;
+    htmlError = "keine Finalläufe gefunden";
+  } catch (e) {
+    htmlError = (e as Error).message;
   }
 
-  const url = `https://worldathletics.org/competition/calendar-results/results/${competitionId}?eventId=${eventId}`;
-  const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; FantasyAthletics/2.0)" } });
-  if (!res.ok) throw new Error(`GET ${url}: ${res.status}`);
-  return extractRacesFromHtml(await res.text(), eventId);
+  // 2. GraphQL-API
+  const res = await fetch(api.url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-api-key": api.key },
+    body: JSON.stringify({
+      operationName: "getCalendarCompetitionResults",
+      query: COMPETITION_QUERY,
+      variables: { competitionId, eventId, day: null },
+    }),
+  });
+  if (!res.ok) throw new Error(`Ergebnisseite: ${htmlError}; API: ${res.status}`);
+  const body = (await res.json()) as { data?: { getCalendarCompetitionResults?: { eventTitles?: { events?: { eventId?: number }[] }[] } } };
+  // Nur das gesuchte Event, falls die API mehrere liefert.
+  const events = (body.data?.getCalendarCompetitionResults?.eventTitles ?? []).flatMap((t) => t.events ?? []);
+  const event = events.find((e) => Number(e.eventId) === eventId) ?? (events.length === 1 ? events[0] : null);
+  return event ? extractRacesFromJson(event) : [];
 }
