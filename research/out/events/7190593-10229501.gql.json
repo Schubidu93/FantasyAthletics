@@ -1,0 +1,1356 @@
+{
+ "status": 200,
+ "body": {
+  "data": {
+   "getCalendarCompetitionResults": {
+    "eventTitles": [
+     {
+      "eventTitle": null,
+      "events": [
+       {
+        "event": "Men's 800 Metres",
+        "eventId": 10229501,
+        "races": [
+         {
+          "date": "2025-09-20",
+          "day": 8,
+          "race": "Final",
+          "raceId": 10,
+          "raceNumber": 0,
+          "results": [
+           {
+            "competitor": {
+             "id": "8nm3pit1sipf8t3wxb2bcp",
+             "name": "Emmanuel WANYONYI"
+            },
+            "mark": "1:41.86",
+            "nationality": "KEN",
+            "place": "1.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "yeh9ulx2ixsdv4mdvwi99d",
+             "name": "Djamel SEDJATI"
+            },
+            "mark": "1:41.90",
+            "nationality": "ALG",
+            "place": "2.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "lq1jcdcvvnanolw576sv5",
+             "name": "Marco AROP"
+            },
+            "mark": "1:41.95",
+            "nationality": "CAN",
+            "place": "3.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "gcwh2iej2qsvzvjdo5oo3",
+             "name": "Cian MCPHILLIPS"
+            },
+            "mark": "1:42.15",
+            "nationality": "IRL",
+            "place": "4.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "rdf1ha0gmlcfde3614n5u",
+             "name": "Mohamed ATTAOUI"
+            },
+            "mark": "1:42.21",
+            "nationality": "ESP",
+            "place": "5.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "5f6smbw0pymlchdvv9y4b",
+             "name": "Max BURGIN"
+            },
+            "mark": "1:42.29",
+            "nationality": "GBR",
+            "place": "6.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "zbgo6wn7nj3z7tms3ypbf",
+             "name": "Navasky ANDERSON"
+            },
+            "mark": "1:42.76",
+            "nationality": "JAM",
+            "place": "7.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "6zty2skia12wj2p5gsjmg",
+             "name": "Tshepiso MASALELA"
+            },
+            "mark": "1:42.77",
+            "nationality": "BOT",
+            "place": "8.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           }
+          ]
+         },
+         {
+          "date": "2025-09-18",
+          "day": 6,
+          "race": "Semifinal - Heat",
+          "raceId": 13,
+          "raceNumber": 1,
+          "results": [
+           {
+            "competitor": {
+             "id": "g67xksn0a9q0niuaq9gybk",
+             "name": "Marco AROP"
+            },
+            "mark": "1:45.09",
+            "nationality": "CAN",
+            "place": "1.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "04hr9ee7vnnlbk3uaw3udxp",
+             "name": "Djamel SEDJATI"
+            },
+            "mark": "1:45.09",
+            "nationality": "ALG",
+            "place": "2.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "h753uk9g2eqoawhrumilp8",
+             "name": "Mark ENGLISH"
+            },
+            "mark": "1:45.47",
+            "nationality": "IRL",
+            "place": "3.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "zpm61zbhs84fd9m4o8sdl",
+             "name": "Maciej WYDERKA"
+            },
+            "mark": "1:45.55",
+            "nationality": "POL",
+            "place": "4.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "hl0g7t7hnomjtin5lqhp8",
+             "name": "Ben PATTISON"
+            },
+            "mark": "1:45.84",
+            "nationality": "GBR",
+            "place": "5.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "2znlxx5xh6jh04xr5lbdyr",
+             "name": "Kethobogile HAINGURA"
+            },
+            "mark": "1:46.05",
+            "nationality": "BOT",
+            "place": "6.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "jmvemv6vb9temn1yykqx",
+             "name": "Tyrice TAYLOR"
+            },
+            "mark": "1:46.56",
+            "nationality": "JAM",
+            "place": "7.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "a7xtn3r1y0pxp9rrk5tpd",
+             "name": "Nicholas KIPLAGAT"
+            },
+            "mark": "1:49.54",
+            "nationality": "KEN",
+            "place": "8.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           }
+          ]
+         },
+         {
+          "date": "2025-09-18",
+          "day": 6,
+          "race": "Semifinal - Heat",
+          "raceId": 13,
+          "raceNumber": 2,
+          "results": [
+           {
+            "competitor": {
+             "id": "42pf6w3yqxoj3nrv3fewio",
+             "name": "Cian MCPHILLIPS"
+            },
+            "mark": "1:43.18",
+            "nationality": "IRL",
+            "place": "1.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "cnkho54qekdgsjxqwjok4",
+             "name": "Max BURGIN"
+            },
+            "mark": "1:43.37",
+            "nationality": "GBR",
+            "place": "2.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "zi8nmw43nvamotkz21krkj",
+             "name": "Donavan BRAZIER"
+            },
+            "mark": "1:43.82",
+            "nationality": "USA",
+            "place": "3.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "cy0xejlnce4wu5rtagpe0c",
+             "name": "Francesco PERNICI"
+            },
+            "mark": "1:43.84",
+            "nationality": "ITA",
+            "place": "4.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "1wfyl7ua13cjhhgs871bnqr",
+             "name": "Gabriel TUAL"
+            },
+            "mark": "1:44.09",
+            "nationality": "FRA",
+            "place": "5.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "l26p1g1ronjhls74v5hef7",
+             "name": "David BARROSO"
+            },
+            "mark": "1:44.27",
+            "nationality": "ESP",
+            "place": "6.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "36y4mdd2djraff4zlxbm8f",
+             "name": "Kelvin Kimtai LOTI"
+            },
+            "mark": "1:44.82",
+            "nationality": "KEN",
+            "place": "7.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "hgczini04xf6qz2drd5com",
+             "name": "Slimane MOULA"
+            },
+            "mark": "1:46.82",
+            "nationality": "ALG",
+            "place": "8.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           }
+          ]
+         },
+         {
+          "date": "2025-09-18",
+          "day": 6,
+          "race": "Semifinal - Heat",
+          "raceId": 13,
+          "raceNumber": 3,
+          "results": [
+           {
+            "competitor": {
+             "id": "yia0lq3iv99y2vuejesyam",
+             "name": "Mohamed ATTAOUI"
+            },
+            "mark": "1:43.18",
+            "nationality": "ESP",
+            "place": "1.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "1f2auo1sxrzbmisar741r",
+             "name": "Emmanuel WANYONYI"
+            },
+            "mark": "1:43.47",
+            "nationality": "KEN",
+            "place": "2.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "zfk21n67aposzun3vk8myi",
+             "name": "Navasky ANDERSON"
+            },
+            "mark": "1:43.72",
+            "nationality": "JAM",
+            "place": "3.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "d6gtto5ld0r279olatv6uv",
+             "name": "Tshepiso MASALELA"
+            },
+            "mark": "1:43.80",
+            "nationality": "BOT",
+            "place": "4.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "jrz4w0t6hcko7yj7d11s7n",
+             "name": "Bryce HOPPEL"
+            },
+            "mark": "1:43.92",
+            "nationality": "USA",
+            "place": "5.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "gpbe116fxbmfw9s23yknr",
+             "name": "Yanis MEZIANE"
+            },
+            "mark": "1:44.12",
+            "nationality": "FRA",
+            "place": "6.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "peh0s8fqwmj2c8we5g57ft",
+             "name": "Marino BLOUDEK"
+            },
+            "mark": "1:44.33",
+            "nationality": "CRO",
+            "place": "7.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "0hiw5ax9a3lga2d7h8uzbst",
+             "name": "Eliott CRESTAN"
+            },
+            "mark": "1:44.56",
+            "nationality": "BEL",
+            "place": "8.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           }
+          ]
+         },
+         {
+          "date": "2025-09-16",
+          "day": 4,
+          "race": "Round 1 - Heat",
+          "raceId": 11,
+          "raceNumber": 1,
+          "results": [
+           {
+            "competitor": {
+             "id": "hk8nw1q7y47uoxqaklaq7k",
+             "name": "David BARROSO"
+            },
+            "mark": "1:44.94",
+            "nationality": "ESP",
+            "place": "1.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "3bhilfltcn51wi3hdenwwz",
+             "name": "Djamel SEDJATI"
+            },
+            "mark": "1:45.01",
+            "nationality": "ALG",
+            "place": "2.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "ro08v5mnjgh2xzcw21qlds",
+             "name": "Kethobogile HAINGURA"
+            },
+            "mark": "1:45.02",
+            "nationality": "BOT",
+            "place": "3.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "kyerzwn08kfsn0tj75so2",
+             "name": "Ibrahim Abass M CHUOT"
+            },
+            "mark": "1:45.16",
+            "nationality": "QAT",
+            "place": "4.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "vdtfl5jv4xb7wv9190bca",
+             "name": "Handal ROBAN"
+            },
+            "mark": "1:45.32",
+            "nationality": "VIN",
+            "place": "5.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "lz3xvswtz3v0svr7k0mtk",
+             "name": "Alex Ngeno KIPNGETICH"
+            },
+            "mark": "1:45.37",
+            "nationality": "KEN",
+            "place": "6.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "756073iq9hcepord56r2f4",
+             "name": "Jared MICALLEF"
+            },
+            "mark": "1:46.62",
+            "nationality": "MLT",
+            "place": "7.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "vq5g282wxbiopziy6i8zsl",
+             "name": "Giovanni LAZZARO"
+            },
+            "mark": "1:47.00",
+            "nationality": "ITA",
+            "place": "8.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "pgaqz49tbb8ioxid7nfwni",
+             "name": "Justin O'TOOLE"
+            },
+            "mark": "1:48.88",
+            "nationality": "CAN",
+            "place": "9.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           }
+          ]
+         },
+         {
+          "date": "2025-09-16",
+          "day": 4,
+          "race": "Round 1 - Heat",
+          "raceId": 11,
+          "raceNumber": 2,
+          "results": [
+           {
+            "competitor": {
+             "id": "a558u5qd2a7ks3peb7s9f",
+             "name": "Mohamed ATTAOUI"
+            },
+            "mark": "1:45.23",
+            "nationality": "ESP",
+            "place": "1.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "gbnvqp93mghxwn72giwdt",
+             "name": "Kelvin Kimtai LOTI"
+            },
+            "mark": "1:45.35",
+            "nationality": "KEN",
+            "place": "2.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "ixrydhxuche8ra6458xqai",
+             "name": "Marco AROP"
+            },
+            "mark": "1:45.39",
+            "nationality": "CAN",
+            "place": "3.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "khuudmiotvq3ate7z8q823",
+             "name": "Samuel CHAPPLE"
+            },
+            "mark": "1:45.45",
+            "nationality": "NED",
+            "place": "4.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "o126inh8jud812ejekbgj",
+             "name": "Tiarnan CRORKEN"
+            },
+            "mark": "1:45.63",
+            "nationality": "GBR",
+            "place": "5.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "hyykzmcm056b6retaw3yvq",
+             "name": "Tom DRADRIGA"
+            },
+            "mark": "1:46.18",
+            "nationality": "UGA",
+            "place": "6.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "fxzlgsppkiu9hzlsjs7mg",
+             "name": "Pieter SISK"
+            },
+            "mark": "1:46.37",
+            "nationality": "BEL",
+            "place": "7.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "jaspr2u31ux5xffbanuim",
+             "name": "Abdelati EL GUESSE"
+            },
+            "mark": "1:46.80",
+            "nationality": "MAR",
+            "place": "8.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "59ynbus2w4sqwuooqyi4e",
+             "name": "Musa SULIMAN"
+            },
+            "mark": "1:48.28",
+            "nationality": "ART",
+            "place": "9.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           }
+          ]
+         },
+         {
+          "date": "2025-09-16",
+          "day": 4,
+          "race": "Round 1 - Heat",
+          "raceId": 11,
+          "raceNumber": 3,
+          "results": [
+           {
+            "competitor": {
+             "id": "pfmb81p7wqjqy0a112c63n",
+             "name": "Maciej WYDERKA"
+            },
+            "mark": "1:46.30",
+            "nationality": "POL",
+            "place": "1.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "w7dj2u0tr52l1onzd3sij",
+             "name": "Ben PATTISON"
+            },
+            "mark": "1:46.51",
+            "nationality": "GBR",
+            "place": "2.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "du420sc0z0uwfrr2xqzr7",
+             "name": "Gabriel TUAL"
+            },
+            "mark": "1:46.54",
+            "nationality": "FRA",
+            "place": "3.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "qm6y9gvl70njnw3wp98zr",
+             "name": "Mariano GARCÍA"
+            },
+            "mark": "1:47.09",
+            "nationality": "ESP",
+            "place": "4.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "fzmtocayf66l67gtpn97n",
+             "name": "Moad ZAHAFI"
+            },
+            "mark": "1:47.14",
+            "nationality": "MAR",
+            "place": "5.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "6v3jyk3ib7oqrqyk34481q",
+             "name": "Ebrahim Remaid ALZOFAIRI"
+            },
+            "mark": "1:47.26",
+            "nationality": "KUW",
+            "place": "6.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "tcyzh9ce8jbhup0np4auok",
+             "name": "Cooper LUTKENHAUS"
+            },
+            "mark": "1:47.68",
+            "nationality": "USA",
+            "place": "7.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "mxytclbxvr9a1cjpppye1c",
+             "name": "Matthew ERICKSON"
+            },
+            "mark": "1:48.49",
+            "nationality": "CAN",
+            "place": "8.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "ucg1ar8zc6sr1knd2wk0i9",
+             "name": "Hein Htet AUNG"
+            },
+            "mark": "1:52.70",
+            "nationality": "MYA",
+            "place": "9.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           }
+          ]
+         },
+         {
+          "date": "2025-09-16",
+          "day": 4,
+          "race": "Round 1 - Heat",
+          "raceId": 11,
+          "raceNumber": 4,
+          "results": [
+           {
+            "competitor": {
+             "id": "cemspvlmvc3so39wotu8n",
+             "name": "Cian MCPHILLIPS"
+            },
+            "mark": "1:44.91",
+            "nationality": "IRL",
+            "place": "1.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "oktyd9osu5cw7ds5zhckg",
+             "name": "Bryce HOPPEL"
+            },
+            "mark": "1:45.09",
+            "nationality": "USA",
+            "place": "2.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "lu360d0e4wd4qvo1yczpi",
+             "name": "Tyrice TAYLOR"
+            },
+            "mark": "1:45.13",
+            "nationality": "JAM",
+            "place": "3.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "kcrs59hrbgle4dovp00fdr",
+             "name": "Peter BOL"
+            },
+            "mark": "1:45.15",
+            "nationality": "AUS",
+            "place": "4.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "z9b9svsgnecw2w7kc7d9dq",
+             "name": "Ivan PELIZZA"
+            },
+            "mark": "1:45.65",
+            "nationality": "SUI",
+            "place": "5.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "n9ufboqqxkm2cxrf3u2mi",
+             "name": "Catalin TECUCEANU"
+            },
+            "mark": "1:46.22",
+            "nationality": "ITA",
+            "place": "6.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "6zx4jiy3dyci2wgkfqirk9",
+             "name": "Alexander STEPANOV"
+            },
+            "mark": "1:46.32",
+            "nationality": "GER",
+            "place": "7.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "kmm4bty1kk3tnp856c6ir",
+             "name": "Andreas KRAMER"
+            },
+            "mark": "1:46.84",
+            "nationality": "SWE",
+            "place": "8.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "ec53udqr235wqeetgnat7i",
+             "name": "Stephen RAHUASI"
+            },
+            "mark": "1:55.21",
+            "nationality": "SOL",
+            "place": "9.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           }
+          ]
+         },
+         {
+          "date": "2025-09-16",
+          "day": 4,
+          "race": "Round 1 - Heat",
+          "raceId": 11,
+          "raceNumber": 5,
+          "results": [
+           {
+            "competitor": {
+             "id": "orhnrj8pyxlh8ik1v9241",
+             "name": "Emmanuel WANYONYI"
+            },
+            "mark": "1:45.05",
+            "nationality": "KEN",
+            "place": "1.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "s0vapc2gh0j2jb1034ru55",
+             "name": "Francesco PERNICI"
+            },
+            "mark": "1:45.11",
+            "nationality": "ITA",
+            "place": "2.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "s1hjt6po2p6dwruyydr1p",
+             "name": "Mark ENGLISH"
+            },
+            "mark": "1:45.13",
+            "nationality": "IRL",
+            "place": "3.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "0abg9hj7428gfte59sbt56",
+             "name": "Peyton CRAIG"
+            },
+            "mark": "1:45.44",
+            "nationality": "AUS",
+            "place": "4.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "h9u35xa2fbaqbmubq7433e",
+             "name": "Mohamed Ali GOUANED"
+            },
+            "mark": "1:45.49",
+            "nationality": "ALG",
+            "place": "5.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "ez13net9c6ob3n4aju2p35",
+             "name": "Tobias GRØNSTAD"
+            },
+            "mark": "1:45.93",
+            "nationality": "NOR",
+            "place": "6.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "hu9w3nzqj3utsz0lu3f2",
+             "name": "Ko OCHIAI"
+            },
+            "mark": "1:46.78",
+            "nationality": "JPN",
+            "place": "7.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "19jtpuiv7vryszkk1cx5ar",
+             "name": "Abdullahi HASSAN"
+            },
+            "mark": "1:47.50",
+            "nationality": "CAN",
+            "place": "8.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "wwnb8zpw0mvh3ims9awf",
+             "name": "Ryan CLARKE"
+            },
+            "mark": "1:49.08",
+            "nationality": "NED",
+            "place": "9.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           }
+          ]
+         },
+         {
+          "date": "2025-09-16",
+          "day": 4,
+          "race": "Round 1 - Heat",
+          "raceId": 11,
+          "raceNumber": 6,
+          "results": [
+           {
+            "competitor": {
+             "id": "n8f44qvktnp1rw1vs851ie",
+             "name": "Max BURGIN"
+            },
+            "mark": "1:44.73",
+            "nationality": "GBR",
+            "place": "1.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "4b2t0w6x5kpr10s99z9yr9",
+             "name": "Tshepiso MASALELA"
+            },
+            "mark": "1:44.74",
+            "nationality": "BOT",
+            "place": "2.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "hek0zfo266gw6mmoaedvbs",
+             "name": "Navasky ANDERSON"
+            },
+            "mark": "1:44.87",
+            "nationality": "JAM",
+            "place": "3.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "w1iptw36grbp6tqvhbtyyn",
+             "name": "Yanis MEZIANE"
+            },
+            "mark": "1:45.02",
+            "nationality": "FRA",
+            "place": "4.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "ejvflqaiu1f2uj50uh3n21",
+             "name": "Eliott CRESTAN"
+            },
+            "mark": "1:45.05",
+            "nationality": "BEL",
+            "place": "5.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "s2xxv4tz98mil5zt3mitts",
+             "name": "Luke BOYES"
+            },
+            "mark": "1:45.54",
+            "nationality": "AUS",
+            "place": "6.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "klapjfbs7zjgqz86kymb",
+             "name": "Patryk SIERADZKI"
+            },
+            "mark": "1:45.90",
+            "nationality": "POL",
+            "place": "7.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "is3t07s2q8efcizispua77",
+             "name": "Yohanes TEFERA"
+            },
+            "mark": "1:50.93",
+            "nationality": "ETH",
+            "place": "8.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "8bs1re9d79advjffkl66c5",
+             "name": "Mohammed DWEDAR"
+            },
+            "mark": "1:53.63",
+            "nationality": "PLE",
+            "place": "9.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           }
+          ]
+         },
+         {
+          "date": "2025-09-16",
+          "day": 4,
+          "race": "Round 1 - Heat",
+          "raceId": 11,
+          "raceNumber": 7,
+          "results": [
+           {
+            "competitor": {
+             "id": "h4piop5uuldkpw7svl50lo",
+             "name": "Donavan BRAZIER"
+            },
+            "mark": "1:44.66",
+            "nationality": "USA",
+            "place": "1.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "ltb16yt089o8p454ptmze7",
+             "name": "Slimane MOULA"
+            },
+            "mark": "1:44.77",
+            "nationality": "ALG",
+            "place": "2.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "bef9q02nh5eiebm2m9lvu",
+             "name": "Marino BLOUDEK"
+            },
+            "mark": "1:44.78",
+            "nationality": "CRO",
+            "place": "3.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "nb6hkhjk5bn6kh6xt9bu",
+             "name": "Nicholas KIPLAGAT"
+            },
+            "mark": "1:44.91",
+            "nationality": "KEN",
+            "place": "4.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "m2etc545176k5j7kg9jld",
+             "name": "Filip OSTROWSKI"
+            },
+            "mark": "1:45.47",
+            "nationality": "POL",
+            "place": "5.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "x4zdabfjvzl8djbrhz3bl6",
+             "name": "Jakub DUDYCHA"
+            },
+            "mark": "1:45.76",
+            "nationality": "CZE",
+            "place": "6.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "weyumsiynu7eic5ae6i58",
+             "name": "Abderrahman EL ASSAL"
+            },
+            "mark": "1:46.12",
+            "nationality": "MAR",
+            "place": "7.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "dr3kuai1c1fvqcq5grebcd",
+             "name": "Alex AMANKWA"
+            },
+            "mark": "1:47.12",
+            "nationality": "GHA",
+            "place": "8.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "17hj9u9154t4qxf7hf6w46",
+             "name": "Eduardo RIBEIRO"
+            },
+            "mark": "1:50.40",
+            "nationality": "BRA",
+            "place": "9.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ }
+}

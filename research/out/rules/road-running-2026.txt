@@ -1,0 +1,252 @@
+Introduction
+Structure
+Employment
+Tenders
+Contact
+Newsletters
+Introduction
+Next Courses
+Endurance Running Webinars
+Register
+Outbreak Prevention Tools
+Research Ethics Committee
+Introduction
+Areas
+Development Community
+ATC's
+All
+News
+Press Releases
+Report
+Previews
+Features
+Series
+Register for Press Releases
+Competitions Home
+Our Competitions
+Calendar & Results
+Tickets
+Hosting
+Competition Performance Ranking
+Athletes Home
+World Rankings
+Profiles
+Awards
+Spikes
+Athletes' Representatives
+Transfer of Allegiance
+Athletes Commission
+Our Sport Home
+Rules & Regulations
+Heritage
+Intro
+Event Ranking
+Ranking Criteria
+Competition Performance Ranking
+Calendar
+Stats Home
+Calendar & Results
+Toplists
+Records
+Send Competition Results
+World Rankings
+All
+Lifestyle
+Performance
+Culture
+Constitution & Book of Rules
+Strategic Plans and Reports
+Elections & Appointments
+Member Federation Resource Centre
+Technical Information
+Anti Doping
+Health & Science
+Research Centre
+Education
+Congress
+Council
+Commissions
+Season Top Lists
+All time Top lists
+Records by Type
+Records by Event
+Certified Road Events
+
+## Home of World Athletics
+
+## Contents
+1. Basics of the World Rankings
+2. Track & Field Events
+3. Combined Events
+4. Road Running
+5. Race Walking
+6. Cross Country
+7. Overall Rankings
+
+## 4. ROAD RUNNING
+
+## 4.1. RANKING METHOD
+In force from 1 January 2026.
+The ranking system is based on the two main elements of all Athletics performances: the measured results of athletes (result score) and their placing during competitions (placing score).
+The combination of these elements provides the athletes’ performance for each competition in which they participate (performance score).
+RESULT SCORE + PLACING SCORE = PERFORMANCE SCORE
+Athletes’ performances can be considered in all competitions from grass roots to elite international level. However, the results must be in accordance with the WA Rules and Regulations in force, and World Athletics or one of its Area Associations or Member Federations must have officially ratified the results.
+
+## 4.2. RESULT SCORE
+The Result Scores are calculated using the latest editions of the World Athletics Scoring Tables of Athletics (by Dr. Bojidar Spiriev) which can be found here.
+For disciplines not included in the latest editions of the World Athletics Scoring Tables of Athletics, there are special Scoring Tables developed in full conformity with the World Athletics versions.
+The World Rankings consider only results which were achieved at a competition conducted according to the World Athletics Rules.
+Intermediate splits during a competition are not considered as a result for the athlete and thus are not included in the World Rankings.
+The initial Result Score may be altered taking into consideration the following factor: Downhill course (Drop)
+Downhill course (Drop)
+
+## 4.2.1. Downhill Courses
+To avoid disregarding performances achieved on a course not fully complying with the WA criteria, a “Downhill Modification System” has been developed to include results achieved on a Downhill course.
+A “Downhill Couse” is defined as one which has a net drop (decrease in elevation) of more than 1 m/km.
+A net drop of 1 m/km of the race distance is equivalent to 6 points according to the World Athletics Scoring Tables (or the alternate Scoring Tables in case of events that are not included in the World Athletics Scoring Tables).
+These points are deducted from the initial Result Scores of the athletes at the competition concerned.
+There is no deduction if the net drop is within the allowed 1 m/km.
+Over the net drop of 1 m/km every 0.1 m/km is equal to 6 + 0.6 points for each 0.1 m/km. (e.g. 1.1 m/km = - 6.6 points; 1.2 m/km = -7.2 points)
+
+## 4.2.2. Certified Road Courses
+Only results achieved on Certified Road courses can be considered. More details and the updated list of these Certified Road Courses can be found on worldathletics.org.
+
+## 4.3. PLACING SCORE
+Placing Score is awarded for the placing achieved by the athlete at a competition.
+Competitions are categorised, and the Placing Scores are different in each Category. There are 9 different categories for the purposes of Placing Scores. The Placing Scores obtainable at each competition vary according to the level and significance of the competition. The category “OW” reflects the strongest competitions and consequently awards the most points. For example, the Placing Scores available at the World Athletics Championships or at the Olympic Games are much higher than those at any other competition. See 4.4 - Categories of Competitions.
+In certain cases, Placing Scores may also be different within an Event Group, depending on whether the discipline is a Main Event or a Similar Event.
+In Area Championships, Games and National Championships Placing Scores can only be awarded to athletes representing their Area and Home Country respectively. Athletes representing a foreign Member Federation or other Areas are regarded as out of competition participants (OC) and only receive Result Scores for their performances, regardless of their original position indicated in the official results of the competition.
+In case a competition belongs to more than one Category, the most favourable Placing Score is considered for each athlete based on the positions achieved in the different classifications.
+
+## 4.3.1. Marathon Event Group
+To give more emphasis to the Main Event of this Group, there are different Placing Score tables for the Marathon (Main Event) and the Half-Marathon, 25km and 30km (Similar Events). If the Half Marathon counts as a Main Event in the Road Running Event Group, Placing Scores are awarded according to Table 4.3.
+Table 4.1. Placing Scores for Marathon
+Place | OW | GW | GL | A | B | C | D | E | F
+1st | 200 | 120 | 100 | 50 | 32 | 21 | 14 | 7 | 4
+2nd | 160 | 90 | 75 | 42 | 25 | 17 | 11 | 5 | 2
+3rd | 145 | 80 | 65 | 35 | 21 | 14 | 8 | 4 | 1
+4th | 130 | 70 | 53 | 28 | 17 | 11 | 7 | 3 | 
+5th | 115 | 60 | 42 | 21 | 14 | 9 | 6 | 2 | 
+6th | 105 | 53 | 35 | 17 | 11 | 7 | 5 | 1 | 
+7th | 100 | 46 | 28 | 14 | 9 | 5 | 4 |  | 
+8th | 95 | 39 | 21 | 11 | 7 | 4 | 3 |  | 
+9th | 56 | 32 | 18 |  |  |  |  |  | 
+10th | 49 | 25 | 15 |  |  |  |  |  | 
+11th | 42 | 18 | 13 |  |  |  |  |  | 
+12th | 35 | 14 | 12 |  |  |  |  |  | 
+13th | 31 |  |  |  |  |  |  |  | 
+14th | 28 |  |  |  |  |  |  |  | 
+15th | 26 |  |  |  |  |  |  |  | 
+16th | 24 |  |  |  |  |  |  |  | 
+17th | 22 |  |  |  |  |  |  |  | 
+18th | 20 |  |  |  |  |  |  |  | 
+19th | 19 |  |  |  |  |  |  |  | 
+20th | 18 |  |  |  |  |  |  |  | 
+
+Table 4.2. Placing Scores for Half Marathon (when similar event), 25km and 30km
+Place | GW | GL | A | B | C | D | E | F
+1st | 32 | 21 | 14 | 7 | 4 |  |  | 
+2nd | 25 | 15 | 11 | 5 | 2 |  |  | 
+3rd | 21 | 13 | 8 | 4 | 1 |  |  | 
+4th | 17 | 11 | 7 | 3 |  |  |  | 
+5th | 14 | 9 | 6 | 2 |  |  |  | 
+6th | 11 | 8 | 5 | 1 |  |  |  | 
+7th | 9 | 7 | 4 |  |  |  |  | 
+8th | 7 | 6 | 3 |  |  |  |  | 
+9th |  |  |  |  |  |  |  | 
+10th |  |  |  |  |  |  |  | 
+11th |  |  |  |  |  |  |  | 
+12th |  |  |  |  |  |  |  | 
+
+
+## 4.3.2. The Road Running Event Group
+In the Road Running Event Group there is only one Placing Score Table, valid for all events in this group.
+Table 4.3. Placing Scores for the Road Running Event Group
+Place | OW | GW | GL | A | B | C | D | E | F
+1st | 190 | 100 | 65 | 50 | 32 | 21 | 14 | 7 | 4
+2nd | 155 | 75 | 49 | 42 | 25 | 17 | 11 | 5 | 2
+3rd | 140 | 65 | 42 | 35 | 21 | 14 | 8 | 4 | 1
+4th | 125 | 53 | 35 | 28 | 17 | 11 | 7 | 3 | 
+5th | 110 | 42 | 31 | 21 | 14 | 9 | 6 | 2 | 
+6th | 100 | 35 | 27 | 17 | 11 | 7 | 5 | 1 | 
+7th | 95 | 31 | 24 | 14 | 9 | 5 | 4 |  | 
+8th | 90 | 27 | 21 | 11 | 7 | 4 | 3 |  | 
+9th | 56 | 24 | 14 |  |  |  |  |  | 
+10th | 49 | 21 | 11 |  |  |  |  |  | 
+11th | 42 | 18 | 8 |  |  |  |  |  | 
+12th | 35 | 15 | 7 |  |  |  |  |  | 
+
+
+## 4.4. CATEGORIES OF COMPETITIONS
+Placing Scores are distributed according to the categorisation of competitions, subject to the following:
+World Athletics has the exclusive right to determine to which Category a given competition should be assigned. Categorisation of Area Permit competitions (Championships, Games and invitation meetings) will be agreed with the corresponding Area Association. Specific national permit competitions (other than National Senior Championships) will be placed in category E as designated by the Member Federation in agreement with, and subject to quotas established by World Athletics. All other national permit competitions are placed in category F.
+During a calendar year, only one National Senior Championships per each Member Federation can award Placing Scores according to the Categorisation as shown below. In case a Member Federation organizes more than one National Championships in any discipline within one calendar year, the first such competition is regarded as the National Championships unless the MF informs World Athletics otherwise, prior to the beginning of the season.
+Only those events of a competition are entitled to receive the Category as listed below – and thus the corresponding Placing Scores – which are held primarily for the purpose of the competition for which the corresponding Category was awarded. Extra or supplementary events, national or youth events during international invitational meetings, etc. are considered as Category F regardless of the Category of the main competition during which the event was held.
+Table 4.4. Categories of Competitions
+Category | Details
+OW | Olympic GamesWorld Athletics Championships
+GW | World Athletics Half Marathon / Road Running ChampionshipsWorld Athletics Platinum Label Marathons
+GL | Area Senior Outdoor ChampionshipsWorld Athletics Platinum Label Road Races (not including Marathons)
+A | Major Games (All-African, Asian, Commonwealth, Pan American, European)World Athletics Gold Label MarathonsArea Senior Marathon & Half Marathon Championships (when not part of the Area Championships)
+B | Regional Games & Athletics Championships - first tier (Universiade, Francophone Games Ibero-American Championships, CAC Games, Balkan Championships) Area second tier Senior Championships in MarathonWorld Athletics Elite Label MarathonsWorld Athletics Gold Label Road Races (not including Marathons)National Senior Championships (in Main Events)
+C | World Athletics Elite Label Road Races (not including Marathons)Area third tier Championships (Area U23 Championships) and in Similar Events Regional Games & Championships (Arab Championships, Mediterranean Games, CISM World Games)
+D | Regional Championships, Games and Cups (First and senior division only)National Senior Championships (in Similar Events)
+E | World Athletics Label Races
+F | National Permit Races (If measured and certified)
+
+
+## 4.5. PERFORMANCE SCORE
+The Performance Score is obtained by adding the Result Score to the Placing Score:
+Result Score + Placing Score = Performance Score
+
+## 4.6. EVENT GROUPS, MAIN EVENTS AND SIMILAR EVENTS
+The Road Running Event Rankings are produced in 4 Event Groups. Performances in each of the 4 Event Groups count separately for the Event Rankings. Athletes can be ranked in the different Event Groups where they achieved a sufficient number of performances.
+Table 4.5. Road Running Event Groups
+Nr. | Event Group | Main Event | Similar Events
+1. | Men’s Marathon | Marathon | Half Marathon, 25 km, 30 km
+2. | Men’s Road Running | Half Marathon and/or 10 km | 5 km, 15 km, 10 Miles, 20km
+3. | Women’s Marathon | Marathon | Half Marathon, 25 km, 30 km
+4. | Women’s Road Running | Half Marathon and/or 10 km | 5 km, 15 km, 10 Miles, 20km
+
+
+## 4.7. REQUIRED NUMBER OF PERFORMANCES
+In order to be ranked, athletes must collect a sufficient number of Performance Scores and some of them must come from Main Events (reference is made to Table 4.5.).
+
+## 4.7.1. Minimum number of Performance Scores
+In Men’s and Women’s Marathon Event Groups (Nr.1 & Nr.3) the minimum number of Performance Scores is two (2).
+In Men’s and Women’s Road Running Event Groups (Nr.2 & Nr.4) the minimum number of Performance Scores is three (3).
+
+## 4.7.2. Minimum number of Performance Scores in the Main Events
+In Men’s and Women’s Marathon Event Groups (Nr.1 & Nr.3) the minimum number of Performance Score in the Main Event is one (1).
+In Men’s and Women’s Road Running Event Groups (Nr.2 & Nr.4) the minimum number of Performance Scores in the Main Events is two (2).
+
+## 4.8. RANKING PERIOD
+Only those Performance Scores are considered, which were obtained by the athlete in an 18 months period prior to the date of the Rankings.
+To avoid overweighting, for competitions in the OW Category, the previous edition of the same OW category competition will be included in the Rankings with GL category Placing Scores until it is within the 18 months period. E.g., performances from the 2024 Olympic Games will score with GL category Placing Scores once the 2025 World Athletics Championships results are processed.
+In order to ensure that performances achieved at the World Athletics Championships or Olympic Games are calculated in the Rankings, the latest edition of the World Athletics Championships or Olympic Games - strictly the latest one of the two - is included in the Rankings calculation regardless of whether they fall in the Events’ respective Ranking Period, given that they were held within 3 full calendar years (e.g. after 1st January in the 3rd year prior to the date of the Rankings).
+In order to ensure that performances achieved at the Area Senior Outdoor Championships are calculated in the Rankings, the latest editions of the Area Senior Outdoor Championships are included in the Rankings calculation regardless of whether they fall in the Events’ respective Ranking Period, given that they were held within 3 full calendar years (e.g. after 1st January in the 3rd year prior to the date of the Rankings).
+
+## 4.9. WORLD RECORD BONUS
+In case an athlete achieves a New World Record, or equals the World Record, bonus points are given as an extra reward for the obvious significance and promotional value of such performance. These World Record bonus points are added directly to the average of the Performance Scores to increase the Ranking Score of the athlete.
+World Record bonus points are awarded for each world record performance achieved by the athlete in the ranking period, regardless of the fact that the performance is included in the Ranking calculation or not.
+World Record bonus points are given as follows:
+Main Events New World Record = 20 bonus points added to the average of Performance Scores Equalling the World Record = 10 bonus points added to the average of Performance Scores
+New World Record = 20 bonus points added to the average of Performance Scores
+Equalling the World Record = 10 bonus points added to the average of Performance Scores
+Similar Events New World Record = 10 bonus points added to the average of Performance Scores Equalling the World Record = 5 bonus points added to the average of Performance Scores
+New World Record = 10 bonus points added to the average of Performance Scores
+Equalling the World Record = 5 bonus points added to the average of Performance Scores
+
+## 4.10. RANKING SCORE
+The Rankings are based on the Ranking Scores. Athletes are ranked in the Event Rankings by their Ranking Scores.
+The Ranking Score is the average of Performance Scores.
+Ranking Scores are always rounded down to the next whole number.
+In order to be ranked, athletes must collect a sufficient number of Performance Scores and some of them must come from Main Events. Athletes who do not collect enough performances, cannot have a valid Ranking Score, and are thus ineligible for ranking. See details for each Event Group in the corresponding section.
+When calculating the Ranking Score the following factors are considered: Event Groups, Main Events and Similar Events Required number of performances for Ranking Ranking period World Record performances
+Event Groups, Main Events and Similar Events
+Required number of performances for Ranking
+Ranking period
+World Record performances
+Tie break in case of same Ranking ScoreIn case two or more athletes have equal Ranking Scores, the tie for their Ranking position will be resolved in favour of the athlete with the best Performance Score. If the best Performance Scores are also equal, then the second best Performance Scores decide, and so on. If all Performance Scores used to make up the athlete's Ranking Score are equal, then the tie is not broken and the athletes remain ranked in the same position.
+
+## search

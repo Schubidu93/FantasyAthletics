@@ -1,0 +1,48 @@
+{
+ "status": 200,
+ "body": {
+  "data": {
+   "__type": {
+    "name": "CalendarCompetitionResults",
+    "fields": [
+     {
+      "name": "competition",
+      "type": {
+       "name": "CalendarResultsCompetition",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     },
+     {
+      "name": "eventTitles",
+      "type": {
+       "name": null,
+       "kind": "LIST",
+       "ofType": {
+        "name": "CalendarResultsEventTitle",
+        "kind": "OBJECT",
+        "ofType": null
+       }
+      }
+     },
+     {
+      "name": "options",
+      "type": {
+       "name": "CalendarResultsOptions",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     },
+     {
+      "name": "parameters",
+      "type": {
+       "name": "CalendarResultsParameters",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    ]
+   }
+  }
+ }
+}

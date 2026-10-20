@@ -1,0 +1,565 @@
+{
+ "status": 200,
+ "body": {
+  "data": {
+   "getCalendarCompetitionResults": {
+    "eventTitles": [
+     {
+      "eventTitle": null,
+      "events": [
+       {
+        "event": "Men's 1500 Metres Short Track",
+        "eventId": 10229558,
+        "races": [
+         {
+          "date": "2026-03-22",
+          "day": 3,
+          "race": "Final",
+          "raceId": 10,
+          "raceNumber": 0,
+          "results": [
+           {
+            "competitor": {
+             "id": "7ebofecbdgsc9xskjt9reo",
+             "name": "Mariano GARCÍA"
+            },
+            "mark": "3:39.63",
+            "nationality": "ESP",
+            "place": "1.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "4tgbzrhe1il7w24h6msqmr",
+             "name": "Isaac NADER"
+            },
+            "mark": "3:40.06",
+            "nationality": "POR",
+            "place": "2.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "j4glgs4u95cfctg8g0xbr6",
+             "name": "Adam SPENCER"
+            },
+            "mark": "3:40.26",
+            "nationality": "AUS",
+            "place": "3.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "32cg3et4yidyvtdrgqlbf",
+             "name": "Samuel PIHLSTRÖM"
+            },
+            "mark": "3:40.59",
+            "nationality": "SWE",
+            "place": "4.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "s72pskos1c8bmwzvas383",
+             "name": "Samuel CHAPPLE"
+            },
+            "mark": "3:40.59",
+            "nationality": "NED",
+            "place": "5.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "skqodtxc1bgq269v9d0o",
+             "name": "Nathan GREEN"
+            },
+            "mark": "3:40.78",
+            "nationality": "USA",
+            "place": "6.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "khjyjq42di9ph7x6vjpelr",
+             "name": "Federico RIVA"
+            },
+            "mark": "3:40.98",
+            "nationality": "ITA",
+            "place": "7.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "6ivvjpb7mt9q70kgikoezo",
+             "name": "Carlos SAEZ"
+            },
+            "mark": "3:42.46",
+            "nationality": "ESP",
+            "place": "8.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "01rvpjvtgyf3kc3lrj4j00r",
+             "name": "Titouan LE GRIX"
+            },
+            "mark": "3:42.69",
+            "nationality": "FRA",
+            "place": "9.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           }
+          ]
+         },
+         {
+          "date": "2026-03-20",
+          "day": 1,
+          "race": "Round 1 - Heat",
+          "raceId": 11,
+          "raceNumber": 1,
+          "results": [
+           {
+            "competitor": {
+             "id": "lmd6ketld4oir6onb4b3e",
+             "name": "Federico RIVA"
+            },
+            "mark": "3:40.52",
+            "nationality": "ITA",
+            "place": "1.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "rtrx3de14upco1mnpd5a",
+             "name": "Adam SPENCER"
+            },
+            "mark": "3:40.79",
+            "nationality": "AUS",
+            "place": "2.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "bkgb02klnra6qmoe1tcb0u",
+             "name": "Nathan GREEN"
+            },
+            "mark": "3:40.97",
+            "nationality": "USA",
+            "place": "3.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "y7su2iyoejjta52h6lwdam",
+             "name": "Romain MORNET"
+            },
+            "mark": "3:41.68",
+            "nationality": "FRA",
+            "place": "4.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "vvzsene446hb663k6g6fqg",
+             "name": "Robert FARKEN"
+            },
+            "mark": "3:41.79",
+            "nationality": "GER",
+            "place": "5.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "f55em6nusn6gko3mr2h3x6",
+             "name": "Pieter SISK"
+            },
+            "mark": "3:42.45",
+            "nationality": "BEL",
+            "place": "6.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "mz6to9rded9oxiq0f9f0zd",
+             "name": "James MCMURRAY"
+            },
+            "mark": "3:42.51",
+            "nationality": "GBR",
+            "place": "7.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "f3mf4g7pbqwytjylb2epzd",
+             "name": "Eduardo HERRERA"
+            },
+            "mark": "3:42.70",
+            "nationality": "MEX",
+            "place": "8.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "rn8btrsdbsescylypf5xp",
+             "name": "Rok MARKELJ"
+            },
+            "mark": "3:45.08",
+            "nationality": "SLO",
+            "place": "9.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "bdywqjyeylb53wgrfse2h",
+             "name": "Aldin ĆATOVIĆ"
+            },
+            "mark": "3:48.51",
+            "nationality": "SRB",
+            "place": "10.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           }
+          ]
+         },
+         {
+          "date": "2026-03-20",
+          "day": 1,
+          "race": "Round 1 - Heat",
+          "raceId": 11,
+          "raceNumber": 2,
+          "results": [
+           {
+            "competitor": {
+             "id": "qj7pf41k9buhsdmkroa4",
+             "name": "Samuel PIHLSTRÖM"
+            },
+            "mark": "3:43.38",
+            "nationality": "SWE",
+            "place": "1.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "a3umzkyuavemitv5ieszi",
+             "name": "Isaac NADER"
+            },
+            "mark": "3:43.58",
+            "nationality": "POR",
+            "place": "2.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "sk1lr92usc29r0e58buz7",
+             "name": "Carlos SAEZ"
+            },
+            "mark": "3:43.75",
+            "nationality": "ESP",
+            "place": "3.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "ml1yymjvsv08g7ouw26qfv",
+             "name": "Luke HOUSER"
+            },
+            "mark": "3:43.87",
+            "nationality": "USA",
+            "place": "4.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "xa1io82rejl7vgei81b2rf",
+             "name": "Jochem VERMEULEN"
+            },
+            "mark": "3:44.55",
+            "nationality": "BEL",
+            "place": "5.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "xqxk5434vbpzzgmuey1e9",
+             "name": "Pol MOYA"
+            },
+            "mark": "3:44.68",
+            "nationality": "AND",
+            "place": "6.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "tqcipkpupk2w0a9wj2bik",
+             "name": "Jack HIGGINS"
+            },
+            "mark": "3:44.75",
+            "nationality": "GBR",
+            "place": "7.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "l89otf5nms6jn7zfhd63r",
+             "name": "Aaron AHL"
+            },
+            "mark": "3:45.11",
+            "nationality": "CAN",
+            "place": "8.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "svh9q88y93hwk7an7e7hi",
+             "name": "James GORMLEY"
+            },
+            "mark": "3:50.71",
+            "nationality": "IRL",
+            "place": "9.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "o90hj62a4y8vl0i1njmk8f",
+             "name": "Samat KAZAKBAEV"
+            },
+            "mark": "3:57.37",
+            "nationality": "KGZ",
+            "place": "10.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           }
+          ]
+         },
+         {
+          "date": "2026-03-20",
+          "day": 1,
+          "race": "Round 1 - Heat",
+          "raceId": 11,
+          "raceNumber": 3,
+          "results": [
+           {
+            "competitor": {
+             "id": "04yfwkmb8lai0hi5ypukf09",
+             "name": "Mariano GARCÍA"
+            },
+            "mark": "3:38.19",
+            "nationality": "ESP",
+            "place": "1.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "2lw01x7vc6zd5ksfqn2st",
+             "name": "Titouan LE GRIX"
+            },
+            "mark": "3:38.92",
+            "nationality": "FRA",
+            "place": "2.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "cezs4eufizrq127qzvopnb",
+             "name": "Samuel CHAPPLE"
+            },
+            "mark": "3:39.03",
+            "nationality": "NED",
+            "place": "3.",
+            "points": null,
+            "qualified": false,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "e8mm85hq748c4gvp4m5b5",
+             "name": "Foster MALLECK"
+            },
+            "mark": "3:39.05",
+            "nationality": "CAN",
+            "place": "4.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "bi9l5nsl1ytljtw8s317kc",
+             "name": "Håkon MOE BERG"
+            },
+            "mark": "3:39.29",
+            "nationality": "NOR",
+            "place": "5.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "12hr880tjrbcvwxo6oahj",
+             "name": "Žan RUDOLF"
+            },
+            "mark": "3:40.20",
+            "nationality": "SLO",
+            "place": "6.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "yxxcvigw7ygjnqjr1mrdfa",
+             "name": "Festus LAGAT"
+            },
+            "mark": "3:40.26",
+            "nationality": "KEN",
+            "place": "7.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "vv8c1ydqueqxhn2fb0k55r",
+             "name": "Pietro ARESE"
+            },
+            "mark": "3:40.91",
+            "nationality": "ITA",
+            "place": "8.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "g333rklp53euvvxxhthg",
+             "name": "Kamil HERZYK"
+            },
+            "mark": "3:44.31",
+            "nationality": "POL",
+            "place": "9.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "0czn6rrxr68mv6nv8cz8ub",
+             "name": "Camden GILMORE"
+            },
+            "mark": "3:47.13",
+            "nationality": "PAR",
+            "place": "10.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ }
+}
