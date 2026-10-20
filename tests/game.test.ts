@@ -247,16 +247,19 @@ describe("WA-Platzierungsregeln 2026", () => {
     ]);
   });
 
-  it("Cross: Performance Score nach Platz statt Result Score; Halbmarathon nimmt die bessere Tabelle", async () => {
+  it("Cross nur Platzierung mit Cross-Faktor; Halbmarathon nimmt die bessere Tabelle; Berglauf wie 10 km Straße", async () => {
     const d = `${new Date().getFullYear()}-02-01`;
+    await db.query("update seasons set cross_factor = 0.2 where id = $1", [season]);
     expect(await points(
       `insert into results (athlete_id, date, competition, discipline, category, race, place, result_score)
-       values (4, $1, 'a Cross GL', 'Cross Country', 'GL', 'F', 3, 0),
-              (5, $1, 'b HM GW', 'Half Marathon', 'GW', 'F', 1, 1000)`,
+       values (4, $1, 'a Cross GL', 'Cross Country', 'GL', 'F', 3, 1200),
+              (5, $1, 'b HM GW', 'Half Marathon', 'GW', 'F', 1, 1000),
+              (4, $1, 'c Berglauf GL', 'Mountain Classic', 'GL', 'F', 2, 1000)`,
       [d],
     )).toEqual([
-      ["a Cross GL", 264, 0],  // Tab. 6.1 GL 3. = 1165 -> (1165-1000) × Faktor 1,6
-      ["b HM GW", 0, 200],     // max(Tab. 4.2: 32, Tab. 4.3: 100) × Faktor 2
+      ["a Cross GL", 0, 372.8],  // Tab. 6.1 GL 3. = 1165 × Cross-Faktor 0,2 × Disziplinfaktor 1,6; keine Leistungspunkte
+      ["b HM GW", 0, 200],       // max(Tab. 4.2: 32, Tab. 4.3: 100) × Faktor 2
+      ["c Berglauf GL", 0, 43.2], // Tab. 2.10 GL 2. = 27 × Faktor 1,6
     ]);
   });
 });

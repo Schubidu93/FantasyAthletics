@@ -17,6 +17,7 @@ export function AdminPanel({ season, members, matchdays, runs }: { season: Seaso
     perf_threshold: season.perf_threshold,
     perf_factor: season.perf_factor,
     placing_factor: season.placing_factor,
+    cross_factor: season.cross_factor,
     roster_size: season.roster_size,
     lineup_slots: season.lineup_slots.join(", "),
     draft_starts_at: season.draft_starts_at ? season.draft_starts_at.slice(0, 16) : "",
@@ -37,6 +38,7 @@ export function AdminPanel({ season, members, matchdays, runs }: { season: Seaso
       perf_threshold: Number(s.perf_threshold),
       perf_factor: Number(s.perf_factor),
       placing_factor: Number(s.placing_factor),
+      cross_factor: Number(s.cross_factor),
       roster_size: Number(s.roster_size),
       lineup_slots: s.lineup_slots.split(",").map((x) => x.trim()).filter(Boolean),
       draft_starts_at: s.draft_starts_at ? new Date(s.draft_starts_at).toISOString() : null,
@@ -87,12 +89,14 @@ export function AdminPanel({ season, members, matchdays, runs }: { season: Seaso
           {field("perf_threshold", "Leistungs-Schwelle")}
           {field("perf_factor", "Leistungs-Faktor", "number", "0.01")}
           {field("placing_factor", "Platzierungs-Faktor", "number", "0.01")}
+          {field("cross_factor", "Cross-Faktor", "number", "0.01")}
           {field("roster_size", "Kadergröße")}
           {field("draft_starts_at", "Draft-Termin", "datetime-local")}
         </div>
         {field("lineup_slots", "Positionen (kommagetrennt, WC… = Wildcard)", "text")}
         <p className="muted text-xs">
-          Punkte je Ergebnis = (max(0, WA-Punkte − Leistungs-Schwelle) × Leistungs-Faktor + Platzierungspunkte × Platzierungs-Faktor) × Disziplinfaktor
+          Punkte je Ergebnis = (max(0, WA-Punkte − Leistungs-Schwelle) × Leistungs-Faktor + Platzierungspunkte × Platzierungs-Faktor) × Disziplinfaktor.
+          Cross: nur WA-Cross-Platzierungspunkte × Cross-Faktor × Disziplinfaktor.
         </p>
         <div className="flex items-center gap-3">
           <button className="btn">Speichern</button>

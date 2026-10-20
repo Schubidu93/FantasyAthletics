@@ -11,6 +11,7 @@ export type Season = {
   perf_threshold: number;
   perf_factor: number;
   placing_factor: number;
+  cross_factor: number;
   roster_size: number;
   lineup_slots: string[];
   draft_starts_at: string | null;
