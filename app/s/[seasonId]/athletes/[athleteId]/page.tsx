@@ -55,6 +55,11 @@ export default async function AthletePage({ params }: { params: Promise<{ season
                       {r.wa_race}: {r.wa_place ?? "–"}
                     </div>
                   )}
+                  {r.placing_round && r.placing_round !== "F" && (
+                    <div className="text-xs text-slate-500" title="Wertung der letzten Runde vor dem Finale">
+                      {r.placing_place === 0 ? "Q/q" : `Runde: ${r.placing_place}.`}
+                    </div>
+                  )}
                 </td>
                 <td className="text-right">{r.result_score ?? "–"}</td>
                 <td className="text-right">{fmtPoints(r.performance_points)}</td>

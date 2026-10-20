@@ -121,13 +121,13 @@ describe("Punkte", () => {
       "select competition, performance_points, placing_points, total_points from result_points where season_id = $1 order by competition",
       [season])).rows;
     const by = Object.fromEntries(rows.map((r) => [r.competition, r]));
-    // (1180-1000)*2*1 = 360, GL-Sieg 1500m = 170 * 0.5 = 85
+    // (1180-1000)*2*1 = 360, GL-Sieg 1500m (WA Tab. 2.2) = 120 * 0.5 = 60
     expect(Number(by.Meeting.performance_points)).toBe(360);
-    expect(Number(by.Meeting.placing_points)).toBe(85);
+    expect(Number(by.Meeting.placing_points)).toBe(60);
     // Vorlauf: keine Platzierungspunkte
     expect(Number(by.Meeting2.placing_points)).toBe(0);
-    // Marathon Faktor 3: (150*2)*3 = 900, GL Platz 2 = 105*0.5*3 = 157.5
-    expect(Number(by.Marathon.total_points)).toBe(1057.5);
+    // Marathon Faktor 3: (150*2)*3 = 900, GL Platz 2 (Tab. 4.1) = 75*0.5*3 = 112.5
+    expect(Number(by.Marathon.total_points)).toBe(1012.5);
     // Disziplin mit Faktor 0
     expect(Number(by.Staffel.total_points)).toBe(0);
   });
@@ -173,9 +173,9 @@ describe("Aufstellung, Transfers, Trades", () => {
     );
     const st = (await db.query<{ team_name: string; points: string }>(
       "select team_name, points from standings where season_id = $1 order by team_name", [season])).rows;
-    // alice: 800m (100 + 140) + 1500m (0 + 60) = 300; bob hat keine Aufstellung
+    // alice: 800m (100 + A-Sieg 100) + 1500m (0 + A-8. 42) = 242; bob hat keine Aufstellung
     expect(st.map((r) => [r.team_name, Number(r.points)])).toEqual([
-      ["Team Alice", 300], ["Team Bob", 0], ["Team Carol", 0],
+      ["Team Alice", 242], ["Team Bob", 0], ["Team Carol", 0],
     ]);
   });
 
@@ -218,6 +218,49 @@ describe("Aufstellung, Transfers, Trades", () => {
   });
 });
 
+describe("WA-Platzierungsregeln 2026", () => {
+  beforeEach(() => setup());
+
+  const points = async (sql: string, params: unknown[]) => {
+    await db.query(sql, params);
+    return (await db.query<{ competition: string; performance_points: string; placing_points: string }>(
+      "select competition, performance_points, placing_points from result_points order by competition")).rows
+      .map((r) => [r.competition, Number(r.performance_points), Number(r.placing_points)]);
+  };
+
+  it("Vorrunde: Q/q, Ausgeschiedene nach Gesamtplatz, Vorläufe ohne Wertung", async () => {
+    const d = `${new Date().getFullYear()}-09-18`;
+    expect(await points(
+      `insert into results (athlete_id, date, competition, discipline, category, race, wa_race, place, result_score, placing_round, placing_place)
+       values (1, $1, 'a WM HF Q', '800 Metres', 'OW', 'SF1', 'SF1', 2, 1000, 'P9', 0),
+              (8, $1, 'b WM HF raus', '800 Metres', 'OW', 'SF2', 'SF2', 5, 1000, 'P9', 10),
+              (2, $1, 'c WM HF 1500', '1500 Metres', 'OW', 'SF1', 'SF1', 9, 1000, 'P10', 12),
+              (3, $1, 'd WM VL 5000', '5000 Metres', 'OW', 'H1', 'H1', 3, 1000, 'P10', 0),
+              (7, $1, 'e Vorlauf ohne Wertung', '1500 Metres', 'OW', 'H2', 'H2', 1, 1000, null, null)`,
+      [d],
+    )).toEqual([
+      ["a WM HF Q", 0, 100],      // Tab. 2.3 Q/q
+      ["b WM HF raus", 0, 84],    // Tab. 2.3 10.
+      ["c WM HF 1500", 0, 62],    // Tab. 2.4 12. (Finale mit 10+)
+      ["d WM VL 5000", 0, 72.8],  // Tab. 2.6 Q/q 56 × Faktor 1,3
+      ["e Vorlauf ohne Wertung", 0, 0],
+    ]);
+  });
+
+  it("Cross: Performance Score nach Platz statt Result Score; Halbmarathon nimmt die bessere Tabelle", async () => {
+    const d = `${new Date().getFullYear()}-02-01`;
+    expect(await points(
+      `insert into results (athlete_id, date, competition, discipline, category, race, place, result_score)
+       values (4, $1, 'a Cross GL', 'Cross Country', 'GL', 'F', 3, 0),
+              (5, $1, 'b HM GW', 'Half Marathon', 'GW', 'F', 1, 1000)`,
+      [d],
+    )).toEqual([
+      ["a Cross GL", 264, 0],  // Tab. 6.1 GL 3. = 1165 -> (1165-1000) × Faktor 1,6
+      ["b HM GW", 0, 200],     // max(Tab. 4.2: 32, Tab. 4.3: 100) × Faktor 2
+    ]);
+  });
+});
+
 describe("Geteilte Finals", () => {
   beforeEach(() => setup());
 
@@ -231,11 +274,11 @@ describe("Geteilte Finals", () => {
     await insert("F1", 5); // noch nicht aufgelöst -> keine Platzierungspunkte
     const r = await one<{ placing_points: string }>(db, "select placing_points from result_points where athlete_id = 3");
     expect(Number(r!.placing_points)).toBe(0);
-    await insert("F", 7); // aufgelöst: GL 5000m Platz 7 = 70, Faktor 1.3
+    await insert("F", 7); // aufgelöst: GL 5000m Platz 7 (Tab. 2.5) = 49, Faktor 1.3
     const rows = (await db.query<{ placing_points: string; wa_race: string; wa_place: number }>(
       "select placing_points, wa_race, wa_place from result_points where athlete_id = 3")).rows;
     expect(rows).toHaveLength(1);
-    expect(Number(rows[0].placing_points)).toBe(91);
+    expect(Number(rows[0].placing_points)).toBe(63.7);
     expect([rows[0].wa_race, rows[0].wa_place]).toEqual(["F1", 5]);
   });
 });
@@ -253,6 +296,6 @@ describe("Übersichten", () => {
     );
     const r = await one<{ owner_team: string; season_points: string; event_group: string }>(db,
       "select owner_team, season_points, event_group from pool_overview where season_id = $1 and id = 2", [season]);
-    expect(r).toEqual({ owner_team: "Team Alice", season_points: "130.0", event_group: "1500" });
+    expect(r).toEqual({ owner_team: "Team Alice", season_points: "106.0", event_group: "1500" });
   });
 });

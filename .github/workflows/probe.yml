@@ -1,9 +1,8 @@
-name: WA-Probe (einmalig)
+name: WA-Regeln und Beispieldaten laden
 
+# Lädt die WA-Ranking-Regeln und Beispiel-Events nach research/out (z. B. wenn WA die Regeln
+# für ein neues Jahr veröffentlicht). Danach: python3 research/build_placing_sql.py
 on:
-  push:
-    branches: [claude/sleepy-planck-h90ess]
-    paths: [research/probe.ts, .github/workflows/probe.yml]
   workflow_dispatch:
 
 permissions:

@@ -58,6 +58,8 @@ export type ResultPoints = {
   place: number | null;
   wa_race: string;
   wa_place: number | null;
+  placing_round: "F" | "P9" | "P10" | null;
+  placing_place: number | null;
   mark: string | null;
   result_score: number | null;
   performance_points: number;
