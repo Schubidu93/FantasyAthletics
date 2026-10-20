@@ -1,0 +1,32 @@
+name: WA-Probe (einmalig)
+
+on:
+  push:
+    branches: [claude/sleepy-planck-h90ess]
+    paths: [research/probe.ts, .github/workflows/probe.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsx research/probe.ts
+      - name: Ergebnisse committen
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/out
+          git commit -m "WA-Probe: Rohdaten" || exit 0
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin HEAD:"$GITHUB_REF_NAME"
