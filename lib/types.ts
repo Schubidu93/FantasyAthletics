@@ -56,6 +56,8 @@ export type ResultPoints = {
   category: string | null;
   race: string;
   place: number | null;
+  wa_race: string;
+  wa_place: number | null;
   mark: string | null;
   result_score: number | null;
   performance_points: number;

@@ -15,7 +15,7 @@ Löst die alte Lösung aus Google Sheets, Apps Script und AppSheet ab.
 | **Transfers** | Free Agents aus dem Pool holen, sofort und nach dem Prinzip „wer zuerst kommt“. Trades zwischen Teams, die das andere Team annehmen muss. |
 | **Punkte je Ergebnis** | `(max(0, WA-Punkte − 1000) × Leistungsfaktor + Platzierungspunkte × Platzierungsfaktor) × Disziplinfaktor` |
 
-- **Platzierungspunkte** richten sich nach den WA-World-Ranking-Tabellen. Sie hängen ab von Disziplingruppe, Wettkampfkategorie (OW, DF, GW, GL, A–F), Finale oder Halbfinale und Platz. Vorläufe und gesplittete Finals (F1, F2 …) bekommen keine Platzierungspunkte.
+- **Platzierungspunkte** richten sich nach den WA-World-Ranking-Tabellen. Sie hängen ab von Disziplingruppe, Wettkampfkategorie (OW, DF, GW, GL, A–F), Finale oder Halbfinale und Platz. Vorläufe bekommen keine Platzierungspunkte. Bei Finals mit mehreren Läufen (F1, F2 …) ermittelt der Importer aus den Detailergebnissen die kombinierte Platzierung über alle Finalläufe und wertet das Ergebnis als Lauf F. Beispiel: In F1 auf Platz 5, in F2 waren zwei Läufer schneller, ergibt Platz 7. Die Originalwerte bleiben in `wa_race` und `wa_place` erhalten.
 - **Disziplinfaktoren** sind z. B. Marathon 3, Halbmarathon 2, 10.000 m 1,6, Gehen 0. Die Tabellen `disciplines` und `placing_scores` sind aus dem alten Google Sheet übernommen.
 - **Wann ein Ergebnis zählt:** wenn der Athlet im Spieltag aufgestellt war **und** am Wettkampftag im Kader des Teams stand.
 

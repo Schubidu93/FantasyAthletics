@@ -218,6 +218,28 @@ describe("Aufstellung, Transfers, Trades", () => {
   });
 });
 
+describe("Geteilte Finals", () => {
+  beforeEach(() => setup());
+
+  it("wertet die kombinierte Platzierung und behält die WA-Rohdaten als Schlüssel", async () => {
+    const date = `${new Date().getFullYear()}-07-01`;
+    const insert = (race: string, place: number) => db.query(
+      `insert into results (athlete_id, date, competition, discipline, category, race, place, wa_race, wa_place, result_score)
+       values (3, $1, 'Meeting', '5000 Metres', 'GL', $2, $3, 'F1', 5, 1000)
+       on conflict (athlete_id, date, discipline, wa_race, competition) do update set race = excluded.race, place = excluded.place`,
+      [date, race, place]);
+    await insert("F1", 5); // noch nicht aufgelöst -> keine Platzierungspunkte
+    const r = await one<{ placing_points: string }>(db, "select placing_points from result_points where athlete_id = 3");
+    expect(Number(r!.placing_points)).toBe(0);
+    await insert("F", 7); // aufgelöst: GL 5000m Platz 7 = 70, Faktor 1.3
+    const rows = (await db.query<{ placing_points: string; wa_race: string; wa_place: number }>(
+      "select placing_points, wa_race, wa_place from result_points where athlete_id = 3")).rows;
+    expect(rows).toHaveLength(1);
+    expect(Number(rows[0].placing_points)).toBe(91);
+    expect([rows[0].wa_race, rows[0].wa_place]).toEqual(["F1", 5]);
+  });
+});
+
 describe("Übersichten", () => {
   beforeEach(() => setup());
 

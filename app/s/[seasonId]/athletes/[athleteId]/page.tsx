@@ -48,7 +48,14 @@ export default async function AthletePage({ params }: { params: Promise<{ season
                   <div>{r.discipline} · {r.mark}</div>
                   <div className="text-xs text-slate-500">{r.competition} · {r.category ?? "–"}{r.race && r.race !== "F" ? ` · ${r.race}` : ""}</div>
                 </td>
-                <td>{r.place ?? "–"}</td>
+                <td>
+                  {r.place ?? "–"}
+                  {r.wa_race && r.wa_race !== r.race && (
+                    <div className="text-xs text-slate-500" title="Kombinierte Platzierung über alle Finalläufe">
+                      {r.wa_race}: {r.wa_place ?? "–"}
+                    </div>
+                  )}
+                </td>
                 <td className="text-right">{r.result_score ?? "–"}</td>
                 <td className="text-right">{fmtPoints(r.performance_points)}</td>
                 <td className="text-right">{fmtPoints(r.placing_points)}</td>
