@@ -1,0 +1,25 @@
+{
+  "name": "fantasy-athletics",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Datenabruf (World Athletics) und Tests für Fantasy Athletics. Die App selbst liegt in web/.",
+  "scripts": {
+    "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "import:pool": "tsx importer/sync-pool.ts",
+    "import:results": "tsx importer/sync-results.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
+    "cheerio": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/pg": "^8.15.0",
+    "pg": "^8.16.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.5"
+  }
+}

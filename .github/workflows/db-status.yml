@@ -1,0 +1,34 @@
+name: Datenstand prüfen
+
+# Zeigt, wie viele Athleten, Ergebnisse und Wettkämpfe in der Datenbank liegen.
+on:
+  workflow_dispatch:
+
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    steps:
+      - run: sudo apt-get install -y -qq postgresql-client
+      - name: Datenstand
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          psql "$SUPABASE_DB_URL" -P pager=off -c "
+            select 'Athleten' as was, gender as wertung, count(*)::text as anzahl from riders group by gender
+            union all select 'Athleten im Pool', gender, count(*)::text from riders where uci_rank is not null group by gender
+            union all select 'Ergebnisse mit Punkten', x.gender, count(*)::text from results r join riders x on x.pcs_slug = r.rider_slug group by x.gender
+            union all select 'Wettkämpfe', '', count(*)::text from races
+            union all select 'WA-Ergebnisse (alle Läufe)', '', count(*)::text from wa_results
+            union all select 'Toplisteneinträge', '', count(*)::text from toplist_entries
+            union all select 'Ligen', '', count(*)::text from leagues
+            order by 1, 2;"
+          psql "$SUPABASE_DB_URL" -P pager=off -c "select name, uci_class, country, start_date, loaded_at from races order by start_date desc nulls last limit 5;"
+          psql "$SUPABASE_DB_URL" -P pager=off -c "select pg_size_pretty(pg_database_size(current_database())) as datenbankgroesse;"
+      - name: Zeitplaner
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          psql "$SUPABASE_DB_URL" -P pager=off -c "select jobname, schedule, active from cron.job;" || true
+          psql "$SUPABASE_DB_URL" -P pager=off -c "select status, left(return_message, 80) as meldung, start_time from cron.job_run_details order by start_time desc limit 5;" || true
+          psql "$SUPABASE_DB_URL" -P pager=off -c "select status_code, left(content, 80) as antwort, created from net._http_response order by created desc limit 8;" || true
+          psql "$SUPABASE_DB_URL" -P pager=off -c "select exists (select 1 from vault.secrets where name = 'github_dispatch_token') as schluessel_hinterlegt;" || true
