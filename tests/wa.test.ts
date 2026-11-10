@@ -19,8 +19,8 @@ const TOPLIST_HTML = `
 describe("WA-Parser", () => {
   it("liest Toplisten-Zeilen", () => {
     expect(parseToplist(TOPLIST_HTML)).toEqual([
-      { athleteId: 14650473, name: "Robert FARKEN", birthYear: 1997, mark: "3:33.12", score: 1236 },
-      { athleteId: 14914521, name: "Malik SKUPIN-ALFA", birthYear: null, mark: "3:40.00", score: 1100 },
+      { athleteId: 14650473, name: "Robert FARKEN", birthDate: "1997-09-20", mark: "3:33.12", score: 1236 },
+      { athleteId: 14914521, name: "Malik SKUPIN-ALFA", birthDate: null, mark: "3:40.00", score: 1100 },
     ]);
   });
 

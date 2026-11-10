@@ -1,39 +1,89 @@
-import { PGlite } from "@electric-sql/pglite";
-import { readFileSync, readdirSync } from "node:fs";
+// Testdatenbank: echtes PostgreSQL mit schema.sql + reference_data.sql.
+// Lokal z. B. per initdb gestartet, in GitHub Actions als Service-Container.
+// TEST_DATABASE_URL zeigt auf eine Instanz, in der Datenbanken angelegt werden dürfen.
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import pg from "pg";
 
-const MIGRATIONS = join(import.meta.dirname, "..", "supabase", "migrations");
+const ROOT = join(import.meta.dirname, "..");
+const ADMIN_URL = process.env.TEST_DATABASE_URL ?? "postgres://postgres@localhost:54329/postgres?host=/tmp/fa-pg";
+const TEMPLATE = "fa_test_template";
 
-// Minimaler Nachbau dessen, was Supabase vor unseren Migrationen bereitstellt.
-const SUPABASE_STUB = `
-  create role anon; create role authenticated; create role service_role;
-  create schema auth;
-  create table auth.users (id uuid primary key, email text);
-  create function auth.uid() returns uuid language sql stable as
-    $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
-  create publication supabase_realtime;
-`;
+const sql = (f: string) => readFileSync(join(ROOT, f), "utf8");
 
-export async function createDb() {
-  const db = new PGlite();
-  await db.exec(SUPABASE_STUB);
-  for (const file of readdirSync(MIGRATIONS).sort()) {
-    await db.exec(readFileSync(join(MIGRATIONS, file), "utf8"));
-  }
-  return db;
+async function admin() {
+  const c = new pg.Client({ connectionString: ADMIN_URL });
+  await c.connect();
+  return c;
 }
 
-export async function createUser(db: PGlite, name: string) {
+function urlFor(db: string) {
+  const u = new URL(ADMIN_URL);
+  u.pathname = `/${db}`;
+  return u.toString();
+}
+
+let templateReady: Promise<void> | null = null;
+
+/** Vorlage einmal pro Testlauf anlegen (Schema zweimal einspielen = Wiederholbarkeit prüfen). */
+function ensureTemplate() {
+  templateReady ??= (async () => {
+    const a = await admin();
+    await a.query(`drop database if exists ${TEMPLATE}`);
+    await a.query(`create database ${TEMPLATE}`);
+    await a.end();
+    const c = new pg.Client({ connectionString: urlFor(TEMPLATE) });
+    await c.connect();
+    await c.query("set client_min_messages = warning");
+    for (let i = 0; i < 2; i++) {
+      await c.query(sql("tests/supabase-stub.sql"));
+      await c.query(sql("supabase/schema.sql"));
+      await c.query(sql("supabase/reference_data.sql"));
+    }
+    await c.end();
+  })();
+  return templateReady;
+}
+
+export type Db = pg.Client & { one<T = any>(q: string, p?: unknown[]): Promise<T>; all<T = any>(q: string, p?: unknown[]): Promise<T[]> };
+
+/** Frische Datenbank aus der Vorlage. */
+export async function freshDb(): Promise<Db> {
+  await ensureTemplate();
+  const name = `fa_test_${Math.random().toString(36).slice(2, 10)}`;
+  const a = await admin();
+  await a.query(`create database ${name} template ${TEMPLATE}`);
+  await a.end();
+  const c = new pg.Client({ connectionString: urlFor(name) }) as Db;
+  await c.connect();
+  await c.query("set client_min_messages = warning");
+  c.one = async (q, p = []) => (await c.query(q, p)).rows[0];
+  c.all = async (q, p = []) => (await c.query(q, p)).rows;
+  const end = c.end.bind(c);
+  c.end = (async () => {
+    await end();
+    const x = await admin();
+    await x.query(`drop database if exists ${name}`);
+    await x.end();
+  }) as typeof c.end;
+  return c;
+}
+
+export async function createUser(db: Db, name: string) {
   const id = crypto.randomUUID();
   await db.query("insert into auth.users (id, email) values ($1, $2)", [id, `${name}@example.com`]);
   return id;
 }
 
-export async function as(db: PGlite, userId: string | null) {
+/** Als Nutzer handeln (auth.uid()). */
+export async function as(db: Db, userId: string | null) {
   await db.query("select set_config('request.jwt.claim.sub', $1, false)", [userId ?? ""]);
 }
 
-export async function one<T = Record<string, unknown>>(db: PGlite, sql: string, params: unknown[] = []) {
-  const res = await db.query<T>(sql, params);
-  return res.rows[0];
+/** Athlet mit Toplisteneintrag anlegen. */
+export async function athlete(db: Db, id: number, name: string, gender: "men" | "women", discipline: string, score: number, year = new Date().getFullYear()) {
+  const slug = `wa-${id}`;
+  await db.query("insert into riders (pcs_slug, name, gender, nation, wa_id) values ($1, $2, $3, 'GER', $4)", [slug, name, gender, id]);
+  await db.query("insert into toplist_entries (rider_slug, year, discipline, mark, score) values ($1, $2, $3, '-', $4)", [slug, year - 1, discipline, score]);
+  return slug;
 }

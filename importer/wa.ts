@@ -8,7 +8,7 @@ export type Gender = "M" | "W";
 export type ToplistRow = {
   athleteId: number;
   name: string;
-  birthYear: number | null;
+  birthDate: string | null; // ISO yyyy-mm-dd
   mark: string;
   score: number;
 };
@@ -78,11 +78,11 @@ export function parseToplist(html: string): ToplistRow[] {
     const athleteId = athleteIdFromHref(link.attr("href") ?? "");
     const score = Number(row.find('td[data-th="ResultScore"]').text().trim());
     if (!athleteId || !Number.isFinite(score)) return;
-    const dob = row.find('td[data-th="DOB"]').text().match(/(\d{4})/);
+    const dob = parseWaDate(row.find('td[data-th="DOB"]').text());
     rows.push({
       athleteId,
       name: link.text().replace(/\s+/g, " ").trim(),
-      birthYear: dob ? Number(dob[1]) : null,
+      birthDate: dob,
       mark: row.find('td[data-th="Mark"]').text().trim(),
       score,
     });

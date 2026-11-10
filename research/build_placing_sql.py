@@ -1,4 +1,6 @@
-# Erzeugt die Migration mit den WA-Platzierungstabellen 2026 aus den gesicherten Regelseiten.
+# Erzeugt supabase/reference_data.sql: Disziplinen (research/disciplines.txt) und die
+# WA-Platzierungstabellen 2026 aus den gesicherten Regelseiten (research/out/rules/*.txt).
+# Aufruf aus dem Repo-Hauptordner: python3 research/build_placing_sql.py
 import re, sys
 
 def tables(path):
@@ -66,5 +68,34 @@ for src, num, table, race_type in spec:
                 pts = 1100  # Tippfehler in der WA-Tabelle (24. = 1105, 26. = 1098)
             for p in places:
                 values.append(f"  ('{table}', '{cat}', '{race_type}', {p}, {pts})")
-print(len(values), file=sys.stderr)
-print(",\n".join(values))
+
+def q(v):
+    return "null" if v == "" else "'" + v.replace("'", "''") + "'"
+
+disc = []
+for line in open("research/disciplines.txt", encoding="utf-8"):
+    name, factor, group, tables, cross = line.rstrip("\n").split("|")
+    arr = "'{" + tables + "}'"
+    disc.append(f"  ({q(name)}, {factor}, {q(group)}, {arr}, {q(cross)})")
+
+out = f"""-- =====================================================================
+-- Fantasy Athletics – Referenzdaten (wird nach schema.sql eingespielt)
+-- Automatisch erzeugt von research/build_placing_sql.py – nicht von Hand ändern.
+--
+-- disciplines: Disziplinfaktor (eigene Spielregel), Gruppe für die Aufstellungspositionen,
+--   Platzierungstabellen und ggf. Cross-Tabelle. Bestehende Zeilen bleiben unverändert
+--   (Faktoren lassen sich im Supabase Table Editor anpassen).
+-- placing_scores: WA-World-Ranking-Regeln 2026 (Track & Field, Road Running, Cross Country),
+--   werden bei jedem Einspielen aktualisiert.
+-- =====================================================================
+
+insert into disciplines (name, factor, event_group, placing_tables, cross_table) values
+{",\n".join(disc)}
+on conflict (name) do nothing;
+
+insert into placing_scores (placing_table, category, race_type, place, points) values
+{",\n".join(values)}
+on conflict (placing_table, category, race_type, place) do update set points = excluded.points;
+"""
+open("supabase/reference_data.sql", "w", encoding="utf-8").write(out)
+print(f"{len(disc)} Disziplinen, {len(values)} Platzierungswerte", file=sys.stderr)

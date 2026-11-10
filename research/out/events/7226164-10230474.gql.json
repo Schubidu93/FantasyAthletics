@@ -1,0 +1,733 @@
+{
+ "status": 200,
+ "body": {
+  "data": {
+   "getCalendarCompetitionResults": {
+    "eventTitles": [
+     {
+      "eventTitle": null,
+      "events": [
+       {
+        "event": "Men's Marathon Race Walk",
+        "eventId": 10230474,
+        "races": [
+         {
+          "date": "2026-04-12",
+          "day": 1,
+          "race": "Final",
+          "raceId": 10,
+          "raceNumber": 1,
+          "results": [
+           {
+            "competitor": {
+             "id": "yh4po6e50to6f8bsf12uhc",
+             "name": "Hayato KATSUKI"
+            },
+            "mark": "3:04:58",
+            "nationality": "JPN",
+            "place": "1.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "9euqmsce6n5jlnugqmbcfj",
+             "name": "David HURTADO"
+            },
+            "mark": "3:05:57",
+            "nationality": "ECU",
+            "place": "2.",
+            "points": null,
+            "qualified": null,
+            "records": "AR",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "dobmz38im047exsrl2im4e",
+             "name": "Kazuya IWAI"
+            },
+            "mark": "3:06:03",
+            "nationality": "JPN",
+            "place": "3.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "2wewvjizmda7nhqiguua0m",
+             "name": "César HERRERA"
+            },
+            "mark": "3:06:59",
+            "nationality": "COL",
+            "place": "4.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "nocq7u3zuvuq50j10x2st",
+             "name": "Massimo STANO"
+            },
+            "mark": "3:07:38",
+            "nationality": "ITA",
+            "place": "5.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "009o2y0ghcgvwbwgcvf5zt",
+             "name": "Aurélien QUINION"
+            },
+            "mark": "3:07:53",
+            "nationality": "FRA",
+            "place": "6.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "jre4cek05fdfbr3ptgya0d",
+             "name": "Riccardo ORSONI"
+            },
+            "mark": "3:08:09",
+            "nationality": "ITA",
+            "place": "7.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "sxnmgcmwqz66nw1btje",
+             "name": "Andrea AGRUSTI"
+            },
+            "mark": "3:08:26",
+            "nationality": "ITA",
+            "place": "8.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "dv0yphwe45yynoho6e3v",
+             "name": "Subaru ISHIDA"
+            },
+            "mark": "3:10:34",
+            "nationality": "JPN",
+            "place": "9.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "2snctub9096448avfxkfp",
+             "name": "Bernardo Uriel BARRONDO"
+            },
+            "mark": "3:11:17",
+            "nationality": "GUA",
+            "place": "10.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "1cupujwk36oiwq3yphubmd",
+             "name": "Karl JUNGHANNß"
+            },
+            "mark": "3:12:10",
+            "nationality": "GER",
+            "place": "11.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "jnn76qkcrmctj0p2wgyes",
+             "name": "Manuel BERMÚDEZ"
+            },
+            "mark": "3:13:10",
+            "nationality": "ESP",
+            "place": "12.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "bs35lq1vrue4eya5vuh25e",
+             "name": "Daniel CHAMOSA"
+            },
+            "mark": "3:13:10",
+            "nationality": "ESP",
+            "place": "13.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "4f4fuzbrkppjsqlqo2slz",
+             "name": "Samuel Kireri GATHIMBA"
+            },
+            "mark": "3:13:20",
+            "nationality": "KEN",
+            "place": "14.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "73ghqixdokhuaw79v7shxb",
+             "name": "José Luis DOCTOR"
+            },
+            "mark": "3:13:39",
+            "nationality": "MEX",
+            "place": "15.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "ubhgaksy14dqchlzae569",
+             "name": "José Manuel PÉREZ"
+            },
+            "mark": "3:13:39",
+            "nationality": "ESP",
+            "place": "16.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "l3dwt9557zu7b8cnepib",
+             "name": "Ram BABOO"
+            },
+            "mark": "3:13:55",
+            "nationality": "IND",
+            "place": "17.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "0o217ti659bf0ldelvyvsuq",
+             "name": "Erick Bernabé BARRONDO"
+            },
+            "mark": "3:14:15",
+            "nationality": "GUA",
+            "place": "18.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "2u5bq8jucbl9ybc0yqd38",
+             "name": "Andres Eduardo OLIVAS NÚÑEZ"
+            },
+            "mark": "3:15:30",
+            "nationality": "MEX",
+            "place": "19.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "79s9c1nnxzswfaszoq69g",
+             "name": "Sandeep KUMAR"
+            },
+            "mark": "3:15:41",
+            "nationality": "IND",
+            "place": "20.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "bm8buhbn8k9yd11x0bsphp",
+             "name": "Xianghong HE"
+            },
+            "mark": "3:15:52",
+            "nationality": "CHN",
+            "place": "21.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "cm24y38miqilh8cao5j6mc",
+             "name": "Xavier MENA"
+            },
+            "mark": "3:16:21",
+            "nationality": "ECU",
+            "place": "22.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "648qinmgbzptprx72yhm",
+             "name": "Mitchell BAKER"
+            },
+            "mark": "3:17:06",
+            "nationality": "AUS",
+            "place": "23.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "c2fok8ekgjklns3uljao3k",
+             "name": "Aldo ANDREI"
+            },
+            "mark": "3:17:35",
+            "nationality": "ITA",
+            "place": "24.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "5mbyqi8xe02qktcekbqpnc",
+             "name": "Heristone Wanyonyi WAFULA"
+            },
+            "mark": "3:17:47",
+            "nationality": "KEN",
+            "place": "25.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "etpsjeblhb9wtck24d7za",
+             "name": "Josafat SÁNCHEZ PEÑA"
+            },
+            "mark": "3:18:32",
+            "nationality": "MEX",
+            "place": "26.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "ztgaxfmbavryewrxex2p4g",
+             "name": "Christopher LINKE"
+            },
+            "mark": "3:18:59",
+            "nationality": "GER",
+            "place": "27.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "hp6vozdgi6cqath5g1z4u",
+             "name": "Xiaoqiang ZHU"
+            },
+            "mark": "3:19:14",
+            "nationality": "CHN",
+            "place": "28.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "z121w9uv6a8q71spb4y6uh",
+             "name": "Johannes FRENZL"
+            },
+            "mark": "3:19:23",
+            "nationality": "GER",
+            "place": "29.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "sgpzrt6wfmqezngg0m4cyj",
+             "name": "Jinson Octavio CALDERÓN"
+            },
+            "mark": "3:19:40",
+            "nationality": "ECU",
+            "place": "30.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "c42qm8g7qjs18nuq4a9rgyj",
+             "name": "Paulo Henrique RIBEIRO"
+            },
+            "mark": "3:21:26",
+            "nationality": "BRA",
+            "place": "31.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "l1r26p3lgtddykvmtorl8r",
+             "name": "Cameron CORBISHLEY"
+            },
+            "mark": "3:21:38",
+            "nationality": "GBR",
+            "place": "32.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "xlu1o29ui8qcqn1wak9l",
+             "name": "Stefano CHIESA"
+            },
+            "mark": "3:21:53",
+            "nationality": "ITA",
+            "place": "33.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "q70oir0q4np8d4d3udqmke",
+             "name": "Carl GIBBONS"
+            },
+            "mark": "3:22:53",
+            "nationality": "AUS",
+            "place": "34.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "z8ju695nlssxz4jbddjbj",
+             "name": "Carlos MERCENARIO"
+            },
+            "mark": "3:23:10",
+            "nationality": "MEX",
+            "place": "35.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "niuzm56rz7cos4a7s06z1p",
+             "name": "Oscar PATÍN"
+            },
+            "mark": "3:24:36",
+            "nationality": "ECU",
+            "place": "36.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "yr99z2iq3fpcho04otuu",
+             "name": "Roberto Carlos MARROQUÍN"
+            },
+            "mark": "3:28:22",
+            "nationality": "GUA",
+            "place": "37.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "2cdk01b7iimked1vp457ge",
+             "name": "Yanlong GAO"
+            },
+            "mark": "3:28:56",
+            "nationality": "CHN",
+            "place": "38.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "5hiv21b61j93ntc0fd2nss",
+             "name": "Jinxi WANG"
+            },
+            "mark": "3:32:25",
+            "nationality": "CHN",
+            "place": "39.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "9thlss0vehpdkxnxu0ya6w",
+             "name": "Felix KIPKEMOI"
+            },
+            "mark": "3:35:01",
+            "nationality": "KEN",
+            "place": "40.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "alin5tc9hxju58tfbvce",
+             "name": "Tao QU"
+            },
+            "mark": "3:35:37",
+            "nationality": "CHN",
+            "place": "41.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "zcjydjwmieqmuxjtett8",
+             "name": "Stephen Ndangiri KIHU"
+            },
+            "mark": "3:36:04",
+            "nationality": "KEN",
+            "place": "42.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "jx9bzwh1b0g0cu0zz0gc8ab",
+             "name": "Diego PEREIRA LIMA"
+            },
+            "mark": "3:39:34",
+            "nationality": "BRA",
+            "place": "43.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "vwbb7jd0lwruosurjwbxsl",
+             "name": "Edson Erico ALVES DE AGUIAR"
+            },
+            "mark": "3:39:45",
+            "nationality": "BRA",
+            "place": "44.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "52qpqpi7sbhs98krof46jm",
+             "name": "Peter Theuri MUIGAI"
+            },
+            "mark": "3:46:29",
+            "nationality": "KEN",
+            "place": "45.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "1gw93l0limi25jpwx9tcu8",
+             "name": "Bricyn HEALEY"
+            },
+            "mark": "3:48:15",
+            "nationality": "USA",
+            "place": "46.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "hs4h6mvayksl90htlkjge",
+             "name": "Klaubert Emanoel FERREIRA"
+            },
+            "mark": "3:51:01",
+            "nationality": "BRA",
+            "place": "47.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "4wcm4voy7lunao3ipgmshp",
+             "name": "Rudney DIAS NOGUEIRA"
+            },
+            "mark": "3:51:57",
+            "nationality": "BRA",
+            "place": "48.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "uezruvpequjxjky9sllj4",
+             "name": "Michael Giuseppe MANNOZZI"
+            },
+            "mark": "4:06:59",
+            "nationality": "USA",
+            "place": "49.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "r52jlsrextjodipeb8as2f",
+             "name": "Julio César SALAZAR"
+            },
+            "mark": "DNF",
+            "nationality": "MEX",
+            "place": "",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "xl1u07u1kwtfbkr6jp10e",
+             "name": "Harun BILIR"
+            },
+            "mark": "DNF",
+            "nationality": "TUR",
+            "place": "",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "o02e5andu6na2d44i39h57",
+             "name": "Ozan BAYRAM"
+            },
+            "mark": "DNF",
+            "nationality": "TUR",
+            "place": "",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "dowutb445ald6cql1mf38",
+             "name": "Perseus KARLSTRÖM"
+            },
+            "mark": "DNS",
+            "nationality": "SWE",
+            "place": "",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           },
+           {
+            "competitor": {
+             "id": "hsnfzs5zskm0xreqm1eem",
+             "name": "Diyar BAYRAM"
+            },
+            "mark": "DQ",
+            "nationality": "TUR",
+            "place": "",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "remark": null
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ }
+}

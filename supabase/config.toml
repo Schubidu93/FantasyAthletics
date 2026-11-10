@@ -1,9 +1,0 @@
-# Minimal-Konfiguration für die Supabase CLI (`supabase link` / `supabase db push`).
-project_id = "fantasy-athletics"
-
-[auth]
-site_url = "http://localhost:3000"
-additional_redirect_urls = ["http://localhost:3000/auth/confirm"]
-
-[auth.email]
-otp_length = 6

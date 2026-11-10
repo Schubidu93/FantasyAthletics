@@ -1,0 +1,39 @@
+name: Benachrichtigungen senden
+
+# Verschickt vorgemerkte Push-Benachrichtigungen (Waiver, Tausch, Draft, Spieltage, Punkte).
+# Erzeugt beim ersten Lauf das VAPID-Schlüsselpaar.
+on:
+  workflow_run:
+    workflows: ["Rennergebnisse laden (UCI)"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      test:
+        description: "Testnachricht an alle Geräte schicken"
+        type: boolean
+        default: false
+
+concurrency:
+  group: push
+  cancel-in-progress: false
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: datasync
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: datasync/requirements.txt
+      - run: pip install -q -r datasync/requirements.txt
+      - run: python send_push.py
+        working-directory: datasync
+        env:
+          TEST: ${{ inputs.test && '1' || '' }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
