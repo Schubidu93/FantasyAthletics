@@ -21,7 +21,7 @@ const hash = (s) => [...s].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) | 0, 7)
 export function buildReport(c, lots, pts, proj = null) {
   const picks = lots.filter((l) => l.manager_id).sort((a, b) => a.lot_no - b.lot_no || a.id - b.id);
   const value = (slug) => Number(pts[slug] || 0);
-  // erwartete Pick-Position nach Vorjahrespunkten (1 = wertvollster gezogener Fahrer)
+  // erwartete Pick-Position nach Vorjahrespunkten (1 = wertvollster gezogener Athlet)
   const byValue = [...picks].sort((a, b) => value(b.rider_slug) - value(a.rider_slug));
   const expected = Object.fromEntries(byValue.map((p, i) => [p.rider_slug, i + 1]));
   const auction = draftCosts(c.league);
@@ -68,7 +68,7 @@ export function buildReport(c, lots, pts, proj = null) {
         ? `Teuerstes Fragezeichen: ${name(t.reach)} für ${t.reach.price} bei nur ${fmtPts(t.reach.value)} Punkten.`
         : `Reach: ${name(t.reach)} schon an Pick ${t.reach.pickNo} – nur ${fmtPts(t.reach.value)} Vorjahrespunkte.`);
     }
-    if (!withPts.length) parts.push('Kein einziger Fahrer mit Vorjahrespunkten – ein echtes Wagnis.');
+    if (!withPts.length) parts.push('Kein einziger Athlet mit Vorjahrespunkten – ein echtes Wagnis.');
     t.text = parts.join(' ');
   });
   return { picks, teams };
@@ -85,10 +85,10 @@ export function DraftReport({ c }) {
     // bestmögliche Punkte je Kader (Top x aus y je Spieltag im Vorjahr) – serverseitig zwischengespeichert
     const rows = await rpc('draft_projection', { p_league: L }).catch(() => []);
     let proj = rows.some((r) => Number(r.points) > 0) ? Object.fromEntries(rows.map((r) => [r.manager_id, Number(r.points)])) : null;
-    // Ohne Vorjahresdaten: aktuelle UCI-Ranglistenpunkte (52 Wochen) als Maßstab
+    // Ohne Vorjahresdaten: beste WA-Punktzahl der Toplisten als Maßstab
     if (!lots.some((l) => pts[l.rider_slug])) {
       pts = Object.fromEntries(c.riders.map((r) => [r.pcs_slug, Number(r.ranking_points || 0)]));
-      basis = 'UCI-Ranglistenpunkte';
+      basis = 'den WA-Punkten der Toplisten';
       proj = null;
     }
     return { lots, pts, basis, proj };
@@ -109,8 +109,8 @@ export function DraftReport({ c }) {
           <button class=${view === 'teams' ? 'active' : ''} onClick=${() => setView('teams')}>Kader</button>
         </div></div>
       <p class="muted small">${data.data.proj
-        ? `Bewertet nach den Punkten ${prevYear}: je Spieltag (gleicher Zeitraum im Vorjahr) zählen die besten ${c.league.scoring_mode === 'lineup' ? c.league.lineup_size : c.league.roster_size} der ${c.league.roster_size} Fahrer jedes Kaders.`
-        : `Bewertet nach ${data.data.basis} der gezogenen Fahrer.`} Eine Prognose, keine Garantie.</p>
+        ? `Bewertet nach den Punkten ${prevYear}: je Spieltag (gleicher Zeitraum im Vorjahr) zählen die besten ${c.league.scoring_mode === 'lineup' ? c.league.lineup_size : c.league.roster_size} der ${c.league.roster_size} Athleten jedes Kaders.`
+        : `Bewertet nach ${data.data.basis} der gezogenen Athleten.`} Eine Prognose, keine Garantie.</p>
     </section>
 
     ${view === 'report' && teams.map((t) => html`<section class=${`card report ${t.m.id === c.me?.id ? 'mine' : ''}`} key=${t.m.id}>
@@ -125,8 +125,8 @@ export function DraftReport({ c }) {
     </section>`)}
 
     ${view === 'board' && html`<section class="card"><div class="scroll-x"><table class="tbl">
-      <thead><tr><th class="num">Pick</th>${!auction && html`<th class="num hide-sm">Runde</th>`}<th>Fahrer</th><th>Team</th>
-        ${auction && html`<th class="num">Preis</th>`}<th class="num">Pkt. ${data.data.basis === 'UCI-Ranglistenpunkte' ? 'Rangl.' : prevYear}</th></tr></thead>
+      <thead><tr><th class="num">Pick</th>${!auction && html`<th class="num hide-sm">Runde</th>`}<th>Athlet</th><th>Team</th>
+        ${auction && html`<th class="num">Preis</th>`}<th class="num">Pkt. ${data.data.basis === 'den WA-Punkten der Toplisten' ? 'WA' : prevYear}</th></tr></thead>
       <tbody>${picks.map((p) => html`<tr key=${p.id} class=${p.manager_id === c.me?.id ? 'me' : ''}>
         <td class="num">${p.keeper ? 'K' : p.pickNo}</td>${!auction && html`<td class="num hide-sm">${Math.ceil(p.pickNo / n)}</td>`}
         <td><${RiderCell} r=${name(p.rider_slug)} /></td>

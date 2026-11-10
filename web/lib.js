@@ -107,6 +107,21 @@ export function slotOk(slot, r) {
   return g.startsWith('WC') || riderGroup(r) === g;
 }
 
+// Disziplinnamen von World Athletics kurz und deutsch: "1500 Metres Short Track" → "1500 m (Halle)"
+const DISC = [[/^10,000 Metres/, '10.000 m'], [/ Metres Steeplechase/, ' m Hindernis'], [/ Metres Hurdles/, ' m Hürden'],
+  [/ Metres/, ' m'], [/^Mile Road$/, 'Meile Straße'], [/^Mile/, 'Meile'], [/^2 Miles/, '2 Meilen'], [/^10 Miles Road/, '10 Meilen'],
+  [/^Half Marathon/, 'Halbmarathon'], [/ Kilometres Road/, ' km Straße'], [/^Cross Country Relay/, 'Cross-Staffel'],
+  [/^Cross Country/, 'Cross'], [/ Short Track$/, ' (Halle)'], [/ Relay/, ' Staffel'], [/ Race Walk/, ' Gehen'],
+  [/^Mountain Running /, 'Berglauf '], [/^Mountain Classic/, 'Berglauf']];
+export const discLabel = (d) => DISC.reduce((t, [re, rep]) => t.replace(re, rep), d || '');
+// Lauf laut WA: F, F1, SF2, H3, QF1 …
+export function raceLabel(r) {
+  const m = (r || '').match(/^(F|SF|QF|H|R)(\d*)$/);
+  if (!m) return r || '';
+  const name = { F: 'Finale', SF: 'Halbfinale', QF: 'Viertelfinale', H: 'Vorlauf', R: 'Lauf' }[m[1]];
+  return m[2] ? `${name} ${m[2]}` : name;
+}
+
 // ---- Flaggen ---------------------------------------------------------------
 // IOC-Codes (GER, NED …) und ISO-3-Codes (DEU …) werden beide erkannt.
 const ISO2 = {ABW:'AW',AFG:'AF',AGO:'AO',ALB:'AL',ALG:'DZ',AND:'AD',ANG:'AO',ANT:'AG',ARE:'AE',ARG:'AR',ARM:'AM',ARU:'AW',ASA:'AS',ATG:'AG',AUS:'AU',AUT:'AT',AZE:'AZ',BAH:'BS',BAN:'BD',BAR:'BB',BDI:'BI',BEL:'BE',BEN:'BJ',BER:'BM',BFA:'BF',BGD:'BD',BGR:'BG',BHR:'BH',BHS:'BS',BHU:'BT',BIH:'BA',BIZ:'BZ',BLR:'BY',BOL:'BO',BOT:'BW',BRA:'BR',BRB:'BB',BRN:'BH',BRU:'BN',BUL:'BG',BUR:'BF',CAF:'CF',CAM:'KH',CAN:'CA',CAY:'KY',CGO:'CG',CHA:'TD',CHE:'CH',CHI:'CL',CHL:'CL',CHN:'CN',CIV:'CI',CMR:'CM',COD:'CD',COK:'CK',COL:'CO',COM:'KM',CPV:'CV',CRC:'CR',CRI:'CR',CRO:'HR',CUB:'CU',CUW:'CW',CYP:'CY',CZE:'CZ',DEN:'DK',DEU:'DE',DJI:'DJ',DMA:'DM',DNK:'DK',DOM:'DO',DZA:'DZ',ECU:'EC',EGY:'EG',ERI:'ER',ESA:'SV',ESP:'ES',EST:'EE',ETH:'ET',FIJ:'FJ',FIN:'FI',FJI:'FJ',FRA:'FR',FRO:'FO',FSM:'FM',GAB:'GA',GAM:'GM',GBR:'GB',GBS:'GW',GEO:'GE',GEQ:'GQ',GER:'DE',GHA:'GH',GIB:'GI',GLP:'GP',GMB:'GM',GNB:'GW',GRC:'GR',GRE:'GR',GRL:'GL',GRN:'GD',GTM:'GT',GUA:'GT',GUI:'GN',GUM:'GU',GUY:'GY',HAI:'HT',HKG:'HK',HND:'HN',HON:'HN',HRV:'HR',HUN:'HU',IDN:'ID',INA:'ID',IND:'IN',IRI:'IR',IRL:'IE',IRN:'IR',IRQ:'IQ',ISL:'IS',ISR:'IL',ISV:'VI',ITA:'IT',IVB:'VG',JAM:'JM',JOR:'JO',JPN:'JP',KAZ:'KZ',KEN:'KE',KGZ:'KG',KHM:'KH',KIR:'KI',KNA:'KN',KOR:'KR',KOS:'XK',KSA:'SA',KUW:'KW',KWT:'KW',LAO:'LA',LAT:'LV',LBA:'LY',LBN:'LB',LBR:'LR',LBY:'LY',LCA:'LC',LES:'LS',LIE:'LI',LKA:'LK',LSO:'LS',LTU:'LT',LUX:'LU',LVA:'LV',MAC:'MO',MAD:'MG',MAR:'MA',MAS:'MY',MAW:'MW',MCO:'MC',MDA:'MD',MDG:'MG',MDV:'MV',MEX:'MX',MGL:'MN',MHL:'MH',MKD:'MK',MLI:'ML',MLT:'MT',MMR:'MM',MNE:'ME',MNG:'MN',MON:'MC',MOZ:'MZ',MRI:'MU',MRT:'MR',MTN:'MR',MTQ:'MQ',MUS:'MU',MWI:'MW',MYA:'MM',MYS:'MY',NAM:'NA',NCA:'NI',NCL:'NC',NED:'NL',NEP:'NP',NER:'NE',NGA:'NG',NGR:'NG',NIC:'NI',NIG:'NE',NLD:'NL',NOR:'NO',NRU:'NR',NZL:'NZ',OMA:'OM',OMN:'OM',PAK:'PK',PAN:'PA',PAR:'PY',PER:'PE',PHI:'PH',PHL:'PH',PLE:'PS',PLW:'PW',PNG:'PG',POL:'PL',POR:'PT',PRI:'PR',PRK:'KP',PRT:'PT',PRY:'PY',PSE:'PS',PUR:'PR',PYF:'PF',QAT:'QA',REU:'RE',ROU:'RO',RSA:'ZA',RUS:'RU',RWA:'RW',SAM:'WS',SAU:'SA',SDN:'SD',SEN:'SN',SEY:'SC',SGP:'SG',SKN:'KN',SLB:'SB',SLE:'SL',SLO:'SI',SLV:'SV',SMR:'SM',SOL:'SB',SOM:'SO',SRB:'RS',SRI:'LK',SSD:'SS',STP:'ST',SUD:'SD',SUI:'CH',SUR:'SR',SVK:'SK',SVN:'SI',SWE:'SE',SWZ:'SZ',SXM:'SX',SYC:'SC',SYR:'SY',TAN:'TZ',TGA:'TO',THA:'TH',TJK:'TJ',TKM:'TM',TLS:'TL',TOG:'TG',TON:'TO',TPE:'TW',TTO:'TT',TUN:'TN',TUR:'TR',TUV:'TV',TWN:'TW',TZA:'TZ',UAE:'AE',UGA:'UG',UKR:'UA',URU:'UY',URY:'UY',USA:'US',UZB:'UZ',VAN:'VU',VCT:'VC',VEN:'VE',VGB:'VG',VIE:'VN',VIN:'VC',VIR:'VI',VNM:'VN',WSM:'WS',YEM:'YE',ZAF:'ZA',ZAM:'ZM',ZIM:'ZW',ZMB:'ZM',ZWE:'ZW'};

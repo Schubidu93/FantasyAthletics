@@ -17,6 +17,6 @@ export function More({ c }) {
     <${PushToggle} />
     <div class="row between"><button class="ghost" onClick=${() => sb.auth.signOut()}>Abmelden</button>
       <a class="muted small" href=${`#/league/${L}/feedback`}>💬 Feedback geben</a></div>
-    <p class="muted small">Daten: UCI (DataRide, Wettkampfverzeichnis). Keine offizielle App der UCI.</p>
+    <p class="muted small">Daten: World Athletics (Toplisten und Ergebnisse). Keine offizielle App von World Athletics.</p>
   </div>`;
 }

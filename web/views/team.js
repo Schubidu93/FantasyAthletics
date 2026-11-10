@@ -1,5 +1,5 @@
 import { html, useState, useEffect } from '../vendor/preact-htm.js';
-import { sb, q, rpc, useLoad, useAction, Msg, Loading, RiderCell, fmtDate, fmtPts, SOURCE_LABEL, budgetRelevant, useRiderPoints } from '../lib.js';
+import { sb, q, rpc, useLoad, useAction, Msg, Loading, RiderCell, fmtDate, fmtPts, SOURCE_LABEL, budgetRelevant, useRiderPoints, leagueSlots, slotLabel, slotOk } from '../lib.js';
 
 import { NextDeadline, fmtDeadline } from './deadline.js';
 
@@ -36,7 +36,7 @@ function Roster({ c, managerId, points }) {
   return html`<section class="card">
     <div class="row between"><h2>Kader</h2><span class="big">${fmtPts(total)} <span class="muted small">Punkte</span></span></div>
     <div class="scroll-x"><table class="tbl">
-      <thead><tr><th>Fahrer</th><th class="num">Preis</th>
+      <thead><tr><th>Athlet</th><th class="num">Preis</th>
         ${started.map((md) => html`<th class="num" title=${md.name}>${md.name}</th>`)}
         <th class="num">Gesamt</th></tr></thead>
       <tbody>
@@ -48,7 +48,7 @@ function Roster({ c, managerId, points }) {
           <td class="num"><strong>${fmtPts(p(r.rider_slug))}</strong></td></tr>`)}
       </tbody>
     </table></div>
-    ${past.length > 0 && html`<details><summary>Abgegebene Fahrer (${past.length})</summary>
+    ${past.length > 0 && html`<details><summary>Abgegebene Athleten (${past.length})</summary>
       <ul class="list compact">${past.map((r) => html`<li key=${r.id}>
         <span>${c.riderMap[r.rider_slug]?.name || r.rider_slug}</span>
         <span class="muted">${fmtDate(r.acquired_on)} – ${fmtDate(r.released_on)} · ${fmtPts(p(r.rider_slug))} Pkt.</span></li>`)}</ul>
@@ -56,32 +56,47 @@ function Roster({ c, managerId, points }) {
   </section>`;
 }
 
+// Aufstellung mit festen Positionen: je Disziplingruppe (ggf. getrennt nach ♂/♀) plus Wildcards
 function Lineup({ c }) {
   const md = c.nextMatchday;
-  const size = c.league.lineup_size;
-  const mine = c.active.filter((r) => r.manager_id === c.me.id);
-  const [sel, setSel] = useState(null);
+  const slots = leagueSlots(c.league);
+  const mine = c.active.filter((r) => r.manager_id === c.me.id).map((r) => c.riderMap[r.rider_slug]).filter(Boolean);
+  const [sel, setSel] = useState(null);         // { slot: rider_slug }
   const a = useAction();
   useEffect(() => {
     if (!md) return;
-    rpc('effective_lineup', { p_matchday: md.id, p_manager: c.me.id })
-      .then((rows) => setSel(new Set(rows.map((r) => (typeof r === 'string' ? r : r.effective_lineup)))))
-      .catch(() => setSel(new Set()));
+    rpc('effective_lineup_slots', { p_matchday: md.id, p_manager: c.me.id })
+      .then((rows) => setSel(Object.fromEntries(rows.filter((r) => mine.some((x) => x.pcs_slug === r.rider_slug)).map((r) => [r.slot, r.rider_slug]))))
+      .catch(() => setSel({}));
   }, [md?.id]);
   if (!md) return html`<section class="card"><h3>Aufstellung</h3><p class="muted">Kein kommender Spieltag angelegt.${c.isAdmin ? html` <a href=${`#/league/${c.league.id}/admin`}>Spieltag anlegen →</a>` : ''}</p></section>`;
   if (!sel) return null;
-  const toggle = (slug) => { const s = new Set(sel); s.has(slug) ? s.delete(slug) : s.add(slug); setSel(s); };
+  const used = new Set(Object.values(sel).filter(Boolean));
+  const filled = slots.filter((s) => sel[s]).length;
+  const choose = (slot, slug) => {
+    const next = { ...sel };
+    for (const k of Object.keys(next)) if (next[k] === slug) delete next[k];   // Athlet wechselt die Position
+    if (slug) next[slot] = slug; else delete next[slot];
+    setSel(next);
+  };
   return html`<section class="card">
     <h3>Aufstellung für ${md.name}</h3>
-    <p class="muted small">${size} von ${c.league.roster_size} Fahrern werten. Änderbar bis <strong>${fmtDeadline(md.deadline)}</strong>,
-      danach ist sie für ${md.name} fest. Ohne neue Eingabe gilt die letzte Aufstellung.</p>
-    <ul class="list compact">${mine.map((r) => html`<li key=${r.id}>
-      <label class="check"><input type="checkbox" checked=${sel.has(r.rider_slug)} onChange=${() => toggle(r.rider_slug)} />
-        <${RiderCell} r=${c.riderMap[r.rider_slug]} /></label></li>`)}</ul>
+    <p class="muted small">${slots.length} Positionen: je Disziplin${c.league.lineup_mode === 'mf' ? ' ein Mann (♂) und eine Frau (♀)' : ''}, Wildcards nehmen jede Disziplin.
+      Änderbar bis <strong>${fmtDeadline(md.deadline)}</strong>, danach ist sie für ${md.name} fest. Ohne neue Eingabe gilt die letzte Aufstellung.</p>
+    <ul class="list compact lineup">${slots.map((slot) => {
+      const options = mine.filter((r) => slotOk(slot, r));
+      return html`<li key=${slot}>
+        <span class="slot-name">${slotLabel(slot)}</span>
+        <select value=${sel[slot] || ''} onChange=${(e) => choose(slot, e.target.value)}>
+          <option value="">– leer –</option>
+          ${options.map((r) => html`<option value=${r.pcs_slug}>${r.name}${used.has(r.pcs_slug) && sel[slot] !== r.pcs_slug ? ' (andere Position)' : ''}</option>`)}
+        </select></li>`;
+    })}</ul>
+    ${filled < slots.length && html`<p class="muted small">Für leere Positionen fehlt dir ein passender Athlet – hol dir einen per Waiver.</p>`}
     <div class="row">
-      <button class="primary" disabled=${a.busy || sel.size !== size}
-        onClick=${() => a.run(() => rpc('set_lineup', { p_matchday: md.id, p_riders: [...sel] }), 'Aufstellung gespeichert.')}>
-        Speichern (${sel.size}/${size})</button>
+      <button class="primary" disabled=${a.busy}
+        onClick=${() => a.run(() => rpc('set_lineup', { p_matchday: md.id, p_lineup: sel }), 'Aufstellung gespeichert.')}>
+        Speichern (${filled}/${slots.length})</button>
     </div>
     <${Msg} msg=${a.msg} />
   </section>`;
@@ -123,7 +138,7 @@ function Trades({ c }) {
   const myNeed = needDrop(take.length, give.length);
   const DropPicker = ({ exclude, need, sel, set }) => html`<div class="drop-pick">
     <h4>Zusätzlich entlassen (${sel.length}/${need})</h4>
-    <p class="muted small">Du bekommst mehr Fahrer als du abgibst – damit der Kader nicht zu groß wird. Fahrer aus offenen Waiver-Anträgen sind ausgenommen.</p>
+    <p class="muted small">Du bekommst mehr Athleten als du abgibst – damit der Kader nicht zu groß wird. Athleten aus offenen Waiver-Anträgen sind ausgenommen.</p>
     ${mine.filter((r) => !exclude.includes(r.rider_slug)).map((r) => html`<label class="check" key=${r.id}>
       <input type="checkbox" disabled=${pendingDrops.has(r.rider_slug)} checked=${sel.includes(r.rider_slug)} onChange=${() => flip(sel, set, r.rider_slug)} />
       ${name(r.rider_slug)}${pendingDrops.has(r.rider_slug) ? html` <span class="muted small">(Waiver-Antrag)</span>` : html` <span class="muted small">${fmtPts(pts[r.rider_slug] || 0)}</span>`}</label>`)}
@@ -131,7 +146,7 @@ function Trades({ c }) {
 
   return html`<section class="card stack">
     <h3>Tausch</h3>
-    <p class="muted small">Auch ungleich möglich (z. B. 1 gegen 2): Wer mehr Fahrer bekommt, entlässt dafür eigene. Beide müssen zustimmen;
+    <p class="muted small">Auch ungleich möglich (z. B. 1 gegen 2): Wer mehr Athleten bekommt, entlässt dafür eigene. Beide müssen zustimmen;
       danach hat der Admin 24 Stunden Vetorecht. Ausgeführt wird zum nächsten Stichtag.</p>
     ${trades.data && trades.data.length > 0 && html`<ul class="list">${trades.data.map((t) => {
       const incoming = t.to_manager === c.me.id;
@@ -172,7 +187,7 @@ function Trades({ c }) {
         </div>
         ${(give.length > 0 || take.length > 0) && html`<p class="small trade-sum">Punkte ${new Date().getFullYear()}: du gibst <strong>${fmtPts(sumPts(give))}</strong>, du bekommst <strong>${fmtPts(sumPts(take))}</strong></p>`}
         ${myNeed > 0 && html`<${DropPicker} exclude=${give} need=${myNeed} sel=${drop} set=${setDrop} />`}
-        ${give.length > take.length && take.length > 0 && html`<p class="muted small">Du gibst mehr Fahrer ab – ${c.managerMap[partner]?.team_name} wählt bei der Annahme, wen er dafür entlässt.</p>`}
+        ${give.length > take.length && take.length > 0 && html`<p class="muted small">Du gibst mehr Athleten ab – ${c.managerMap[partner]?.team_name} wählt bei der Annahme, wen er dafür entlässt.</p>`}
         <button class="primary" disabled=${a.busy || !give.length || !take.length || drop.length !== myNeed}
           onClick=${() => act('propose_trade', { p_league: c.league.id, p_to: partner, p_give: give, p_take: take, p_drop: myNeed ? drop : [] })
             .then(() => { setGive([]); setTake([]); setDrop([]); })}>

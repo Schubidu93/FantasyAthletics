@@ -1,5 +1,5 @@
 import { html, useState, useMemo } from '../vendor/preact-htm.js';
-import { sb, q, rpc, useLoad, useAction, Msg, RiderCell, normName, withFlag, teamName, SearchSelect, useRiderPoints, fmtPts } from '../lib.js';
+import { sb, q, rpc, useLoad, useAction, Msg, RiderCell, normName, useRiderPoints, fmtPts, GROUPS, GROUP_LABEL, riderGroup } from '../lib.js';
 import { NextDeadline, transferPhase, fmtDeadline } from './deadline.js';
 
 const STATUS = { pending: 'offen', won: 'Zuschlag', lost: 'kein Zuschlag', cancelled: 'zurückgezogen' };
@@ -40,7 +40,7 @@ export function Waiver({ c }) {
       </div>
       <p class="muted small">${c.league.waiver_mode === 'faab'
         ? `FAAB: verdecktes Gebot mit deinem Restbudget (${c.me.budget_left}). Höchstgebot gewinnt, bei Gleichstand der schlechter Platzierte.`
-        : 'Priorität: Der Tabellenletzte wählt zuerst. Pro Runde bekommt jeder höchstens einen Fahrer.'}</p>
+        : 'Priorität: Der Tabellenletzte wählt zuerst. Pro Runde bekommt jeder höchstens einen Athleten.'}</p>
       <${HowTo} c=${c} />
       ${order.data && html`<details><summary>Reihenfolge aller Manager</summary>
         <ol>${order.data.map((o) => html`<li key=${o.manager_id}>${o.team_name}</li>`)}</ol></details>`}
@@ -73,35 +73,34 @@ export function Waiver({ c }) {
 
 function FreeAgents({ c, onPick, free: freePhase }) {
   const [term, setTerm] = useState('');
-  const [team, setTeam] = useState('');
-  const [nation, setNation] = useState('');
+  const [group, setGroup] = useState('');
+  const [gender, setGender] = useState('');
   const lockedSince = c.league.last_waiver_run;
   const locked = useMemo(() => new Set(freePhase ? [] : c.roster.filter((r) => r.released_at && lockedSince && r.released_at >= lockedSince).map((r) => r.rider_slug)), [c.roster, freePhase]);
   const pts = useRiderPoints(c.league.gender);
-  const free = c.riders.filter((r) => !c.owner[r.pcs_slug])
+  const free = c.riders.filter((r) => !c.owner[r.pcs_slug] && r.uci_rank)
     .sort((a, b) => (pts[b.pcs_slug] || 0) - (pts[a.pcs_slug] || 0) || (a.uci_rank ?? 1e9) - (b.uci_rank ?? 1e9));
-  const teams = [...new Set(free.map((r) => r.team).filter(Boolean))].sort();
-  const nations = [...new Set(free.map((r) => r.nation).filter(Boolean))].sort();
   const t = normName(term);
-  const list = free.filter((r) => (!team || normName(team).split(' ').every((w) => normName(r.team || '').includes(w))) && (!nation || r.nation === nation)
+  const list = free.filter((r) => (!group || riderGroup(r) === group) && (!gender || r.gender === gender)
     && (!t || t.split(' ').every((w) => normName(r.name).includes(w)))).slice(0, 100);
 
   return html`<section class="card">
-    <h3>Freie Fahrer</h3>
+    <h3>Freie Athleten</h3>
     <div class="filters">
       <input type="search" placeholder="Name" value=${term} onInput=${(e) => setTerm(e.target.value)} />
-      <${SearchSelect} value=${team} onChange=${setTeam} options=${teams} label=${teamName} placeholder="Team (z. B. UAE)" />
-      <select value=${nation} onChange=${(e) => setNation(e.target.value)}><option value="">Alle Nationen</option>${nations.map((x) => html`<option value=${x}>${withFlag(x)}</option>`)}</select>
+      <select value=${group} onChange=${(e) => setGroup(e.target.value)}><option value="">Alle Disziplinen</option>${GROUPS.map((g) => html`<option value=${g}>${GROUP_LABEL[g]}</option>`)}</select>
+      ${c.league.gender === 'mixed' && html`<select value=${gender} onChange=${(e) => setGender(e.target.value)}>
+        <option value="">Männer und Frauen</option><option value="men">Männer</option><option value="women">Frauen</option></select>`}
     </div>
     <ul class="list fa-list">${list.map((r) => html`<li key=${r.pcs_slug}>
       <${RiderCell} r=${r} />
       <span class="fa-side">
         <span class="pts-chip">${fmtPts(pts[r.pcs_slug] || 0)} Pkt.</span>
         ${locked.has(r.pcs_slug)
-          ? html`<span class="tag" title="Abgegebene Fahrer sind bis zum nächsten Stichtag gesperrt – Antrag ist trotzdem möglich">gesperrt</span>` : ''}
+          ? html`<span class="tag" title="Abgegebene Athleten sind bis zum nächsten Stichtag gesperrt – Antrag ist trotzdem möglich">gesperrt</span>` : ''}
         <button class=${freePhase ? 'small primary' : 'small'} onClick=${() => onPick(r)}>${freePhase ? 'Holen' : 'Antrag'}</button>
       </span></li>`)}</ul>
-    <p class="muted small">Sortiert nach UCI-Punkten ${new Date().getFullYear()}, max. 100 Treffer.</p>
+    <p class="muted small">Sortiert nach Punkten ${new Date().getFullYear()}, max. 100 Treffer.</p>
   </section>`;
 }
 
@@ -124,7 +123,7 @@ function ClaimForm({ c, add, onDone, onCancel }) {
   if (phase === 'free') return html`<section class="card stack">
     <h3>Sofort tauschen</h3>
     <p class="muted small">Freie Phase: Der Wechsel passiert sofort und gilt ab ${md.name} (Stichtag ${fmtDeadline(md.deadline)}).
-      Bis dahin kannst du beliebig oft tauschen – der abgegebene Fahrer ist sofort für alle frei.</p>
+      Bis dahin kannst du beliebig oft tauschen – der abgegebene Athlet ist sofort für alle frei.</p>
     <${Compare} c=${c} add=${add} drop=${drop} pts=${pts} />
     <label>Dafür abgeben
       <select value=${drop} onChange=${(e) => setDrop(e.target.value)}>${dropOptions}</select></label>
@@ -155,7 +154,7 @@ function ClaimForm({ c, add, onDone, onCancel }) {
   </section>`;
 }
 
-// Vergleich: geholter und abgegebener Fahrer mit Punkten dieses Jahres
+// Vergleich: geholter und abgegebener Athlet mit Punkten dieses Jahres
 function Compare({ c, add, drop, pts }) {
   const d = drop && c.riderMap[drop];
   const row = (sign, r) => html`<div class="cmp-row"><span class=${`cmp-sign ${sign === '+' ? 'plus' : 'minus'}`}>${sign}</span>
@@ -168,11 +167,11 @@ function HowTo({ c }) {
   const two = c.league.transfer_mode === 'waiver_free';
   const faab = c.league.waiver_mode === 'faab';
   return html`<details class="howto"><summary>So funktioniert's</summary><ol class="small">
-    <li><strong>Antrag stellen:</strong> freien Fahrer wählen und einen eigenen zum Abgeben – der Kader bleibt voll. Mehrere Anträge sind möglich, in Wunschreihenfolge (↑↓).</li>
+    <li><strong>Antrag stellen:</strong> freien Athleten wählen und einen eigenen zum Abgeben – der Kader bleibt voll. Mehrere Anträge sind möglich, in Wunschreihenfolge (↑↓).</li>
     <li><strong>Auswertung</strong> ${two ? 'zur Waiver-Frist' : 'am Stichtag'}: ${faab
       ? 'das höchste verdeckte Gebot gewinnt (bezahlt aus deinem Restbudget), bei Gleichstand der schlechter Platzierte.'
-      : 'der Tabellenletzte zuerst, dann reihum – pro Runde ein Fahrer je Manager, bis keine gültigen Anträge mehr übrig sind.'}${' '}
-      Ist ein Fahrer schon vergeben oder dein Abgabefahrer weg, rückt dein nächster Antrag nach.</li>
+      : 'der Tabellenletzte zuerst, dann reihum – pro Runde ein Athlet je Manager, bis keine gültigen Anträge mehr übrig sind.'}${' '}
+      Ist ein Athlet schon vergeben oder dein abzugebender Athlet weg, rückt dein nächster Antrag nach.</li>
     ${two && html`<li><strong>Freie Phase</strong> danach bis zum Stichtag: ohne Antrag sofort tauschen – wer zuerst kommt. Du kannst beliebig oft hin und her wechseln.</li>`}
     <li><strong>Wirksam ab dem nächsten Spieltag.</strong> Im laufenden Spieltag zählt dein bisheriger Kader weiter.</li>
     <li>Das Ergebnis bekommst du als Push-Nachricht.</li>

@@ -4,7 +4,7 @@ name: Benachrichtigungen senden
 # Erzeugt beim ersten Lauf das VAPID-Schlüsselpaar.
 on:
   workflow_run:
-    workflows: ["Rennergebnisse laden (UCI)"]
+    workflows: ["Ergebnisse laden (World Athletics)"]
     types: [completed]
   workflow_dispatch:
     inputs:

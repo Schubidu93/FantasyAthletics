@@ -1,0 +1,27 @@
+name: Athletenpool laden (World Athletics)
+
+# DE-Toplisten (aktuelles Jahr + Vorjahr, alle Laufdisziplinen ab 800 m): Athleten über der Pool-Schwelle,
+# Disziplingruppe und Bestleistung. Täglich um 6 Uhr (gestartet vom Zeitplaner in der Datenbank).
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: wa-import
+  cancel-in-progress: false
+
+jobs:
+  load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run import:pool
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}

@@ -1,25 +1,15 @@
 import { html, useState } from '../vendor/preact-htm.js';
-import { rpc, useLoad, Loading, fmtDate, fmtDateTime, fmtPts } from '../lib.js';
+import { rpc, useLoad, Loading, fmtDate, fmtDateTime, fmtPts, discLabel, raceLabel } from '../lib.js';
 import { fmtUntil } from '../lib.js';
 import { NextDeadline, windowStart } from './deadline.js';
 
 const MD_STATUS = (md) => (md.frozen ? 'eingefroren' : md.status === 'closed' ? 'abgeschlossen (Korrekturen 7 Tage)' : md.status === 'running' ? 'läuft' : 'geplant');
 
-const LABELS = [
-  [/^Final Classification · General Classification$/, 'Gesamtwertung'],
-  [/^Final Classification$/, 'Ergebnis'],
-  [/^Final Classification · /, ''],
-  [/^Stage (\d+) · Stage Classification$/, 'Etappe $1'],
-  [/^Stage (\d+) · Stage General Classification$/, 'Etappe $1 · Gesamtführung'],
-  [/^Prologue · Stage Classification$/, 'Prolog'],
-  [/^Prologue · Stage General Classification$/, 'Prolog · Gesamtführung'],
-  [/General Classification/g, 'Gesamtwertung'], [/Mountains? Classification/g, 'Bergwertung'],
-  [/Points Classification/g, 'Punktewertung'], [/Young Riders? Classification/g, 'Nachwuchswertung'],
-  [/^Stage (\d+)/, 'Etappe $1'], [/^Prologue/, 'Prolog'],
-];
+// Bezeichnung eines gewerteten Ergebnisses: "1500 Metres · SF1" → "1500 m · Halbfinale 1"
 export const labelText = (l) => {
-  if (!l || l === 'result') return 'Ergebnis';
-  return LABELS.reduce((t, [re, rep]) => t.replace(re, rep), l);
+  if (!l) return 'Ergebnis';
+  const [disc, run] = l.split(' · ');
+  return run ? `${discLabel(disc)} · ${raceLabel(run)}` : discLabel(disc);
 };
 
 export function Results({ c }) {
@@ -68,7 +58,7 @@ export function Results({ c }) {
 function Schedule({ c, current }) {
   const today = new Date().toISOString().slice(0, 10);
   if (!c.matchdays.length) return html`<section class="card"><h3>Spielplan</h3>
-    <p class="muted small">${c.isAdmin ? 'Lege die Spieltage unter Mehr → Admin an (z. B. Klassiker, Giro, Tour, Vuelta).' : 'Der Admin hat noch keine Spieltage festgelegt.'}</p></section>`;
+    <p class="muted small">${c.isAdmin ? 'Lege die Spieltage unter Mehr → Admin an (z. B. alle 2 Wochen oder Hallensaison, Frühjahr, Bahnsaison).' : 'Der Admin hat noch keine Spieltage festgelegt.'}</p></section>`;
   const next = c.matchdays.find((m) => m.ends_on >= today);
   const tag = (m) => m.frozen ? html`<span class="tag">eingefroren</span>`
     : m.status === 'closed' ? html`<span class="tag">abgeschlossen</span>`

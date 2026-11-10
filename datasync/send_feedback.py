@@ -35,8 +35,8 @@ def to_bytes(value):
 def build(fb, images):
     msg = EmailMessage()
     who = fb.get("team_name") or fb.get("user_email") or "Unbekannt"
-    msg["Subject"] = f"UCI Fantasy Feedback von {who}"
-    msg["From"] = formataddr(("UCI Fantasy", USER))
+    msg["Subject"] = f"Runner Fantasy Feedback von {who}"
+    msg["From"] = formataddr(("Runner Fantasy", USER))
     msg["To"] = TO
     if fb.get("user_email"):
         msg["Reply-To"] = fb["user_email"]

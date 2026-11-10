@@ -1,6 +1,6 @@
 name: Datenstand prüfen
 
-# Zeigt, wie viele Fahrer, Ergebnisse und Rennen in der Datenbank liegen.
+# Zeigt, wie viele Athleten, Ergebnisse und Wettkämpfe in der Datenbank liegen.
 on:
   workflow_dispatch:
 
@@ -14,15 +14,15 @@ jobs:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
           psql "$SUPABASE_DB_URL" -P pager=off -c "
-            select 'Fahrer' as was, gender as wertung, count(*)::text as anzahl from riders group by gender
-            union all select 'Fahrer mit Rang', gender, count(*)::text from riders where uci_rank is not null group by gender
-            union all select 'Ergebnisse (Punkte je Fahrer)', x.gender, count(*)::text from results r join riders x on x.pcs_slug = r.rider_slug group by x.gender
-            union all select 'Rennen mit Ergebnisliste', gender, count(*)::text from races where loaded_at is not null group by gender
-            union all select 'Wertungen', '', count(*)::text from race_events
-            union all select 'Ergebniszeilen', '', count(*)::text from event_results
+            select 'Athleten' as was, gender as wertung, count(*)::text as anzahl from riders group by gender
+            union all select 'Athleten im Pool', gender, count(*)::text from riders where uci_rank is not null group by gender
+            union all select 'Ergebnisse mit Punkten', x.gender, count(*)::text from results r join riders x on x.pcs_slug = r.rider_slug group by x.gender
+            union all select 'Wettkämpfe', '', count(*)::text from races
+            union all select 'WA-Ergebnisse (alle Läufe)', '', count(*)::text from wa_results
+            union all select 'Toplisteneinträge', '', count(*)::text from toplist_entries
             union all select 'Ligen', '', count(*)::text from leagues
             order by 1, 2;"
-          psql "$SUPABASE_DB_URL" -P pager=off -c "select name, uci_class, country, start_date, loaded_at from races where loaded_at is not null order by loaded_at desc limit 5;"
+          psql "$SUPABASE_DB_URL" -P pager=off -c "select name, uci_class, country, start_date, loaded_at from races order by start_date desc nulls last limit 5;"
           psql "$SUPABASE_DB_URL" -P pager=off -c "select pg_size_pretty(pg_database_size(current_database())) as datenbankgroesse;"
       - name: Zeitplaner
         env:

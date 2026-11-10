@@ -41,7 +41,7 @@ def queue_test():
     """Testnachricht an alle Nutzer mit eingeschalteten Benachrichtigungen vormerken."""
     users = sorted({s["user_id"] for s in db.select("push_subscriptions", {"select": "user_id"})})
     if users:
-        db.insert("notifications", [{"user_id": u, "title": "🚴 Test von UCI Fantasy",
+        db.insert("notifications", [{"user_id": u, "title": "🏃 Test von Runner Fantasy",
                                      "body": "Benachrichtigungen funktionieren! Antippen öffnet die App.", "url": ""} for u in users])
     print(f"Testnachricht für {len(users)} Nutzer vorgemerkt.")
 

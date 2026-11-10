@@ -4,3 +4,9 @@ __pycache__/
 .DS_Store
 .env
 .env.local
+# Rohdaten der WA-Erkundung (nur die Regeltexte werden eingecheckt)
+research/out/*
+!research/out/rules/
+research/out/rules/*
+!research/out/rules/*.txt
+!research/out/log.txt

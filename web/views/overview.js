@@ -29,7 +29,7 @@ export function Overview({ c }) {
 
   return html`<div class="stack">
     ${before && html`<section class="card">
-      <h3>${c.league.status === 'drafting' ? '🚴 Der Draft läuft' : 'Vor dem Draft'}</h3>
+      <h3>${c.league.status === 'drafting' ? '🏃 Der Draft läuft' : 'Vor dem Draft'}</h3>
       <p class="muted">${c.league.status === 'drafting' ? 'Ab in den Draft-Raum!' : 'Sobald der Draft vorbei ist, siehst du hier Tabelle, Kader und neue Punkte.'}</p>
       <a class="button primary" href=${href('draft')}>Zum Draft</a></section>`}
     <${NextDeadline} c=${c} compact />
@@ -52,7 +52,7 @@ export function Overview({ c }) {
     </section>`}
 
     ${c.me && mine.length > 0 && html`<section class="card">
-      <h3>Neue Punkte meiner Fahrer</h3>
+      <h3>Neue Punkte meiner Athleten</h3>
       ${recent.length === 0 ? html`<p class="muted small">In den letzten 14 Tagen keine Punkte – Rennergebnisse kommen täglich um 20 Uhr.</p>`
         : html`<ul class="list compact">${recent.map((r, i) => html`<li key=${i}>
           <span><strong>${name(r.rider_slug)}</strong> <span class="muted small">${labelText(r.label)}</span></span>

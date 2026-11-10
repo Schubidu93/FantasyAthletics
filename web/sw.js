@@ -4,8 +4,8 @@ self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
 
 self.addEventListener('push', (event) => {
   let d = {};
-  try { d = event.data ? event.data.json() : {}; } catch { d = { title: 'Fantasy Athletics', body: event.data?.text() }; }
-  event.waitUntil(self.registration.showNotification(d.title || 'Fantasy Athletics', {
+  try { d = event.data ? event.data.json() : {}; } catch { d = { title: 'Runner Fantasy', body: event.data?.text() }; }
+  event.waitUntil(self.registration.showNotification(d.title || 'Runner Fantasy', {
     body: d.body || '',
     icon: 'icon-192.png',
     badge: 'icon-192.png',

@@ -27,7 +27,7 @@ export function Home({ session }) {
 
   return html`<main class="wrap stack home">
     <div class="row between">
-      <div class="brand"><img src="logo.svg" alt="" class="logo-img" /> Fantasy Athletics</div>
+      <div class="brand"><img src="logo.svg" alt="" class="logo-img" /> Runner Fantasy</div>
       <button class="ghost" onClick=${() => sb.auth.signOut()}>Abmelden</button>
     </div>
     <h2>Meine Ligen</h2>

@@ -1,20 +1,20 @@
 :root {
   --bg: #f5f6f8; --surface: #ffffff; --surface-2: #eef1f5; --text: #1b1f24; --muted: #66707c;
-  --border: #dde2e8; --accent: #2a6fdb; --accent-text: #ffffff; --accent-soft: #e5eefc;
+  --border: #dde2e8; --accent: #cf4424; --accent-text: #ffffff; --accent-soft: #fbe9e4;
   --ok: #2f9e44; --ok-soft: #e6f4e9; --err: #c92a2a; --err-soft: #fbeaea; --warn: #b35c00; --warn-soft: #fdf1e3;
   --radius: 10px; --shadow: 0 1px 2px rgba(0,0,0,.05);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #111418; --surface: #1a1e24; --surface-2: #232830; --text: #e7eaee; --muted: #9aa3ae;
-    --border: #2e343d; --accent: #5b9bff; --accent-text: #0b1220; --accent-soft: #1d2a40;
+    --border: #2e343d; --accent: #ff7a57; --accent-text: #1a0d08; --accent-soft: #3a2019;
     --ok: #51cf66; --ok-soft: #1b2e20; --err: #ff6b6b; --err-soft: #3a1d1d; --warn: #ffa94d; --warn-soft: #3a2a17;
     --shadow: none;
   }
 }
 :root[data-theme="dark"] {
   --bg: #111418; --surface: #1a1e24; --surface-2: #232830; --text: #e7eaee; --muted: #9aa3ae;
-  --border: #2e343d; --accent: #5b9bff; --accent-text: #0b1220; --accent-soft: #1d2a40;
+  --border: #2e343d; --accent: #ff7a57; --accent-text: #1a0d08; --accent-soft: #3a2019;
   --ok: #51cf66; --ok-soft: #1b2e20; --err: #ff6b6b; --err-soft: #3a1d1d; --warn: #ffa94d; --warn-soft: #3a2a17;
   --shadow: none;
 }
@@ -363,3 +363,17 @@ details.help summary { cursor: pointer; color: var(--accent); }
 details.help ul { padding-left: 1.1rem; margin: .4rem 0; }
 details.help li { margin: .3rem 0; }
 details.help li.chosen { background: var(--accent-soft); border-radius: 6px; padding: 2px 6px; margin-left: -6px; }
+
+/* ---- Runner Fantasy: Aufstellung mit Positionen, Disziplin-Auswahl, Wettkämpfe ---- */
+.lineup li { display: grid; grid-template-columns: 7.5rem 1fr; gap: .5rem; align-items: center; }
+.lineup .slot-name { font-weight: 600; font-size: .9rem; }
+.lineup select { width: 100%; min-width: 0; }
+.group-pick { display: flex; flex-direction: column; gap: .35rem; }
+.label-text { font-size: .85rem; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: .35rem .75rem; }
+.chip { display: inline-flex; align-items: center; gap: .3rem; font-size: .9rem; }
+.err-text { color: #c0392b; }
+.race-link .race-date { font-size: .8rem; color: var(--muted); }
+.race-link .race-name { display: flex; flex-direction: column; min-width: 0; }
+.race-link .race-name strong { overflow-wrap: anywhere; }
+.toplists summary { cursor: pointer; margin-top: .5rem; }
