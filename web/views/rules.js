@@ -122,8 +122,8 @@ export function Rules({ c }) {
           Berg- und Traillauf nutzen die Tabelle für 10 km Straße.</li>
         <li><strong>Zwischenzeiten</strong> (z. B. die 1500 m in einem Meilenrennen) geben keine Leistungs- und Platzierungspunkte. Sie stehen
           mit ihren WA-Punkten in den Ergebnissen; Punkte gibt es nur, wenn die Zwischenzeit ein Rekord ist (Rekord-Bonus).</li>
-        <li><strong>Rekord-Bonus:</strong> deutscher Rekord +${cfg?.record_dr ?? 50}, Europarekord +${cfg?.record_er ?? 80},
-          Weltrekord +${cfg?.record_wr ?? 100} Punkte – zusätzlich zu den normalen Punkten; es zählt nur der höchste Rekord.
+        <li><strong>Rekord-Bonus:</strong> deutscher Rekord +${cfg?.record_dr ?? 50}, Europarekord +${cfg?.record_er ?? 100},
+          Weltrekord +${cfg?.record_wr ?? 200} Punkte – zusätzlich zu den normalen Punkten; es zählt nur der höchste Rekord.
           Gilt für alle Laufdisziplinen inkl. Halle und Straße. Rekorde erkennt die App täglich an den All-time-Listen von World Athletics
           (alle Leistungen) – auch solche, die inzwischen wieder verbessert wurden. Der Admin kann zusätzlich Rekorde von Hand eintragen.</li>
         <li>Punkte zählen nur innerhalb eines Spieltags – für die Spieltage, in denen der Athlet in deinem Kader steht${lineup ? ' und aufgestellt ist' : ''}.</li>

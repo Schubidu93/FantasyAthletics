@@ -158,6 +158,10 @@ alter table scoring_config add column if not exists new_group_threshold int not 
 alter table scoring_config add column if not exists record_dr int not null default 50;
 alter table scoring_config add column if not exists record_er int not null default 80;
 alter table scoring_config add column if not exists record_wr int not null default 100;
+-- Standard seit 16.11.2026: 50/100/200 (alte Standardwerte 50/80/100 einmalig umstellen)
+alter table scoring_config alter column record_er set default 100;
+alter table scoring_config alter column record_wr set default 200;
+update scoring_config set record_er = 100, record_wr = 200 where record_dr = 50 and record_er = 80 and record_wr = 100;
 insert into scoring_config (id) values (1) on conflict do nothing;
 
 -- Rohdaten der Ergebnisse von World Athletics (ein Eintrag pro Lauf eines Athleten)

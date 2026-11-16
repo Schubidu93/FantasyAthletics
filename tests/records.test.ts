@@ -76,7 +76,7 @@ describe("Rekorde aus All-time-Listen", () => {
                   { athlete_id: "wa-1", discipline: "Mile", date: `${Y}-07-18`, mark: "3:46.82", record: "ER" },
                   { athlete_id: "wa-9", discipline: "Mile", date: `${Y}-07-18`, mark: "3:40.00", record: "WR" }];
     expect((await db.one("select apply_records($1) n", [JSON.stringify(rows)])).n).toBe(1);
-    expect((await pts())[0][2]).toBe(80);
+    expect((await pts())[0][2]).toBe(100);
     // ein späterer DR-Fund stuft nicht zurück
     expect((await db.one("select apply_records($1) n", [JSON.stringify([rows[0]])])).n).toBe(0);
   });
