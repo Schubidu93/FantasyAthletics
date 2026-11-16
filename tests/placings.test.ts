@@ -148,3 +148,17 @@ describe("Extraktion", () => {
     expect(combinedPlace(competitions, "13:41.00", { name: "B" })).toBe(3);
   });
 });
+
+describe("Meisterschaft im offenen Rennen", () => {
+  it("findet den Meisterschaftsplatz (DM im Hannover-Marathon 2026, echte Daten)", async () => {
+    const { blocksFromEventTitles, championshipPlacing, mainRaces } = await import("../importer/placings");
+    const { readFileSync } = await import("node:fs");
+    const data = JSON.parse(readFileSync("tests/fixtures/wa-event-7236399-10229634.json", "utf8"));
+    const blocks = blocksFromEventTitles(data.eventTitles, 10229634);
+    expect(blocks.map((b) => [b.category, b.title])).toEqual([["E", null], ["B", "German Marathon Ch."]]);
+    expect(championshipPlacing(blocks, { id: 14682657, name: "Tom THURLEY" }))
+      .toEqual({ place: 1, category: "B", title: "German Marathon Ch.", mainCategory: "E" });
+    expect(championshipPlacing(blocks, { name: "Archie CASTEEL" })).toBeNull();   // nicht in der DM-Wertung
+    expect(mainRaces(blocks).flatMap((r) => r.entries).find((e) => e.name === "Tom THURLEY")?.place).toBe(6);
+  });
+});

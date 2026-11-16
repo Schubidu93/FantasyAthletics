@@ -247,15 +247,50 @@ export function extractRacesFromHtml(html: string, eventId?: number): Race[] {
 // Abruf
 // ---------------------------------------------------------------------------
 
+// Ein Event kann in mehreren Wertungen stehen: offenes Rennen (eventTitle leer, z. B. Kategorie E) und eine eingebettete
+// Meisterschaft (eventTitle „German Marathon Ch.“, Kategorie B) mit eigener Platzierung.
+export type EventBlock = { category: string | null; title: string | null; races: Race[] };
+
 const COMPETITION_QUERY = `
   query getCalendarCompetitionResults($competitionId: Int, $day: Int, $eventId: Int) {
     getCalendarCompetitionResults(competitionId: $competitionId, day: $day, eventId: $eventId) {
-      eventTitles { events { eventId competitions { date race raceNumber
+      eventTitles { rankingCategory eventTitle events { eventId races { date race raceNumber
         results { competitor { id name urlSlug } mark place qualified } } } }
     }
   }`;
 
-export async function fetchEventRaces(api: ApiConfig, competitionId: number, eventId: number): Promise<Race[]> {
+/** Blöcke aus `eventTitles` (GraphQL-Antwort oder __NEXT_DATA__ der Ergebnisseite). */
+export function blocksFromEventTitles(eventTitles: unknown, eventId: number): EventBlock[] {
+  if (!Array.isArray(eventTitles)) return [];
+  return eventTitles.map((t) => {
+    const title = t as { rankingCategory?: string | null; eventTitle?: string | null; events?: { eventId?: number }[] };
+    const events = (title.events ?? []).filter((e) => Number(e.eventId) === eventId);
+    return { category: title.rankingCategory ?? null, title: title.eventTitle || null, races: extractRacesFromJson(events) };
+  }).filter((b) => b.races.length);
+}
+
+/** Läufe der Hauptwertung (offenes Rennen; ohne eingebettete Meisterschaft). */
+export function mainRaces(blocks: EventBlock[]): Race[] {
+  const main = blocks.filter((b) => !b.title);
+  return (main.length ? main : blocks.slice(0, 1)).flatMap((b) => b.races);
+}
+
+/**
+ * Eingebettete Meisterschaft: Platz des Athleten im Finale eines Blocks mit eigenem Titel, wenn es daneben die
+ * Hauptwertung gibt. Liefert auch die Kategorie der Hauptwertung (WA schreibt beim Athleten sonst die der Meisterschaft).
+ */
+export function championshipPlacing(blocks: EventBlock[], athlete: Athlete):
+  { place: number; category: string | null; title: string; mainCategory: string | null } | null {
+  const main = blocks.find((b) => !b.title);
+  if (!main) return null;
+  for (const b of blocks.filter((x) => x.title)) {
+    const own = findEntry(finalsOf(b.races).flatMap((r) => r.entries), athlete);
+    if (own?.place) return { place: own.place, category: b.category, title: b.title!, mainCategory: main.category };
+  }
+  return null;
+}
+
+export async function fetchEventBlocks(api: ApiConfig, competitionId: number, eventId: number): Promise<EventBlock[]> {
   // 1. GraphQL-API (liefert auch Q/q)
   let apiError: string | null = null;
   try {
@@ -269,12 +304,10 @@ export async function fetchEventRaces(api: ApiConfig, competitionId: number, eve
       }),
     });
     if (!res.ok) throw new Error(String(res.status));
-    const body = (await res.json()) as { data?: { getCalendarCompetitionResults?: { eventTitles?: { events?: { eventId?: number }[] }[] } } };
-    // Nur das gesuchte Event (die API liefert u. U. mehrere Blöcke für dieselbe eventId).
-    const events = (body.data?.getCalendarCompetitionResults?.eventTitles ?? []).flatMap((t) => t.events ?? [])
-      .filter((e) => Number(e.eventId) === eventId);
-    const competitions = extractRacesFromJson(events);
-    if (competitions.length) return competitions;
+    const body = (await res.json()) as { data?: { getCalendarCompetitionResults?: { eventTitles?: unknown } }; errors?: { message: string }[] };
+    if (body.errors?.length) throw new Error(body.errors[0].message);
+    const blocks = blocksFromEventTitles(body.data?.getCalendarCompetitionResults?.eventTitles, eventId);
+    if (blocks.length) return blocks;
     apiError = "keine Läufe";
   } catch (e) {
     apiError = (e as Error).message;
@@ -284,5 +317,18 @@ export async function fetchEventRaces(api: ApiConfig, competitionId: number, eve
   const url = `https://worldathletics.org/competition/calendar-results/results/${competitionId}?eventId=${eventId}`;
   const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; FantasyAthletics/2.0)" } });
   if (!res.ok) throw new Error(`API: ${apiError}; Ergebnisseite: ${res.status}`);
-  return extractRacesFromHtml(await res.text(), eventId);
+  const html = await res.text();
+  try {
+    const next = JSON.parse(cheerio.load(html)("script#__NEXT_DATA__").text() || "null");
+    const blocks = blocksFromEventTitles(next?.props?.pageProps?.calendarEventsResults?.eventTitles, eventId);
+    if (blocks.length) return blocks;
+  } catch {
+    // weiter mit dem HTML
+  }
+  return [{ category: null, title: null, races: extractRacesFromHtml(html, eventId) }];
+}
+
+/** Läufe der Hauptwertung eines Events. */
+export async function fetchEventRaces(api: ApiConfig, competitionId: number, eventId: number): Promise<Race[]> {
+  return mainRaces(await fetchEventBlocks(api, competitionId, eventId));
 }

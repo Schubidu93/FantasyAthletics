@@ -1,0 +1,198 @@
+{
+ "eventTitles": [
+  {
+   "rankingCategory": "E",
+   "eventTitle": null,
+   "events": [
+    {
+     "event": "Men's Marathon",
+     "eventId": 10229634,
+     "gender": "M",
+     "isRelay": false,
+     "perResultWind": false,
+     "withWind": false,
+     "summary": null,
+     "races": [
+      {
+       "date": "2026-04-12",
+       "day": 1,
+       "race": "Final",
+       "raceId": 10,
+       "raceNumber": 0,
+       "results": [
+        {
+         "competitor": {
+          "teamMembers": null,
+          "id": "kn1grgabkt884pa2km7ph",
+          "name": "Thomas Kibet MARU",
+          "iaafId": null,
+          "urlSlug": "kenya/thomas-kibet-maru-15036116",
+          "birthDate": "30 DEC 1993",
+          "hasProfile": true,
+          "__typename": "CalendarResultsCompetitor"
+         },
+         "mark": "2:07:53",
+         "nationality": "KEN",
+         "place": "1.",
+         "points": null,
+         "qualified": null,
+         "records": "",
+         "wind": null,
+         "remark": null,
+         "details": null,
+         "__typename": "CalendarResultsRaceResult"
+        },
+        {
+         "competitor": {
+          "teamMembers": null,
+          "id": "06fbbp72yhvkqjhwdsqhjwq",
+          "name": "Godwin KATAKURA",
+          "iaafId": 481626,
+          "urlSlug": "zimbabwe/godwin-katakura-14895426",
+          "birthDate": "18 APR 2000",
+          "hasProfile": true,
+          "__typename": "CalendarResultsCompetitor"
+         },
+         "mark": "2:08:47",
+         "nationality": "ZIM",
+         "place": "2.",
+         "points": null,
+         "qualified": null,
+         "records": "",
+         "wind": null,
+         "remark": null,
+         "details": null,
+         "__typename": "CalendarResultsRaceResult"
+        },
+        {
+         "competitor": {
+          "teamMembers": null,
+          "id": "2jccmtftb587yjydk2gwkj",
+          "name": "Archie CASTEEL",
+          "iaafId": 371928,
+          "urlSlug": "sweden/archie-casteel-14608938",
+          "birthDate": "13 AUG 1996",
+          "hasProfile": true,
+          "__typename": "CalendarResultsCompetitor"
+         },
+         "mark": "2:10:56",
+         "nationality": "SWE",
+         "place": "5.",
+         "points": null,
+         "qualified": null,
+         "records": "",
+         "wind": null,
+         "remark": null,
+         "details": null,
+         "__typename": "CalendarResultsRaceResult"
+        },
+        {
+         "competitor": {
+          "teamMembers": null,
+          "id": "m346dxql01gz6nfdgtwans",
+          "name": "Tom THURLEY",
+          "iaafId": 338341,
+          "urlSlug": "germany/tom-thurley-14682657",
+          "birthDate": "13 SEP 1993",
+          "hasProfile": true,
+          "__typename": "CalendarResultsCompetitor"
+         },
+         "mark": "2:11:02",
+         "nationality": "GER",
+         "place": "6.",
+         "points": null,
+         "qualified": null,
+         "records": "",
+         "wind": null,
+         "remark": null,
+         "details": null,
+         "__typename": "CalendarResultsRaceResult"
+        }
+       ],
+       "startList": null,
+       "wind": null,
+       "__typename": "CalendarResultsRace"
+      }
+     ],
+     "__typename": "CalendarResultsEvent"
+    }
+   ],
+   "__typename": "CalendarResultsEventTitle"
+  },
+  {
+   "rankingCategory": "B",
+   "eventTitle": "German Marathon Ch.",
+   "events": [
+    {
+     "event": "Men's Marathon",
+     "eventId": 10229634,
+     "gender": "M",
+     "isRelay": false,
+     "perResultWind": false,
+     "withWind": false,
+     "summary": null,
+     "races": [
+      {
+       "date": "2026-04-12",
+       "day": 1,
+       "race": "Final",
+       "raceId": 10,
+       "raceNumber": 0,
+       "results": [
+        {
+         "competitor": {
+          "teamMembers": null,
+          "id": "14682657",
+          "name": "Tom THURLEY",
+          "iaafId": 338341,
+          "urlSlug": "germany/tom-thurley-14682657",
+          "birthDate": "13 SEP 1993",
+          "hasProfile": true,
+          "__typename": "CalendarResultsCompetitor"
+         },
+         "mark": "2:11:02",
+         "nationality": "GER",
+         "place": "1.",
+         "points": null,
+         "qualified": null,
+         "records": "",
+         "wind": null,
+         "remark": null,
+         "details": null,
+         "__typename": "CalendarResultsRaceResult"
+        },
+        {
+         "competitor": {
+          "teamMembers": null,
+          "id": "14815619",
+          "name": "Erik HILLE",
+          "iaafId": 435917,
+          "urlSlug": "germany/erik-hille-14815619",
+          "birthDate": "29 SEP 1988",
+          "hasProfile": true,
+          "__typename": "CalendarResultsCompetitor"
+         },
+         "mark": "2:12:22",
+         "nationality": "GER",
+         "place": "2.",
+         "points": null,
+         "qualified": null,
+         "records": "",
+         "wind": null,
+         "remark": null,
+         "details": null,
+         "__typename": "CalendarResultsRaceResult"
+        }
+       ],
+       "startList": null,
+       "wind": null,
+       "__typename": "CalendarResultsRace"
+      }
+     ],
+     "__typename": "CalendarResultsEvent"
+    }
+   ],
+   "__typename": "CalendarResultsEventTitle"
+  }
+ ]
+}
