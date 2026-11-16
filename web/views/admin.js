@@ -1,15 +1,15 @@
 import { html, useState } from '../vendor/preact-htm.js';
-import { sb, q, all, rpc, useLoad, useAction, Msg, Loading, RiderPicker, fmtDate, fmtDateTime, normName } from '../lib.js';
+import { sb, q, all, rpc, useLoad, useAction, Msg, Loading, RiderPicker, RiderCell, fmtDate, fmtDateTime, normName, discLabel, today } from '../lib.js';
 import { fmtUntil } from '../lib.js';
 import { LeagueSettingsFields } from './home.js';
 
 const SECTIONS = [['settings', 'Einstellungen'], ['members', 'Mitglieder'], ['import', 'Offline-Draft'],
-  ['matchdays', 'Spieltage'], ['fix', 'Korrekturen'], ['log', 'Protokoll']];
+  ['matchdays', 'Spieltage'], ['results', 'Nachträge'], ['fix', 'Korrekturen'], ['log', 'Protokoll']];
 
 export function Admin({ c, sub }) {
   if (!c.isAdmin) return html`<p class="card muted">Nur für den Liga-Admin.</p>`;
   const s = sub || 'settings';
-  const View = { settings: Settings, members: Members, import: OfflineImport, matchdays: Matchdays, fix: Fixes, log: Log }[s];
+  const View = { settings: Settings, members: Members, import: OfflineImport, matchdays: Matchdays, results: ManualResults, fix: Fixes, log: Log }[s];
   return html`<div class="stack">
     <nav class="seg wrap-seg">${SECTIONS.filter(([k]) => k !== 'import' || c.league.draft_mode === 'offline').map(([k, l]) =>
       html`<a href=${`#/league/${c.league.id}/admin/${k}`} class=${k === s ? 'active' : ''}>${l}</a>`)}</nav>
@@ -330,6 +330,71 @@ function Matchdays({ c }) {
 }
 
 // ---- Korrekturen ---------------------------------------------------------
+
+// ---- Nachträge: Ergebnisse, die World Athletics nicht führt (z. B. RaceResult) ------
+
+const ROAD = ['5 Kilometres Road', '10 Kilometres Road', '15 Kilometres Road', '10 Miles Road', '20 Kilometres Road',
+  'Half Marathon', '25 Kilometres Road', '30 Kilometres Road', 'Marathon'];
+
+function ManualResults({ c }) {
+  const list = useLoad(() => q(sb.from('wa_results').select('id,rider_slug,date,competition,discipline,mark,result_score,source_url')
+    .eq('source', 'manual').order('date', { ascending: false }).limit(200)), []);
+  const counted = useLoad(async () => {
+    const ids = (list.data || []).map((x) => x.id);
+    return ids.length ? new Set((await q(sb.from('results').select('wa_result_id').in('wa_result_id', ids))).map((x) => x.wa_result_id)) : new Set();
+  }, [list.data]);
+  const [rider, setRider] = useState(null);
+  const [f, setF] = useState({ discipline: '10 Kilometres Road', date: '', mark: '', competition: '', venue: '', source_url: '', wa_points: '' });
+  const [check, setCheck] = useState(null);
+  const a = useAction();
+  const set = (k) => (e) => { setF({ ...f, [k]: e.target.value }); setCheck(null); };
+  const ready = rider && f.discipline && f.date && f.mark.trim();
+  const doCheck = () => a.run(async () => setCheck(await rpc('manual_result_check',
+    { p_rider: rider.pcs_slug, p_discipline: f.discipline, p_date: f.date, p_mark: f.mark })));
+  const save = () => a.run(async () => {
+    await rpc('add_manual_result', { p: { ...f, rider_slug: rider.pcs_slug, wa_points: f.wa_points === '' ? null : +f.wa_points } });
+    setF({ ...f, mark: '', wa_points: '' }); setRider(null); setCheck(null); list.reload();
+  }, 'Ergebnis nachgetragen – zählt ab sofort in der Wertung.');
+  const pts = check?.wa_points ?? (f.wa_points === '' ? null : +f.wa_points);
+
+  return html`<div class="stack">
+    <section class="card stack">
+      <h3>Ergebnis nachtragen</h3>
+      <p class="muted small">Für Rennen auf vermessenen Strecken, die World Athletics nicht führt (z. B. Ergebnisse bei RaceResult).
+        Bruttozeit eintragen – die App berechnet die WA-Punkte. Taucht das Ergebnis später bei World Athletics auf, gilt das WA-Ergebnis.</p>
+      ${rider ? html`<div class="row between"><${RiderCell} r=${rider} /><button class="small ghost" onClick=${() => { setRider(null); setCheck(null); }}>Ändern</button></div>`
+        : html`<${RiderPicker} riders=${c.riders} onPick=${(r) => { setRider(r); setCheck(null); }} limit=${8} />`}
+      <div class="grid2 compact">
+        <label>Disziplin<select value=${f.discipline} onChange=${set('discipline')}>${ROAD.map((d) => html`<option value=${d}>${discLabel(d)}</option>`)}</select></label>
+        <label>Datum<input type="date" max=${today()} value=${f.date} onInput=${set('date')} /></label>
+        <label>Bruttozeit<input inputmode="decimal" placeholder="z. B. 29:18 oder 1:02:45" value=${f.mark} onInput=${set('mark')} /></label>
+        <label>Wettkampf<input placeholder="z. B. Stadtlauf Musterstadt" value=${f.competition} onInput=${set('competition')} /></label>
+        <label>Ort (optional)<input value=${f.venue} onInput=${set('venue')} /></label>
+        <label>Quelle (Link)<input type="url" placeholder="https://my.raceresult.com/…" value=${f.source_url} onInput=${set('source_url')} /></label>
+      </div>
+      <div class="row"><button disabled=${a.busy || !ready} onClick=${doCheck}>Punkte berechnen</button></div>
+      ${check && html`<div class="stack">
+        ${check.duplicate && html`<p class="note err">Schon vorhanden: ${fmtDate(check.duplicate.date)} · ${check.duplicate.competition} · ${check.duplicate.mark}
+          (${check.duplicate.source === 'wa' ? 'World Athletics' : 'Nachtrag'}) – nicht doppelt eintragen.</p>`}
+        ${check.has_table ? html`<p class=${`note ${pts > check.threshold ? 'ok' : ''}`}><strong>${pts} WA-Punkte</strong>${' – '}${pts > check.threshold ? 'über der Schwelle, zählt in der Wertung.' : `unter der Schwelle von ${check.threshold}, bringt keine Punkte.`}</p>`
+          : html`<label>WA-Punkte<input type="number" value=${f.wa_points} onInput=${(e) => setF({ ...f, wa_points: e.target.value })} />
+            <small class="muted">Für diese Disziplin kann die App die Punkte noch nicht berechnen (zu wenige WA-Ergebnisse) – bitte von Hand eintragen.</small></label>`}
+      </div>`}
+      <div class="row"><button class="primary" disabled=${a.busy || !check || check.duplicate || pts === null || !f.competition.trim()} onClick=${save}>Speichern</button></div>
+      <${Msg} msg=${a.msg} />
+    </section>
+    <section class="card stack">
+      <h3>Bisherige Nachträge</h3>
+      ${!list.data ? html`<${Loading} error=${list.error} />` : list.data.length === 0 ? html`<p class="muted small">Noch keine.</p>` : html`<ul class="list compact">
+        ${list.data.map((x) => html`<li key=${x.id}>
+          <span>${fmtDate(x.date)} · <strong>${c.riderMap[x.rider_slug]?.name || x.rider_slug}</strong> · ${discLabel(x.discipline)} ${x.mark} · ${x.result_score} WA-P.
+            <span class="muted"> – ${x.competition}${x.source_url ? html` · <a href=${x.source_url} target="_blank" rel="noopener">Quelle</a>` : ''}
+            ${counted.data && !counted.data.has(x.id) ? ' · zählt nicht' : ''}</span></span>
+          <button class="small ghost" disabled=${a.busy} onClick=${() => confirm('Nachtrag löschen?') && a.run(async () => {
+            await rpc('delete_manual_result', { p_id: x.id }); list.reload(); }, 'Nachtrag gelöscht.')}>Löschen</button></li>`)}</ul>`}
+    </section>
+  </div>`;
+}
 
 function Fixes({ c }) {
   return html`<div class="stack">

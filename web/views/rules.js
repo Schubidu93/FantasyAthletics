@@ -171,6 +171,10 @@ export function Rules({ c }) {
         <li><strong>Kontrolle:</strong> Jede Nacht werden alle Athleten in den Kadern komplett neu abgeglichen, die übrigen einmal pro Woche –
           nachträgliche Korrekturen von World Athletics (andere Zeit, gestrichenes Ergebnis) werden so übernommen.</li>
         <li><strong>Jahre:</strong> „Punkte 2026“ zählt alle Wettkämpfe vom 1.1. bis 31.12.2026. Ergebnisse werden ab 2025 gespeichert.</li>
+        <li><strong>Nachträge:</strong> Rennen auf vermessenen Strecken, die World Athletics nicht führt (z. B. Ergebnisse bei RaceResult),
+          kann der Admin von Hand nachtragen – mit Bruttozeit und Link zur Quelle. Die WA-Punkte berechnet die App nach den Punktetabellen
+          von World Athletics; es zählen nur Leistungspunkte (keine Platzierungspunkte). Taucht das Ergebnis später bei World Athletics auf,
+          gilt das WA-Ergebnis.</li>
         <li><strong>Korrekturen:</strong> Bei falschen Daten kann der Admin Punkte manuell korrigieren – jede Korrektur wird protokolliert.</li>
       </ul>
     </details>

@@ -25,7 +25,7 @@ function runNote(x) {
 async function loadRider(slug) {
   const [rider] = await q(sb.from('riders').select('*').eq('pcs_slug', slug));
   const rows = await all(() => sb.from('wa_results')
-    .select('id,date,competition,discipline,category,race,place,wa_race,wa_place,placing_round,placing_place,mark,result_score,remark,wa_competition_id')
+    .select('id,date,competition,discipline,category,race,place,wa_race,wa_place,placing_round,placing_place,mark,result_score,remark,wa_competition_id,source,source_url')
     .eq('rider_slug', slug).gte('date', `${FIRST_YEAR}-01-01`).order('date', { ascending: false }).order('id'));
   const pts = Object.fromEntries((await all(() => sb.from('results').select('wa_result_id,uci_points,perf_points,placing_points')
     .eq('rider_slug', slug).order('id'))).map((r) => [r.wa_result_id, r]));
@@ -108,6 +108,8 @@ export function RiderModal() {
             <span class="res-date">${shortDate(x.date)}</span>
             <span class="res-what"><b>${discWithKm(x.discipline, x.competition)}${x.race && x.race !== 'F' ? ` · ${raceLabel(x.race)}` : ''} · ${x.mark || '–'}</b>
               <small>${x.competition}${x.category ? ` · ${x.category}` : ''}${x.result_score ? ` · ${x.result_score} WA-P.` : ''}</small>
+              ${x.source === 'manual' && html`<small class="muted">Nachtrag${x.source_url ? html` · <a href=${x.source_url} target="_blank" rel="noopener"
+                onClick=${(e) => e.stopPropagation()}>Quelle</a>` : ''}${!x.pts ? ' · zählt nicht (World Athletics führt das Ergebnis oder unter der Schwelle)' : ''}</small>`}
               ${runNote(x) && html`<small class="muted">${runNote(x)}</small>`}
               ${x.pts && html`<small class="muted">Leistung ${fmtPts(x.pts.perf_points)} + Platzierung ${fmtPts(x.pts.placing_points)}</small>`}</span>
             <span class="res-place">${placeLabel(x)}</span>
@@ -117,7 +119,7 @@ export function RiderModal() {
         ${data.toplists.length > 0 && html`<details class="toplists"><summary class="small">Toplisten (DE)</summary>
           <ul class="list compact">${data.toplists.map((t) => html`<li key=${t.year + t.discipline}>
             <span>${t.year} · ${discLabel(t.discipline)}</span><span class="muted">${t.mark} · ${t.score} WA-P.</span></li>`)}</ul></details>`}`}
-      <p class="muted small">Quelle: World Athletics. Antippen öffnet den Wettkampf.</p>
+      <p class="muted small">Quelle: World Athletics, Nachträge mit eigener Quelle. Antippen öffnet den Wettkampf.</p>
     </div>
   </div>`;
 }

@@ -136,7 +136,11 @@ describe("Ergebnisabruf", () => {
     expect(await stored()).toContain(`wa-102 ${day(0)} 1500 Metres 3:59.10 1179`);
     // gelöschtes Ergebnis verschwindet beim nächsten Komplettabruf des Athleten
     wa.get(101)!.splice(1, 1);
+    // Nachträge (z. B. RaceResult) überstehen den Komplettabruf
+    await db.query(`insert into wa_results (rider_slug, date, competition, discipline, race, wa_race, mark, result_score, source)
+                    values ('wa-103', $1, 'Stadtlauf', '10 Kilometres Road', 'F', 'F', '29:00', 1200, 'manual')`, [day(-3)]);
     await importer("voll");
+    expect((await db.one("select count(*)::int n from wa_results where source = 'manual'")).n).toBe(1);
     expect(calls.single).toHaveLength(3);
     expect((await stored()).filter((s) => s.startsWith("wa-101"))).toHaveLength(3);
     expect(Number((await db.one("select count(*) n from results where rider_slug = 'wa-101'")).n)).toBe(3);

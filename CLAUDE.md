@@ -50,6 +50,9 @@
 - Ergebnisabruf sparsam: `resultsByAthlete` (Sammelabruf, letzte ~30 Tage, keine WA-Punkte/Wettkampf-ID) nur als Signal;
   Einzelabruf (`getSingleCompetitorResultsDate`, ganzes Jahr mit WA-Punkten) nur für Athleten mit Neuem bzw. nachts zur Kontrolle.
   Ende-zu-Ende-Test: `tests/importer.test.ts` (Nachbau von WA und Supabase-Schnittstelle).
+- Nachträge: `wa_results.source = 'manual'` (+ `source_url`), angelegt über `add_manual_result`; der Importer löscht/überschreibt
+  nur `source = 'wa'`. WA-Punkte aus `scoring_coefficients` (Parabel je Disziplin/Geschlecht, nachts neu berechnet).
+  RaceResult/LADV nicht automatisch abrufen (siehe `research/fremdquellen-notizen.md`).
 - Rohdaten in `wa_results`; `rebuild_results()` berechnet daraus die Punkte in `results` (die Spiellogik von UCI Fantasy liest nur `results`).
   Pool: `toplist_entries` → `refresh_pool()` setzt `riders.uci_rank` (Pool-Rang), `event_group`, Bestleistung.
 - Cross: Disziplin heißt nur „Cross Country“, die Distanz steht im Wettkampfnamen („… - XC 7.5km“) → `cross_km()` in der Datenbank,

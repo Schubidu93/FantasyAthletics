@@ -143,7 +143,7 @@ await run(db, async () => {
             race: r.race, place: r.place, wa_race: r.race, wa_place: r.place,
             placing_round: null, placing_place: null,
             mark: r.mark, result_score: r.resultScore, remark: r.remark,
-            wa_competition_id: r.competitionId, wa_event_id: r.eventId, imported_at: new Date().toISOString(),
+            wa_competition_id: r.competitionId, wa_event_id: r.eventId, imported_at: new Date().toISOString(), source: "wa",
           });
         }
         loaded.push(job);
@@ -178,7 +178,7 @@ await run(db, async () => {
   for (const year of years) {
     const slugs = loaded.filter((l) => l.year === year).map((l) => l.slug);
     await chunked(slugs, 100, async (chunk) => {
-      const { error } = await db.from("wa_results").delete().in("rider_slug", chunk)
+      const { error } = await db.from("wa_results").delete().in("rider_slug", chunk).eq("source", "wa")
         .gte("date", `${year}-01-01`).lte("date", `${year}-12-31`).lt("imported_at", started);
       if (error) throw new Error(`wa_results löschen: ${error.message}`);
     });
@@ -218,6 +218,8 @@ await run(db, async () => {
   // Punkte, Saisonwertung, Stichtage
   const scored = years.length ? await rpc<number>(db, "rebuild_results", { p_from: `${Math.min(...years)}-01-01` }) : 0;
   for (const y of new Set([...years, Y])) await rpc(db, "refresh_season_stats", { p_year: y });
+  // nachts: WA-Punkteformel für Nachträge aus den aktuellen Daten neu berechnen
+  if (MODE !== "neu") console.log(`WA-Punktetabellen: ${await rpc<number>(db, "fit_scoring_coefficients", {})}`);
   await rpc(db, "run_maintenance");
   if (failures.length || throttled) {
     await db.from("sync_status").update({ ok: false,

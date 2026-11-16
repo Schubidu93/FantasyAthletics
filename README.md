@@ -41,6 +41,9 @@ Die Spielregeln werden in der Datenbank geprüft (Positionen, Uhr, Kadergröße,
   Cross: `max(0, Wert der WA-Cross-Tabelle − 1000) × Cross-Faktor × Distanzfaktor` (bis 3 km 1, bis 6 km 1,3, bis 12 km 1,6, darüber 2; ohne Angabe 1,6 –
   Tabelle `cross_distance_factors`, die Distanz steht bei WA im Wettkampfnamen, z. B. „… - XC 7.5km“). Vorrunden zählen bei OW/DF/GW/GL (Q/q bzw. Gesamtplatz der Runde), geteilte Finals werden kombiniert.
   Leistungs-, Platzierungs- und Cross-Faktor sind standardmäßig 0,1 (gleiche Größenordnung wie im alten AppSheet-Spiel).
+  Nachträge (Admin → Nachträge): Ergebnisse, die WA nicht führt (z. B. RaceResult), mit Bruttozeit und Link; WA-Punkte aus der
+  nachgebauten Punkteformel (`scoring_coefficients`, nachts per `fit_scoring_coefficients()` aus den WA-Ergebnissen berechnet),
+  nur Leistungspunkte; führt WA dasselbe Ergebnis (gleiche Disziplin, ±1 Tag), zählt nur das WA-Ergebnis.
   Schwellen und Faktoren sind im Admin-Bereich unter „Punkte und Athletenpool“ änderbar (gilt für alle Ligen).
 
 Alle Details stehen in der App unter Mehr → Regeln.

@@ -116,6 +116,30 @@ create table if not exists wa_results (
   imported_at       timestamptz not null default now(),
   unique (rider_slug, date, discipline, wa_race, competition)
 );
+-- Herkunft: 'wa' = vom Importer, 'manual' = vom Admin nachgetragen (z. B. aus RaceResult), mit Link als Quelle
+alter table wa_results add column if not exists source text not null default 'wa';
+alter table wa_results add column if not exists source_url text;
+alter table wa_results add column if not exists added_by uuid;
+do $$ begin
+  alter table wa_results add constraint wa_results_source_check check (source in ('wa', 'manual'));
+exception when duplicate_object then null; end $$;
+
+-- WA-Punktetabellen nachgebaut: Punkte = a·t² + b·t + c (t = Zeit in Sekunden), je Disziplin und Geschlecht
+-- aus den vorhandenen WA-Ergebnissen berechnet (fit_scoring_coefficients) – für Nachträge ohne WA-Punkte
+create table if not exists scoring_coefficients (
+  discipline text not null,
+  gender     text not null check (gender in ('men', 'women')),
+  a          numeric not null,
+  b          numeric not null,
+  c          numeric not null,
+  t_min      numeric,                 -- Zeitbereich der Daten
+  t_max      numeric,
+  n          int not null,            -- verwendete Ergebnisse
+  exact      numeric,                 -- Anteil exakt getroffener WA-Punkte
+  max_error  int,                     -- größte Abweichung in Punkten
+  fitted_at  timestamptz not null default now(),
+  primary key (discipline, gender)
+);
 create index if not exists wa_results_date on wa_results (date);
 
 -- Wettkämpfe (aus den Ergebnissen der Pool-Athleten): pcs_slug = 'wa-c<WA-Wettkampf-ID>'
@@ -1781,6 +1805,10 @@ begin
              end plc
         from wa_results w left join disciplines d on d.name = w.discipline
        where (p_from is null or w.date >= p_from) and w.date >= date '2025-01-01'
+         -- Nachtrag entfällt, sobald World Athletics dasselbe Ergebnis führt (gleiche Disziplin, ±1 Tag)
+         and not (w.source = 'manual' and exists (select 1 from wa_results o
+                   where o.rider_slug = w.rider_slug and o.source = 'wa' and o.discipline = w.discipline
+                     and abs(o.date - w.date) <= 1))
     ) x
    where perf + plc > 0
   on conflict (rider_slug, race_slug, label) do nothing;
@@ -2294,6 +2322,156 @@ begin
 end $$;
 
 -- =====================================================================
+-- Nachträge: Ergebnisse, die World Athletics nicht führt (z. B. von RaceResult), mit WA-Punkten
+-- =====================================================================
+
+-- "2:09:43" / "29:18" / "13:45.12" / "29:18,4" -> Sekunden
+create or replace function mark_seconds(p text) returns numeric
+language plpgsql immutable as $$
+declare v text := replace(regexp_replace(coalesce(p, ''), '[^0-9:.,]', '', 'g'), ',', '.'); parts text[]; t numeric := 0; x text;
+begin
+  if v !~ '^\d+(:\d{1,2})*(\.\d+)?$' then return null; end if;
+  parts := string_to_array(v, ':');
+  if cardinality(parts) > 3 then return null; end if;
+  foreach x in array parts loop t := t * 60 + x::numeric; end loop;
+  return t;
+end $$;
+
+-- Koeffizienten aus allen WA-Ergebnissen mit Zeit und WA-Punkten berechnen (kleinste Quadrate). Ausreißer
+-- (z. B. falsch erfasste Zeiten) werden schrittweise aussortiert: weg, was mehr als 3 × die mittlere Abweichung
+-- (Median) + 2 Punkte daneben liegt, dann neu rechnen, bis sich nichts mehr ändert. Gibt die Zahl der Tabellen zurück.
+create or replace function fit_scoring_coefficients(p_min int default 30) returns int
+language plpgsql security definer set search_path = public as $$
+declare g record; pass int; s0 numeric; s1 numeric; s2 numeric; s3 numeric; s4 numeric; y0 numeric; y1 numeric; y2 numeric;
+        det numeric; ka numeric; kb numeric; kc numeric; n int := 0; lim numeric; dropped int;
+begin
+  create temp table if not exists _fit (discipline text, gender text, t numeric, y numeric, ok boolean) on commit drop;
+  truncate _fit;
+  insert into _fit
+    select w.discipline, r.gender, mark_seconds(w.mark), w.result_score, true
+      from wa_results w join riders r on r.pcs_slug = w.rider_slug join disciplines d on d.name = w.discipline
+     where w.source = 'wa' and w.result_score > 0 and d.cross_table is null and mark_seconds(w.mark) > 0;
+  for g in select discipline, gender from _fit group by 1, 2 having count(*) >= p_min loop
+    ka := null; kb := null; kc := null;
+    for pass in 1..8 loop
+      select count(*), sum(t), sum(t^2), sum(t^3), sum(t^4), sum(y), sum(t*y), sum(t^2*y)
+        into s0, s1, s2, s3, s4, y0, y1, y2
+        from _fit f where f.discipline = g.discipline and f.gender = g.gender and f.ok;
+      if s0 < p_min then ka := null; exit; end if;
+      -- Normalgleichungen [s4 s3 s2; s3 s2 s1; s2 s1 s0]·[a b c] = [y2 y1 y0] (Cramersche Regel)
+      det := s4*(s2*s0 - s1*s1) - s3*(s3*s0 - s1*s2) + s2*(s3*s1 - s2*s2);
+      if det = 0 then ka := null; exit; end if;
+      ka := (y2*(s2*s0 - s1*s1) - s3*(y1*s0 - s1*y0) + s2*(y1*s1 - s2*y0)) / det;
+      kb := (s4*(y1*s0 - s1*y0) - y2*(s3*s0 - s1*s2) + s2*(s3*y0 - y1*s2)) / det;
+      kc := (s4*(s2*y0 - s1*y1) - s3*(s3*y0 - s2*y1) + y2*(s3*s1 - s2*s2)) / det;
+      -- Grenze aus allen Ergebnissen der Gruppe (Median ist unempfindlich gegen wenige Ausreißer);
+      -- zu Unrecht aussortierte kommen mit der besseren Formel wieder hinein
+      select 3 * percentile_cont(0.5) within group (order by abs(ka*t^2 + kb*t + kc - y)) + 2 into lim
+        from _fit f where f.discipline = g.discipline and f.gender = g.gender;
+      update _fit f set ok = not f.ok where f.discipline = g.discipline and f.gender = g.gender
+         and f.ok <> (abs(ka*f.t^2 + kb*f.t + kc - f.y) <= lim);
+      get diagnostics dropped = row_count;
+      exit when dropped = 0;
+    end loop;
+    continue when ka is null or ka <= 0;
+    insert into scoring_coefficients (discipline, gender, a, b, c, t_min, t_max, n, exact, max_error, fitted_at)
+    select g.discipline, g.gender, ka, kb, kc, min(f.t), max(f.t), count(*),
+           round(avg((round(ka*f.t^2 + kb*f.t + kc) = f.y)::int), 3), max(abs(round(ka*f.t^2 + kb*f.t + kc) - f.y)), now()
+      from _fit f where f.discipline = g.discipline and f.gender = g.gender and f.ok
+    on conflict (discipline, gender) do update set a = excluded.a, b = excluded.b, c = excluded.c, t_min = excluded.t_min,
+      t_max = excluded.t_max, n = excluded.n, exact = excluded.exact, max_error = excluded.max_error, fitted_at = now();
+    n := n + 1;
+  end loop;
+  return n;
+end $$;
+
+-- WA-Punkte einer Zeit (null, wenn es für Disziplin/Geschlecht noch keine Tabelle gibt)
+create or replace function wa_points(p_discipline text, p_gender text, p_mark text) returns int
+language sql stable security definer set search_path = public as $$
+  select case when mark_seconds(p_mark) is null then null
+              -- jenseits des Tiefpunkts der Parabel (sehr langsam) gibt es 0 Punkte
+              when mark_seconds(p_mark) >= -k.b / (2 * k.a) then 0
+              else greatest(0, round(k.a * mark_seconds(p_mark)^2 + k.b * mark_seconds(p_mark) + k.c))::int end
+    from scoring_coefficients k where k.discipline = p_discipline and k.gender = p_gender;
+$$;
+
+create or replace function _require_any_admin() returns void
+language plpgsql stable security definer set search_path = public as $$
+begin
+  if not exists (select 1 from leagues where admin_user = auth.uid()) and not _is_service() then
+    raise exception 'Nur Liga-Admins dürfen Ergebnisse nachtragen.';
+  end if;
+end $$;
+
+-- Vorschau für das Eingabeformular: WA-Punkte, Schwelle, bereits vorhandenes Ergebnis
+create or replace function manual_result_check(p_rider text, p_discipline text, p_date date, p_mark text) returns jsonb
+language plpgsql stable security definer set search_path = public as $$
+declare r riders; pts int; dup record;
+begin
+  perform _require_any_admin();
+  select * into r from riders where pcs_slug = p_rider;
+  if r.pcs_slug is null then raise exception 'Athlet nicht gefunden.'; end if;
+  pts := wa_points(p_discipline, r.gender, p_mark);
+  select w.date, w.competition, w.mark, w.source into dup from wa_results w
+   where w.rider_slug = p_rider and w.discipline = p_discipline and abs(w.date - p_date) <= 1
+   order by w.source = 'wa' desc limit 1;
+  return jsonb_build_object(
+    'seconds', mark_seconds(p_mark),
+    'wa_points', pts,
+    'has_table', exists (select 1 from scoring_coefficients where discipline = p_discipline and gender = r.gender),
+    'threshold', (select perf_threshold from scoring_config where id = 1),
+    'duplicate', case when dup.date is null then null
+                      else jsonb_build_object('date', dup.date, 'competition', dup.competition, 'mark', dup.mark, 'source', dup.source) end);
+end $$;
+
+-- Nachtrag speichern. p: rider_slug, date, discipline, mark, competition, venue, source_url, wa_points (optional,
+-- nur wenn die App die Punkte nicht berechnen kann)
+create or replace function add_manual_result(p jsonb) returns bigint
+language plpgsql security definer set search_path = public as $$
+declare r riders; d disciplines; v_date date := (p->>'date')::date; v_mark text := nullif(trim(p->>'mark'), '');
+        v_comp text := nullif(trim(p->>'competition'), ''); pts int; v_id bigint; v_slug text;
+begin
+  perform _require_any_admin();
+  select * into r from riders where pcs_slug = p->>'rider_slug';
+  if r.pcs_slug is null then raise exception 'Athlet nicht gefunden.'; end if;
+  select * into d from disciplines where name = p->>'discipline';
+  if d.name is null or coalesce(d.factor, 0) = 0 or d.cross_table is not null then
+    raise exception 'Disziplin % kann nicht nachgetragen werden.', p->>'discipline';
+  end if;
+  if v_date is null or v_date > current_date or v_date < date '2025-01-01' then raise exception 'Ungültiges Datum.'; end if;
+  if v_comp is null then raise exception 'Bitte den Wettkampf angeben.'; end if;
+  if mark_seconds(v_mark) is null then raise exception 'Zeit nicht erkannt (z. B. 29:18 oder 1:02:45).'; end if;
+  if exists (select 1 from wa_results w where w.rider_slug = r.pcs_slug and w.discipline = d.name and abs(w.date - v_date) <= 1) then
+    raise exception 'Für % gibt es in dieser Disziplin um diesen Tag schon ein Ergebnis.', r.name;
+  end if;
+  pts := coalesce(wa_points(d.name, r.gender, v_mark), (p->>'wa_points')::int);
+  if pts is null then raise exception 'WA-Punkte können für diese Disziplin noch nicht berechnet werden – bitte von Hand angeben.'; end if;
+  insert into wa_results (rider_slug, date, competition, venue, discipline, race, wa_race, mark, result_score, remark,
+                          source, source_url, added_by)
+  values (r.pcs_slug, v_date, v_comp, nullif(trim(p->>'venue'), ''), d.name, 'F', 'F', v_mark, pts, 'Nachtrag',
+          'manual', nullif(trim(p->>'source_url'), ''), auth.uid())
+  returning id into v_id;
+  v_slug := 'wa-' || md5(v_comp || v_date::text);
+  insert into races (pcs_slug, name, venue, start_date, end_date, loaded_at)
+  values (v_slug, v_comp, nullif(trim(p->>'venue'), ''), v_date, v_date, now())
+  on conflict (pcs_slug) do nothing;
+  perform rebuild_results(v_date);
+  perform refresh_season_stats(extract(year from v_date)::int);
+  return v_id;
+end $$;
+
+create or replace function delete_manual_result(p_id bigint) returns void
+language plpgsql security definer set search_path = public as $$
+declare v_date date;
+begin
+  perform _require_any_admin();
+  delete from wa_results where id = p_id and source = 'manual' returning date into v_date;
+  if v_date is null then raise exception 'Nachtrag nicht gefunden.'; end if;
+  perform rebuild_results(v_date);
+  perform refresh_season_stats(extract(year from v_date)::int);
+end $$;
+
+-- =====================================================================
 -- Admin-Werkzeuge
 -- =====================================================================
 
@@ -2578,6 +2756,7 @@ alter table scoring_config  enable row level security;
 alter table cross_distance_factors enable row level security;
 alter table keepers         enable row level security;
 alter table app_config      enable row level security;   -- keine Policies: nur Service-Key
+alter table scoring_coefficients enable row level security;
 alter table athlete_sync    enable row level security;   -- keine Policies: nur Service-Key
 alter table athlete_feed    enable row level security;   -- keine Policies: nur Service-Key
 alter table push_subscriptions enable row level security;
@@ -2588,7 +2767,7 @@ declare t text;
 begin
   -- öffentliche Stammdaten: lesbar für angemeldete Nutzer
   foreach t in array array['riders', 'races', 'results', 'sync_status', 'rider_season_stats', 'toplist_entries',
-                           'wa_results', 'disciplines', 'placing_scores', 'scoring_config', 'cross_distance_factors'] loop
+                           'wa_results', 'disciplines', 'placing_scores', 'scoring_config', 'cross_distance_factors', 'scoring_coefficients'] loop
     execute format('drop policy if exists read_all on %I', t);
     execute format('create policy read_all on %I for select to authenticated using (true)', t);
   end loop;
@@ -2633,7 +2812,7 @@ begin
     'dispatch_workflow(text,jsonb)', 'refresh_season_stats(int)', '_lineup_swap(uuid,uuid,text,text,date)', 'weekly_summary()', 'scheduler_tick()', '_notify(uuid,text,text,text)', '_notify_turn(uuid,uuid,uuid,text,timestamptz)', '_check_trade_drops(uuid,text[],text[],int)', '_open_roster_slots(uuid)', '_reset_default_deadlines(uuid,text)', '_snake_pick(uuid,text)', '_score_rows(uuid)',
     '_claim_valid(waiver_claims,leagues)', '_execute_claim(waiver_claims,leagues,matchdays)',
     '_process_waivers(uuid)', '_process_trades(uuid)', '_league_points(uuid)', '_league_table(uuid)',
-    '_waiver_order(uuid)', 'run_maintenance()'] loop
+    '_waiver_order(uuid)', 'run_maintenance()', 'fit_scoring_coefficients(int)'] loop
     execute format('revoke execute on function %s from public', f);
     begin
       execute format('revoke execute on function %s from anon, authenticated', f);
