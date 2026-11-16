@@ -1,0 +1,34 @@
+name: WA-Kalender erkunden
+
+# Einmalige Erkundung für den Ergebnisabruf (Kalender, Wettkampfergebnisse, Mehr-Athleten-Abfragen).
+# Ergebnisse landen in research/out/calendar.
+on:
+  push:
+    branches: [claude/sleepy-planck-h90ess]
+    paths: [research/probe-calendar.ts, .github/workflows/probe-calendar.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsx research/probe-calendar.ts
+      - name: Ergebnisse committen
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f research/out/calendar
+          git commit -m "WA-Kalender: Rohdaten" || exit 0
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin HEAD:"$GITHUB_REF_NAME"
