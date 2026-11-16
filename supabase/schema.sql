@@ -820,7 +820,7 @@ begin
           (s->>'max_per_team')::int,
           coalesce(s->>'draft_mode', 'snake'),
           coalesce(s->>'draft_order', 'ranking'),
-          coalesce((s->>'bid_seconds')::int, 60),
+          coalesce((s->>'bid_seconds')::int, 30),
           coalesce(s->>'waiver_mode', 'priority'),
           coalesce(s->>'gender', 'mixed'),
           coalesce((s->>'season_start')::date, make_date(extract(year from current_date)::int + 1, 1, 1)),

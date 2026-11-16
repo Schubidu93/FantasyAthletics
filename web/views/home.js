@@ -64,7 +64,7 @@ function CreateLeague({ onCancel }) {
   const y = new Date().getMonth() >= 9 ? new Date().getFullYear() + 1 : new Date().getFullYear();
   const [f, setF] = useState({
     name: '', team_name: '', max_managers: 8, roster_size: 11, scoring_mode: 'lineup',
-    draft_mode: 'snake', draft_order: 'ranking', bid_seconds: 60, waiver_mode: 'priority', transfer_mode: 'waiver_free',
+    draft_mode: 'snake', draft_order: 'ranking', bid_seconds: 30, waiver_mode: 'priority', transfer_mode: 'waiver_free',
     gender: 'mixed', lineup_mode: 'free', lineup_groups: [...GROUPS], wildcards: 2,
     season_start: `${y}-01-01`, season_end: `${y}-12-31`,
   });
@@ -73,9 +73,9 @@ function CreateLeague({ onCancel }) {
   const set = (k) => (e) => {
     const v = e.target.value;
     const next = { ...f, [k]: v,
-      ...(k === 'draft_mode' && v === 'snake' && [15, 20].includes(+f.bid_seconds) ? { bid_seconds: 60 } : {}),
-      ...(k === 'draft_mode' && v === 'live' && +f.bid_seconds === 60 ? { bid_seconds: 15 } : {}),
-      ...(k === 'draft_mode' && v === 'blind' && +f.bid_seconds === 60 ? { bid_seconds: 20 } : {}) };
+      ...(k === 'draft_mode' && v === 'snake' && [15, 20].includes(+f.bid_seconds) ? { bid_seconds: 30 } : {}),
+      ...(k === 'draft_mode' && v === 'live' && +f.bid_seconds === 30 ? { bid_seconds: 15 } : {}),
+      ...(k === 'draft_mode' && v === 'blind' && +f.bid_seconds === 30 ? { bid_seconds: 20 } : {}) };
     const slots = leagueSlots(next).length;
     if (['lineup_mode', 'gender', 'wildcards', 'lineup_groups'].includes(k) && +next.roster_size < slots) next.roster_size = slots + 3;
     setF(next);
@@ -133,9 +133,11 @@ export function LeagueSettingsFields({ f, set, locked }) {
       <label>Wildcards (beliebige Disziplin)<input type="number" min="0" max="6" value=${f.wildcards} onInput=${set('wildcards')} disabled=${locked} /></label>
       <div class="span2 group-pick">
         <span class="label-text">Disziplinen in der Aufstellung</span>
-        <div class="chips">${GROUPS.map((g) => html`<label class="check chip" key=${g}>
+        <div class="chips chips-grid">${GROUPS.map((g) => html`<label class="check chip" key=${g}>
           <input type="checkbox" checked=${groups.includes(g)} disabled=${locked} onChange=${() => toggleGroup(g)} /> ${GROUP_LABEL[g]}</label>`)}</div>
-        <p class="muted small">${slots.length} Positionen: ${slots.map(slotLabel).join(', ')}.
+        <p class="muted small"><strong>${slots.length} Positionen:</strong> ${f.gender === 'mixed' && f.lineup_mode === 'mf' ? 'je ein Mann und eine Frau in ' : 'je eine in '}${
+          groups.length ? GROUPS.filter((g) => groups.includes(g)).map((g) => GROUP_LABEL[g]).join(', ') : '–'}${
+          +f.wildcards > 0 ? `, dazu ${+f.wildcards === 1 ? 'eine Wildcard' : `${+f.wildcards} Wildcards`} (beliebige Disziplin)` : ''}.
           ${slots.length > +f.roster_size ? html`<strong class="err-text"> Der Kader muss mindestens ${slots.length} Athleten haben.</strong>` : ''}</p>
       </div>`}
     <label>Draft-Modus
