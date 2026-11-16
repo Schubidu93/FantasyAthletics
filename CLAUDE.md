@@ -72,4 +72,4 @@
 - Ideen für später: 50-%-Regel (Athleten, die die meisten Punkte außerhalb der Laufdisziplinen holen, ausschließen – mit Ausnahmeliste),
   Startlisten, Verletzungen/Pausen markieren.
 - LADV als Zusatzquelle: automatisches Auslesen laut Nutzungsbedingungen verboten, API-Keys derzeit nicht vergeben
-  (siehe `research/ladv-notizen.md`). Erst wieder angehen, wenn ein Key vorliegt.
+  (siehe `research/fremdquellen-notizen.md`). Erst wieder angehen, wenn ein Key vorliegt.
