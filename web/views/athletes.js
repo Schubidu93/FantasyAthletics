@@ -8,7 +8,10 @@ export function Riders({ c }) {
   // Punkte des gewählten Jahres; bei Sortierung nach Pool-Rang die des laufenden Jahres
   // gewähltes Jahr noch ohne Ergebnisse (z. B. Jahresanfang) → neuestes Jahr mit Ergebnissen
   const ys = (years.data || []).map(String);
-  const sel = sort === 'rank' || !ys.length || ys.includes(sort) ? sort : ys[0];
+  // Pool-Rang = Reihenfolge nach den Punkten im Vorjahr des Spieljahrs → eigene Sortierung nur, wenn es dieses Jahr nicht gibt
+  const gy = useLoad(() => rpc('game_year'), []);
+  const showRank = !ys.includes(String((gy.data || new Date().getFullYear()) - 1));
+  const sel = (sort === 'rank' && showRank) || (sort !== 'rank' && (!ys.length || ys.includes(sort))) ? sort : ys[0] || sort;
   const year = sel === 'rank' ? +(ys[0] || new Date().getFullYear()) : +sel;
   const pts = useLoad(() => rpcAll('athlete_points', { p_gender: c.league.gender, p_year: year }), [c.league.gender, year]);
   const [term, setTerm] = useState('');
@@ -44,7 +47,7 @@ export function Riders({ c }) {
       </select>
       <select value=${sel} onChange=${(e) => setSort(e.target.value)}>
         ${(years.data?.length ? years.data : [year]).map((yy) => html`<option value=${String(yy)}>Sortiert nach Punkten ${yy}</option>`)}
-        <option value="rank">Sortiert nach Pool-Rang</option>
+        ${showRank && html`<option value="rank">Sortiert nach Pool-Rang</option>`}
       </select>
     </div>
     <div class="scroll-x"><table class="tbl athletes-tbl">

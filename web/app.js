@@ -13,6 +13,7 @@ import { RiderModal } from './views/rider.js';
 import { Riders } from './views/athletes.js';
 import { Races } from './views/races.js';
 import { Calendar } from './views/calendar.js';
+import { Toplists } from './views/toplists.js';
 import { Rules } from './views/rules.js';
 import { More } from './views/more.js';
 import { Feedback } from './views/feedback.js';
@@ -85,20 +86,20 @@ function sections(c) {
     beforeDraft
       ? { key: 'draft', label: 'Draft', tabs: [['draft', 'Draft']] }
       : { key: 'team', label: 'Team', tabs: [['team', 'Kader'], ...(afterDraft ? [['waiver', 'Waiver']] : [])] },
-    { key: 'athletes', label: 'Athleten', tabs: [['athletes', 'Athleten']] },
+    { key: 'athletes', label: 'Athleten', tabs: [['athletes', 'Athleten'], ['toplists', 'Toplisten']] },
     { key: 'races', label: 'Wettkämpfe', tabs: [['races', 'Ergebnisse'], ['calendar', 'Kalender']] },
     { key: 'more', label: 'Mehr', tabs: [['more', 'Menü'], ['rules', 'Regeln'],
       ...(!beforeDraft ? [['draft', 'Draft']] : []), ...(c.isAdmin ? [['admin', 'Admin']] : [])] },
   ];
 }
 
-function LeagueShell({ id, tab, sub, sub2, session }) {
+function LeagueShell({ id, tab, sub, sub2, sub3, session }) {
   const ctx = useLoad(() => loadLeague(id, session.user.id), [id, session.user.id]);
   if (!ctx.data) return html`<div class="scroll"><main class="wrap"><${Loading} error=${ctx.error} /></main></div>`;
   const c = { ...ctx.data, reload: ctx.reload, user: session.user };
   const defaultTab = c.league.status === 'drafting' ? 'draft' : 'home';
   const t = tab || defaultTab;
-  const View = { draft: Draft, team: Team, athletes: Riders, races: Races, calendar: Calendar, rules: Rules, waiver: Waiver, results: Results,
+  const View = { draft: Draft, team: Team, athletes: Riders, races: Races, calendar: Calendar, toplists: Toplists, rules: Rules, waiver: Waiver, results: Results,
     table: Table, admin: Admin, more: More, feedback: Feedback, home: Overview }[t] || Overview;
   const secs = sections(c);
   const current = secs.find((x) => x.tabs.some(([k]) => k === t))
@@ -131,7 +132,7 @@ function LeagueShell({ id, tab, sub, sub2, session }) {
         ${current.tabs.map(([k, label]) => html`<a href=${href(k)} class=${k === t ? 'active' : ''}>${label}</a>`)}
       </nav>`}
     </header>
-    <div class="scroll" key=${t}><main class="wrap"><${View} c=${c} sub=${sub} sub2=${sub2} /></main></div>`;
+    <div class="scroll" key=${t}><main class="wrap"><${View} c=${c} sub=${sub} sub2=${sub2} sub3=${sub3} /></main></div>`;
 }
 
 // Nur dieser Bereich scrollt – Kopf und Menüleiste stehen fest (kein Inhalt unter der iPhone-Statusleiste)
@@ -152,7 +153,7 @@ function App() {
     location.hash = `#/join/${pending}`;
   }
   if (parts[0] === 'join') return html`<${Scroll}><${Join} code=${parts[1]} session=${session} /><//>`;
-  if (parts[0] === 'league') return html`<${LeagueShell} key=${parts[1]} id=${parts[1]} tab=${parts[2]} sub=${parts[3]} sub2=${parts[4]} session=${session} />`;
+  if (parts[0] === 'league') return html`<${LeagueShell} key=${parts[1]} id=${parts[1]} tab=${parts[2]} sub=${parts[3]} sub2=${parts[4]} sub3=${parts[5]} session=${session} />`;
   return html`<${Scroll}><${Home} session=${session} /><//>`;
 }
 

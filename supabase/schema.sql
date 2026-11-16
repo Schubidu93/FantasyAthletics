@@ -1813,6 +1813,23 @@ language sql stable security definer set search_path = public as $$
    order by t.year desc, t.score desc;
 $$;
 
+-- Toplisten-Ansicht: vorhandene Jahre/Disziplinen/Geschlechter und die besten Einträge einer Liste
+create or replace function toplist_index()
+returns table (year int, discipline text, gender text, entries int)
+language sql stable security definer set search_path = public as $$
+  select t.year, t.discipline, a.gender, count(*)::int
+    from toplist_entries t join athletes a on a.id = t.athlete_id
+   group by 1, 2, 3 order by 1 desc, 2, 3;
+$$;
+create or replace function toplist(p_year int, p_discipline text, p_gender text, p_limit int default 20)
+returns table (rank int, athlete_id text, name text, nation text, mark text, score int)
+language sql stable security definer set search_path = public as $$
+  select (rank() over (order by t.score desc))::int, t.athlete_id, a.name, a.nation, t.mark, t.score
+    from toplist_entries t join athletes a on a.id = t.athlete_id
+   where t.year = p_year and t.discipline = p_discipline and a.gender = p_gender
+   order by t.score desc, a.name limit least(coalesce(p_limit, 20), 200);
+$$;
+
 -- Spieljahr: die Saison, für die gerade gedraftet bzw. gespielt wird. Ab 1. November zählt das Folgejahr
 -- (Draft für die neue Saison); von Hand festlegbar über scoring_config.game_year.
 create or replace function game_year() returns int
@@ -2016,19 +2033,23 @@ create table if not exists athlete_season_stats (
   primary key (athlete_id, year)
 );
 
+-- Platz über Männer und Frauen hinweg (für Mixed-Ligen)
+alter table athlete_season_stats add column if not exists overall_rank int;
+alter table athlete_season_stats add column if not exists overall_athletes int;
+
 create or replace function refresh_season_stats(p_year int) returns int
 language plpgsql security definer set search_path = public as $$
 declare n int;
 begin
   delete from athlete_season_stats where year = p_year;
-  insert into athlete_season_stats (athlete_id, year, season_rank, points, athletes)
+  insert into athlete_season_stats (athlete_id, year, season_rank, points, athletes, overall_rank, overall_athletes)
   with s as (
     select r.athlete_id, x.gender, sum(r.points) pts
       from results r join athletes x on x.id = r.athlete_id
      where r.result_date >= make_date(p_year, 1, 1) and r.result_date <= make_date(p_year, 12, 31)
      group by 1, 2)
   select athlete_id, p_year, (rank() over (partition by gender order by pts desc))::int, pts,
-         (count(*) over (partition by gender))::int
+         (count(*) over (partition by gender))::int, (rank() over (order by pts desc))::int, (count(*) over ())::int
     from s;
   get diagnostics n = row_count;
   return n;

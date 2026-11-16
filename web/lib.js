@@ -52,7 +52,7 @@ export const fmtDate = (d) => (d ? new Date(d.length === 10 ? d + 'T00:00:00' : 
 export const fmtDateTime = (d) =>
   d ? new Date(d).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }) : '–';
 // Punkte einheitlich mit einer Nachkommastelle (468,1 · 307,0)
-export const fmtPts = (n) => (Number(n) || 0).toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+export const fmtPts = (n) => (Number(n) || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 // Fristende anzeigen: 0:00 Uhr heißt „bis Ende des Vortags“ → nur das Datum des Vortags; sonst Datum mit Uhrzeit
 export function fmtUntil(ts, { weekday = false } = {}) {
   if (!ts) return '–';
@@ -109,11 +109,31 @@ export function waAthleteUrl(r) {
 }
 export const waResultUrl = (competitionId, eventId) =>
   `https://worldathletics.org/competition/calendar-results/results/${competitionId}${eventId ? `?eventId=${eventId}` : ''}`;
-// Geschlecht als umrandeter Buchstabe: blaues M, rosa F (g = 'men'/'women' oder 'M'/'W')
+// Geschlecht als kleines farbiges Abzeichen: blaues M, rosa F (g = 'men'/'women' oder 'M'/'W')
 export const SexBadge = ({ g }) => {
   const f = g === 'women' || g === 'W' || g === 'F';
-  return html`<span class=${`sex ${f ? 'sex-f' : 'sex-m'}`} title=${f ? 'Frauen' : 'Männer'}>${f ? 'F' : 'M'}</span>`;
+  return html`<span class=${`badge ${f ? 'b-f' : 'b-m'}`} title=${f ? 'Frauen' : 'Männer'}>${f ? 'F' : 'M'}</span>`;
 };
+// WA-Wettkampfkategorie als farbiges Abzeichen (wie im Kalender-Widget): DL/OW/DF/GW lila, GL blau, A grün, sonst grau
+const CAT_CLASS = { OW: 'b-top', DF: 'b-top', GW: 'b-top', DL: 'b-top', GL: 'b-gl', A: 'b-a' };
+export const CatBadge = ({ cat }) => (cat ? html`<span class=${`badge ${CAT_CLASS[cat] || 'b-low'}`} title="Kategorie bei World Athletics">${cat}</span>` : '');
+// Sortierschlüssel für Disziplinen: Strecke in Metern (800 m < 1500 m < Meile < … < Marathon)
+export function discMeters(label) {
+  const s = String(label || '');
+  if (/Halbmarathon|Half Marathon/i.test(s)) return 21097;
+  if (/Marathon/i.test(s)) return 42195;
+  if (/Meile|Mile/i.test(s)) return 1609;
+  const km = s.match(/([\d.,]+)\s*km/i);
+  if (km) return parseFloat(km[1].replace(',', '.')) * 1000;
+  const m = s.match(/([\d.]+)\s*(m\b|Metres)/);
+  return m ? parseFloat(m[1].replace('.', '')) : 1e6;
+}
+// Reihenfolge der Läufe: Vorläufe, Viertel-, Halbfinale, Finale; jeweils 1, 2, 3 …
+export function raceOrder(r) {
+  const m = String(r || '').match(/^(R|H|QF|SF|F)(\d*)$/);
+  if (!m) return 500;
+  return { R: 0, H: 100, QF: 200, SF: 300, F: 400 }[m[1]] + (+m[2] || 0);
+}
 // Positionsname mit Geschlechts-Kennzeichen
 export function SlotLabel({ slot }) {
   const [g, sex] = slot.split(':');
