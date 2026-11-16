@@ -13,7 +13,7 @@
 // Umgebung: SUPABASE_URL, SUPABASE_SERVICE_KEY, MODUS, optional WA_API_URL/WA_API_KEY,
 //           RESULT_YEARS (nur MODUS=voll, z. B. "2026,2025"), WA_CONCURRENCY
 import { adminClient, chunked, currentYear, rpc, run, selectAll } from "./supabase";
-import { combinedPlace, fetchEventRaces, isPrelimRace, isSplitFinal, prelimPlacing, PRELIM_CATEGORIES, type Race } from "./placings";
+import { championshipPlacing, combinedPlace, fetchEventBlocks, isPrelimRace, isSplitFinal, mainRaces, prelimPlacing, PRELIM_CATEGORIES, type EventBlock } from "./placings";
 import { ApiAuthError, RateLimitError, discoverApiConfig, fetchAthleteResults, fetchRecentResults, FEED_LIMIT, sleep, type ApiConfig, type FeedResult } from "./wa";
 
 const CONCURRENCY = Number(process.env.WA_CONCURRENCY ?? 2);
@@ -169,12 +169,18 @@ await run(db, async () => {
   const key = (r: Row) => [r.athlete_id, r.date, r.discipline, r.wa_race, r.competition].join("|");
   const unique = [...new Map(rows.map((r) => [key(r), r])).values()];
 
-  const placings = years.length ? await resolveEventPlacings(unique, api, years, names) : "";
+  const { summary: placings, champs } = years.length ? await resolveEventPlacings(unique, api, years, names) : { summary: "", champs: [] };
 
   await chunked(unique, 500, async (chunk) => {
     const { error } = await db.from("wa_results").upsert(chunk, { onConflict: "athlete_id,date,discipline,wa_race,competition" });
     if (error) throw new Error(`wa_results: ${error.message}`);
   });
+  // Eingebettete Meisterschaften: Platz separat setzen (nicht im Upsert, damit Einträge des Admins bleiben)
+  for (const c of champs) {
+    const { error } = await db.from("wa_results").update({ champ_place: c.place, champ_category: c.category })
+      .match({ athlete_id: c.athlete_id, date: c.date, discipline: c.discipline, wa_race: c.wa_race, competition: c.competition });
+    if (error) throw new Error(`Meisterschaftsplatz: ${error.message}`);
+  }
   // Ergebnisse, die WA nicht mehr führt (Korrekturen), für die erfolgreich geladenen Athleten entfernen
   for (const year of years) {
     const slugs = loaded.filter((l) => l.year === year).map((l) => l.slug);
@@ -242,33 +248,56 @@ await run(db, async () => {
  * Bereits aufgelöste Ergebnisse werden aus der DB übernommen, jedes Event nur einmal geladen.
  */
 async function resolveEventPlacings(rows: Row[], api: ApiConfig, years: number[], names: Map<string, string>) {
+  type Champ = { athlete_id: string; date: string; discipline: string; wa_race: string; competition: string; place: number; category: string | null };
+  const champs: Champ[] = [];
   const split = rows.filter((r) => isSplitFinal(String(r.wa_race)));
   const prelims = rows.filter((r) => isPrelimRace(String(r.wa_race)) && PRELIM_CATEGORIES.includes(String(r.category)));
-  if (!split.length && !prelims.length) return "keine Detailergebnisse nötig";
+  // Meisterschaft im offenen Rennen (z. B. „Hannover Marathon - German Marathon Ch.“): eigener Block mit eigener Wertung
+  const champRows = rows.filter((r) => /\bCh\.|Championships?/i.test(String(r.competition)) && r.wa_competition_id && r.wa_event_id);
+  if (!split.length && !prelims.length && !champRows.length) return { summary: "keine Detailergebnisse nötig", champs };
 
   const key = (r: Row) => [r.athlete_id, r.date, r.discipline, r.wa_race, r.competition].join("|");
   type Known = { athlete_id: string; date: string; discipline: string; wa_race: string; competition: string;
-                 race: string; place: number | null; placing_round: string | null; placing_place: number | null };
+                 race: string; place: number | null; placing_round: string | null; placing_place: number | null;
+                 category: string | null; champ_place: number | null };
   const known = new Map<string, Known>();
   const prev = await selectAll<Known>((a, b) => db.from("wa_results")
-    .select("athlete_id, date, discipline, wa_race, competition, race, place, placing_round, placing_place")
-    .or("race.eq.F,placing_round.not.is.null").neq("wa_race", "F").neq("wa_race", "")
+    .select("athlete_id, date, discipline, wa_race, competition, race, place, placing_round, placing_place, category, champ_place")
+    .or("and(race.eq.F,wa_race.neq.F,wa_race.neq.),placing_round.not.is.null,champ_place.not.is.null")
     .gte("date", `${Math.min(...years)}-01-01`).lte("date", `${Math.max(...years)}-12-31`)
     .order("id").range(a, b));
   for (const r of prev) known.set(key(r), r);
   const who = (r: Row) => ({ id: Number(String(r.athlete_id).slice(3)), name: names.get(String(r.athlete_id)) });
 
-  const events = new Map<string, Promise<Race[]>>();
-  const racesFor = (r: Row) => {
+  const events = new Map<string, Promise<EventBlock[]>>();
+  const blocksFor = (r: Row) => {
     const ek = `${r.wa_competition_id}:${r.wa_event_id}`;
     if (!events.has(ek)) {
-      events.set(ek, sleep(300).then(() => fetchEventRaces(api, Number(r.wa_competition_id), Number(r.wa_event_id))).catch((e) => {
+      events.set(ek, sleep(300).then(() => fetchEventBlocks(api, Number(r.wa_competition_id), Number(r.wa_event_id))).catch((e) => {
         console.warn(`Detailergebnisse ${ek}: ${(e as Error).message}`);
         return [];
       }));
     }
     return events.get(ek)!;
   };
+  const racesFor = async (r: Row) => mainRaces(await blocksFor(r));
+
+  let champCount = 0;
+  for (const r of champRows) {
+    const prev = known.get(key(r));
+    if (prev?.champ_place) {
+      // schon bekannt (auch von Hand): Kategorie der Hauptwertung beibehalten
+      if (prev.category) r.category = prev.category;
+      continue;
+    }
+    const c = championshipPlacing(await blocksFor(r), who(r));
+    if (!c) continue;
+    if (c.mainCategory) r.category = c.mainCategory;
+    champs.push({ athlete_id: String(r.athlete_id), date: String(r.date), discipline: String(r.discipline), wa_race: String(r.wa_race),
+                  competition: String(r.competition), place: c.place, category: c.category });
+    champCount++;
+    console.log(`Meisterschaft: ${key(r)} → ${c.title} Platz ${c.place} (${c.category}), Rennen ${c.mainCategory}`);
+  }
 
   const stats = { finals: 0, finalsOpen: 0, prelims: 0, prelimsOpen: 0 };
   for (const r of split) {
@@ -302,6 +331,6 @@ async function resolveEventPlacings(rows: Row[], api: ApiConfig, years: number[]
       stats.prelimsOpen++;
     }
   }
-  return `geteilte Finals: ${stats.finals} kombiniert, ${stats.finalsOpen} offen; ` +
-    `Vorrunden: ${stats.prelims} gewertet, ${stats.prelimsOpen} ohne Wertung`;
+  return { summary: `geteilte Finals: ${stats.finals} kombiniert, ${stats.finalsOpen} offen; ` +
+    `Vorrunden: ${stats.prelims} gewertet, ${stats.prelimsOpen} ohne Wertung; Meisterschaften im offenen Rennen: ${champCount}`, champs };
 }

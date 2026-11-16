@@ -113,9 +113,9 @@ export function Rules({ c }) {
           Eigene Tabellen für 800/1500 m, 5000 m/Hindernis, 10.000 m, Marathon und Straße; passt eine Disziplin zu mehreren Tabellen, zählt die bessere.</li>
         <li><strong>Vorläufe und Halbfinals</strong> bringen nur bei OW, DF, GW und GL Platzierungspunkte – und nur in der letzten Runde vor dem Finale:
           qualifiziert (Q oder q) = fester Wert, ausgeschieden = Gesamtplatz der Runde (erst alle Qualifizierten, dann die anderen nach Zeit).</li>
-        <li><strong>Meisterschaft im offenen Rennen</strong> (z. B. Deutsche Marathon-Meisterschaft im Frankfurt-Marathon): Der Admin trägt den
-          Meisterschaftsplatz ein. Es zählt der höhere Wert: Platzierungspunkte für den Platz im Rennen oder für den Meisterschaftsplatz in Kategorie B
-          (Deutsche Meisterschaft).</li>
+        <li><strong>Meisterschaft im offenen Rennen</strong> (z. B. Deutsche Marathon-Meisterschaft im Hannover-Marathon): World Athletics führt
+          das offene Rennen und die Meisterschaft getrennt, jeweils mit eigener Kategorie und eigenem Platz. Die App übernimmt beides; es zählt der höhere
+          Wert aus Platz im Rennen und Meisterschaftsplatz (z. B. Kategorie B, Platz 1). Fehlt etwas, kann der Admin den Meisterschaftsplatz eintragen.</li>
         <li><strong>Finals mit mehreren Läufen</strong> (z. B. 10.000 m in zwei Läufen): Platz über alle Läufe nach Zeit, gewertet wie ein Finale.</li>
         <li><strong>Cross:</strong> World Athletics vergibt hier statt WA-Punkten für die Zeit einen festen Wert je Platz und Kategorie
           (z. B. GL-Sieg 1200, GL-3. 1165). Gewertet wird wie eine Leistung: (Wert − ${cfg ? cfg.perf_threshold : 1000}, nur darüber)
