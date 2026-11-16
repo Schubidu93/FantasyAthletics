@@ -43,7 +43,7 @@ async function loadRider(slug, league) {
   // Liga-Admins dürfen Rekorde an Ergebnissen eintragen
   const admin = !!lg && lg.admin_user === (await sb.auth.getUser()).data?.user?.id;
   const rows = await all(() => sb.from('wa_results')
-    .select('id,date,competition,discipline,category,race,place,wa_race,wa_place,placing_round,placing_place,mark,result_score,remark,wa_competition_id,wa_event_id,source,source_url,country,record,relay')
+    .select('id,date,competition,discipline,category,race,place,wa_race,wa_place,placing_round,placing_place,mark,result_score,remark,wa_competition_id,wa_event_id,source,source_url,country,record,relay,champ_place,champ_category')
     .eq('athlete_id', slug).gte('date', `${FIRST_YEAR}-01-01`).order('date', { ascending: false }).order('id'));
   const pts = Object.fromEntries((await all(() => sb.from('results').select('wa_result_id,points,perf_points,placing_points,record_points,pb_points')
     .eq('athlete_id', slug).order('id'))).map((r) => [r.wa_result_id, r]));
@@ -105,6 +105,11 @@ export function RiderModal() {
     try { await rpc('set_result_record', { p_id: x.id, p_record: v || null }); setData(await loadRider(slug, L)); }
     catch (e) { setError(e.message); }
   };
+  // Meisterschaft im offenen Rennen (z. B. DM im Frankfurt-Marathon): Platz in der Meisterschaftswertung, Kategorie B
+  const setChamp = async (x, v) => {
+    try { await rpc('set_result_champ', { p_id: x.id, p_place: v === '' ? null : +v, p_category: 'B' }); setData(await loadRider(slug, L)); }
+    catch (e) { setError(e.message); }
+  };
   const toTop = (t) => { if (!L) return; setSlug(null); location.hash = `#/league/${L}/toplists/${t.year}/${encodeURIComponent(t.discipline)}/${r?.gender || 'men'}`; };
   const go = (x) => { if (!L || !x.wa_competition_id) return; setSlug(null); location.hash = `#/league/${L}/races/wa-c${x.wa_competition_id}`; };
 
@@ -150,7 +155,8 @@ export function RiderModal() {
           <div class="res-table">${shown.map((x) => html`<div key=${x.id} class=${`res-row ${L && x.wa_competition_id ? 'clickable' : ''}`} onClick=${() => go(x)}>
             <span class="res-date">${shortDate(x.date)}</span>
             <span class="res-what"><b>${x.relay ? `Staffel ${RELAYS[x.relay]?.label || x.relay}` : discWithKm(x.discipline, x.competition)}${x.race && x.race !== 'F' ? ` · ${raceLabel(x.race)}` : ''} · ${x.mark || '–'}</b>
-              ${(x.record || Number(x.pts?.pb_points) > 0) && html`<span class="res-tags">
+              ${(x.record || x.champ_place || Number(x.pts?.pb_points) > 0) && html`<span class="res-tags">
+                ${x.champ_place && html`<span>${x.champ_place === 1 ? '🏆 Meister' : `Meisterschaft: ${x.champ_place}. Platz`}</span>`}
                 ${x.record && html`<span><span class="badge b-rec">${x.record}</span> ${RECORD[x.record]}</span>`}
                 ${Number(x.pts?.pb_points) > 0 && html`<span>${Number(x.pts.pb_points) < Number(x.pbFull)
                   ? html`<span class="badge b-pb">=PB</span> Bestleistung eingestellt` : html`<span class="badge b-pb">PB</span> Bestleistung`}</span>`}</span>`}
@@ -163,9 +169,11 @@ export function RiderModal() {
               ].filter(Boolean).join(' + ')].filter(Boolean).join(' · ')}</small>`}
               ${x.source === 'manual' && html`<small class="muted">Nachtrag${x.source_url ? html` · <a href=${x.source_url} target="_blank" rel="noopener"
                 onClick=${(e) => e.stopPropagation()}>Quelle</a>` : ''}${!x.pts ? ' · zählt nicht (World Athletics führt das Ergebnis oder unter der Schwelle)' : ''}</small>`}
-              ${data.admin && editRec && html`<small onClick=${(e) => e.stopPropagation()}><select class="mini" value=${x.record || ''}
+              ${data.admin && editRec && html`<small class="row" onClick=${(e) => e.stopPropagation()}><select class="mini" value=${x.record || ''}
                 onChange=${(e) => setRecord(x, e.target.value)} aria-label="Rekord"><option value="">kein Rekord</option>
-                ${Object.entries(RECORD).map(([k, l]) => html`<option value=${k}>${l}</option>`)}</select></small>`}
+                ${Object.entries(RECORD).map(([k, l]) => html`<option value=${k}>${l}</option>`)}</select>
+                <label class="mini-label">Meisterschaft Platz <input class="mini" type="number" min="1" style="width:4em" value=${x.champ_place ?? ''}
+                  onChange=${(e) => setChamp(x, e.target.value)} /></label></small>`}
               ${x.wa_competition_id && html`<small><a href=${waResultUrl(x.wa_competition_id, x.wa_event_id)} target="_blank" rel="noopener"
                 onClick=${(e) => e.stopPropagation()}>WA-Ergebnis ↗</a></small>`}</span>
             <span class="res-place">${placeLabel(x)}</span>
@@ -178,7 +186,7 @@ export function RiderModal() {
               <td class="muted">${t.year}</td><td>${discLabel(t.discipline)}</td><td class="num"><strong>${t.rank}.</strong></td>
               <td class="num">${t.mark}</td></tr>`)}</tbody></table></details>`}`}
       <p class="muted small">Quelle: World Athletics, Nachträge mit eigener Quelle. Antippen öffnet den Wettkampf bzw. die Topliste.
-        ${data?.admin && html` <button type="button" class="linkish small" onClick=${() => setEditRec(!editRec)}>${editRec ? 'Fertig' : 'Rekord von Hand eintragen'}</button>`}</p>
+        ${data?.admin && html` <button type="button" class="linkish small" onClick=${() => setEditRec(!editRec)}>${editRec ? 'Fertig' : 'Rekord/Meisterschaft von Hand eintragen'}</button>`}</p>
     </div>
   </div>`;
 }

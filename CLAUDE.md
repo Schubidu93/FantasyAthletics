@@ -69,6 +69,7 @@
   (schneller als alles davor = 1, gleich = 0,5 „=PB“; eingestellte Rekorde `=DR/=ER/=WR` halb; ab Schwelle, keine Zwischenzeiten/Staffeln; Halle = „… Short Track“).
 - Rekorde: `importer/sync-records.ts` liest die All-time-Listen (alle Leistungen) DE/Europa/Welt, `recordMarks()` erkennt Rekorde ab 2025
   (auch inzwischen verbesserte) → `apply_records` setzt `wa_results.record` (DR/ER/WR, nur hochstufen) → Bonus aus `scoring_config.record_*`.
+  Meisterschaft im offenen Rennen: `wa_results.champ_place/champ_category` (Admin, `set_result_champ`), Platzierung = höherer Wert.
   Zwischenzeiten (`_is_split`: „… - Split times“ / ST) geben nur den Rekord-Bonus. „Datenbank einrichten“ rechnet danach alle Punkte neu.
 - Kalender: `importer/sync-calendar.ts` → `calendar_events` (WA-Kalender: weltweit ab GL, Europa ab A, Deutschland ab E;
   Programm aus `getCompetitionOrganiserInfo`, Filter in `importer/calendar-filter.ts`).

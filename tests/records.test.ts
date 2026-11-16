@@ -88,3 +88,23 @@ describe("Rekorde aus All-time-Listen", () => {
     expect((await pts())[0][2]).toBe(100);
   });
 });
+
+describe("Meisterschaft im offenen Rennen", () => {
+  it("zählt der Meisterschaftsplatz (Kategorie B), wenn er mehr bringt als der Platz im Rennen", async () => {
+    await athlete(db, 2, "Tom THURLEY", "men", "Marathon", 1150);
+    await db.query(`insert into wa_results (athlete_id, date, competition, discipline, category, race, wa_race, place, wa_place, mark, result_score)
+      values ('wa-2', '${Y}-10-25', 'Frankfurt Marathon', 'Marathon', 'GL', 'F', 'F', 15, 15, '2:09:30', 1150)`);
+    await db.query("select rebuild_results(null)");
+    const plc = async () => Number((await db.one("select placing_points p from results where athlete_id = 'wa-2'")).p);
+    const before = await plc();
+    const id = (await db.one("select id from wa_results where athlete_id = 'wa-2'")).id;
+    await db.query("select set_result_champ($1, 1)", [id]);
+    const b1 = Number((await db.one(`select max(ps.points) p from placing_scores ps join disciplines d on ps.placing_table = any (d.placing_tables)
+      where d.name = 'Marathon' and ps.category = 'B' and ps.race_type = 'F' and ps.place = 1`)).p);
+    const f = Number((await db.one("select factor from disciplines where name = 'Marathon'")).factor);
+    expect(await plc()).toBeCloseTo(Math.max(before, Math.round(b1 * 0.1 * f * 100) / 100), 2);
+    expect(await plc()).toBeGreaterThan(before);
+    await db.query("select set_result_champ($1, null)", [id]);
+    expect(await plc()).toBe(before);
+  });
+});
