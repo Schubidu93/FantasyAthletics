@@ -1,66 +1,20 @@
-robots: 200 https://ladv.de/robots.txt (581 Zeichen, 0 Links)
-robots.txt:
-
-
-User-agent: *
-Allow: /
-Disallow: /oav/athletendaten/
-Disallow: /oav/datenaustausch/
-Disallow: /urkundendruck/
-Disallow: /api/
-Disallow: /dlvApi/
-Sitemap: https://ladv.de/sitemap/index
-Sitemap: https://ladv.de/sitemap/athletindex
-
-User-Agent: AhrefsBot
-Crawl-Delay: 60
-
-User-agent: msnbot
-Crawl-delay: 60
-
-User-agent: bingbot
-Crawl-delay: 60
-
-User-agent: Slurp
-Crawl-delay: 60
-
-User-agent: AblidaNo5
-Crawl-delay: 10
-
-User-agent: PetalBot
-Crawl-delay: 1
-
-User-agent: ClaudeBot
-Disallow: /
-
-User-agent: GPTBot
-Disallow: /
-
-User-agent: grapeshot
-Disallow: /
-
-User-agent: ImagesiftBot
-Disallow: /
-
-
-
-start: 200 https://ladv.de/ (4202 Zeichen, 126 Links)
-Interessante Links: https://ladv.de/ausschreibung/suche https://ladv.de/baden/ergebnisse https://ladv.de/bayern/ergebnisse https://ladv.de/berlin/ergebnisse https://ladv.de/brandenburg/ergebnisse https://ladv.de/bremen/ergebnisse https://ladv.de/hamburg/ergebnisse https://ladv.de/hessen/ergebnisse https://ladv.de/mecklenburg-vorpommern/ergebnisse https://ladv.de/niedersachsen/ergebnisse https://ladv.de/nordrhein/ergebnisse https://ladv.de/pfalz/ergebnisse https://ladv.de/rheinhessen-rheinland/ergebnisse https://ladv.de/saarland/ergebnisse https://ladv.de/sachsen/ergebnisse https://ladv.de/sachsen-anhalt/ergebnisse https://ladv.de/schleswig-holstein/ergebnisse https://ladv.de/thueringen/ergebnisse https://ladv.de/westfalen/ergebnisse https://ladv.de/wuerttemberg/ergebnisse https://ladv.de/ergebnisse https://ladv.de/leistungsdatenbank https://ladv.de/leistungsdatenbank/athletenprofil https://ladv.de/leistungsdatenbank/trailer https://ladv.de/leistungsdatenbank/strecken https://ladv.de/ausschreibung/detail/49169/4.-Haldenwanger-Kinderleichtathletikwettkampf-Haldenwang-%28Landkreis-Oberallg%C3%A4u%29.htm https://blog.ladv.de/2025/08/50-millionen-besucher/ https://ladv.de/hilfe https://ladv.de/page/view/datenschutz.htm https://ladv.de/page/view/nutzungsbedingungen.htm https://ladv.de/page/view/agb.htm https://ladv.de/page/view/impressum.htm
-link-0: 200 https://ladv.de/ausschreibung/suche (7551 Zeichen, 90 Links)
-link-1: 200 https://ladv.de/baden/ergebnisse (5306 Zeichen, 168 Links)
-link-2: 200 https://ladv.de/bayern/ergebnisse (5395 Zeichen, 172 Links)
-link-3: 200 https://ladv.de/berlin/ergebnisse (5214 Zeichen, 167 Links)
-link-4: 200 https://ladv.de/brandenburg/ergebnisse (5297 Zeichen, 166 Links)
-link-5: 200 https://ladv.de/bremen/ergebnisse (5185 Zeichen, 165 Links)
-link-6: 200 https://ladv.de/hamburg/ergebnisse (5140 Zeichen, 167 Links)
-link-7: 200 https://ladv.de/hessen/ergebnisse (5276 Zeichen, 168 Links)
-link-8: 200 https://ladv.de/mecklenburg-vorpommern/ergebnisse (5219 Zeichen, 168 Links)
-link-9: 200 https://ladv.de/niedersachsen/ergebnisse (5202 Zeichen, 169 Links)
-link-10: 200 https://ladv.de/nordrhein/ergebnisse (5180 Zeichen, 167 Links)
-link-11: 200 https://ladv.de/pfalz/ergebnisse (5414 Zeichen, 166 Links)
-pfad-0: 404 https://ladv.de/api (1819 Zeichen, 91 Links)
-pfad-1: 404 https://ladv.de/api/doc (1819 Zeichen, 91 Links)
-pfad-2: 404 https://ladv.de/agb (1819 Zeichen, 91 Links)
-pfad-3: 404 https://ladv.de/impressum (1819 Zeichen, 91 Links)
-pfad-4: 404 https://ladv.de/suche?query=Mohumed (1819 Zeichen, 91 Links)
-pfad-5: 404 https://ladv.de/athleten?query=Mohumed (1819 Zeichen, 91 Links)
+nutzungsbedingungen: 200 https://ladv.de/page/view/nutzungsbedingungen.htm (26960 Zeichen, 101 Links)
+agb: 200 https://ladv.de/page/view/agb.htm (14310 Zeichen, 101 Links)
+impressum: 200 https://ladv.de/page/view/impressum.htm (2132 Zeichen, 92 Links)
+leistungsdatenbank: 200 https://ladv.de/leistungsdatenbank (2035 Zeichen, 90 Links)
+athletenprofil: 200 https://ladv.de/leistungsdatenbank/athletenprofil (1644 Zeichen, 91 Links)
+hilfe: 200 https://ladv.de/hilfe (2413 Zeichen, 105 Links)
+sitemap/athletindex: 16065 Zeichen; Anfang: <?xml version='1.0' encoding='UTF-8'?>
+<sitemapindex xmlns='http://www.sitemaps.org/schemas/sitemap/0.9' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/siteindex.xsd'>
+  <sitemap>
+    <loc>https://ladv.de/sitemap/athlet/0</loc>
+    <lastmod>2026-11-16</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://ladv.de/sitemap/athlet/5000</loc>
+    <lastmod>2026-11-16</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://ladv.de/sitemap/athlet/10000</loc>
+    <lastmod>2026-11-16</lastmod>
+  
