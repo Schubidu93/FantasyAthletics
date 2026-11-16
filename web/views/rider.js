@@ -123,11 +123,12 @@ export function RiderModal() {
         <button class="ghost small" onClick=${() => setSlug(null)} aria-label="Schließen">✕</button>
       </div>
       ${error ? html`<p class="note err">${error}</p>` : !data ? html`<p class="muted">Lädt …</p>` : html`
-        ${data.pbs.length > 0 && html`<details class="toplists" open><summary class="small">Bestleistungen</summary>
-          <ul class="list compact pb-list">${data.pbs.map((p) => html`<li key=${p.discipline} class=${p.date >= `${thisYear}-01-01` ? 'pb-new' : ''}>
-            <span>${discLabel(p.discipline)}</span><span><strong>${p.mark}</strong> <span class="muted small">${dateShort(p.date)}${p.result_score
-              ? ` · ${p.result_score}` : ''}</span></span></li>`)}</ul>
-          <p class="muted small">Zahl hinten: WA-Punkte. Hervorgehoben: Bestleistung aus ${thisYear}.</p></details>`}
+        ${data.pbs.length > 0 && html`<details class="toplists"><summary class="small">Bestleistungen (${data.pbs.length})</summary>
+          <table class="pb-tbl"><thead><tr><th>Disziplin</th><th class="num">Zeit</th><th class="num">Datum</th><th class="num">WA-P.</th></tr></thead>
+            <tbody>${data.pbs.map((p) => html`<tr key=${p.discipline} class=${p.date >= `${thisYear}-01-01` ? 'pb-new' : ''}>
+              <td>${discLabel(p.discipline)}</td><td class="num"><strong>${p.mark}</strong></td>
+              <td class="num muted">${dateShort(p.date)}</td><td class="num muted">${p.result_score || ''}</td></tr>`)}</tbody></table>
+          <p class="muted small">Farbig: Bestleistung aus ${thisYear}.</p></details>`}
         <div class="row between">
           ${years.length > 1 ? html`<div class="seg small">${years.map((yy) =>
             html`<button class=${yy === y ? 'active' : ''} onClick=${() => setYear(yy)}>${yy}</button>`)}</div>` : html`<span class="muted small">${y || ''}</span>`}
