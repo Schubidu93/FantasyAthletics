@@ -17,6 +17,12 @@ function placeLabel(x) {
   return final && x.place <= 3 ? html`<span class=${`medal m${x.place}`}>${x.place}.</span>` : `${x.place}.`;
 }
 // Zusatz zum Lauf: kombinierte Platzierung bzw. Wertung der Runde vor dem Finale
+// Wettkampf kurz: Name vor dem ersten Komma, dazu der Ort (letzter Teil), wenn er nicht schon im Namen steht
+function compShort(c) {
+  const [main, ...rest] = String(c || '').replace(/\s+-\s+(Diamond Discipline|Split times)$/i, '').split(', ');
+  const city = rest.length ? rest[rest.length - 1].replace(/\s*\(i\)$/, '') : '';
+  return city && !main.includes(city) ? `${main} · ${city}` : main;
+}
 // „18.07.26“
 const dateShort = (d) => (d ? `${d.slice(8, 10)}.${d.slice(5, 7)}.${d.slice(2, 4)}` : '');
 const isSplit = (x) => /split time/i.test(x.competition || '') || x.remark === 'ST';
@@ -143,21 +149,24 @@ export function RiderModal() {
           <div class="res-table">${shown.map((x) => html`<div key=${x.id} class=${`res-row ${L && x.wa_competition_id ? 'clickable' : ''}`} onClick=${() => go(x)}>
             <span class="res-date">${shortDate(x.date)}</span>
             <span class="res-what"><b>${x.relay ? `Staffel ${RELAYS[x.relay]?.label || x.relay}` : discWithKm(x.discipline, x.competition)}${x.race && x.race !== 'F' ? ` · ${raceLabel(x.race)}` : ''} · ${x.mark || '–'}</b>
+              ${(x.record || Number(x.pts?.pb_points) > 0) && html`<span class="res-tags">
+                ${x.record && html`<span><span class="badge b-rec">${x.record}</span> ${RECORD[x.record]}</span>`}
+                ${Number(x.pts?.pb_points) > 0 && html`<span>${Number(x.pts.pb_points) < Number(x.pbFull)
+                  ? html`<span class="badge b-pb">=PB</span> Bestleistung eingestellt` : html`<span class="badge b-pb">PB</span> Bestleistung`}</span>`}</span>`}
+              <small title=${x.competition}>${x.country ? `${flag(x.country)} ` : ''}${compShort(x.competition)}${x.category ? html` <${CatBadge} cat=${x.category} />` : ''}</small>
               ${x.relay && html`<small class="muted">gewertet als ${discLabel(x.discipline)} (Durchschnitt je Läufer), 1/${RELAYS[x.relay]?.legs || 3} der Punkte</small>`}
-              <small>${x.country ? `${flag(x.country)} ` : ''}${x.competition}${x.category ? html` <${CatBadge} cat=${x.category} />` : ''}${x.result_score ? ` · ${x.result_score} WA-P.` : ''}</small>
+              ${runNote(x) && html`<small class="muted">${runNote(x)}</small>`}
+              ${(x.result_score || x.pts) && html`<small class="muted">${[x.result_score && `${x.result_score} WA-P.`, x.pts && [
+                `Leistung ${fmtPts(x.pts.perf_points)}`, `Platz ${fmtPts(x.pts.placing_points)}`,
+                Number(x.pts.record_points) && `Rekord ${fmtPts(x.pts.record_points)}`, Number(x.pts.pb_points) && `PB ${fmtPts(x.pts.pb_points)}`,
+              ].filter(Boolean).join(' + ')].filter(Boolean).join(' · ')}</small>`}
               ${x.source === 'manual' && html`<small class="muted">Nachtrag${x.source_url ? html` · <a href=${x.source_url} target="_blank" rel="noopener"
                 onClick=${(e) => e.stopPropagation()}>Quelle</a>` : ''}${!x.pts ? ' · zählt nicht (World Athletics führt das Ergebnis oder unter der Schwelle)' : ''}</small>`}
-              ${runNote(x) && html`<small class="muted">${runNote(x)}</small>`}
-              ${x.wa_competition_id && html`<small><a href=${waResultUrl(x.wa_competition_id, x.wa_event_id)} target="_blank" rel="noopener"
-                onClick=${(e) => e.stopPropagation()}>WA-Ergebnis ↗</a></small>`}
-              ${x.record && html`<small><span class="badge b-rec">${x.record}</span> ${RECORD[x.record]}</small>`}
-              ${Number(x.pts?.pb_points) > 0 && html`<small>${Number(x.pts.pb_points) < Number(x.pbFull)
-                ? html`<span class="badge b-pb">=PB</span> Bestleistung eingestellt` : html`<span class="badge b-pb">PB</span> persönliche Bestleistung`}</small>`}
-              ${x.pts && html`<small class="muted">Leistung ${fmtPts(x.pts.perf_points)} + Platzierung ${fmtPts(x.pts.placing_points)}${Number(x.pts.record_points)
-                ? ` + Rekord ${fmtPts(x.pts.record_points)}` : ''}${Number(x.pts.pb_points) ? ` + PB ${fmtPts(x.pts.pb_points)}` : ''}</small>`}
               ${data.admin && editRec && html`<small onClick=${(e) => e.stopPropagation()}><select class="mini" value=${x.record || ''}
                 onChange=${(e) => setRecord(x, e.target.value)} aria-label="Rekord"><option value="">kein Rekord</option>
-                ${Object.entries(RECORD).map(([k, l]) => html`<option value=${k}>${l}</option>`)}</select></small>`}</span>
+                ${Object.entries(RECORD).map(([k, l]) => html`<option value=${k}>${l}</option>`)}</select></small>`}
+              ${x.wa_competition_id && html`<small><a href=${waResultUrl(x.wa_competition_id, x.wa_event_id)} target="_blank" rel="noopener"
+                onClick=${(e) => e.stopPropagation()}>WA-Ergebnis ↗</a></small>`}</span>
             <span class="res-place">${placeLabel(x)}</span>
             <span class="res-pts">${x.pts ? fmtPts(x.pts.points) : ''}</span>
           </div>`)}</div>

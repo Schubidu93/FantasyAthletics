@@ -407,3 +407,6 @@ select.mini { font-size: .75rem; padding: 2px 6px; width: auto; min-height: 0; }
 .row.nowrap { flex-wrap: nowrap; gap: .4rem; }
 .b-pb { background: #0d9488; }
 .pb-list li.pb-new strong { color: var(--accent); }
+/* Rekord und PB direkt unter der Zeit, gut sichtbar */
+.res-tags { display: flex; flex-wrap: wrap; gap: .15rem .6rem; font-size: .8rem; font-weight: 600; color: var(--accent); margin: .1rem 0; }
+.res-tags .badge { margin-right: .15rem; }
