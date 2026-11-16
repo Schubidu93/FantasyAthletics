@@ -5,7 +5,7 @@ name: WA-Kalender erkunden
 on:
   push:
     branches: [claude/sleepy-planck-h90ess]
-    paths: [research/probe-calendar.ts, .github/workflows/probe-calendar.yml]
+    paths: [research/probe-feed.ts]
   workflow_dispatch:
 
 permissions:
@@ -22,7 +22,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx tsx research/probe-calendar.ts
+      - run: npx tsx research/probe-feed.ts
       - name: Ergebnisse committen
         if: always()
         run: |
