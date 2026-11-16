@@ -54,13 +54,16 @@
   nur `source = 'wa'`. WA-Punkte aus `scoring_coefficients` (Parabel je Disziplin/Geschlecht, nachts neu berechnet).
   RaceResult/LADV nicht automatisch abrufen (siehe `research/fremdquellen-notizen.md`).
 - Rohdaten in `wa_results`; `rebuild_results()` berechnet daraus die Punkte in `results` (die Spiellogik von UCI Fantasy liest nur `results`).
-  Pool: `toplist_entries` → `refresh_pool()` setzt `riders.uci_rank` (Pool-Rang), `event_group`, Bestleistung.
+  Pool: `toplist_entries` → `refresh_pool()` setzt `athletes.pool_rank` (Pool-Rang), `event_group`, Bestleistung.
 - Cross: Disziplin heißt nur „Cross Country“, die Distanz steht im Wettkampfnamen („… - XC 7.5km“) → `cross_km()` in der Datenbank,
   `crossKm()`/`discWithKm()` in `web/lib.js`; Distanzfaktor aus `cross_distance_factors`. Mehrere Rennen eines Wettkampfs
   (z. B. Pforzheim 1,5 und 7,5 km) haben dieselbe Wettkampf-ID und werden über die Distanz im Label getrennt.
 - Q/q: im GraphQL-Feld `qualified` steht für Q und q `false`, für Ausgeschiedene `null` (geprüft an WM 2025, Hallen-WM 2026, EM 2026).
 - worldathletics.org ist aus der Claude-Umgebung meist gesperrt; Rohdaten dann per Workflow „WA-Regeln und Beispieldaten laden“ holen.
-- Athleten-ID heißt historisch `pcs_slug` (`wa-<id>`), Wettkämpfe `wa-c<Wettkampf-ID>`. Daten ab 2025.
+- Namen: `athletes.id` = `wa-<WA-ID>` (Fremdschlüssel überall `athlete_id`), `competitions.id` = `wa-c<Wettkampf-ID>`
+  (`results.competition_id`), Fantasy-Punkte `results.points`, Pool-Rang `athletes.pool_rank`. Bis November 2026 hießen sie
+  wie bei UCI Fantasy `riders`/`pcs_slug`/`rider_slug`/`races`/`uci_*` – die Umbenennung steht oben in `schema.sql`.
+  In App-Code heißen manche Variablen noch `rider…` (z. B. `RiderCell`, `riderMap`). Daten ab 2025.
 
 ## Feedback
 

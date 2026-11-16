@@ -49,7 +49,7 @@ export function Waiver({ c }) {
     ${pending.length > 0 && html`<section class="card">
       <h3>Meine Anträge (Wunschreihenfolge)</h3>
       <ol class="list">${pending.map((p, i) => html`<li key=${p.id}>
-        <span><strong>+ ${name(p.add_rider)}</strong>${p.drop_rider ? html` <span class="muted">für</span> − ${name(p.drop_rider)}` : html` <span class="muted">(freier Platz)</span>`}
+        <span><strong>+ ${name(p.add_athlete)}</strong>${p.drop_athlete ? html` <span class="muted">für</span> − ${name(p.drop_athlete)}` : html` <span class="muted">(freier Platz)</span>`}
           ${c.league.waiver_mode === 'faab' ? html` <span class="tag">${p.bid}</span>` : ''}</span>
         <span class="row">
           <button class="small ghost" disabled=${i === 0} onClick=${() => move(i, -1)} aria-label="nach oben">↑</button>
@@ -65,7 +65,7 @@ export function Waiver({ c }) {
     ${done.length > 0 && html`<section class="card">
       <h3>Abgewickelte Anträge</h3>
       <ul class="list compact">${done.slice(0, 40).map((p) => html`<li key=${p.id}>
-        <span>${c.managerMap[p.manager_id]?.team_name}: + ${name(p.add_rider)}${p.drop_rider ? ` / − ${name(p.drop_rider)}` : ''}</span>
+        <span>${c.managerMap[p.manager_id]?.team_name}: + ${name(p.add_athlete)}${p.drop_athlete ? ` / − ${name(p.drop_athlete)}` : ''}</span>
         <span class=${p.status === 'won' ? 'tag ok' : 'tag'}>${STATUS[p.status]}${p.note ? ` – ${p.note}` : ''}</span></li>`)}</ul>
     </section>`}
   </div>`;
@@ -76,10 +76,10 @@ function FreeAgents({ c, onPick, free: freePhase }) {
   const [group, setGroup] = useState('');
   const [gender, setGender] = useState('');
   const lockedSince = c.league.last_waiver_run;
-  const locked = useMemo(() => new Set(freePhase ? [] : c.roster.filter((r) => r.released_at && lockedSince && r.released_at >= lockedSince).map((r) => r.rider_slug)), [c.roster, freePhase]);
+  const locked = useMemo(() => new Set(freePhase ? [] : c.roster.filter((r) => r.released_at && lockedSince && r.released_at >= lockedSince).map((r) => r.athlete_id)), [c.roster, freePhase]);
   const pts = useRiderPoints(c.league.gender);
-  const free = c.riders.filter((r) => !c.owner[r.pcs_slug] && r.uci_rank)
-    .sort((a, b) => (pts[b.pcs_slug] || 0) - (pts[a.pcs_slug] || 0) || (a.uci_rank ?? 1e9) - (b.uci_rank ?? 1e9));
+  const free = c.athletes.filter((r) => !c.owner[r.id] && r.pool_rank)
+    .sort((a, b) => (pts[b.id] || 0) - (pts[a.id] || 0) || (a.pool_rank ?? 1e9) - (b.pool_rank ?? 1e9));
   const t = normName(term);
   const list = free.filter((r) => (!group || riderGroup(r) === group) && (!gender || r.gender === gender)
     && (!t || t.split(' ').every((w) => normName(r.name).includes(w)))).slice(0, 100);
@@ -92,11 +92,11 @@ function FreeAgents({ c, onPick, free: freePhase }) {
       ${c.league.gender === 'mixed' && html`<select value=${gender} onChange=${(e) => setGender(e.target.value)}>
         <option value="">Männer und Frauen</option><option value="men">Männer</option><option value="women">Frauen</option></select>`}
     </div>
-    <ul class="list fa-list">${list.map((r) => html`<li key=${r.pcs_slug}>
+    <ul class="list fa-list">${list.map((r) => html`<li key=${r.id}>
       <${RiderCell} r=${r} />
       <span class="fa-side">
-        <span class="pts-chip">${fmtPts(pts[r.pcs_slug] || 0)} Pkt.</span>
-        ${locked.has(r.pcs_slug)
+        <span class="pts-chip">${fmtPts(pts[r.id] || 0)} Pkt.</span>
+        ${locked.has(r.id)
           ? html`<span class="tag" title="Abgegebene Athleten sind bis zum nächsten Stichtag gesperrt – Antrag ist trotzdem möglich">gesperrt</span>` : ''}
         <button class=${freePhase ? 'small primary' : 'small'} onClick=${() => onPick(r)}>${freePhase ? 'Holen' : 'Antrag'}</button>
       </span></li>`)}</ul>
@@ -108,16 +108,16 @@ function ClaimForm({ c, add, onDone, onCancel }) {
   const pts = useRiderPoints(c.league.gender);
   const mine = c.active.filter((r) => r.manager_id === c.me.id);
   const open = c.league.roster_size - mine.length;            // freie Kaderplätze (z. B. nach ungleichem Tausch)
-  const [drop, setDrop] = useState(open > 0 ? '' : mine[0]?.rider_slug || '');
+  const [drop, setDrop] = useState(open > 0 ? '' : mine[0]?.athlete_id || '');
   const dropOptions = html`${open > 0 && html`<option value="">– niemand (freier Kaderplatz) –</option>`}
-        ${mine.map((r) => html`<option value=${r.rider_slug}>${c.riderMap[r.rider_slug]?.name} · ${fmtPts(pts[r.rider_slug] || 0)} Pkt.${c.riderMap[r.rider_slug]?.inactive ? ' (inaktiv)' : ''}</option>`)}`;
+        ${mine.map((r) => html`<option value=${r.athlete_id}>${c.riderMap[r.athlete_id]?.name} · ${fmtPts(pts[r.athlete_id] || 0)} Pkt.${c.riderMap[r.athlete_id]?.inactive ? ' (inaktiv)' : ''}</option>`)}`;
   const [bid, setBid] = useState(0);
   const a = useAction();
   const dropRider = c.riderMap[drop];
   const faab = c.league.waiver_mode === 'faab';
   const { md, phase } = transferPhase(c);
   const freeMove = () => a.run(async () => {
-    await rpc('free_move', { p_league: c.league.id, p_add: add.pcs_slug, p_drop: drop || null });
+    await rpc('free_move', { p_league: c.league.id, p_add: add.id, p_drop: drop || null });
     onDone();
   });
   if (phase === 'free') return html`<section class="card stack">
@@ -134,7 +134,7 @@ function ClaimForm({ c, add, onDone, onCancel }) {
     <${Msg} msg=${a.msg} />
   </section>`;
   const submit = (immediate) => a.run(async () => {
-    await rpc('submit_waiver', { p_league: c.league.id, p_add: add.pcs_slug, p_drop: drop || null, p_bid: faab ? +bid : 0, p_immediate: immediate });
+    await rpc('submit_waiver', { p_league: c.league.id, p_add: add.id, p_drop: drop || null, p_bid: faab ? +bid : 0, p_immediate: immediate });
     onDone();
   });
 
@@ -158,7 +158,7 @@ function ClaimForm({ c, add, onDone, onCancel }) {
 function Compare({ c, add, drop, pts }) {
   const d = drop && c.riderMap[drop];
   const row = (sign, r) => html`<div class="cmp-row"><span class=${`cmp-sign ${sign === '+' ? 'plus' : 'minus'}`}>${sign}</span>
-    <${RiderCell} r=${r} /><span class="pts-chip">${fmtPts(pts[r.pcs_slug] || 0)} Pkt.</span></div>`;
+    <${RiderCell} r=${r} /><span class="pts-chip">${fmtPts(pts[r.id] || 0)} Pkt.</span></div>`;
   return html`<div class="cmp">${row('+', add)}${d && row('−', d)}</div>`;
 }
 

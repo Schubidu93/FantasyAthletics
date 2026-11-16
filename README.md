@@ -97,5 +97,5 @@ Der Zeitplaner läuft in der Datenbank (pg_cron, alle 15 Minuten, `scheduler_tic
 
 - World Athletics hat keine offizielle öffentliche API; der Abruf nutzt die Toplisten-Seiten und die GraphQL-Schnittstelle der
   Website mit Pausen zwischen den Abfragen.
-- Athleten heißen intern weiter `riders` mit der ID `pcs_slug` (Format `wa-<World-Athletics-ID>`), damit die Spiellogik von
+- Athleten heißen intern weiter `athletes` mit der ID `id` (Format `wa-<World-Athletics-ID>`), damit die Spiellogik von
   UCI Fantasy unverändert nutzbar bleibt.

@@ -10,25 +10,25 @@ export function Riders({ c }) {
   const ys = (years.data || []).map(String);
   const sel = sort === 'rank' || !ys.length || ys.includes(sort) ? sort : ys[0];
   const year = sel === 'rank' ? +(ys[0] || new Date().getFullYear()) : +sel;
-  const pts = useLoad(() => rpcAll('rider_points', { p_gender: c.league.gender, p_year: year }), [c.league.gender, year]);
+  const pts = useLoad(() => rpcAll('athlete_points', { p_gender: c.league.gender, p_year: year }), [c.league.gender, year]);
   const [term, setTerm] = useState('');
   const [group, setGroup] = useState('');
   const [gender, setGender] = useState('');
   const [owner, setOwner] = useState('');          // '' alle, 'free' frei, 'mine' meine, sonst Manager-ID
   const [limit, setLimit] = useState(100);
 
-  const pmap = useMemo(() => Object.fromEntries((pts.data || []).map((p) => [p.rider_slug, p])), [pts.data]);
+  const pmap = useMemo(() => Object.fromEntries((pts.data || []).map((p) => [p.athlete_id, p])), [pts.data]);
   if (!pts.data) return html`<${Loading} error=${pts.error} />`;
 
   const t = normName(term);
-  const list = c.riders
-    .filter((r) => r.uci_rank || pmap[r.pcs_slug] || c.owner[r.pcs_slug])
+  const list = c.athletes
+    .filter((r) => r.pool_rank || pmap[r.id] || c.owner[r.id])
     .filter((r) => (!group || riderGroup(r) === group) && (!gender || r.gender === gender))
-    .filter((r) => !owner || (owner === 'free' ? !c.owner[r.pcs_slug] : owner === 'mine' ? c.owner[r.pcs_slug] === c.me?.id : c.owner[r.pcs_slug] === owner))
+    .filter((r) => !owner || (owner === 'free' ? !c.owner[r.id] : owner === 'mine' ? c.owner[r.id] === c.me?.id : c.owner[r.id] === owner))
     .filter((r) => !t || t.split(' ').every((w) => normName(r.name).includes(w)))
     .sort((a, b) => sel === 'rank'
-      ? (a.uci_rank ?? 1e9) - (b.uci_rank ?? 1e9)
-      : (Number(pmap[b.pcs_slug]?.points) || 0) - (Number(pmap[a.pcs_slug]?.points) || 0) || (a.uci_rank ?? 1e9) - (b.uci_rank ?? 1e9));
+      ? (a.pool_rank ?? 1e9) - (b.pool_rank ?? 1e9)
+      : (Number(pmap[b.id]?.points) || 0) - (Number(pmap[a.id]?.points) || 0) || (a.pool_rank ?? 1e9) - (b.pool_rank ?? 1e9));
 
   return html`<section class="card">
     <div class="row between"><h2>Athleten</h2><span class="muted small">${list.length} Athleten · Punkte ${year}</span></div>
@@ -47,12 +47,12 @@ export function Riders({ c }) {
         <option value="rank">Sortiert nach bester WA-Punktzahl</option>
       </select>
     </div>
-    <div class="scroll-x"><table class="tbl riders-tbl">
+    <div class="scroll-x"><table class="tbl athletes-tbl">
       <thead><tr><th class="num hide-sm col-no">#</th><th>Athlet</th><th class="col-owner">Kader</th><th class="num hide-sm col-res">Ergebnisse</th><th class="num col-pts" title=${`Fantasy-Punkte ${year}`}>Pkt.</th></tr></thead>
       <tbody>${list.slice(0, limit).map((r, i) => {
-        const m = c.managerMap[c.owner[r.pcs_slug]];
-        const p = pmap[r.pcs_slug];
-        return html`<tr key=${r.pcs_slug} class=${m && m.id === c.me?.id ? 'me' : ''}>
+        const m = c.managerMap[c.owner[r.id]];
+        const p = pmap[r.id];
+        return html`<tr key=${r.id} class=${m && m.id === c.me?.id ? 'me' : ''}>
           <td class="num muted hide-sm">${i + 1}</td>
           <td><${RiderCell} r=${r} /></td>
           <td class="col-owner">${m ? m.team_name : html`<span class="tag ok">frei</span>`}</td>

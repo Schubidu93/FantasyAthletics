@@ -10,50 +10,110 @@
 -- Alle Schreibzugriffe der App laufen über die Funktionen (RPC) unten.
 -- Direkt schreiben darf nur der Service-Key (GitHub-Workflows).
 --
--- Namen: Athleten heißen intern weiter "riders" mit der ID "pcs_slug"
--- (Format "wa-<World-Athletics-ID>") – so bleibt die Spiellogik von UCI Fantasy
--- unverändert nutzbar.
+-- Namen: Athleten in "athletes" (ID "wa-<World-Athletics-ID>"), Wettkämpfe in
+-- "competitions" (ID "wa-c<Wettkampf-ID>"), Fantasy-Punkte je Ergebnis in "results".
 -- =====================================================================
 
 create extension if not exists pgcrypto;
 create extension if not exists btree_gist;
 
 -- ---------------------------------------------------------------------
+-- Umbenennung (November 2026): Namen aus UCI Fantasy (riders, races, uci_…) auf
+-- Leichtathletik-Namen. Läuft nur, solange die alten Namen noch existieren; Daten bleiben erhalten.
+-- ---------------------------------------------------------------------
+do $$
+declare r record;
+begin
+  if to_regclass('public.riders') is not null and to_regclass('public.athletes') is null then
+    alter table public.riders rename to athletes;
+  end if;
+  if to_regclass('public.races') is not null and to_regclass('public.competitions') is null then
+    alter table public.races rename to competitions;
+  end if;
+  if to_regclass('public.rider_season_stats') is not null and to_regclass('public.athlete_season_stats') is null then
+    alter table public.rider_season_stats rename to athlete_season_stats;
+  end if;
+  for r in
+    select c.table_name, c.column_name, v.new_name
+      from information_schema.columns c
+      join (values ('athletes', 'pcs_slug', 'id'), ('athletes', 'uci_rank', 'pool_rank'),
+                   ('competitions', 'pcs_slug', 'id'), ('competitions', 'uci_class', 'category'),
+                   ('results', 'uci_points', 'points'), ('athlete_season_stats', 'riders', 'athletes'),
+                   ('draft_state', 'current_rider', 'current_athlete'),
+                   ('waiver_claims', 'add_rider', 'add_athlete'), ('waiver_claims', 'drop_rider', 'drop_athlete'),
+                   ('trades', 'give_riders', 'give_athletes'), ('trades', 'take_riders', 'take_athletes'),
+                   (null, 'rider_slug', 'athlete_id'), (null, 'race_slug', 'competition_id')) v(tbl, old_name, new_name)
+        on c.column_name = v.old_name and (v.tbl is null or c.table_name = v.tbl)
+     where c.table_schema = 'public'
+       and not exists (select 1 from information_schema.columns x
+                        where x.table_schema = 'public' and x.table_name = c.table_name and x.column_name = v.new_name)
+  loop
+    execute format('alter table public.%I rename column %I to %I', r.table_name, r.column_name, r.new_name);
+  end loop;
+  for r in select * from (values ('riders_gender_rank', 'athletes_gender_rank'), ('riders_norm_name', 'athletes_norm_name'),
+                                 ('results_rider_date', 'results_athlete_date'), ('roster_active_rider', 'roster_active_athlete')) v(o, n)
+            where to_regclass('public.' || o) is not null and to_regclass('public.' || n) is null loop
+    execute format('alter index public.%I rename to %I', r.o, r.n);
+  end loop;
+  -- automatisch benannte Schlüssel und Fremdschlüssel wie bei einer frischen Datenbank benennen
+  for r in select c.conrelid::regclass tbl, c.conname, new_name from (
+             select x.*, regexp_replace(regexp_replace(regexp_replace(regexp_replace(regexp_replace(regexp_replace(regexp_replace(
+                      regexp_replace(regexp_replace(x.conname,
+                      '^rider_season_stats_', 'athlete_season_stats_'), '^riders_', 'athletes_'), '^races_', 'competitions_'),
+                      'rider_slug', 'athlete_id', 'g'), 'race_slug', 'competition_id', 'g'), 'current_rider', 'current_athlete', 'g'),
+                      'add_rider', 'add_athlete', 'g'), 'drop_rider', 'drop_athlete', 'g'), 'pcs_slug', 'id', 'g') new_name
+               from pg_constraint x where x.connamespace = 'public'::regnamespace) c
+            where c.new_name <> c.conname
+              and not exists (select 1 from pg_constraint y where y.connamespace = 'public'::regnamespace and y.conname = c.new_name) loop
+    execute format('alter table %s rename constraint %I to %I', r.tbl, r.conname, r.new_name);
+  end loop;
+  -- Funktionen mit alten Namen entfernen (die neuen werden unten angelegt)
+  for r in select p.oid::regprocedure fn from pg_proc p
+            where p.pronamespace = 'public'::regnamespace
+              and (p.proname in ('rider_points', 'rider_group', 'rider_season_rank', '_rider_free')
+                   -- Ergebnis-Spalten mit alten Namen lassen sich nicht per "create or replace" ändern
+                   or p.proargnames && array['rider_slug', 'race_slug', 'uci_points', 'uci_rank', 'uci_class', 'pcs_slug',
+                                             'riders', 'current_rider', 'add_rider', 'drop_rider', 'give_riders', 'take_riders']) loop
+    execute format('drop function %s', r.fn);
+  end loop;
+end $$;
+
+-- ---------------------------------------------------------------------
 -- Stammdaten aus World Athletics (global, für alle Ligen gleich)
 -- ---------------------------------------------------------------------
 
 -- Athleten: alle, die je im Pool waren (DE-Toplisten über der Pool-Schwelle)
-create table if not exists riders (
-  pcs_slug       text primary key,              -- stabile ID: 'wa-<World-Athletics-ID>'
+create table if not exists athletes (
+  id       text primary key,              -- stabile ID: 'wa-<World-Athletics-ID>'
   name           text not null,
   gender         text not null check (gender in ('men', 'women')),
   nation         text,
   team           text,                          -- (bei Leichtathletik ungenutzt)
-  uci_rank       int,                           -- Platz im aktuellen Pool nach bester WA-Punktzahl; null = nicht im Pool
+  pool_rank       int,                           -- Platz im aktuellen Pool nach bester WA-Punktzahl; null = nicht im Pool
   ranking_points numeric,                       -- beste WA-Punktzahl in den Pool-Toplisten
   inactive       boolean not null default false, -- Karriereende / Sperre
   updated_at     timestamptz not null default now()
 );
-alter table riders add column if not exists ranking_points numeric;
-alter table riders add column if not exists inactive boolean not null default false;
-alter table riders add column if not exists birth_date date;
-alter table riders add column if not exists wa_id bigint;
-alter table riders add column if not exists event_group text;      -- 800, 1500, 5000, 10000, Marathon, Hindernis (aus der besten Toplistenleistung)
-alter table riders add column if not exists group_override text;   -- vom Betreiber gesetzte Gruppe (hat Vorrang)
-alter table riders add column if not exists best_discipline text;
-alter table riders add column if not exists best_mark text;
-alter table riders add column if not exists best_year int;
-create index if not exists riders_gender_rank on riders (gender, uci_rank);
+alter table athletes add column if not exists ranking_points numeric;
+alter table athletes add column if not exists inactive boolean not null default false;
+alter table athletes add column if not exists birth_date date;
+alter table athletes add column if not exists wa_id bigint;
+alter table athletes add column if not exists event_group text;      -- 800, 1500, 5000, 10000, Marathon, Hindernis (aus der besten Toplistenleistung)
+alter table athletes add column if not exists group_override text;   -- vom Betreiber gesetzte Gruppe (hat Vorrang)
+alter table athletes add column if not exists best_discipline text;
+alter table athletes add column if not exists best_mark text;
+alter table athletes add column if not exists best_year int;
+create index if not exists athletes_gender_rank on athletes (gender, pool_rank);
 
 -- Toplisten-Einträge (DE, Senioren, Laufdisziplinen ab 800 m) – Grundlage für den Pool
 create table if not exists toplist_entries (
-  rider_slug text not null references riders (pcs_slug) on delete cascade,
+  athlete_id text not null references athletes (id) on delete cascade,
   year       int  not null,
   discipline text not null,
   mark       text,
   score      int  not null,
   updated_at timestamptz not null default now(),
-  primary key (rider_slug, year, discipline)
+  primary key (athlete_id, year, discipline)
 );
 
 -- Disziplinen: eigener Faktor, Gruppe für Positionen, WA-Platzierungstabellen (Werte: reference_data.sql)
@@ -95,7 +155,7 @@ insert into scoring_config (id) values (1) on conflict do nothing;
 -- Rohdaten der Ergebnisse von World Athletics (ein Eintrag pro Lauf eines Athleten)
 create table if not exists wa_results (
   id                bigint generated always as identity primary key,
-  rider_slug        text not null references riders (pcs_slug) on delete cascade,
+  athlete_id        text not null references athletes (id) on delete cascade,
   date              date not null,
   competition       text not null default '',
   venue             text,
@@ -114,7 +174,7 @@ create table if not exists wa_results (
   wa_competition_id bigint,
   wa_event_id       bigint,
   imported_at       timestamptz not null default now(),
-  unique (rider_slug, date, discipline, wa_race, competition)
+  unique (athlete_id, date, discipline, wa_race, competition)
 );
 -- Herkunft: 'wa' = vom Importer, 'manual' = vom Admin nachgetragen (z. B. aus RaceResult), mit Link als Quelle
 alter table wa_results add column if not exists source text not null default 'wa';
@@ -142,36 +202,36 @@ create table if not exists scoring_coefficients (
 );
 create index if not exists wa_results_date on wa_results (date);
 
--- Wettkämpfe (aus den Ergebnissen der Pool-Athleten): pcs_slug = 'wa-c<WA-Wettkampf-ID>'
-create table if not exists races (
-  pcs_slug   text primary key,
+-- Wettkämpfe (aus den Ergebnissen der Pool-Athleten): id = 'wa-c<WA-Wettkampf-ID>'
+create table if not exists competitions (
+  id   text primary key,
   name       text,
   gender     text,
   start_date date,
   end_date   date
 );
-alter table races add column if not exists uci_class text;   -- WA-Kategorie (OW, GW, GL, A …)
-alter table races add column if not exists country text;     -- IOC-Code
-alter table races add column if not exists venue text;
-alter table races add column if not exists loaded_at timestamptz;
+alter table competitions add column if not exists category text;   -- WA-Kategorie (OW, GW, GL, A …)
+alter table competitions add column if not exists country text;     -- IOC-Code
+alter table competitions add column if not exists venue text;
+alter table competitions add column if not exists loaded_at timestamptz;
 
 -- Wertung: ein Eintrag pro gewertetem Ergebnis mit den Fantasy-Punkten (aus wa_results, siehe rebuild_results)
 create table if not exists results (
   id          bigint generated always as identity primary key,
-  rider_slug  text not null references riders (pcs_slug) on delete cascade,
-  race_slug   text not null,
+  athlete_id  text not null references athletes (id) on delete cascade,
+  competition_id   text not null,
   label       text not null,                    -- Disziplin und Lauf, z. B. '1500 Metres · SF1'
   result_date date not null,
   rank        int,
-  uci_points  numeric not null default 0,         -- Fantasy-Punkte (Name aus UCI Fantasy)
+  points  numeric not null default 0,         -- Fantasy-Punkte (Name aus UCI Fantasy)
   updated_at  timestamptz not null default now(),
-  unique (rider_slug, race_slug, label)
+  unique (athlete_id, competition_id, label)
 );
 alter table results add column if not exists updated_at timestamptz not null default now();
 alter table results add column if not exists perf_points numeric not null default 0;     -- Leistungsanteil
 alter table results add column if not exists placing_points numeric not null default 0;  -- Platzierungsanteil
 alter table results add column if not exists wa_result_id bigint;                        -- Quelle in wa_results
-create index if not exists results_rider_date on results (rider_slug, result_date);
+create index if not exists results_athlete_date on results (athlete_id, result_date);
 
 create table if not exists sync_status (
   id       int primary key default 1 check (id = 1),
@@ -183,16 +243,16 @@ insert into sync_status (id) values (1) on conflict do nothing;
 
 -- Ergebnisabruf: wann wurden die Ergebnisse eines Athleten für ein Jahr zuletzt komplett geladen?
 create table if not exists athlete_sync (
-  rider_slug text not null references riders (pcs_slug) on delete cascade,
+  athlete_id text not null references athletes (id) on delete cascade,
   year       int  not null,
   checked_at timestamptz not null default now(),
-  primary key (rider_slug, year)
+  primary key (athlete_id, year)
 );
 
 -- Ergebnisabruf: Stand des WA-Sammelabrufs (neueste Ergebnisse der letzten ~30 Tage) je Athlet.
 -- Taucht ein unbekanntes Ergebnis auf (neu, nachgereichte Disziplin, geänderte Zeit), wird der Athlet neu geladen.
 create table if not exists athlete_feed (
-  rider_slug text primary key references riders (pcs_slug) on delete cascade,
+  athlete_id text primary key references athletes (id) on delete cascade,
   keys       text[] not null default '{}',
   changed_at timestamptz not null default now()
 );
@@ -279,10 +339,10 @@ alter table managers add column if not exists prev_manager uuid references manag
 create table if not exists keepers (
   league_id  uuid not null references leagues (id) on delete cascade,
   manager_id uuid not null references managers (id) on delete cascade,
-  rider_slug text not null references riders (pcs_slug),
+  athlete_id text not null references athletes (id),
   price      int  not null default 0,
-  primary key (manager_id, rider_slug),
-  unique (league_id, rider_slug)
+  primary key (manager_id, athlete_id),
+  unique (league_id, athlete_id)
 );
 
 create table if not exists draft_state (
@@ -290,7 +350,7 @@ create table if not exists draft_state (
   status           text not null default 'pending' check (status in ('pending', 'running', 'paused', 'done')),
   phase            text not null default 'auction' check (phase in ('auction', 'fill', 'snake')),
   lot_no           int  not null default 0,
-  current_rider    text references riders (pcs_slug),
+  current_athlete    text references athletes (id),
   current_bid      int  not null default 0,
   current_bidder   uuid references managers (id) on delete set null,
   deadline         timestamptz,
@@ -327,11 +387,11 @@ create table if not exists draft_lots (
   id         bigint generated always as identity primary key,
   league_id  uuid not null references leagues (id) on delete cascade,
   lot_no     int  not null,
-  rider_slug text not null references riders (pcs_slug),
+  athlete_id text not null references athletes (id),
   manager_id uuid references managers (id) on delete set null,  -- null = übersprungen
   price      int  not null default 0,
   created_at timestamptz not null default now(),
-  unique (league_id, rider_slug)
+  unique (league_id, athlete_id)
 );
 
 create table if not exists draft_bids (
@@ -353,7 +413,7 @@ create table if not exists roster_entries (
   id          bigint generated always as identity primary key,
   league_id   uuid not null references leagues (id) on delete cascade,
   manager_id  uuid not null references managers (id) on delete cascade,
-  rider_slug  text not null references riders (pcs_slug),
+  athlete_id  text not null references athletes (id),
   price       int  not null default 0,
   source      text not null,
   acquired_on date not null,
@@ -364,7 +424,7 @@ create table if not exists roster_entries (
 alter table roster_entries drop constraint if exists roster_entries_source_check;
 alter table roster_entries add constraint roster_entries_source_check
   check (source in ('draft', 'offline', 'waiver', 'trade', 'admin', 'free'));
-create unique index if not exists roster_active_rider on roster_entries (league_id, rider_slug) where released_on is null;
+create unique index if not exists roster_active_athlete on roster_entries (league_id, athlete_id) where released_on is null;
 create index if not exists roster_manager on roster_entries (manager_id);
 
 -- ---------------------------------------------------------------------
@@ -396,8 +456,8 @@ update matchdays set locked = true where not locked and waivers_done and deadlin
 create table if not exists lineups (
   matchday_id uuid not null references matchdays (id) on delete cascade,
   manager_id  uuid not null references managers (id) on delete cascade,
-  rider_slug  text not null references riders (pcs_slug),
-  primary key (matchday_id, manager_id, rider_slug)
+  athlete_id  text not null references athletes (id),
+  primary key (matchday_id, manager_id, athlete_id)
 );
 -- Position in der Aufstellung, z. B. '1500', '800:W' (Mixed je Disziplin m+w), 'WC1'
 alter table lineups add column if not exists slot text not null default '';
@@ -411,8 +471,8 @@ create table if not exists waiver_claims (
   id           uuid primary key default gen_random_uuid(),
   league_id    uuid not null references leagues (id) on delete cascade,
   manager_id   uuid not null references managers (id) on delete cascade,
-  add_rider    text not null references riders (pcs_slug),
-  drop_rider   text not null references riders (pcs_slug),
+  add_athlete    text not null references athletes (id),
+  drop_athlete   text not null references athletes (id),
   priority     int  not null default 1,
   bid          int  not null default 0,
   status       text not null default 'pending' check (status in ('pending', 'won', 'lost', 'cancelled')),
@@ -427,8 +487,8 @@ create table if not exists trades (
   league_id    uuid not null references leagues (id) on delete cascade,
   from_manager uuid not null references managers (id) on delete cascade,
   to_manager   uuid not null references managers (id) on delete cascade,
-  give_riders  text[] not null,   -- gibt from_manager ab
-  take_riders  text[] not null,   -- bekommt from_manager
+  give_athletes  text[] not null,   -- gibt from_manager ab
+  take_athletes  text[] not null,   -- bekommt from_manager
   status       text not null default 'proposed'
                check (status in ('proposed', 'accepted', 'declined', 'cancelled', 'vetoed', 'done', 'failed')),
   note         text,
@@ -437,7 +497,7 @@ create table if not exists trades (
   done_at      timestamptz
 );
 -- Waiver ohne Abgabe, wenn der Kader nicht voll ist (z. B. nach einem ungleichen Tausch)
-alter table waiver_claims alter column drop_rider drop not null;
+alter table waiver_claims alter column drop_athlete drop not null;
 
 -- Ungleiche Tausche: wer mehr Fahrer bekommt, entlässt dafür zusätzlich eigene Fahrer
 alter table trades add column if not exists from_drop text[] not null default '{}';   -- entlässt from_manager (beim Angebot gewählt)
@@ -452,20 +512,20 @@ create table if not exists point_overrides (
   league_id   uuid not null references leagues (id) on delete cascade,
   matchday_id uuid not null references matchdays (id) on delete cascade,
   manager_id  uuid not null references managers (id) on delete cascade,
-  rider_slug  text not null references riders (pcs_slug),
+  athlete_id  text not null references athletes (id),
   points      numeric not null,
   reason      text,
   created_by  uuid,
   created_at  timestamptz not null default now(),
-  unique (matchday_id, manager_id, rider_slug)
+  unique (matchday_id, manager_id, athlete_id)
 );
 
 create table if not exists score_snapshot (
   league_id   uuid not null references leagues (id) on delete cascade,
   matchday_id uuid not null references matchdays (id) on delete cascade,
   manager_id  uuid not null references managers (id) on delete cascade,
-  rider_slug  text not null,
-  race_slug   text not null,
+  athlete_id  text not null,
+  competition_id   text not null,
   label       text not null,
   result_date date not null,
   points      numeric not null
@@ -588,7 +648,7 @@ end $$;
 
 create or replace function _rname(p_slug text) returns text
 language sql stable security definer set search_path = public as $$
-  select coalesce((select name from riders where pcs_slug = p_slug), p_slug);
+  select coalesce((select name from athletes where id = p_slug), p_slug);
 $$;
 
 create or replace function vapid_public_key() returns text
@@ -633,21 +693,21 @@ create or replace function _team_limit_ok(p_manager uuid, p_rider text, p_withou
 language sql stable security definer set search_path = public as $$
   select l.max_per_team is null
       or rd.team is null
-      or (select count(*) from roster_entries re join riders x on x.pcs_slug = re.rider_slug
+      or (select count(*) from roster_entries re join athletes x on x.id = re.athlete_id
           where re.manager_id = m.id and re.released_on is null and x.team = rd.team
-            and re.rider_slug is distinct from p_without) < l.max_per_team
-  from managers m join leagues l on l.id = m.league_id, riders rd
-  where m.id = p_manager and rd.pcs_slug = p_rider;
+            and re.athlete_id is distinct from p_without) < l.max_per_team
+  from managers m join leagues l on l.id = m.league_id, athletes rd
+  where m.id = p_manager and rd.id = p_rider;
 $$;
 
 -- Ist ein Fahrer in der Liga frei? Abgegebene Fahrer sind gesperrt, wenn sie
 -- seit p_locked_since abgegeben wurden (= bis zum nächsten Stichtag).
-create or replace function _rider_free(p_league uuid, p_rider text, p_locked_since timestamptz) returns boolean
+create or replace function _athlete_free(p_league uuid, p_rider text, p_locked_since timestamptz) returns boolean
 language sql stable security definer set search_path = public as $$
-  select exists (select 1 from riders r join leagues l on l.id = p_league
-                 where r.pcs_slug = p_rider and _gender_ok(l.gender, r.gender) and r.uci_rank is not null)
+  select exists (select 1 from athletes r join leagues l on l.id = p_league
+                 where r.id = p_rider and _gender_ok(l.gender, r.gender) and r.pool_rank is not null)
      and not exists (select 1 from roster_entries
-                     where league_id = p_league and rider_slug = p_rider
+                     where league_id = p_league and athlete_id = p_rider
                        and (released_on is null or released_at >= p_locked_since));
 $$;
 
@@ -655,7 +715,7 @@ create or replace function _release(p_league uuid, p_manager uuid, p_rider text,
 language plpgsql security definer set search_path = public as $$
 begin
   update roster_entries set released_on = p_on, released_at = now()
-   where league_id = p_league and manager_id = p_manager and rider_slug = p_rider and released_on is null;
+   where league_id = p_league and manager_id = p_manager and athlete_id = p_rider and released_on is null;
   return found;
 end $$;
 
@@ -664,9 +724,9 @@ end $$;
 -- =====================================================================
 
 -- Disziplingruppe eines Athleten (800, 1500, 5000, 10000, Marathon, Hindernis)
-create or replace function rider_group(p_slug text) returns text
+create or replace function athlete_group(p_slug text) returns text
 language sql stable security definer set search_path = public as $$
-  select coalesce(group_override, event_group) from riders where pcs_slug = p_slug;
+  select coalesce(group_override, event_group) from athletes where id = p_slug;
 $$;
 
 -- Positionen der Aufstellung, z. B. {800,1500,…,WC1,WC2} oder im Mixed-Modus "je Disziplin m+w"
@@ -696,7 +756,7 @@ language sql stable security definer set search_path = public as $$
     when split_part(p_slot, ':', 2) = 'W' and r.gender <> 'women' then false
     when p_slot like 'WC%' then true
     else coalesce(r.group_override, r.event_group) = split_part(p_slot, ':', 1) end
-  from riders r where r.pcs_slug = p_rider;
+  from athletes r where r.id = p_rider;
 $$;
 
 -- Liga-Einstellungen vereinheitlichen: Zahl der Positionen = wertende Athleten
@@ -914,15 +974,15 @@ end $$;
 
 -- Mögliche Keeper des aufrufenden Managers: sein Kader am Ende der Vorsaison
 create or replace function keeper_options(p_league uuid)
-returns table (rider_slug text, prev_price int, price int, chosen boolean)
+returns table (athlete_id text, prev_price int, price int, chosen boolean)
 language plpgsql stable security definer set search_path = public as $$
 declare v_me uuid; l leagues;
 begin
   v_me := _require_member(p_league);
   select * into l from leagues where id = p_league;
   return query
-  select re.rider_slug, re.price, greatest(1, re.price + l.keeper_surcharge),
-         exists (select 1 from keepers k where k.manager_id = v_me and k.rider_slug = re.rider_slug)
+  select re.athlete_id, re.price, greatest(1, re.price + l.keeper_surcharge),
+         exists (select 1 from keepers k where k.manager_id = v_me and k.athlete_id = re.athlete_id)
     from managers m join roster_entries re on re.manager_id = m.prev_manager and re.released_on is null
    where m.id = v_me
    order by re.price desc;
@@ -936,16 +996,16 @@ begin
   select * into l from leagues where id = p_league;
   if l.status <> 'setup' then raise exception 'Keeper können nur vor dem Draft gewählt werden.'; end if;
   if v_n > l.keeper_count then raise exception 'Du darfst höchstens % Keeper wählen.', l.keeper_count; end if;
-  if exists (select 1 from unnest(p_riders) r where r not in (select o.rider_slug from keeper_options(p_league) o)) then
+  if exists (select 1 from unnest(p_riders) r where r not in (select o.athlete_id from keeper_options(p_league) o)) then
     raise exception 'Nur Athleten aus deinem Vorjahreskader.';
   end if;
-  select coalesce(sum(o.price), 0) into v_sum from keeper_options(p_league) o where o.rider_slug = any (p_riders);
+  select coalesce(sum(o.price), 0) into v_sum from keeper_options(p_league) o where o.athlete_id = any (p_riders);
   if l.draft_mode in ('live', 'blind') and v_sum > l.budget - (l.roster_size - v_n) then
     raise exception 'Zu teuer: Keeper kosten %, es muss Budget für die restlichen Plätze bleiben.', v_sum;
   end if;
   delete from keepers where manager_id = v_me;
-  insert into keepers (league_id, manager_id, rider_slug, price)
-    select p_league, v_me, o.rider_slug, o.price from keeper_options(p_league) o where o.rider_slug = any (p_riders);
+  insert into keepers (league_id, manager_id, athlete_id, price)
+    select p_league, v_me, o.athlete_id, o.price from keeper_options(p_league) o where o.athlete_id = any (p_riders);
 exception when unique_violation then
   raise exception 'Dieser Athlet ist schon Keeper eines anderen Managers.';
 end $$;
@@ -965,7 +1025,7 @@ begin
   select * into d from draft_state where league_id = p_league;
 
   if not exists (select 1 from managers m where m.league_id = p_league and _open_slots(m.id) > 0) then
-    update draft_state set status = 'done', current_rider = null, current_bid = 0, current_bidder = null,
+    update draft_state set status = 'done', current_athlete = null, current_bid = 0, current_bidder = null,
                            deadline = null, nominator = null, updated_at = now()
      where league_id = p_league;
     update leagues set status = 'active', last_waiver_run = now() where id = p_league;
@@ -987,7 +1047,7 @@ begin
        order by draft_position, id offset v_pos - 1 limit 1;
       exit when _open_slots(v_next) > 0;      -- Manager mit vollem Kader (Keeper) überspringen
     end loop;
-    update draft_state set phase = 'snake', lot_no = v_pick, current_rider = null, current_bid = 0, current_bidder = null,
+    update draft_state set phase = 'snake', lot_no = v_pick, current_athlete = null, current_bid = 0, current_bidder = null,
                            nominator = v_next, deadline = now() + make_interval(secs => l.bid_seconds), updated_at = now()
      where league_id = p_league;
     perform _notify_turn(p_league, v_next, d.nominator, 'Dein Pick (Nr. ' || v_pick || ') – du hast ' || l.bid_seconds || ' Sekunden.',
@@ -996,12 +1056,12 @@ begin
   end if;
 
   if d.phase = 'auction' and l.draft_order = 'ranking' then
-    select r.pcs_slug into v_rider from riders r
-     where _gender_ok(l.gender, r.gender) and r.uci_rank is not null and not r.inactive
-       and not exists (select 1 from draft_lots x where x.league_id = p_league and x.rider_slug = r.pcs_slug)
-     order by r.uci_rank, r.pcs_slug limit 1;
+    select r.id into v_rider from athletes r
+     where _gender_ok(l.gender, r.gender) and r.pool_rank is not null and not r.inactive
+       and not exists (select 1 from draft_lots x where x.league_id = p_league and x.athlete_id = r.id)
+     order by r.pool_rank, r.id limit 1;
     if v_rider is not null then
-      update draft_state set lot_no = lot_no + 1, current_rider = v_rider, current_bid = 0, current_bidder = null,
+      update draft_state set lot_no = lot_no + 1, current_athlete = v_rider, current_bid = 0, current_bidder = null,
                              deadline = now() + make_interval(secs => l.bid_seconds), updated_at = now()
        where league_id = p_league;
       return;
@@ -1015,7 +1075,7 @@ begin
    where m.league_id = p_league and _open_slots(m.id) > 0
    order by case when m.draft_position > coalesce(v_cur_pos, 0) then 0 else 1 end, m.draft_position
    limit 1;
-  update draft_state set current_rider = null, current_bid = 0, current_bidder = null, deadline = null,
+  update draft_state set current_athlete = null, current_bid = 0, current_bidder = null, deadline = null,
                          nominator = v_next, updated_at = now()
    where league_id = p_league;
   perform _notify_turn(p_league, v_next, d.nominator,
@@ -1064,7 +1124,7 @@ begin
   if l.status <> 'setup' then raise exception 'Der Draft wurde schon gestartet.'; end if;
   if l.draft_mode = 'offline' then raise exception 'Diese Liga nutzt den Offline-Import.'; end if;
   if (select count(*) from managers where league_id = p_league) < 2 then raise exception 'Mindestens 2 Manager nötig.'; end if;
-  if not exists (select 1 from riders where _gender_ok(l.gender, gender) and uci_rank is not null) then
+  if not exists (select 1 from athletes where _gender_ok(l.gender, gender) and pool_rank is not null) then
     raise exception 'Noch keine Athleten importiert (Workflow "Athletenpool laden").';
   end if;
 
@@ -1072,15 +1132,15 @@ begin
     from (select id, row_number() over (order by random()) rn from managers where league_id = p_league) s
    where m.id = s.id;
   -- Keeper vorab in die Kader (zählen wie gekauft; die Auktion überspringt sie)
-  insert into roster_entries (league_id, manager_id, rider_slug, price, source, acquired_on)
-    select p_league, k.manager_id, k.rider_slug, k.price, 'draft', l.season_start from keepers k where k.league_id = p_league;
+  insert into roster_entries (league_id, manager_id, athlete_id, price, source, acquired_on)
+    select p_league, k.manager_id, k.athlete_id, k.price, 'draft', l.season_start from keepers k where k.league_id = p_league;
   update managers m set budget_left = budget_left - coalesce((select sum(price) from keepers k where k.manager_id = m.id), 0)
    where m.league_id = p_league;
-  insert into draft_lots (league_id, lot_no, rider_slug, manager_id, price)
-    select p_league, 0, k.rider_slug, k.manager_id, k.price from keepers k where k.league_id = p_league
-  on conflict (league_id, rider_slug) do nothing;
+  insert into draft_lots (league_id, lot_no, athlete_id, manager_id, price)
+    select p_league, 0, k.athlete_id, k.manager_id, k.price from keepers k where k.league_id = p_league
+  on conflict (league_id, athlete_id) do nothing;
   insert into draft_state (league_id) values (p_league) on conflict (league_id) do nothing;
-  update draft_state set status = 'running', phase = 'auction', lot_no = 0, current_rider = null, current_bid = 0,
+  update draft_state set status = 'running', phase = 'auction', lot_no = 0, current_athlete = null, current_bid = 0,
                          current_bidder = null, deadline = null, nominator = null, updated_at = now()
    where league_id = p_league;
   update leagues set status = 'drafting' where id = p_league;
@@ -1116,7 +1176,7 @@ begin
   select * into l from leagues where id = p_league;
   select * into d from draft_state where league_id = p_league for update;
   if d.status <> 'running' then raise exception 'Der Draft läuft gerade nicht.'; end if;
-  if d.current_rider is null or d.deadline is null or now() >= d.deadline then raise exception 'Gerade wird kein Athlet versteigert.'; end if;
+  if d.current_athlete is null or d.deadline is null or now() >= d.deadline then raise exception 'Gerade wird kein Athlet versteigert.'; end if;
   if l.draft_mode = 'blind' then
     if d.phase <> 'tiebreak' then raise exception 'In der Blind-Auktion wird verdeckt geboten.'; end if;
     if not (v_me = any (d.tie_bidders)) then raise exception 'Nur die Manager mit Gleichstand bieten im Stechen.'; end if;
@@ -1129,7 +1189,7 @@ begin
   end if;
   v_max := _max_bid(v_me);
   if p_amount > v_max then raise exception 'Dein Höchstgebot ist %.', v_max; end if;
-  if not _team_limit_ok(v_me, d.current_rider) then raise exception 'Du hast schon die Höchstzahl an Athleten dieses Teams.'; end if;
+  if not _team_limit_ok(v_me, d.current_athlete) then raise exception 'Du hast schon die Höchstzahl an Athleten dieses Teams.'; end if;
 
   update draft_state set current_bid = p_amount, current_bidder = v_me,
          deadline = now() + make_interval(secs => l.bid_seconds), updated_at = now()
@@ -1137,7 +1197,7 @@ begin
   insert into draft_bids (league_id, lot_no, manager_id, amount) values (p_league, d.lot_no, v_me, p_amount);
   -- Stechen: kann kein anderer mehr erhöhen, sofort Zuschlag
   if l.draft_mode = 'blind' and not exists (select 1 from unnest(d.tie_bidders) t
-       where t <> v_me and _max_bid(t) >= p_amount + 1 and _team_limit_ok(t, d.current_rider)) then
+       where t <> v_me and _max_bid(t) >= p_amount + 1 and _team_limit_ok(t, d.current_athlete)) then
     perform _draft_award(p_league, v_me, p_amount);
   end if;
 end $$;
@@ -1150,12 +1210,12 @@ begin
   select * into l from leagues where id = p_league;
   select * into d from draft_state where league_id = p_league;
   if p_manager is not null then
-    insert into roster_entries (league_id, manager_id, rider_slug, price, source, acquired_on)
-    values (p_league, p_manager, d.current_rider, p_price, 'draft', l.season_start);
+    insert into roster_entries (league_id, manager_id, athlete_id, price, source, acquired_on)
+    values (p_league, p_manager, d.current_athlete, p_price, 'draft', l.season_start);
     update managers set budget_left = budget_left - p_price where id = p_manager;
   end if;
-  insert into draft_lots (league_id, lot_no, rider_slug, manager_id, price)
-  values (p_league, d.lot_no, d.current_rider, p_manager, case when p_manager is null then 0 else p_price end);
+  insert into draft_lots (league_id, lot_no, athlete_id, manager_id, price)
+  values (p_league, d.lot_no, d.current_athlete, p_manager, case when p_manager is null then 0 else p_price end);
   update draft_state set phase = case when phase = 'tiebreak' then 'auction' else phase end where league_id = p_league;
   perform _draft_next(p_league);
 end $$;
@@ -1207,7 +1267,7 @@ begin
   select * into l from leagues where id = p_league;
   select * into d from draft_state where league_id = p_league for update;
   if l.draft_mode <> 'blind' then raise exception 'Diese Liga nutzt keine Blind-Auktion.'; end if;
-  if d.status <> 'running' or d.phase <> 'auction' or d.current_rider is null or d.deadline is null or now() >= d.deadline then
+  if d.status <> 'running' or d.phase <> 'auction' or d.current_athlete is null or d.deadline is null or now() >= d.deadline then
     raise exception 'Gerade wird kein Athlet versteigert.';
   end if;
   if coalesce(p_amount, 0) <= 0 then
@@ -1218,14 +1278,14 @@ begin
   if _open_slots(v_me) <= 0 then raise exception 'Dein Kader ist voll.'; end if;
   v_max := _max_bid(v_me);
   if p_amount > v_max then raise exception 'Dein Höchstgebot ist %.', v_max; end if;
-  if not _team_limit_ok(v_me, d.current_rider) then raise exception 'Du hast schon die Höchstzahl an Athleten dieses Teams.'; end if;
+  if not _team_limit_ok(v_me, d.current_athlete) then raise exception 'Du hast schon die Höchstzahl an Athleten dieses Teams.'; end if;
   insert into draft_sealed (league_id, lot_no, manager_id, amount) values (p_league, d.lot_no, v_me, p_amount)
   on conflict (league_id, manager_id) do update set amount = excluded.amount, lot_no = excluded.lot_no, created_at = now();
   update draft_state set sealed_done = array_append(array_remove(sealed_done, v_me), v_me), updated_at = now()
    where league_id = p_league;
   -- Haben alle geboten, die noch bieten können? Dann sofort auswerten.
   if not exists (select 1 from managers m where m.league_id = p_league and _max_bid(m.id) >= 1
-                    and _team_limit_ok(m.id, d.current_rider)
+                    and _team_limit_ok(m.id, d.current_athlete)
                     and not exists (select 1 from draft_sealed s where s.league_id = p_league and s.manager_id = m.id)) then
     perform _blind_resolve(p_league);
   end if;
@@ -1245,22 +1305,22 @@ begin
     perform _snake_pick(p_league, null);
     return;
   end if;
-  if l.draft_mode = 'blind' and d.current_rider is not null then
+  if l.draft_mode = 'blind' and d.current_athlete is not null then
     if d.phase = 'tiebreak' then perform _draft_award(p_league, d.current_bidder, d.current_bid);
     else perform _blind_resolve(p_league); end if;
     return;
   end if;
 
-  if d.current_rider is not null then
+  if d.current_athlete is not null then
     if d.current_bid > 0 and d.current_bidder is not null then
-      insert into roster_entries (league_id, manager_id, rider_slug, price, source, acquired_on)
-      values (p_league, d.current_bidder, d.current_rider, d.current_bid, 'draft', l.season_start);
+      insert into roster_entries (league_id, manager_id, athlete_id, price, source, acquired_on)
+      values (p_league, d.current_bidder, d.current_athlete, d.current_bid, 'draft', l.season_start);
       update managers set budget_left = budget_left - d.current_bid where id = d.current_bidder;
-      insert into draft_lots (league_id, lot_no, rider_slug, manager_id, price)
-      values (p_league, d.lot_no, d.current_rider, d.current_bidder, d.current_bid);
+      insert into draft_lots (league_id, lot_no, athlete_id, manager_id, price)
+      values (p_league, d.lot_no, d.current_athlete, d.current_bidder, d.current_bid);
     else
-      insert into draft_lots (league_id, lot_no, rider_slug, manager_id, price)
-      values (p_league, d.lot_no, d.current_rider, null, 0);
+      insert into draft_lots (league_id, lot_no, athlete_id, manager_id, price)
+      values (p_league, d.lot_no, d.current_athlete, null, 0);
     end if;
   end if;
   perform _draft_next(p_league);
@@ -1274,17 +1334,17 @@ begin
   select * into l from leagues where id = p_league;
   select * into d from draft_state where league_id = p_league;
   if v_rider is null then
-    select r.pcs_slug into v_rider from riders r
-     where _gender_ok(l.gender, r.gender) and r.uci_rank is not null and not r.inactive
-       and _rider_free(p_league, r.pcs_slug, 'infinity') and _team_limit_ok(d.nominator, r.pcs_slug)
-     order by r.uci_rank, r.pcs_slug limit 1;
+    select r.id into v_rider from athletes r
+     where _gender_ok(l.gender, r.gender) and r.pool_rank is not null and not r.inactive
+       and _athlete_free(p_league, r.id, 'infinity') and _team_limit_ok(d.nominator, r.id)
+     order by r.pool_rank, r.id limit 1;
     if v_rider is null then raise exception 'Kein freier Athlet mehr verfügbar.'; end if;
   end if;
-  insert into roster_entries (league_id, manager_id, rider_slug, price, source, acquired_on)
+  insert into roster_entries (league_id, manager_id, athlete_id, price, source, acquired_on)
   values (p_league, d.nominator, v_rider, 0, 'draft', l.season_start);
-  insert into draft_lots (league_id, lot_no, rider_slug, manager_id, price)
+  insert into draft_lots (league_id, lot_no, athlete_id, manager_id, price)
   values (p_league, d.lot_no, v_rider, d.nominator, 0)
-  on conflict (league_id, rider_slug) do update set manager_id = excluded.manager_id, price = 0, lot_no = excluded.lot_no;
+  on conflict (league_id, athlete_id) do update set manager_id = excluded.manager_id, price = 0, lot_no = excluded.lot_no;
   perform _draft_next(p_league);
 end $$;
 
@@ -1296,7 +1356,7 @@ begin
   select * into d from draft_state where league_id = p_league for update;
   if d.status <> 'running' or d.phase <> 'snake' then raise exception 'Der Snake-Draft läuft gerade nicht.'; end if;
   if d.nominator is distinct from v_me and not is_admin(p_league) then raise exception 'Du bist nicht an der Reihe.'; end if;
-  if not _rider_free(p_league, p_rider, 'infinity') then raise exception 'Dieser Athlet ist nicht verfügbar.'; end if;
+  if not _athlete_free(p_league, p_rider, 'infinity') then raise exception 'Dieser Athlet ist nicht verfügbar.'; end if;
   if not _team_limit_ok(d.nominator, p_rider) then raise exception 'Grenze pro Team erreicht.'; end if;
   perform _snake_pick(p_league, p_rider);
 end $$;
@@ -1309,22 +1369,22 @@ begin
   v_me := _require_member(p_league);
   select * into l from leagues where id = p_league;
   select * into d from draft_state where league_id = p_league for update;
-  if d.status <> 'running' or d.phase <> 'auction' or d.current_rider is not null then
+  if d.status <> 'running' or d.phase <> 'auction' or d.current_athlete is not null then
     raise exception 'Gerade kann niemand nominieren.';
   end if;
   if d.nominator is distinct from v_me and not is_admin(p_league) then raise exception 'Du bist nicht an der Reihe.'; end if;
-  if exists (select 1 from draft_lots where league_id = p_league and rider_slug = p_rider)
-     or not _rider_free(p_league, p_rider, 'infinity') then
+  if exists (select 1 from draft_lots where league_id = p_league and athlete_id = p_rider)
+     or not _athlete_free(p_league, p_rider, 'infinity') then
     raise exception 'Dieser Athlet ist nicht verfügbar.';
   end if;
   if not _team_limit_ok(d.nominator, p_rider) then raise exception 'Grenze pro Team erreicht.'; end if;
   if l.draft_mode = 'blind' then
-    update draft_state set lot_no = lot_no + 1, current_rider = p_rider, current_bid = 0, current_bidder = null,
+    update draft_state set lot_no = lot_no + 1, current_athlete = p_rider, current_bid = 0, current_bidder = null,
            deadline = now() + make_interval(secs => l.bid_seconds), updated_at = now()
      where league_id = p_league;
     return;
   end if;
-  update draft_state set lot_no = lot_no + 1, current_rider = p_rider, current_bid = 1, current_bidder = d.nominator,
+  update draft_state set lot_no = lot_no + 1, current_athlete = p_rider, current_bid = 1, current_bidder = d.nominator,
          deadline = now() + make_interval(secs => l.bid_seconds), updated_at = now()
    where league_id = p_league;
   insert into draft_bids (league_id, lot_no, manager_id, amount) values (p_league, d.lot_no + 1, d.nominator, 1);
@@ -1340,21 +1400,21 @@ begin
   select * into d from draft_state where league_id = p_league for update;
   if d.status <> 'running' or d.phase <> 'fill' or d.nominator is null then raise exception 'Die Auffüllphase läuft nicht.'; end if;
   if d.nominator is distinct from v_me and not is_admin(p_league) then raise exception 'Du bist nicht an der Reihe.'; end if;
-  if not _rider_free(p_league, p_rider, 'infinity') then raise exception 'Dieser Athlet ist nicht verfügbar.'; end if;
+  if not _athlete_free(p_league, p_rider, 'infinity') then raise exception 'Dieser Athlet ist nicht verfügbar.'; end if;
   if not _team_limit_ok(d.nominator, p_rider) then raise exception 'Grenze pro Team erreicht.'; end if;
-  insert into roster_entries (league_id, manager_id, rider_slug, price, source, acquired_on)
+  insert into roster_entries (league_id, manager_id, athlete_id, price, source, acquired_on)
   values (p_league, d.nominator, p_rider, 1, 'draft', l.season_start);
   update managers set budget_left = budget_left - 1 where id = d.nominator;
-  insert into draft_lots (league_id, lot_no, rider_slug, manager_id, price)
+  insert into draft_lots (league_id, lot_no, athlete_id, manager_id, price)
   values (p_league, d.lot_no + 1, p_rider, d.nominator, 1)
-  on conflict (league_id, rider_slug) do update set manager_id = excluded.manager_id, price = 1;
+  on conflict (league_id, athlete_id) do update set manager_id = excluded.manager_id, price = 1;
   update draft_state set lot_no = lot_no + 1 where league_id = p_league;
   perform _draft_next(p_league);
 end $$;
 
 -- =====================================================================
 -- Offline-Draft-Import
--- p_rows: [{"manager_id": "...", "rider_slug": "...", "price": 12}, …]
+-- p_rows: [{"manager_id": "...", "athlete_id": "...", "price": 12}, …]
 -- Gibt eine Liste von Fehlern zurück; nur ohne Fehler und mit p_commit wird gespeichert.
 -- =====================================================================
 
@@ -1367,30 +1427,30 @@ begin
   if l.status <> 'setup' then return array['Die Kader sind bereits fixiert.']; end if;
 
   create temp table _imp on commit drop as
-    select (e->>'manager_id')::uuid manager_id, e->>'rider_slug' rider_slug,
+    select (e->>'manager_id')::uuid manager_id, e->>'athlete_id' athlete_id,
            coalesce(nullif(e->>'price', '')::int, 0) price
       from jsonb_array_elements(p_rows) e;
 
   for r in select i.manager_id from _imp i where not exists (select 1 from managers m where m.id = i.manager_id and m.league_id = p_league) group by 1 loop
     errs := errs || format('Unbekannter Manager %s', r.manager_id);
   end loop;
-  for r in select i.rider_slug from _imp i where not exists (select 1 from riders x where x.pcs_slug = i.rider_slug and _gender_ok(l.gender, x.gender)) loop
-    errs := errs || format('Athlet %s nicht im Athletenpool gefunden', r.rider_slug);
+  for r in select i.athlete_id from _imp i where not exists (select 1 from athletes x where x.id = i.athlete_id and _gender_ok(l.gender, x.gender)) loop
+    errs := errs || format('Athlet %s nicht im Athletenpool gefunden', r.athlete_id);
   end loop;
-  for r in select rider_slug from _imp group by 1 having count(*) > 1 loop
-    errs := errs || format('Athlet %s ist mehrfach vergeben', r.rider_slug);
+  for r in select athlete_id from _imp group by 1 having count(*) > 1 loop
+    errs := errs || format('Athlet %s ist mehrfach vergeben', r.athlete_id);
   end loop;
-  for r in select m.team_name, count(i.rider_slug) n, coalesce(sum(i.price), 0) s
+  for r in select m.team_name, count(i.athlete_id) n, coalesce(sum(i.price), 0) s
              from managers m left join _imp i on i.manager_id = m.id
             where m.league_id = p_league group by m.id, m.team_name loop
     if r.n <> l.roster_size then errs := errs || format('%s: %s statt %s Athleten', r.team_name, r.n, l.roster_size); end if;
     if r.s > l.budget then errs := errs || format('%s: Summe %s über Budget %s', r.team_name, r.s, l.budget); end if;
   end loop;
   for r in select * from _imp where price < 0 loop
-    errs := errs || format('Negativer Preis bei %s', r.rider_slug);
+    errs := errs || format('Negativer Preis bei %s', r.athlete_id);
   end loop;
   if l.max_per_team is not null then
-    for r in select m.team_name, x.team, count(*) n from _imp i join riders x on x.pcs_slug = i.rider_slug
+    for r in select m.team_name, x.team, count(*) n from _imp i join athletes x on x.id = i.athlete_id
                join managers m on m.id = i.manager_id where x.team is not null
               group by m.team_name, x.team having count(*) > l.max_per_team loop
       errs := errs || format('%s: %s Athleten von %s (max. %s)', r.team_name, r.n, r.team, l.max_per_team);
@@ -1398,8 +1458,8 @@ begin
   end if;
 
   if array_length(errs, 1) is null and p_commit then
-    insert into roster_entries (league_id, manager_id, rider_slug, price, source, acquired_on)
-      select p_league, manager_id, rider_slug, price, 'offline', l.season_start from _imp;
+    insert into roster_entries (league_id, manager_id, athlete_id, price, source, acquired_on)
+      select p_league, manager_id, athlete_id, price, 'offline', l.season_start from _imp;
     update managers m set budget_left = l.budget - coalesce((select sum(price) from _imp i where i.manager_id = m.id), 0),
            draft_position = s.rn
       from (select id, row_number() over (order by random()) rn from managers where league_id = p_league) s
@@ -1499,23 +1559,23 @@ end $$;
 -- Automatische Aufstellung (wenn noch keine gesetzt wurde): Positionen der Reihe nach mit den
 -- teuersten bzw. bestplatzierten passenden Athleten des Kaders besetzen, Wildcards zuletzt.
 create or replace function _auto_lineup(p_matchday uuid, p_manager uuid)
-returns table (slot text, rider_slug text)
+returns table (slot text, athlete_id text)
 language plpgsql stable security definer set search_path = public as $$
 #variable_conflict use_column
 declare md matchdays; v_slot text; v_used text[] := '{}'; v_pick text;
 begin
   select * into md from matchdays where id = p_matchday;
   foreach v_slot in array league_slots(md.league_id) loop
-    select re.rider_slug into v_pick
-      from roster_entries re join riders r on r.pcs_slug = re.rider_slug
+    select re.athlete_id into v_pick
+      from roster_entries re join athletes r on r.id = re.athlete_id
      where re.manager_id = p_manager and re.acquired_on <= md.starts_on
        and (re.released_on is null or re.released_on > md.starts_on)
-       and not (re.rider_slug = any (v_used)) and _slot_ok(v_slot, re.rider_slug)
-     order by re.price desc, r.uci_rank nulls last, re.id
+       and not (re.athlete_id = any (v_used)) and _slot_ok(v_slot, re.athlete_id)
+     order by re.price desc, r.pool_rank nulls last, re.id
      limit 1;
     if v_pick is not null then
       v_used := v_used || v_pick;
-      slot := v_slot; rider_slug := v_pick;
+      slot := v_slot; athlete_id := v_pick;
       return next;
     end if;
   end loop;
@@ -1524,7 +1584,7 @@ end $$;
 -- Gültige Aufstellung mit Positionen: letzte gesetzte Aufstellung bis zu diesem Spieltag,
 -- sonst die automatische.
 create or replace function effective_lineup_slots(p_matchday uuid, p_manager uuid)
-returns table (slot text, rider_slug text)
+returns table (slot text, athlete_id text)
 language plpgsql stable security definer set search_path = public as $$
 #variable_conflict use_column
 declare md matchdays; v_src uuid;
@@ -1535,15 +1595,15 @@ begin
      and exists (select 1 from lineups x where x.matchday_id = lm.id and x.manager_id = p_manager)
    order by lm.starts_on desc limit 1;
   if v_src is not null then
-    return query select x.slot, x.rider_slug from lineups x where x.matchday_id = v_src and x.manager_id = p_manager;
+    return query select x.slot, x.athlete_id from lineups x where x.matchday_id = v_src and x.manager_id = p_manager;
     return;
   end if;
-  return query select a.slot, a.rider_slug from _auto_lineup(p_matchday, p_manager) a;
+  return query select a.slot, a.athlete_id from _auto_lineup(p_matchday, p_manager) a;
 end $$;
 
 create or replace function effective_lineup(p_matchday uuid, p_manager uuid) returns setof text
 language sql stable security definer set search_path = public as $$
-  select e.rider_slug from effective_lineup_slots(p_matchday, p_manager) e;
+  select e.athlete_id from effective_lineup_slots(p_matchday, p_manager) e;
 $$;
 
 -- Aufstellung speichern: p_lineup = {"800": "wa-123", "1500:W": "wa-456", "WC1": null, …}
@@ -1561,23 +1621,23 @@ begin
   if l.scoring_mode <> 'lineup' then raise exception 'Die Liga wertet den Gesamtkader.'; end if;
   v_slots := league_slots(l.id);
   create temp table _lu on commit drop as
-    select key slot, value rider_slug from jsonb_each_text(coalesce(p_lineup, '{}')) where value is not null and value <> '';
+    select key slot, value athlete_id from jsonb_each_text(coalesce(p_lineup, '{}')) where value is not null and value <> '';
   if exists (select 1 from _lu where not (slot = any (v_slots))) then
     raise exception 'Unbekannte Position.';
   end if;
-  if (select count(*) from _lu) <> (select count(distinct rider_slug) from _lu) then
+  if (select count(*) from _lu) <> (select count(distinct athlete_id) from _lu) then
     raise exception 'Ein Athlet kann nur einmal aufgestellt werden.';
   end if;
   for e in select * from _lu loop
-    if not exists (select 1 from roster_entries re where re.manager_id = v_me and re.rider_slug = e.rider_slug and re.released_on is null) then
+    if not exists (select 1 from roster_entries re where re.manager_id = v_me and re.athlete_id = e.athlete_id and re.released_on is null) then
       raise exception 'Du kannst nur Athleten aus deinem Kader aufstellen.';
     end if;
-    if not coalesce(_slot_ok(e.slot, e.rider_slug), false) then
-      raise exception '% passt nicht auf die Position %.', _rname(e.rider_slug), e.slot;
+    if not coalesce(_slot_ok(e.slot, e.athlete_id), false) then
+      raise exception '% passt nicht auf die Position %.', _rname(e.athlete_id), e.slot;
     end if;
   end loop;
   delete from lineups where matchday_id = p_matchday and manager_id = v_me;
-  insert into lineups (matchday_id, manager_id, rider_slug, slot) select p_matchday, v_me, rider_slug, slot from _lu;
+  insert into lineups (matchday_id, manager_id, athlete_id, slot) select p_matchday, v_me, athlete_id, slot from _lu;
   drop table _lu;
 end $$;
 
@@ -1585,15 +1645,15 @@ end $$;
 -- Position passt; sonst bleibt die Position leer.
 create or replace function _lineup_swap(p_league uuid, p_manager uuid, p_drop text, p_add text, p_from date) returns void
 language sql security definer set search_path = public as $$
-  update lineups x set rider_slug = p_add
+  update lineups x set athlete_id = p_add
     from matchdays m
    where m.id = x.matchday_id and m.league_id = p_league and m.starts_on >= p_from
-     and x.manager_id = p_manager and x.rider_slug = p_drop and p_add is not null
+     and x.manager_id = p_manager and x.athlete_id = p_drop and p_add is not null
      and coalesce(_slot_ok(x.slot, p_add), false)
-     and not exists (select 1 from lineups y where y.matchday_id = x.matchday_id and y.manager_id = x.manager_id and y.rider_slug = p_add);
+     and not exists (select 1 from lineups y where y.matchday_id = x.matchday_id and y.manager_id = x.manager_id and y.athlete_id = p_add);
   delete from lineups x using matchdays m
    where m.id = x.matchday_id and m.league_id = p_league and m.starts_on >= p_from
-     and x.manager_id = p_manager and x.rider_slug = p_drop;
+     and x.manager_id = p_manager and x.athlete_id = p_drop;
 $$;
 
 -- =====================================================================
@@ -1602,38 +1662,38 @@ $$;
 
 -- Alle Einzelergebnisse, die in der Liga zählen (eingefroren oder live)
 create or replace function _score_rows(p_league uuid)
-returns table (matchday_id uuid, manager_id uuid, rider_slug text, race_slug text, label text,
+returns table (matchday_id uuid, manager_id uuid, athlete_id text, competition_id text, label text,
                result_date date, points numeric)
 language sql stable security definer set search_path = public as $$
-  select s.matchday_id, s.manager_id, s.rider_slug, s.race_slug, s.label, s.result_date, s.points
+  select s.matchday_id, s.manager_id, s.athlete_id, s.competition_id, s.label, s.result_date, s.points
     from score_snapshot s join matchdays m on m.id = s.matchday_id
    where m.league_id = p_league and m.frozen
   union all
-  select m.id, re.manager_id, re.rider_slug, r.race_slug, r.label, r.result_date, r.uci_points
+  select m.id, re.manager_id, re.athlete_id, r.competition_id, r.label, r.result_date, r.points
     from matchdays m
     join leagues l on l.id = m.league_id
     join roster_entries re on re.league_id = m.league_id
-    join results r on r.rider_slug = re.rider_slug
+    join results r on r.athlete_id = re.athlete_id
                   and r.result_date between m.starts_on and m.ends_on
                   and r.result_date >= re.acquired_on
                   and (re.released_on is null or r.result_date < re.released_on)
    where m.league_id = p_league and not m.frozen and m.starts_on <= current_date
      and (coalesce(m.scoring_mode, l.scoring_mode) = 'full'
-          or re.rider_slug in (select effective_lineup(m.id, re.manager_id)));
+          or re.athlete_id in (select effective_lineup(m.id, re.manager_id)));
 $$;
 
 -- Punkte pro Spieltag, Manager und Fahrer (inkl. Admin-Korrekturen)
 create or replace function _league_points(p_league uuid)
-returns table (matchday_id uuid, manager_id uuid, rider_slug text, points numeric, overridden boolean)
+returns table (matchday_id uuid, manager_id uuid, athlete_id text, points numeric, overridden boolean)
 language sql stable security definer set search_path = public as $$
   with agg as (
-    select s.matchday_id, s.manager_id, s.rider_slug, sum(s.points) pts
+    select s.matchday_id, s.manager_id, s.athlete_id, sum(s.points) pts
       from _score_rows(p_league) s group by 1, 2, 3),
   ov as (select * from point_overrides o where o.league_id = p_league)
   select coalesce(a.matchday_id, ov.matchday_id), coalesce(a.manager_id, ov.manager_id),
-         coalesce(a.rider_slug, ov.rider_slug), coalesce(ov.points, a.pts), ov.id is not null
+         coalesce(a.athlete_id, ov.athlete_id), coalesce(ov.points, a.pts), ov.id is not null
     from agg a full join ov on ov.matchday_id = a.matchday_id and ov.manager_id = a.manager_id
-                           and ov.rider_slug = a.rider_slug;
+                           and ov.athlete_id = a.athlete_id;
 $$;
 
 -- Liga-Tabelle mit Tiebreakern: Punkte, Spieltagssiege, bester Spieltag, weniger Budget ausgegeben
@@ -1673,7 +1733,7 @@ language sql stable security definer set search_path = public as $$
 $$;
 
 create or replace function league_points(p_league uuid)
-returns table (matchday_id uuid, manager_id uuid, rider_slug text, points numeric, overridden boolean)
+returns table (matchday_id uuid, manager_id uuid, athlete_id text, points numeric, overridden boolean)
 language plpgsql stable security definer set search_path = public as $$
 begin
   if not (is_member(p_league) or _is_service()) then raise exception 'Keine Berechtigung.'; end if;
@@ -1705,7 +1765,7 @@ language sql immutable parallel safe set search_path = public, extensions as $$
            lower(extensions.unaccent('extensions.unaccent'::regdictionary, coalesce(p, ''))), '[^a-z0-9]+')) w
          where w <> '' order by w), ' ');
 $$;
-create index if not exists riders_norm_name on riders (gender, norm_name(name));
+create index if not exists athletes_norm_name on athletes (gender, norm_name(name));
 
 -- =====================================================================
 -- Wertung: Pool und Punkte aus den World-Athletics-Daten
@@ -1720,24 +1780,24 @@ $$;
 
 -- Pool neu bilden: beste Toplistenleistung je Athlet im Jahr p_year und Vorjahr (nur Laufdisziplinen mit
 -- Gruppe), daraus Disziplingruppe und Bestleistung. Pool = mindestens pool_threshold WA-Punkte;
--- uci_rank = Platz im Pool nach Punkten (Draft-Reihenfolge, automatische Picks).
+-- pool_rank = Platz im Pool nach Punkten (Draft-Reihenfolge, automatische Picks).
 create or replace function refresh_pool(p_year int default null) returns int
 language plpgsql security definer set search_path = public as $$
 declare y int := coalesce(p_year, extract(year from current_date)::int); c scoring_config; n int;
 begin
   select * into c from scoring_config where id = 1;
-  update riders set ranking_points = null, uci_rank = null where ranking_points is not null or uci_rank is not null;
-  update riders r set ranking_points = b.score, best_discipline = b.discipline, best_mark = b.mark,
+  update athletes set ranking_points = null, pool_rank = null where ranking_points is not null or pool_rank is not null;
+  update athletes r set ranking_points = b.score, best_discipline = b.discipline, best_mark = b.mark,
                       best_year = b.year, event_group = b.event_group, updated_at = now()
-    from (select distinct on (t.rider_slug) t.rider_slug, t.discipline, t.mark, t.score, t.year, d.event_group
+    from (select distinct on (t.athlete_id) t.athlete_id, t.discipline, t.mark, t.score, t.year, d.event_group
             from toplist_entries t join disciplines d on d.name = t.discipline
            where t.year in (y, y - 1) and d.event_group is not null
-           order by t.rider_slug, t.score desc, t.year desc) b
-   where b.rider_slug = r.pcs_slug;
-  update riders r set uci_rank = x.rk
-    from (select pcs_slug, row_number() over (order by ranking_points desc, name) rk
-            from riders where ranking_points >= c.pool_threshold) x
-   where x.pcs_slug = r.pcs_slug;
+           order by t.athlete_id, t.score desc, t.year desc) b
+   where b.athlete_id = r.id;
+  update athletes r set pool_rank = x.rk
+    from (select id, row_number() over (order by ranking_points desc, name) rk
+            from athletes where ranking_points >= c.pool_threshold) x
+   where x.id = r.id;
   get diagnostics n = row_count;
   return n;
 end $$;
@@ -1780,11 +1840,11 @@ declare c scoring_config; n int;
 begin
   select * into c from scoring_config where id = 1;
   delete from results where p_from is null or result_date >= p_from;
-  insert into results (rider_slug, race_slug, label, result_date, rank, uci_points, perf_points, placing_points, wa_result_id)
-  select rider_slug, race_slug, label, date, place, perf + plc, perf, plc, id
+  insert into results (athlete_id, competition_id, label, result_date, rank, points, perf_points, placing_points, wa_result_id)
+  select athlete_id, competition_id, label, date, place, perf + plc, perf, plc, id
     from (
-      select w.id, w.rider_slug, w.date, w.place,
-             coalesce('wa-c' || w.wa_competition_id, 'wa-' || md5(w.competition || w.date::text)) race_slug,
+      select w.id, w.athlete_id, w.date, w.place,
+             coalesce('wa-c' || w.wa_competition_id, 'wa-' || md5(w.competition || w.date::text)) competition_id,
              w.discipline || case when d.cross_table is not null and cross_km(w.competition) is not null
                                   then ' · ' || cross_km(w.competition) || 'km' else '' end
                || case when w.wa_race in ('', 'F') then '' else ' · ' || w.wa_race end label,
@@ -1807,11 +1867,11 @@ begin
        where (p_from is null or w.date >= p_from) and w.date >= date '2025-01-01'
          -- Nachtrag entfällt, sobald World Athletics dasselbe Ergebnis führt (gleiche Disziplin, ±1 Tag)
          and not (w.source = 'manual' and exists (select 1 from wa_results o
-                   where o.rider_slug = w.rider_slug and o.source = 'wa' and o.discipline = w.discipline
+                   where o.athlete_id = w.athlete_id and o.source = 'wa' and o.discipline = w.discipline
                      and abs(o.date - w.date) <= 1))
     ) x
    where perf + plc > 0
-  on conflict (rider_slug, race_slug, label) do nothing;
+  on conflict (athlete_id, competition_id, label) do nothing;
   get diagnostics n = row_count;
   return n;
 end $$;
@@ -1842,40 +1902,40 @@ begin
 end $$;
 
 -- Punkte pro Athlet in einem Jahr (für die Athletenliste der App); p_gender 'mixed' = alle
-create or replace function rider_points(p_gender text, p_year int)
-returns table (rider_slug text, points numeric, results int)
+create or replace function athlete_points(p_gender text, p_year int)
+returns table (athlete_id text, points numeric, results int)
 language sql stable security definer set search_path = public as $$
-  select r.rider_slug, sum(r.uci_points), count(*)::int
-    from results r join riders x on x.pcs_slug = r.rider_slug
+  select r.athlete_id, sum(r.points), count(*)::int
+    from results r join athletes x on x.id = r.athlete_id
    where _gender_ok(p_gender, x.gender)
      and r.result_date >= make_date(p_year, 1, 1) and r.result_date <= make_date(p_year, 12, 31)
-   group by r.rider_slug
-   order by r.rider_slug;
+   group by r.athlete_id
+   order by r.athlete_id;
 $$;
 
 -- Saisonwertung je Jahr fest gespeichert (Rang und Punkte je Athlet, getrennt nach Männern/Frauen),
 -- damit das Athletenfenster sie sofort zeigt. Wird nach jedem Ergebnisabruf neu berechnet.
-create table if not exists rider_season_stats (
-  rider_slug  text not null references riders (pcs_slug) on delete cascade,
+create table if not exists athlete_season_stats (
+  athlete_id  text not null references athletes (id) on delete cascade,
   year        int  not null,
   season_rank int  not null,
   points      numeric not null,
-  riders      int  not null,       -- Athleten mit Punkten in dieser Wertung und Saison
-  primary key (rider_slug, year)
+  athletes      int  not null,       -- Athleten mit Punkten in dieser Wertung und Saison
+  primary key (athlete_id, year)
 );
 
 create or replace function refresh_season_stats(p_year int) returns int
 language plpgsql security definer set search_path = public as $$
 declare n int;
 begin
-  delete from rider_season_stats where year = p_year;
-  insert into rider_season_stats (rider_slug, year, season_rank, points, riders)
+  delete from athlete_season_stats where year = p_year;
+  insert into athlete_season_stats (athlete_id, year, season_rank, points, athletes)
   with s as (
-    select r.rider_slug, x.gender, sum(r.uci_points) pts
-      from results r join riders x on x.pcs_slug = r.rider_slug
+    select r.athlete_id, x.gender, sum(r.points) pts
+      from results r join athletes x on x.id = r.athlete_id
      where r.result_date >= make_date(p_year, 1, 1) and r.result_date <= make_date(p_year, 12, 31)
      group by 1, 2)
-  select rider_slug, p_year, (rank() over (partition by gender order by pts desc))::int, pts,
+  select athlete_id, p_year, (rank() over (partition by gender order by pts desc))::int, pts,
          (count(*) over (partition by gender))::int
     from s;
   get diagnostics n = row_count;
@@ -1888,22 +1948,22 @@ language sql stable security definer set search_path = public as $$
   select distinct extract(year from result_date)::int from results order by 1 desc;
 $$;
 
-create or replace function rider_season_rank(p_slug text, p_year int)
-returns table (season_rank int, points numeric, riders int)
+create or replace function athlete_season_rank(p_slug text, p_year int)
+returns table (season_rank int, points numeric, athletes int)
 language sql stable security definer set search_path = public as $$
-  select season_rank, points, riders from rider_season_stats where rider_slug = p_slug and year = p_year;
+  select season_rank, points, athletes from athlete_season_stats where athlete_id = p_slug and year = p_year;
 $$;
 
 -- Herkunft der Punkte (einzelne Rennergebnisse)
 create or replace function league_point_details(p_league uuid, p_matchday uuid default null)
-returns table (matchday_id uuid, manager_id uuid, rider_slug text, race_slug text, race_name text,
+returns table (matchday_id uuid, manager_id uuid, athlete_id text, competition_id text, race_name text,
                label text, result_date date, points numeric)
 language plpgsql stable security definer set search_path = public as $$
 begin
   if not is_member(p_league) then raise exception 'Keine Berechtigung.'; end if;
   return query
-  select s.matchday_id, s.manager_id, s.rider_slug, s.race_slug, rc.name, s.label, s.result_date, s.points
-    from _score_rows(p_league) s left join races rc on rc.pcs_slug = s.race_slug
+  select s.matchday_id, s.manager_id, s.athlete_id, s.competition_id, rc.name, s.label, s.result_date, s.points
+    from _score_rows(p_league) s left join competitions rc on rc.id = s.competition_id
    where p_matchday is null or s.matchday_id = p_matchday
    order by s.result_date desc, s.points desc;
 end $$;
@@ -1922,10 +1982,10 @@ begin
   if l.status <> 'active' then raise exception 'Waiver sind erst nach dem Draft möglich.'; end if;
   if p_drop is null then
     if _open_roster_slots(v_me) <= 0 then raise exception 'Dein Kader ist voll – bitte einen Athleten zum Abgeben wählen.'; end if;
-  elsif not exists (select 1 from roster_entries where manager_id = v_me and rider_slug = p_drop and released_on is null) then
+  elsif not exists (select 1 from roster_entries where manager_id = v_me and athlete_id = p_drop and released_on is null) then
     raise exception 'Der abzugebende Athlet ist nicht in deinem Kader.';
   end if;
-  if not _rider_free(p_league, p_add, 'infinity') then raise exception 'Dieser Athlet ist nicht frei.'; end if;
+  if not _athlete_free(p_league, p_add, 'infinity') then raise exception 'Dieser Athlet ist nicht frei.'; end if;
   select budget_left into v_budget from managers where id = v_me;
   if l.waiver_mode = 'faab' and (p_bid < 0 or p_bid > v_budget) then
     raise exception 'Gebot muss zwischen 0 und deinem Restbudget (%) liegen.', v_budget;
@@ -1933,22 +1993,22 @@ begin
 
   if p_immediate then
     -- Ersatz außer der Reihe bei Karriereende/Sperre
-    if p_drop is null or not (select inactive from riders where pcs_slug = p_drop) then
+    if p_drop is null or not (select inactive from athletes where id = p_drop) then
       raise exception 'Sofort-Ersatz nur für Athleten mit Karriereende oder Sperre.';
     end if;
-    if not _rider_free(p_league, p_add, coalesce(l.last_waiver_run, '-infinity')) then
+    if not _athlete_free(p_league, p_add, coalesce(l.last_waiver_run, '-infinity')) then
       raise exception 'Dieser Athlet ist bis zum nächsten Stichtag gesperrt.';
     end if;
     if not _team_limit_ok(v_me, p_add, p_drop) then raise exception 'Grenze pro Team erreicht.'; end if;
     perform _release(p_league, v_me, p_drop, current_date);
-    insert into roster_entries (league_id, manager_id, rider_slug, price, source, acquired_on)
+    insert into roster_entries (league_id, manager_id, athlete_id, price, source, acquired_on)
     values (p_league, v_me, p_add, 0, 'waiver', current_date);
-    insert into waiver_claims (league_id, manager_id, add_rider, drop_rider, status, note, processed_at)
+    insert into waiver_claims (league_id, manager_id, add_athlete, drop_athlete, status, note, processed_at)
     values (p_league, v_me, p_add, p_drop, 'won', 'Sofort-Ersatz', now()) returning id into v_id;
     return v_id;
   end if;
 
-  insert into waiver_claims (league_id, manager_id, add_rider, drop_rider, bid, priority)
+  insert into waiver_claims (league_id, manager_id, add_athlete, drop_athlete, bid, priority)
   values (p_league, v_me, p_add, p_drop, case when l.waiver_mode = 'faab' then p_bid else 0 end,
           coalesce((select max(priority) from waiver_claims where manager_id = v_me and status = 'pending'), 0) + 1)
   returning id into v_id;
@@ -1976,13 +2036,13 @@ end $$;
 create or replace function _claim_valid(c waiver_claims, l leagues) returns text
 language plpgsql stable security definer set search_path = public as $$
 begin
-  if c.drop_rider is null then
+  if c.drop_athlete is null then
     if _open_roster_slots(c.manager_id) <= 0 then return 'Kader ist voll'; end if;
-  elsif not exists (select 1 from roster_entries where manager_id = c.manager_id and rider_slug = c.drop_rider and released_on is null) then
+  elsif not exists (select 1 from roster_entries where manager_id = c.manager_id and athlete_id = c.drop_athlete and released_on is null) then
     return 'Abzugebender Athlet nicht mehr im Kader';
   end if;
-  if not _rider_free(l.id, c.add_rider, now()) then return 'Athlet schon vergeben'; end if;
-  if not _team_limit_ok(c.manager_id, c.add_rider, c.drop_rider) then return 'Grenze pro Team'; end if;
+  if not _athlete_free(l.id, c.add_athlete, now()) then return 'Athlet schon vergeben'; end if;
+  if not _team_limit_ok(c.manager_id, c.add_athlete, c.drop_athlete) then return 'Grenze pro Team'; end if;
   if l.waiver_mode = 'faab' and c.bid > (select budget_left from managers where id = c.manager_id) then
     return 'Restbudget reicht nicht';
   end if;
@@ -1992,18 +2052,18 @@ end $$;
 create or replace function _execute_claim(c waiver_claims, l leagues, md matchdays) returns void
 language plpgsql security definer set search_path = public as $$
 begin
-  perform _release(l.id, c.manager_id, c.drop_rider, md.starts_on);
-  insert into roster_entries (league_id, manager_id, rider_slug, price, source, acquired_on)
-  values (l.id, c.manager_id, c.add_rider, case when l.waiver_mode = 'faab' then c.bid else 0 end, 'waiver', md.starts_on);
+  perform _release(l.id, c.manager_id, c.drop_athlete, md.starts_on);
+  insert into roster_entries (league_id, manager_id, athlete_id, price, source, acquired_on)
+  values (l.id, c.manager_id, c.add_athlete, case when l.waiver_mode = 'faab' then c.bid else 0 end, 'waiver', md.starts_on);
   if l.waiver_mode = 'faab' then
     update managers set budget_left = budget_left - c.bid where id = c.manager_id;
   end if;
   -- steht der abgegebene Athlet in einer Aufstellung ab diesem Spieltag, rückt der neue nach (wenn er passt)
-  perform _lineup_swap(l.id, c.manager_id, c.drop_rider, c.add_rider, md.starts_on);
+  perform _lineup_swap(l.id, c.manager_id, c.drop_athlete, c.add_athlete, md.starts_on);
   update waiver_claims set status = 'won', processed_at = now(), matchday_id = md.id where id = c.id;
   -- andere Anträge mit demselben abzugebenden Fahrer werden ungültig
   update waiver_claims set status = 'lost', note = 'Abzugebender Athlet schon getauscht', processed_at = now(), matchday_id = md.id
-   where manager_id = c.manager_id and status = 'pending' and c.drop_rider is not null and drop_rider = c.drop_rider;
+   where manager_id = c.manager_id and status = 'pending' and c.drop_athlete is not null and drop_athlete = c.drop_athlete;
 end $$;
 
 -- Phase für den nächsten Spieltag: 'waiver' (Anträge sammeln), 'free' (sofort tauschen), null (kein Spieltag)
@@ -2033,14 +2093,14 @@ begin
   if p_drop is null then
     if _open_roster_slots(v_me) <= 0 then raise exception 'Dein Kader ist voll – bitte einen Athleten zum Abgeben wählen.'; end if;
   else
-    select * into e from roster_entries where manager_id = v_me and rider_slug = p_drop and released_on is null;
+    select * into e from roster_entries where manager_id = v_me and athlete_id = p_drop and released_on is null;
     if not found then raise exception 'Der abzugebende Athlet ist nicht in deinem Kader.'; end if;
   end if;
   -- frei = in keinem Kader für den nächsten Spieltag (abgegebene Fahrer sind sofort wieder frei)
-  if exists (select 1 from roster_entries where league_id = p_league and rider_slug = p_add and released_on is null) then
+  if exists (select 1 from roster_entries where league_id = p_league and athlete_id = p_add and released_on is null) then
     raise exception 'Dieser Athlet ist schon vergeben.';
   end if;
-  if not exists (select 1 from riders r where r.pcs_slug = p_add and _gender_ok(l.gender, r.gender) and not r.inactive and r.uci_rank is not null) then
+  if not exists (select 1 from athletes r where r.id = p_add and _gender_ok(l.gender, r.gender) and not r.inactive and r.pool_rank is not null) then
     raise exception 'Athlet nicht verfügbar.';
   end if;
   if not _team_limit_ok(v_me, p_add, p_drop) then raise exception 'Grenze pro Team erreicht.'; end if;
@@ -2053,14 +2113,14 @@ begin
   end if;
   -- holen: eigenen, gerade abgegebenen Fahrer zurücknehmen oder neu eintragen
   update roster_entries set released_on = null, released_at = null
-   where manager_id = v_me and rider_slug = p_add and released_on = md.starts_on
+   where manager_id = v_me and athlete_id = p_add and released_on = md.starts_on
      and released_at >= coalesce(md.waiver_deadline, md.deadline);
   if not found then
-    insert into roster_entries (league_id, manager_id, rider_slug, price, source, acquired_on)
+    insert into roster_entries (league_id, manager_id, athlete_id, price, source, acquired_on)
     values (p_league, v_me, p_add, 0, 'free', md.starts_on);
   end if;
   perform _lineup_swap(p_league, v_me, p_drop, p_add, md.starts_on);
-  insert into waiver_claims (league_id, manager_id, add_rider, drop_rider, status, note, processed_at, matchday_id)
+  insert into waiver_claims (league_id, manager_id, add_athlete, drop_athlete, status, note, processed_at, matchday_id)
   values (p_league, v_me, p_add, p_drop, 'won', 'Freie Phase', now(), md.id);
 end $$;
 
@@ -2145,10 +2205,10 @@ begin
   if (select count(distinct x) from unnest(p_drop) x) <> p_needed or p_drop && p_trade_riders then
     raise exception 'Zu entlassende Athleten dürfen nicht Teil des Tauschs sein.';
   end if;
-  if (select count(*) from roster_entries where manager_id = p_manager and released_on is null and rider_slug = any (p_drop)) <> p_needed then
+  if (select count(*) from roster_entries where manager_id = p_manager and released_on is null and athlete_id = any (p_drop)) <> p_needed then
     raise exception 'Zu entlassende Athleten müssen im eigenen Kader stehen.';
   end if;
-  if exists (select 1 from waiver_claims where manager_id = p_manager and status = 'pending' and drop_rider = any (p_drop)) then
+  if exists (select 1 from waiver_claims where manager_id = p_manager and status = 'pending' and drop_athlete = any (p_drop)) then
     raise exception 'Ein Athlet ist schon in einem offenen Waiver-Antrag zur Abgabe vorgesehen.';
   end if;
 end $$;
@@ -2164,13 +2224,13 @@ begin
     raise exception 'Ungültiger Tauschpartner.';
   end if;
   if n_give = 0 or n_take = 0 then raise exception 'Beide Seiten müssen mindestens einen Athleten abgeben.'; end if;
-  if (select count(*) from roster_entries where manager_id = v_me and released_on is null and rider_slug = any (p_give)) <> n_give
-     or (select count(*) from roster_entries where manager_id = p_to and released_on is null and rider_slug = any (p_take)) <> n_take then
+  if (select count(*) from roster_entries where manager_id = v_me and released_on is null and athlete_id = any (p_give)) <> n_give
+     or (select count(*) from roster_entries where manager_id = p_to and released_on is null and athlete_id = any (p_take)) <> n_take then
     raise exception 'Die Athleten müssen in den jeweiligen Kadern stehen.';
   end if;
   -- bekomme ich mehr Fahrer als ich abgebe, entlasse ich die Differenz
   perform _check_trade_drops(v_me, coalesce(p_drop, '{}'), p_give, greatest(n_take - n_give - _open_roster_slots(v_me), 0));
-  insert into trades (league_id, from_manager, to_manager, give_riders, take_riders, from_drop)
+  insert into trades (league_id, from_manager, to_manager, give_athletes, take_athletes, from_drop)
   values (p_league, v_me, p_to, p_give, p_take, coalesce(p_drop, '{}')) returning id into v;
   perform _notify(p_to, '🔁 Neues Tauschangebot',
     (select team_name from managers where id = v_me) || ' bietet ' ||
@@ -2189,8 +2249,8 @@ begin
   if t.to_manager <> my_manager(t.league_id) then raise exception 'Dieses Angebot ist nicht an dich.'; end if;
   if p_accept then
     -- bekomme ich mehr Fahrer als ich abgebe, entlasse ich die Differenz
-    perform _check_trade_drops(t.to_manager, coalesce(p_drop, '{}'), t.take_riders,
-      greatest(array_length(t.give_riders, 1) - array_length(t.take_riders, 1) - _open_roster_slots(t.to_manager), 0));
+    perform _check_trade_drops(t.to_manager, coalesce(p_drop, '{}'), t.take_athletes,
+      greatest(array_length(t.give_athletes, 1) - array_length(t.take_athletes, 1) - _open_roster_slots(t.to_manager), 0));
   end if;
   update trades set status = case when p_accept then 'accepted' else 'declined' end,
                     accepted_at = case when p_accept then now() end,
@@ -2233,22 +2293,22 @@ begin
   for t in select * from trades where league_id = md.league_id and status = 'accepted'
                                   and accepted_at + interval '24 hours' <= md.deadline order by accepted_at loop
     if (select count(*) from roster_entries where manager_id = t.from_manager and released_on is null
-          and rider_slug = any (t.give_riders || t.from_drop)) <> coalesce(array_length(t.give_riders || t.from_drop, 1), 0)
+          and athlete_id = any (t.give_athletes || t.from_drop)) <> coalesce(array_length(t.give_athletes || t.from_drop, 1), 0)
        or (select count(*) from roster_entries where manager_id = t.to_manager and released_on is null
-          and rider_slug = any (t.take_riders || t.to_drop)) <> coalesce(array_length(t.take_riders || t.to_drop, 1), 0) then
+          and athlete_id = any (t.take_athletes || t.to_drop)) <> coalesce(array_length(t.take_athletes || t.to_drop, 1), 0) then
       update trades set status = 'failed', note = 'Athlet nicht mehr im Kader', done_at = now() where id = t.id;
       continue;
     end if;
     -- zusätzlich entlassene Fahrer werden frei
     foreach r in array t.from_drop loop perform _release(md.league_id, t.from_manager, r, md.starts_on); end loop;
     foreach r in array t.to_drop loop perform _release(md.league_id, t.to_manager, r, md.starts_on); end loop;
-    foreach r in array t.give_riders loop
+    foreach r in array t.give_athletes loop
       perform _release(md.league_id, t.from_manager, r, md.starts_on);
-      insert into roster_entries (league_id, manager_id, rider_slug, source, acquired_on) values (md.league_id, t.to_manager, r, 'trade', md.starts_on);
+      insert into roster_entries (league_id, manager_id, athlete_id, source, acquired_on) values (md.league_id, t.to_manager, r, 'trade', md.starts_on);
     end loop;
-    foreach r in array t.take_riders loop
+    foreach r in array t.take_athletes loop
       perform _release(md.league_id, t.to_manager, r, md.starts_on);
-      insert into roster_entries (league_id, manager_id, rider_slug, source, acquired_on) values (md.league_id, t.from_manager, r, 'trade', md.starts_on);
+      insert into roster_entries (league_id, manager_id, athlete_id, source, acquired_on) values (md.league_id, t.from_manager, r, 'trade', md.starts_on);
     end loop;
     update trades set status = 'done', done_at = now() where id = t.id;
   end loop;
@@ -2280,8 +2340,8 @@ begin
     if not md.waivers_done and coalesce(md.waiver_deadline, md.deadline) <= now() then
       perform _process_waivers(md.id);
       perform _notify(w.manager_id, '📋 Waiver-Ergebnis',
-          coalesce('Zuschlag: ' || string_agg(_rname(w.add_rider), ', ') filter (where w.status = 'won'), 'Kein Zuschlag')
-          || coalesce(' · ohne Zuschlag: ' || string_agg(_rname(w.add_rider), ', ') filter (where w.status = 'lost'), ''),
+          coalesce('Zuschlag: ' || string_agg(_rname(w.add_athlete), ', ') filter (where w.status = 'won'), 'Kein Zuschlag')
+          || coalesce(' · ohne Zuschlag: ' || string_agg(_rname(w.add_athlete), ', ') filter (where w.status = 'lost'), ''),
           '#/league/' || md.league_id || '/waiver')
          from waiver_claims w where w.matchday_id = md.id and w.processed_at >= now() - interval '1 minute'
          group by w.manager_id;
@@ -2312,8 +2372,8 @@ begin
        from _league_table(md.league_id) t;
   end loop;
   for md in select * from matchdays where status = 'closed' and not frozen and closed_at <= now() - interval '7 days' loop
-    insert into score_snapshot (league_id, matchday_id, manager_id, rider_slug, race_slug, label, result_date, points)
-      select md.league_id, s.matchday_id, s.manager_id, s.rider_slug, s.race_slug, s.label, s.result_date, s.points
+    insert into score_snapshot (league_id, matchday_id, manager_id, athlete_id, competition_id, label, result_date, points)
+      select md.league_id, s.matchday_id, s.manager_id, s.athlete_id, s.competition_id, s.label, s.result_date, s.points
         from _score_rows(md.league_id) s where s.matchday_id = md.id;
     update matchdays set frozen = true where id = md.id;
   end loop;
@@ -2349,7 +2409,7 @@ begin
   truncate _fit;
   insert into _fit
     select w.discipline, r.gender, mark_seconds(w.mark), w.result_score, true
-      from wa_results w join riders r on r.pcs_slug = w.rider_slug join disciplines d on d.name = w.discipline
+      from wa_results w join athletes r on r.id = w.athlete_id join disciplines d on d.name = w.discipline
      where w.source = 'wa' and w.result_score > 0 and d.cross_table is null and mark_seconds(w.mark) > 0;
   for g in select discipline, gender from _fit group by 1, 2 having count(*) >= p_min loop
     ka := null; kb := null; kc := null;
@@ -2406,14 +2466,14 @@ end $$;
 -- Vorschau für das Eingabeformular: WA-Punkte, Schwelle, bereits vorhandenes Ergebnis
 create or replace function manual_result_check(p_rider text, p_discipline text, p_date date, p_mark text) returns jsonb
 language plpgsql stable security definer set search_path = public as $$
-declare r riders; pts int; dup record;
+declare r athletes; pts int; dup record;
 begin
   perform _require_any_admin();
-  select * into r from riders where pcs_slug = p_rider;
-  if r.pcs_slug is null then raise exception 'Athlet nicht gefunden.'; end if;
+  select * into r from athletes where id = p_rider;
+  if r.id is null then raise exception 'Athlet nicht gefunden.'; end if;
   pts := wa_points(p_discipline, r.gender, p_mark);
   select w.date, w.competition, w.mark, w.source into dup from wa_results w
-   where w.rider_slug = p_rider and w.discipline = p_discipline and abs(w.date - p_date) <= 1
+   where w.athlete_id = p_rider and w.discipline = p_discipline and abs(w.date - p_date) <= 1
    order by w.source = 'wa' desc limit 1;
   return jsonb_build_object(
     'seconds', mark_seconds(p_mark),
@@ -2424,16 +2484,16 @@ begin
                       else jsonb_build_object('date', dup.date, 'competition', dup.competition, 'mark', dup.mark, 'source', dup.source) end);
 end $$;
 
--- Nachtrag speichern. p: rider_slug, date, discipline, mark, competition, venue, source_url, wa_points (optional,
+-- Nachtrag speichern. p: athlete_id, date, discipline, mark, competition, venue, source_url, wa_points (optional,
 -- nur wenn die App die Punkte nicht berechnen kann)
 create or replace function add_manual_result(p jsonb) returns bigint
 language plpgsql security definer set search_path = public as $$
-declare r riders; d disciplines; v_date date := (p->>'date')::date; v_mark text := nullif(trim(p->>'mark'), '');
+declare r athletes; d disciplines; v_date date := (p->>'date')::date; v_mark text := nullif(trim(p->>'mark'), '');
         v_comp text := nullif(trim(p->>'competition'), ''); pts int; v_id bigint; v_slug text;
 begin
   perform _require_any_admin();
-  select * into r from riders where pcs_slug = p->>'rider_slug';
-  if r.pcs_slug is null then raise exception 'Athlet nicht gefunden.'; end if;
+  select * into r from athletes where id = p->>'athlete_id';
+  if r.id is null then raise exception 'Athlet nicht gefunden.'; end if;
   select * into d from disciplines where name = p->>'discipline';
   if d.name is null or coalesce(d.factor, 0) = 0 or d.cross_table is not null then
     raise exception 'Disziplin % kann nicht nachgetragen werden.', p->>'discipline';
@@ -2441,20 +2501,20 @@ begin
   if v_date is null or v_date > current_date or v_date < date '2025-01-01' then raise exception 'Ungültiges Datum.'; end if;
   if v_comp is null then raise exception 'Bitte den Wettkampf angeben.'; end if;
   if mark_seconds(v_mark) is null then raise exception 'Zeit nicht erkannt (z. B. 29:18 oder 1:02:45).'; end if;
-  if exists (select 1 from wa_results w where w.rider_slug = r.pcs_slug and w.discipline = d.name and abs(w.date - v_date) <= 1) then
+  if exists (select 1 from wa_results w where w.athlete_id = r.id and w.discipline = d.name and abs(w.date - v_date) <= 1) then
     raise exception 'Für % gibt es in dieser Disziplin um diesen Tag schon ein Ergebnis.', r.name;
   end if;
   pts := coalesce(wa_points(d.name, r.gender, v_mark), (p->>'wa_points')::int);
   if pts is null then raise exception 'WA-Punkte können für diese Disziplin noch nicht berechnet werden – bitte von Hand angeben.'; end if;
-  insert into wa_results (rider_slug, date, competition, venue, discipline, race, wa_race, mark, result_score, remark,
+  insert into wa_results (athlete_id, date, competition, venue, discipline, race, wa_race, mark, result_score, remark,
                           source, source_url, added_by)
-  values (r.pcs_slug, v_date, v_comp, nullif(trim(p->>'venue'), ''), d.name, 'F', 'F', v_mark, pts, 'Nachtrag',
+  values (r.id, v_date, v_comp, nullif(trim(p->>'venue'), ''), d.name, 'F', 'F', v_mark, pts, 'Nachtrag',
           'manual', nullif(trim(p->>'source_url'), ''), auth.uid())
   returning id into v_id;
   v_slug := 'wa-' || md5(v_comp || v_date::text);
-  insert into races (pcs_slug, name, venue, start_date, end_date, loaded_at)
+  insert into competitions (id, name, venue, start_date, end_date, loaded_at)
   values (v_slug, v_comp, nullif(trim(p->>'venue'), ''), v_date, v_date, now())
-  on conflict (pcs_slug) do nothing;
+  on conflict (id) do nothing;
   perform rebuild_results(v_date);
   perform refresh_season_stats(extract(year from v_date)::int);
   return v_id;
@@ -2482,11 +2542,11 @@ begin
   perform _require_admin(p_league);
   if coalesce(trim(p_reason), '') = '' then raise exception 'Bitte einen Grund angeben.'; end if;
   if p_points is null then
-    delete from point_overrides where matchday_id = p_matchday and manager_id = p_manager and rider_slug = p_rider;
+    delete from point_overrides where matchday_id = p_matchday and manager_id = p_manager and athlete_id = p_rider;
   else
-    insert into point_overrides (league_id, matchday_id, manager_id, rider_slug, points, reason, created_by)
+    insert into point_overrides (league_id, matchday_id, manager_id, athlete_id, points, reason, created_by)
     values (p_league, p_matchday, p_manager, p_rider, p_points, p_reason, auth.uid())
-    on conflict (matchday_id, manager_id, rider_slug)
+    on conflict (matchday_id, manager_id, athlete_id)
     do update set points = excluded.points, reason = excluded.reason, created_by = excluded.created_by, created_at = now();
   end if;
   perform _log(p_league, 'override', jsonb_build_object('matchday', p_matchday, 'manager', p_manager,
@@ -2503,9 +2563,9 @@ begin
     raise exception 'Athlet % ist nicht im Kader.', p_drop;
   end if;
   if p_add is not null then
-    if not _rider_free(p_league, p_add, 'infinity') then raise exception 'Athlet % ist nicht frei.', p_add; end if;
+    if not _athlete_free(p_league, p_add, 'infinity') then raise exception 'Athlet % ist nicht frei.', p_add; end if;
     if _open_slots(p_manager) <= 0 then raise exception 'Der Kader ist voll.'; end if;
-    insert into roster_entries (league_id, manager_id, rider_slug, price, source, acquired_on)
+    insert into roster_entries (league_id, manager_id, athlete_id, price, source, acquired_on)
     values (p_league, p_manager, p_add, coalesce(p_price, 0), 'admin', current_date);
   end if;
   perform _log(p_league, 'roster_fix', jsonb_build_object('manager', p_manager, 'add', p_add, 'drop', p_drop, 'reason', p_reason));
@@ -2515,7 +2575,7 @@ create or replace function admin_mark_inactive(p_league uuid, p_rider text, p_in
 language plpgsql security definer set search_path = public as $$
 begin
   perform _require_admin(p_league);
-  update riders set inactive = p_inactive where pcs_slug = p_rider;
+  update athletes set inactive = p_inactive where id = p_rider;
   perform _log(p_league, 'mark_inactive', jsonb_build_object('rider', p_rider, 'inactive', p_inactive));
 end $$;
 
@@ -2641,7 +2701,7 @@ begin
     delete from draft_projection d where d.league_id = p_league;
     insert into draft_projection (league_id, manager_id, points, per_md, signature)
     with team as (
-      select distinct d.manager_id, d.rider_slug from draft_lots d where d.league_id = p_league and d.manager_id is not null),
+      select distinct d.manager_id, d.athlete_id from draft_lots d where d.league_id = p_league and d.manager_id is not null),
     mds as (   -- Spieltage ein Jahr früher; ohne Spieltage: die ganze Vorsaison als ein Block
       select m.name, (m.starts_on - interval '1 year')::date s, (m.ends_on - interval '1 year')::date e
         from matchdays m where m.league_id = p_league
@@ -2649,9 +2709,9 @@ begin
       select 'Vorjahr', make_date(extract(year from l.season_start)::int - 1, 1, 1), make_date(extract(year from l.season_start)::int - 1, 12, 31)
        where not exists (select 1 from matchdays where league_id = p_league)),
     rp as (
-      select t.manager_id, md.name, t.rider_slug, sum(r.uci_points) p
+      select t.manager_id, md.name, t.athlete_id, sum(r.points) p
         from team t cross join mds md
-        join results r on r.rider_slug = t.rider_slug and r.result_date between md.s and md.e
+        join results r on r.athlete_id = t.athlete_id and r.result_date between md.s and md.e
        group by 1, 2, 3),
     best as (
       select rp.manager_id, rp.name, sum(rp.p) p from (
@@ -2670,11 +2730,11 @@ declare lg leagues; n int := 0; k int;
 begin
   for lg in select * from leagues where status = 'active' loop
     with week as (
-      select s.manager_id, s.rider_slug, sum(s.points) pts
+      select s.manager_id, s.athlete_id, sum(s.points) pts
         from _score_rows(lg.id) s where s.result_date > current_date - 7 group by 1, 2),
     per_mgr as (
       select manager_id, sum(pts) total,
-             (array_agg(rider_slug order by pts desc))[1] best_rider, max(pts) best_pts
+             (array_agg(athlete_id order by pts desc))[1] best_rider, max(pts) best_pts
         from week group by 1)
     insert into notifications (user_id, title, body, url)
     select m.user_id,
@@ -2730,9 +2790,9 @@ end $$;
 -- Rechte
 -- =====================================================================
 
-alter table riders          enable row level security;
-alter table races           enable row level security;
-alter table rider_season_stats enable row level security;
+alter table athletes          enable row level security;
+alter table competitions           enable row level security;
+alter table athlete_season_stats enable row level security;
 alter table results         enable row level security;
 alter table sync_status     enable row level security;
 alter table leagues         enable row level security;
@@ -2766,7 +2826,7 @@ do $$
 declare t text;
 begin
   -- öffentliche Stammdaten: lesbar für angemeldete Nutzer
-  foreach t in array array['riders', 'races', 'results', 'sync_status', 'rider_season_stats', 'toplist_entries',
+  foreach t in array array['athletes', 'competitions', 'results', 'sync_status', 'athlete_season_stats', 'toplist_entries',
                            'wa_results', 'disciplines', 'placing_scores', 'scoring_config', 'cross_distance_factors', 'scoring_coefficients'] loop
     execute format('drop policy if exists read_all on %I', t);
     execute format('create policy read_all on %I for select to authenticated using (true)', t);
@@ -2807,7 +2867,7 @@ declare f text;
 begin
   foreach f in array array[
     '_require_member(uuid)', '_require_admin(uuid)', '_log(uuid,text,jsonb)', '_open_slots(uuid)',
-    '_max_bid(uuid)', '_team_limit_ok(uuid,text,text)', '_rider_free(uuid,text,timestamptz)',
+    '_max_bid(uuid)', '_team_limit_ok(uuid,text,text)', '_athlete_free(uuid,text,timestamptz)',
     '_release(uuid,uuid,text,date)', '_draft_next(uuid)', '_draft_award(uuid,uuid,int)', '_blind_resolve(uuid)', '_start_draft(uuid)', 'refresh_pool(int)', 'rebuild_results(date)',
     'dispatch_workflow(text,jsonb)', 'refresh_season_stats(int)', '_lineup_swap(uuid,uuid,text,text,date)', 'weekly_summary()', 'scheduler_tick()', '_notify(uuid,text,text,text)', '_notify_turn(uuid,uuid,uuid,text,timestamptz)', '_check_trade_drops(uuid,text[],text[],int)', '_open_roster_slots(uuid)', '_reset_default_deadlines(uuid,text)', '_snake_pick(uuid,text)', '_score_rows(uuid)',
     '_claim_valid(waiver_claims,leagues)', '_execute_claim(waiver_claims,leagues,matchdays)',

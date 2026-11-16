@@ -48,9 +48,9 @@ const slugs: string[] = [];
 for (const [name, gender, disc, mark, score] of ATHLETES) {
   const slug = `wa-${++id}`;
   slugs.push(slug);
-  await db.query("insert into riders (pcs_slug, wa_id, name, gender, nation, birth_date) values ($1, $2, $3, $4, 'GER', $5)",
+  await db.query("insert into athletes (id, wa_id, name, gender, nation, birth_date) values ($1, $2, $3, $4, 'GER', $5)",
     [slug, id, name, gender, `${1994 + (id % 9)}-0${1 + (id % 9)}-1${id % 9}`]);
-  await db.query("insert into toplist_entries (rider_slug, year, discipline, mark, score) values ($1, $2, $3, $4, $5)", [slug, Y - 1, disc, mark, score]);
+  await db.query("insert into toplist_entries (athlete_id, year, discipline, mark, score) values ($1, $2, $3, $4, $5)", [slug, Y - 1, disc, mark, score]);
 }
 await db.query("select refresh_pool($1)", [Y]);
 
@@ -66,7 +66,7 @@ const res = async (slug: string, ci: number, disc: string, race: string, place: 
   extra: { pr?: string; pp?: number; wr?: string; wp?: number } = {}) => {
   const [cid, name, cat, country, off] = comps[ci];
   await db.query(
-    `insert into wa_results (rider_slug, date, competition, venue, discipline, country, category, race, place, wa_race, wa_place,
+    `insert into wa_results (athlete_id, date, competition, venue, discipline, country, category, race, place, wa_race, wa_place,
                              placing_round, placing_place, mark, result_score, wa_competition_id, wa_event_id)
      values ($1, $2, $3, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 1)`,
     [slug, day(off), name, disc, country, cat, race, place, extra.wr ?? race, extra.wp ?? place, extra.pr ?? null, extra.pp ?? null,
@@ -85,7 +85,7 @@ await res(slugs[17], 4, "Marathon", "F", 6, "2:23:50", 1195);
 // Cross Pforzheim: zwei Rennen (1,5 und 7,5 km) im selben Wettkampf
 comps.push([7300006, "Sparkassen Cross Pforzheim, Pforzheim", "GL", "GER", -2]);
 const pf = async (slug: string, km: string, place: number, mark: string) => db.query(
-  `insert into wa_results (rider_slug, date, competition, venue, discipline, country, category, race, place, wa_race, wa_place, mark, result_score, wa_competition_id, wa_event_id)
+  `insert into wa_results (athlete_id, date, competition, venue, discipline, country, category, race, place, wa_race, wa_place, mark, result_score, wa_competition_id, wa_event_id)
    values ($1, $2, $3, 'Pforzheim (GER)', 'Cross Country', 'GER', 'GL', 'F', $4, 'F', $4, $5, 0, 7300006, 2)`,
   [slug, day(-2), `Sparkassen Cross Pforzheim, Pforzheim - XC ${km}km`, place, mark]);
 await pf(slugs[12], "7.5", 4, "00:19:34");
@@ -93,7 +93,7 @@ await pf(slugs[13], "7.5", 5, "00:23:36");
 await pf(slugs[4], "1.5", 1, "00:04:03");
 await pf(slugs[5], "1.5", 2, "00:04:41");
 for (const [cid, name, cat, country, off] of comps) {
-  await db.query("insert into races (pcs_slug, name, venue, country, uci_class, start_date, end_date) values ($1, $2, $2, $3, $4, $5, $5)",
+  await db.query("insert into competitions (id, name, venue, country, category, start_date, end_date) values ($1, $2, $2, $3, $4, $5, $5)",
     [`wa-c${cid}`, name, country, cat, day(off)]);
 }
 await db.query("select rebuild_results(null)");
@@ -126,7 +126,7 @@ let pos = 0;
 for (const [team, idx] of Object.entries(rosters)) {
   await db.query("update managers set draft_position = $2 where id = $1", [mgr[team], ++pos]);
   for (const i of idx) {
-    await db.query("insert into roster_entries (league_id, manager_id, rider_slug, price, source, acquired_on) values ($1, $2, $3, 0, 'draft', $4)",
+    await db.query("insert into roster_entries (league_id, manager_id, athlete_id, price, source, acquired_on) values ($1, $2, $3, 0, 'draft', $4)",
       [league, mgr[team], slugs[i], `${Y}-01-01`]);
   }
 }

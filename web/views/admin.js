@@ -150,7 +150,7 @@ function Members({ c }) {
 // ---- Offline-Draft-Import ------------------------------------------------
 
 function OfflineImport({ c }) {
-  const [rows, setRows] = useState([]);          // {manager_id, rider_slug, price}
+  const [rows, setRows] = useState([]);          // {manager_id, athlete_id, price}
   const [unmatched, setUnmatched] = useState([]);
   const [errors, setErrors] = useState(null);
   const [mgr, setMgr] = useState(c.managers[0]?.id);
@@ -160,8 +160,8 @@ function OfflineImport({ c }) {
   if (c.league.status !== 'setup') return html`<p class="card muted">Die Kader sind bereits fixiert.</p>`;
 
   const byName = {};
-  c.riders.forEach((r) => { byName[normName(r.name)] = r; });
-  const taken = new Set(rows.map((r) => r.rider_slug));
+  c.athletes.forEach((r) => { byName[normName(r.name)] = r; });
+  const taken = new Set(rows.map((r) => r.athlete_id));
 
   const parseCsv = (text) => {
     const out = [], miss = [];
@@ -172,7 +172,7 @@ function OfflineImport({ c }) {
       const m = c.managers.find((x) => normName(x.team_name) === normName(mName));
       const r = c.riderMap[rName] || byName[normName(rName)];
       if (!m || !r) miss.push(`Zeile ${i + 1}: ${!m ? `Manager „${mName}“` : ''}${!m && !r ? ' und ' : ''}${!r ? `Athlet „${rName}“` : ''} nicht gefunden`);
-      else out.push({ manager_id: m.id, rider_slug: r.pcs_slug, price: p === undefined || p === '' ? null : +p });
+      else out.push({ manager_id: m.id, athlete_id: r.id, price: p === undefined || p === '' ? null : +p });
     });
     setRows(out); setUnmatched(miss); setErrors(null);
   };
@@ -199,14 +199,14 @@ function OfflineImport({ c }) {
       <select value=${mgr} onChange=${(e) => setMgr(e.target.value)}>${c.managers.map((m) => html`<option value=${m.id}>${m.team_name}</option>`)}</select>
       <input type="number" min="0" max="100" placeholder="Preis" value=${price} onInput=${(e) => setPrice(e.target.value)} />
     </div>
-    <${RiderPicker} riders=${c.riders.filter((r) => !taken.has(r.pcs_slug))} limit=${8} action="Hinzufügen"
-      onPick=${(r) => { setRows([...rows, { manager_id: mgr, rider_slug: r.pcs_slug, price: price === '' ? null : +price }]); setErrors(null); }} />
+    <${RiderPicker} athletes=${c.athletes.filter((r) => !taken.has(r.id))} limit=${8} action="Hinzufügen"
+      onPick=${(r) => { setRows([...rows, { manager_id: mgr, athlete_id: r.id, price: price === '' ? null : +price }]); setErrors(null); }} />
 
     <div class="grid2">${c.managers.map((m) => {
       const mine = rows.filter((r) => r.manager_id === m.id);
       return html`<div key=${m.id}><h4>${m.team_name} <span class="muted small">${mine.length}/${c.league.roster_size} · ${mine.reduce((s, r) => s + (r.price || 0), 0)} Pkt.</span></h4>
         <ul class="list compact">${mine.map((r) => html`<li>
-          <span>${c.riderMap[r.rider_slug]?.name}</span>
+          <span>${c.riderMap[r.athlete_id]?.name}</span>
           <span class="row"><span class="muted">${r.price ?? 0}</span>
             <button class="small ghost" onClick=${() => setRows(rows.filter((x) => x !== r))} aria-label="entfernen">✕</button></span></li>`)}</ul></div>`;
     })}</div>
@@ -337,7 +337,7 @@ const ROAD = ['5 Kilometres Road', '10 Kilometres Road', '15 Kilometres Road', '
   'Half Marathon', '25 Kilometres Road', '30 Kilometres Road', 'Marathon'];
 
 function ManualResults({ c }) {
-  const list = useLoad(() => q(sb.from('wa_results').select('id,rider_slug,date,competition,discipline,mark,result_score,source_url')
+  const list = useLoad(() => q(sb.from('wa_results').select('id,athlete_id,date,competition,discipline,mark,result_score,source_url')
     .eq('source', 'manual').order('date', { ascending: false }).limit(200)), []);
   const counted = useLoad(async () => {
     const ids = (list.data || []).map((x) => x.id);
@@ -350,9 +350,9 @@ function ManualResults({ c }) {
   const set = (k) => (e) => { setF({ ...f, [k]: e.target.value }); setCheck(null); };
   const ready = rider && f.discipline && f.date && f.mark.trim();
   const doCheck = () => a.run(async () => setCheck(await rpc('manual_result_check',
-    { p_rider: rider.pcs_slug, p_discipline: f.discipline, p_date: f.date, p_mark: f.mark })));
+    { p_rider: rider.id, p_discipline: f.discipline, p_date: f.date, p_mark: f.mark })));
   const save = () => a.run(async () => {
-    await rpc('add_manual_result', { p: { ...f, rider_slug: rider.pcs_slug, wa_points: f.wa_points === '' ? null : +f.wa_points } });
+    await rpc('add_manual_result', { p: { ...f, athlete_id: rider.id, wa_points: f.wa_points === '' ? null : +f.wa_points } });
     setF({ ...f, mark: '', wa_points: '' }); setRider(null); setCheck(null); list.reload();
   }, 'Ergebnis nachgetragen – zählt ab sofort in der Wertung.');
   const pts = check?.wa_points ?? (f.wa_points === '' ? null : +f.wa_points);
@@ -363,7 +363,7 @@ function ManualResults({ c }) {
       <p class="muted small">Für Rennen auf vermessenen Strecken, die World Athletics nicht führt (z. B. Ergebnisse bei RaceResult).
         Bruttozeit eintragen – die App berechnet die WA-Punkte. Taucht das Ergebnis später bei World Athletics auf, gilt das WA-Ergebnis.</p>
       ${rider ? html`<div class="row between"><${RiderCell} r=${rider} /><button class="small ghost" onClick=${() => { setRider(null); setCheck(null); }}>Ändern</button></div>`
-        : html`<${RiderPicker} riders=${c.riders} onPick=${(r) => { setRider(r); setCheck(null); }} limit=${8} />`}
+        : html`<${RiderPicker} athletes=${c.athletes} onPick=${(r) => { setRider(r); setCheck(null); }} limit=${8} />`}
       <div class="grid2 compact">
         <label>Disziplin<select value=${f.discipline} onChange=${set('discipline')}>${ROAD.map((d) => html`<option value=${d}>${discLabel(d)}</option>`)}</select></label>
         <label>Datum<input type="date" max=${today()} value=${f.date} onInput=${set('date')} /></label>
@@ -387,7 +387,7 @@ function ManualResults({ c }) {
       <h3>Bisherige Nachträge</h3>
       ${!list.data ? html`<${Loading} error=${list.error} />` : list.data.length === 0 ? html`<p class="muted small">Noch keine.</p>` : html`<ul class="list compact">
         ${list.data.map((x) => html`<li key=${x.id}>
-          <span>${fmtDate(x.date)} · <strong>${c.riderMap[x.rider_slug]?.name || x.rider_slug}</strong> · ${discLabel(x.discipline)} ${x.mark} · ${x.result_score} WA-P.
+          <span>${fmtDate(x.date)} · <strong>${c.riderMap[x.athlete_id]?.name || x.athlete_id}</strong> · ${discLabel(x.discipline)} ${x.mark} · ${x.result_score} WA-P.
             <span class="muted"> – ${x.competition}${x.source_url ? html` · <a href=${x.source_url} target="_blank" rel="noopener">Quelle</a>` : ''}
             ${counted.data && !counted.data.has(x.id) ? ' · zählt nicht' : ''}</span></span>
           <button class="small ghost" disabled=${a.busy} onClick=${() => confirm('Nachtrag löschen?') && a.run(async () => {
@@ -412,7 +412,7 @@ function PointOverride({ c }) {
   const [points, setPoints] = useState('');
   const [reason, setReason] = useState('');
   const a = useAction();
-  const riders = [...new Set(c.roster.filter((r) => r.manager_id === mgr).map((r) => r.rider_slug))];
+  const athletes = [...new Set(c.roster.filter((r) => r.manager_id === mgr).map((r) => r.athlete_id))];
   const save = (val) => a.run(async () => {
     await rpc('admin_set_override', { p_league: c.league.id, p_matchday: md, p_manager: mgr, p_rider: rider,
       p_points: val === null ? null : +val, p_reason: reason });
@@ -426,17 +426,17 @@ function PointOverride({ c }) {
       <label>Spieltag<select value=${md} onChange=${(e) => setMd(e.target.value)}>${c.matchdays.map((m) => html`<option value=${m.id}>${m.name}</option>`)}</select></label>
       <label>Team<select value=${mgr} onChange=${(e) => { setMgr(e.target.value); setRider(''); }}>${c.managers.map((m) => html`<option value=${m.id}>${m.team_name}</option>`)}</select></label>
       <label>Athlet<select value=${rider} onChange=${(e) => setRider(e.target.value)}><option value="">– wählen –</option>
-        ${riders.map((s) => html`<option value=${s}>${c.riderMap[s]?.name || s}</option>`)}</select></label>
+        ${athletes.map((s) => html`<option value=${s}>${c.riderMap[s]?.name || s}</option>`)}</select></label>
       <label>Punkte<input type="number" step="0.1" value=${points} onInput=${(e) => setPoints(e.target.value)} /></label>
       <label class="span2">Grund<input value=${reason} onInput=${(e) => setReason(e.target.value)} placeholder="z. B. Ergebnis aberkannt" /></label>
     </div>
     <div class="row"><button class="primary" disabled=${a.busy || !md || !rider || points === '' || !reason.trim()} onClick=${() => save(points)}>Speichern</button></div>
     <${Msg} msg=${a.msg} />
     ${overrides.data?.length > 0 && html`<ul class="list compact">${overrides.data.map((o) => html`<li key=${o.id}>
-      <span>${c.matchdays.find((m) => m.id === o.matchday_id)?.name} · ${c.managerMap[o.manager_id]?.team_name} · ${c.riderMap[o.rider_slug]?.name}: <strong>${o.points}</strong>
+      <span>${c.matchdays.find((m) => m.id === o.matchday_id)?.name} · ${c.managerMap[o.manager_id]?.team_name} · ${c.riderMap[o.athlete_id]?.name}: <strong>${o.points}</strong>
         <span class="muted"> – ${o.reason}</span></span>
       <button class="small ghost" onClick=${() => a.run(async () => {
-        await rpc('admin_set_override', { p_league: c.league.id, p_matchday: o.matchday_id, p_manager: o.manager_id, p_rider: o.rider_slug, p_points: null, p_reason: 'Korrektur aufgehoben' });
+        await rpc('admin_set_override', { p_league: c.league.id, p_matchday: o.matchday_id, p_manager: o.manager_id, p_rider: o.athlete_id, p_points: null, p_reason: 'Korrektur aufgehoben' });
         overrides.reload(); })}>Aufheben</button></li>`)}</ul>`}
   </section>`;
 }
@@ -458,25 +458,25 @@ function RosterFix({ c }) {
     <div class="grid2 compact">
       <label>Team<select value=${mgr} onChange=${(e) => { setMgr(e.target.value); setDrop(''); }}>${c.managers.map((m) => html`<option value=${m.id}>${m.team_name}</option>`)}</select></label>
       <label>Abgeben<select value=${drop} onChange=${(e) => setDrop(e.target.value)}><option value="">– niemand –</option>
-        ${mine.map((r) => html`<option value=${r.rider_slug}>${c.riderMap[r.rider_slug]?.name}</option>`)}</select></label>
+        ${mine.map((r) => html`<option value=${r.athlete_id}>${c.riderMap[r.athlete_id]?.name}</option>`)}</select></label>
       <label class="span2">Grund<input value=${reason} onInput=${(e) => setReason(e.target.value)} /></label>
     </div>
     ${drop && html`<button disabled=${a.busy} onClick=${() => run(null)}>Nur abgeben</button>`}
-    <${RiderPicker} riders=${c.riders.filter((r) => !c.owner[r.pcs_slug])} limit=${8} action="Aufnehmen" onPick=${(r) => run(r.pcs_slug)} />
+    <${RiderPicker} athletes=${c.athletes.filter((r) => !c.owner[r.id])} limit=${8} action="Aufnehmen" onPick=${(r) => run(r.id)} />
     <${Msg} msg=${a.msg} />
   </section>`;
 }
 
 function Inactive({ c }) {
   const a = useAction();
-  const owned = c.active.map((r) => c.riderMap[r.rider_slug]).filter(Boolean);
+  const owned = c.active.map((r) => c.riderMap[r.athlete_id]).filter(Boolean);
   return html`<section class="card stack">
     <h3>Karriereende / Sperre</h3>
     <p class="muted small">Als inaktiv markierte Athleten kann ihr Manager außer der Reihe sofort per Waiver ersetzen.</p>
-    <ul class="list compact">${owned.filter((r) => r.inactive).map((r) => html`<li key=${r.pcs_slug}><span>${r.name}</span>
-      <button class="small" onClick=${() => a.run(async () => { await rpc('admin_mark_inactive', { p_league: c.league.id, p_rider: r.pcs_slug, p_inactive: false }); c.reload(); })}>Wieder aktiv</button></li>`)}</ul>
-    <${RiderPicker} riders=${owned.filter((r) => !r.inactive)} limit=${6} action="Inaktiv setzen"
-      onPick=${(r) => a.run(async () => { await rpc('admin_mark_inactive', { p_league: c.league.id, p_rider: r.pcs_slug, p_inactive: true }); c.reload(); })} />
+    <ul class="list compact">${owned.filter((r) => r.inactive).map((r) => html`<li key=${r.id}><span>${r.name}</span>
+      <button class="small" onClick=${() => a.run(async () => { await rpc('admin_mark_inactive', { p_league: c.league.id, p_rider: r.id, p_inactive: false }); c.reload(); })}>Wieder aktiv</button></li>`)}</ul>
+    <${RiderPicker} athletes=${owned.filter((r) => !r.inactive)} limit=${6} action="Inaktiv setzen"
+      onPick=${(r) => a.run(async () => { await rpc('admin_mark_inactive', { p_league: c.league.id, p_rider: r.id, p_inactive: true }); c.reload(); })} />
     <${Msg} msg=${a.msg} />
   </section>`;
 }

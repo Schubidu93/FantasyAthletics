@@ -83,7 +83,7 @@ export async function as(db: Db, userId: string | null) {
 /** Athlet mit Toplisteneintrag anlegen. */
 export async function athlete(db: Db, id: number, name: string, gender: "men" | "women", discipline: string, score: number, year = new Date().getFullYear()) {
   const slug = `wa-${id}`;
-  await db.query("insert into riders (pcs_slug, name, gender, nation, wa_id) values ($1, $2, $3, 'GER', $4)", [slug, name, gender, id]);
-  await db.query("insert into toplist_entries (rider_slug, year, discipline, mark, score) values ($1, $2, $3, '-', $4)", [slug, year - 1, discipline, score]);
+  await db.query("insert into athletes (id, name, gender, nation, wa_id) values ($1, $2, $3, 'GER', $4)", [slug, name, gender, id]);
+  await db.query("insert into toplist_entries (athlete_id, year, discipline, mark, score) values ($1, $2, $3, '-', $4)", [slug, year - 1, discipline, score]);
   return slug;
 }

@@ -23,15 +23,15 @@ function runNote(x) {
 }
 
 async function loadRider(slug) {
-  const [rider] = await q(sb.from('riders').select('*').eq('pcs_slug', slug));
+  const [rider] = await q(sb.from('athletes').select('*').eq('id', slug));
   const rows = await all(() => sb.from('wa_results')
     .select('id,date,competition,discipline,category,race,place,wa_race,wa_place,placing_round,placing_place,mark,result_score,remark,wa_competition_id,source,source_url')
-    .eq('rider_slug', slug).gte('date', `${FIRST_YEAR}-01-01`).order('date', { ascending: false }).order('id'));
-  const pts = Object.fromEntries((await all(() => sb.from('results').select('wa_result_id,uci_points,perf_points,placing_points')
-    .eq('rider_slug', slug).order('id'))).map((r) => [r.wa_result_id, r]));
-  const toplists = await q(sb.from('toplist_entries').select('year,discipline,mark,score').eq('rider_slug', slug)
+    .eq('athlete_id', slug).gte('date', `${FIRST_YEAR}-01-01`).order('date', { ascending: false }).order('id'));
+  const pts = Object.fromEntries((await all(() => sb.from('results').select('wa_result_id,points,perf_points,placing_points')
+    .eq('athlete_id', slug).order('id'))).map((r) => [r.wa_result_id, r]));
+  const toplists = await q(sb.from('toplist_entries').select('year,discipline,mark,score').eq('athlete_id', slug)
     .order('year', { ascending: false }).order('score', { ascending: false }));
-  const season = Object.fromEntries((await q(sb.from('rider_season_stats').select('year,season_rank,points,riders').eq('rider_slug', slug)))
+  const season = Object.fromEntries((await q(sb.from('athlete_season_stats').select('year,season_rank,points,athletes').eq('athlete_id', slug)))
     .map((x) => [x.year, x]));
   const results = rows.map((r) => ({ ...r, pts: pts[r.id] || null }));
   return { rider, results, toplists, season };
@@ -67,10 +67,10 @@ export function RiderModal() {
   const thisYear = new Date().getFullYear();
   const y = year || (years.includes(thisYear) ? thisYear : years[years.length - 1]);
   const inYear = (data?.results || []).filter((x) => yearOf(x) === y);
-  const total = inYear.reduce((s, x) => s + Number(x.pts?.uci_points || 0), 0);
+  const total = inYear.reduce((s, x) => s + Number(x.pts?.points || 0), 0);
   const shown = (allRuns || byPoints ? inYear : inYear.filter((x) => x.pts))
     .filter((x) => !byPoints || x.pts)
-    .sort((a, b) => (byPoints ? Number(b.pts.uci_points) - Number(a.pts.uci_points) : 0) || b.date.localeCompare(a.date));
+    .sort((a, b) => (byPoints ? Number(b.pts.points) - Number(a.pts.points) : 0) || b.date.localeCompare(a.date));
   const sr = data?.season?.[y];
   const g = riderGroup(r);
   const L = leagueId();
@@ -83,9 +83,9 @@ export function RiderModal() {
           <h2>${r?.nation ? flag(r.nation) + ' ' : ''}${r?.name || '…'}</h2>
           ${r && html`<div class="muted small">${[r.gender === 'women' ? 'Frauen' : 'Männer', g && (GROUP_LABEL[g] || g),
             r.birth_date && `Jg. ${r.birth_date.slice(0, 4)} (${Math.floor((Date.now() - new Date(r.birth_date)) / 31557600000)} J.)`].filter(Boolean).join(' · ')}</div>`}
-          ${r && html`<div class="small"><strong>${r.uci_rank ? `Pool-Platz ${r.uci_rank}` : 'Nicht im aktuellen Pool'}</strong>${r.best_mark
+          ${r && html`<div class="small"><strong>${r.pool_rank ? `Pool-Platz ${r.pool_rank}` : 'Nicht im aktuellen Pool'}</strong>${r.best_mark
             ? ` · Bestleistung ${discLabel(r.best_discipline)} ${r.best_mark} (${Math.round(r.ranking_points || 0)} WA-Punkte)` : ''}</div>`}
-          ${y && html`<div class="small">${y}: ${fmtPts(total)} Punkte${sr ? ` · Platz ${sr.season_rank} von ${sr.riders}` : ''}</div>`}
+          ${y && html`<div class="small">${y}: ${fmtPts(total)} Punkte${sr ? ` · Platz ${sr.season_rank} von ${sr.athletes}` : ''}</div>`}
         </div>
         <button class="ghost small" onClick=${() => setSlug(null)} aria-label="Schließen">✕</button>
       </div>
@@ -113,7 +113,7 @@ export function RiderModal() {
               ${runNote(x) && html`<small class="muted">${runNote(x)}</small>`}
               ${x.pts && html`<small class="muted">Leistung ${fmtPts(x.pts.perf_points)} + Platzierung ${fmtPts(x.pts.placing_points)}</small>`}</span>
             <span class="res-place">${placeLabel(x)}</span>
-            <span class="res-pts">${x.pts ? fmtPts(x.pts.uci_points) : ''}</span>
+            <span class="res-pts">${x.pts ? fmtPts(x.pts.points) : ''}</span>
           </div>`)}</div>
         </div>`}
         ${data.toplists.length > 0 && html`<details class="toplists"><summary class="small">Toplisten (DE)</summary>

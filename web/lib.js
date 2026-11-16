@@ -37,8 +37,8 @@ export function useRiderPoints(gender) {
   const [map, setMap] = useState(pointsCache[key] || null);
   useEffect(() => {
     if (pointsCache[key]) return;
-    rpcAll('rider_points', { p_gender: gender, p_year: year })
-      .then((rows) => { pointsCache[key] = Object.fromEntries(rows.map((r) => [r.rider_slug, Number(r.points)])); setMap(pointsCache[key]); })
+    rpcAll('athlete_points', { p_gender: gender, p_year: year })
+      .then((rows) => { pointsCache[key] = Object.fromEntries(rows.map((r) => [r.athlete_id, Number(r.points)])); setMap(pointsCache[key]); })
       .catch(() => setMap({}));
   }, [key]);
   return map || {};
@@ -217,8 +217,8 @@ export function RiderCell({ r }) {
   return html`<span class="rider">
     <span class="rider-line">
       <button type="button" class="rider-name linkish" title="Ergebnisse anzeigen"
-        onClick=${(e) => { e.stopPropagation(); openRider(r.pcs_slug); }}>${r.name}</button>
-      ${r.uci_rank && html`<span class="rank-chip" title="Platz im Athletenpool (nach bester WA-Punktzahl)">#${r.uci_rank}</span>`}
+        onClick=${(e) => { e.stopPropagation(); openRider(r.id); }}>${r.name}</button>
+      ${r.pool_rank && html`<span class="rank-chip" title="Platz im Athletenpool (nach bester WA-Punktzahl)">#${r.pool_rank}</span>`}
       ${r.inactive && html`<span class="tag warn">inaktiv</span>`}
     </span>
     ${meta && html`<span class="rider-meta">${meta}</span>`}
@@ -241,17 +241,17 @@ export function SearchSelect({ value, onChange, options, placeholder, label = (x
 }
 
 // Athletenauswahl mit Suche (Name oder Gruppe, z. B. „1500“)
-export function RiderPicker({ riders, onPick, placeholder = 'Athlet suchen …', limit = 30, action = 'Wählen' }) {
+export function RiderPicker({ athletes, onPick, placeholder = 'Athlet suchen …', limit = 30, action = 'Wählen' }) {
   const [term, setTerm] = useState('');
   const t = normName(term);
   const text = (r) => normName(r.name + ' ' + (riderGroup(r) || ''));
-  const list = riders
+  const list = athletes
     .filter((r) => !t || t.split(' ').every((w) => text(r).includes(w)))
     .slice(0, limit);
   return html`<div class="picker">
     <input type="search" placeholder=${placeholder} value=${term} onInput=${(e) => setTerm(e.target.value)} />
     <ul class="list">
-      ${list.map((r) => html`<li key=${r.pcs_slug}>
+      ${list.map((r) => html`<li key=${r.id}>
         <${RiderCell} r=${r} />
         <button class="small" onClick=${() => onPick(r)}>${action}</button>
       </li>`)}
