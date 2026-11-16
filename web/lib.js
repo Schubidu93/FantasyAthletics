@@ -97,7 +97,17 @@ export function leagueSlots(l) {
 export function slotLabel(slot) {
   const [g, sex] = slot.split(':');
   const base = /^WC(\d+)$/.test(g) ? `Wildcard ${g.slice(2)}` : GROUP_LABEL[g] || g;
-  return sex ? `${base} ${sex === 'M' ? '♂' : '♀'}` : base;
+  return sex ? `${base} ${sex === 'M' ? 'M' : 'F'}` : base;
+}
+// Geschlecht als umrandeter Buchstabe: blaues M, rosa F (g = 'men'/'women' oder 'M'/'W')
+export const SexBadge = ({ g }) => {
+  const f = g === 'women' || g === 'W' || g === 'F';
+  return html`<span class=${`sex ${f ? 'sex-f' : 'sex-m'}`} title=${f ? 'Frauen' : 'Männer'}>${f ? 'F' : 'M'}</span>`;
+};
+// Positionsname mit Geschlechts-Kennzeichen
+export function SlotLabel({ slot }) {
+  const [g, sex] = slot.split(':');
+  return html`${slotLabel(g)}${sex ? html` <${SexBadge} g=${sex} />` : ''}`;
 }
 // Darf der Athlet auf diese Position? (gleiche Regel wie _slot_ok in der Datenbank)
 export function slotOk(slot, r) {
@@ -211,7 +221,7 @@ export function teamName(t) {
 export function RiderCell({ r }) {
   if (!r) return html`<span class="muted">unbekannt</span>`;
   const g = riderGroup(r);
-  const meta = [r.gender === 'women' ? '♀' : '♂', g && (GROUP_LABEL[g] || g), r.birth_date && `Jg. ${r.birth_date.slice(0, 4)}`]
+  const meta = [g && (GROUP_LABEL[g] || g), r.birth_date && `Jg. ${r.birth_date.slice(0, 4)}`]
     .filter(Boolean).join(' · ');
   const best = r.best_mark && `${r.best_discipline?.replace(' Metres', ' m').replace('Short Track', '(Halle)') || ''} ${r.best_mark}`
     + (r.ranking_points ? ` · ${Math.round(r.ranking_points)} P.` : '');
@@ -222,7 +232,7 @@ export function RiderCell({ r }) {
       ${r.pool_rank && html`<span class="rank-chip" title="Platz im Athletenpool (nach Punkten im Vorjahr der Saison)">#${r.pool_rank}</span>`}
       ${r.inactive && html`<span class="tag warn">inaktiv</span>`}
     </span>
-    ${meta && html`<span class="rider-meta">${meta}</span>`}
+    <span class="rider-meta"><${SexBadge} g=${r.gender} />${meta ? ` ${meta}` : ''}</span>
     ${best && html`<span class="rider-team" title="Beste Toplistenleistung">${best}</span>`}
   </span>`;
 }

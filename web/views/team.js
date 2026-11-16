@@ -1,5 +1,5 @@
 import { html, useState, useEffect } from '../vendor/preact-htm.js';
-import { sb, q, rpc, useLoad, useAction, Msg, Loading, RiderCell, fmtDate, fmtPts, SOURCE_LABEL, budgetRelevant, useRiderPoints, leagueSlots, slotLabel, slotOk } from '../lib.js';
+import { sb, q, rpc, useLoad, useAction, Msg, Loading, RiderCell, fmtDate, fmtPts, SOURCE_LABEL, budgetRelevant, useRiderPoints, leagueSlots, slotLabel, slotOk, SlotLabel } from '../lib.js';
 
 import { NextDeadline, fmtDeadline } from './deadline.js';
 
@@ -56,7 +56,7 @@ function Roster({ c, managerId, points }) {
   </section>`;
 }
 
-// Aufstellung mit festen Positionen: je Disziplingruppe (ggf. getrennt nach ♂/♀) plus Wildcards
+// Aufstellung mit festen Positionen: je Disziplingruppe (ggf. getrennt nach Männern/Frauen) plus Wildcards
 function Lineup({ c }) {
   const md = c.nextMatchday;
   const slots = leagueSlots(c.league);
@@ -81,12 +81,12 @@ function Lineup({ c }) {
   };
   return html`<section class="card">
     <h3>Aufstellung für ${md.name}</h3>
-    <p class="muted small">${slots.length} Positionen: je Disziplin${c.league.lineup_mode === 'mf' ? ' ein Mann (♂) und eine Frau (♀)' : ''}, Wildcards nehmen jede Disziplin.
+    <p class="muted small">${slots.length} Positionen: je Disziplin${c.league.lineup_mode === 'mf' ? ' ein Mann und eine Frau' : ''}, Wildcards nehmen jede Disziplin.
       Änderbar bis <strong>${fmtDeadline(md.deadline)}</strong>, danach ist sie für ${md.name} fest. Ohne neue Eingabe gilt die letzte Aufstellung.</p>
     <ul class="list compact lineup">${slots.map((slot) => {
       const options = mine.filter((r) => slotOk(slot, r));
       return html`<li key=${slot}>
-        <span class="slot-name">${slotLabel(slot)}</span>
+        <span class="slot-name"><${SlotLabel} slot=${slot} /></span>
         <select value=${sel[slot] || ''} onChange=${(e) => choose(slot, e.target.value)}>
           <option value="">– leer –</option>
           ${options.map((r) => html`<option value=${r.id}>${r.name}${used.has(r.id) && sel[slot] !== r.id ? ' (andere Position)' : ''}</option>`)}

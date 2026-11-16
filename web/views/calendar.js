@@ -1,7 +1,7 @@
 // Kalender: kommende Wettkämpfe mit Laufdisziplinen (aus dem WA-Kalender, täglich aktualisiert)
 // International ab Gold Label, Europa ab Kategorie A, Deutschland ab E – siehe importer/sync-calendar.ts
 import { html, useState } from '../vendor/preact-htm.js';
-import { sb, all, useLoad, Loading, normName, flag, nationCode, today } from '../lib.js';
+import { sb, all, useLoad, Loading, normName, flag, nationCode, today, SexBadge } from '../lib.js';
 
 const KIND_LABEL = { track: 'Bahn', road: 'Straße', cross: 'Cross' };
 const TOP = ['OW', 'DF', 'GW', 'GL'];
@@ -64,7 +64,7 @@ export function Calendar() {
             <small>${[e.country && `${flag(nationCode(e.country))} ${(e.venue || '').replace(/\s*\([A-Z]{3}\)\s*$/, '')}`,
               (e.kinds || []).map((k) => KIND_LABEL[k]).join(', ')].filter(Boolean).join(' · ')}</small>
             ${(e.events || []).length > 0 && html`<small class="cal-events">${e.events.map((u) =>
-              `${u.gender === 'W' ? '♀' : u.gender === 'M' ? '♂' : u.gender} ${u.events.join(', ')}`).join(' · ')}</small>`}
+              html`<span class="cal-unit">${['M', 'W'].includes(u.gender) ? html`<${SexBadge} g=${u.gender} />` : u.gender} ${u.events.join(', ')}</span>`)}</small>`}
             ${e.competition_group && html`<small class="muted">${e.competition_group}</small>`}</span></span>
           <span class=${`tag ${TOP.includes(e.category) ? 'ok' : ''}`}>${e.category || '–'}</span>
         </div></li>`)}</ul>`)}
