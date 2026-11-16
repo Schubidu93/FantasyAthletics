@@ -1,0 +1,2986 @@
+{
+ "status": 200,
+ "body": {
+  "data": {
+   "getCalendarCompetitionResults": {
+    "competition": {
+     "dateRange": "14 NOV 2026",
+     "endDate": "2026-11-14",
+     "name": "Sparkassen Cross Pforzheim",
+     "rankingCategory": "GL",
+     "startDate": "2026-11-14",
+     "venue": "Pforzheim (GER)"
+    },
+    "eventTitles": [
+     {
+      "eventTitle": "XC 7.5km",
+      "events": [
+       {
+        "event": "Men's Cross Country",
+        "eventId": 10229623,
+        "gender": "M",
+        "isRelay": false,
+        "perResultWind": false,
+        "races": [
+         {
+          "date": null,
+          "day": null,
+          "race": "Final",
+          "raceId": 10,
+          "raceNumber": 0,
+          "wind": null,
+          "results": [
+           {
+            "id": null,
+            "competitor": {
+             "name": "Egide NTAKARUTIMANA",
+             "urlSlug": "burundi/egide-ntakarutimana-14987250",
+             "id": "qdolk10z2q5uv7lhtw1mb",
+             "iaafId": 534291,
+             "birthDate": "21 OCT 1997",
+             "hasProfile": true
+            },
+            "mark": "19:14",
+            "nationality": "BDI",
+            "place": "1.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Célestin NDIKUMANA",
+             "urlSlug": "burundi/celestin-ndikumana-14993101",
+             "id": "ze1xehyx3po0qviomhoqp",
+             "iaafId": 534122,
+             "birthDate": "22 FEB 2002",
+             "hasProfile": true
+            },
+            "mark": "19:14",
+            "nationality": "BDI",
+            "place": "2.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Rory LEONARD",
+             "urlSlug": "great-britain-ni/rory-leonard-14805205",
+             "id": "jntglxbldpdzcayxn4tfb",
+             "iaafId": 404236,
+             "birthDate": "13 FEB 2001",
+             "hasProfile": true
+            },
+            "mark": "19:30",
+            "nationality": "GBR",
+            "place": "3.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Nick JÄGER",
+             "urlSlug": "germany/nick-jager-14761137",
+             "id": "erdg559a68c5t46m7t574w",
+             "iaafId": 313782,
+             "birthDate": "22 AUG 1999",
+             "hasProfile": true
+            },
+            "mark": "19:34",
+            "nationality": "GER",
+            "place": "4.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Mads MEIJER",
+             "urlSlug": "netherlands/mads-meijer-15006963",
+             "id": "9pyjckhpak8n69wfuknmxc",
+             "iaafId": 534218,
+             "birthDate": "06 SEP 2003",
+             "hasProfile": true
+            },
+            "mark": "19:41",
+            "nationality": "NED",
+            "place": "5.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Isaac KIMELI",
+             "urlSlug": "belgium/isaac-kimeli-14482919",
+             "id": "xpf8b0t5jhhupgo0005ja",
+             "iaafId": 280026,
+             "birthDate": "09 MAR 1994",
+             "hasProfile": true
+            },
+            "mark": "19:45",
+            "nationality": "BEL",
+            "place": "6.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Efrem GIDEY",
+             "urlSlug": "ireland/efrem-gidey-14842722",
+             "id": "5j1hk4gpccswiq03jr40t",
+             "iaafId": 405846,
+             "birthDate": "03 SEP 2000",
+             "hasProfile": true
+            },
+            "mark": "19:46",
+            "nationality": "IRL",
+            "place": "7.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Elie SINDAYIKENGDERA",
+             "urlSlug": "burundi/elie-sindayikengdera-15099598",
+             "id": "htvvesug39lvz0j60dzq68",
+             "iaafId": null,
+             "birthDate": "01 JAN 2004",
+             "hasProfile": true
+            },
+            "mark": "19:48",
+            "nationality": "BDI",
+            "place": "8.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Yihun FANTAHUN",
+             "urlSlug": "ethiopia/yihun-fantahun-14894740",
+             "id": "58ehxrgymhd8lbwr5b1ilk",
+             "iaafId": 480248,
+             "birthDate": "23 JAN 2003",
+             "hasProfile": true
+            },
+            "mark": "19:50",
+            "nationality": "ETH",
+            "place": "9.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Robin HENDRIX",
+             "urlSlug": "belgium/robin-hendrix-14487481",
+             "id": "ehoy2m9d6pr6bqlzhinpy5",
+             "iaafId": 400809,
+             "birthDate": "14 JAN 1995",
+             "hasProfile": true
+            },
+            "mark": "19:51",
+            "nationality": "BEL",
+            "place": "10.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Tharcisse NIZIGIYIMANA",
+             "urlSlug": "burundi/tharcisse-nizigiyimana-15268036",
+             "id": "9j3ix7fpvbri3l5mq8pmts",
+             "iaafId": null,
+             "birthDate": "05 MAR 2005",
+             "hasProfile": true
+            },
+            "mark": "19:53",
+            "nationality": "BDI",
+            "place": "11.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Jochem WIERSMA",
+             "urlSlug": "netherlands/jochem-wiersma-15071340",
+             "id": "3qiizsdfpx49lxmfo5jlf",
+             "iaafId": null,
+             "birthDate": "12 NOV 2006",
+             "hasProfile": true
+            },
+            "mark": "19:54",
+            "nationality": "NED",
+            "place": "12.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Tobias TENT",
+             "urlSlug": "germany/tobias-tent-15003193",
+             "id": "qjnoadukrxmznb9n1za4k",
+             "iaafId": null,
+             "birthDate": "04 DEC 2005",
+             "hasProfile": true
+            },
+            "mark": "19:58",
+            "nationality": "GER",
+            "place": "13.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Jens MERGENTHALER",
+             "urlSlug": "germany/jens-mergenthaler-14700510",
+             "id": "r3icay7fqisbid5xg9gk5",
+             "iaafId": 359151,
+             "birthDate": "13 JUN 1997",
+             "hasProfile": true
+            },
+            "mark": "19:59",
+            "nationality": "GER",
+            "place": "14.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Marco VANDERPOORTEN",
+             "urlSlug": "belgium/marco-vanderpoorten-014798935",
+             "id": "195zc9eg3db2re6jmkolnw",
+             "iaafId": 404333,
+             "birthDate": "04 SEP 2000",
+             "hasProfile": true
+            },
+            "mark": "20:00",
+            "nationality": "BEL",
+            "place": "15.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Jakob DIETERICH",
+             "urlSlug": "germany/jakob-dieterich-15043093",
+             "id": "434ro7rpbwvd9z34resskq",
+             "iaafId": null,
+             "birthDate": "13 MAR 2005",
+             "hasProfile": true
+            },
+            "mark": "20:01",
+            "nationality": "GER",
+            "place": "16.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Maximilian BERGER",
+             "urlSlug": "germany/maximilian-berger-14903265",
+             "id": "axt0ukklcxb3r4vql9ma1q",
+             "iaafId": 488007,
+             "birthDate": "16 SEP 2002",
+             "hasProfile": true
+            },
+            "mark": "20:01",
+            "nationality": "GER",
+            "place": "17.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Silas ZAHLTEN",
+             "urlSlug": "germany/silas-zahlten-14982619",
+             "id": "fos3llyplkjyqnjm97xpi",
+             "iaafId": 534538,
+             "birthDate": "23 SEP 2004",
+             "hasProfile": true
+            },
+            "mark": "20:06",
+            "nationality": "GER",
+            "place": "18.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Fynn BECKER",
+             "urlSlug": "germany/fynn-becker-15104914",
+             "id": "do44bz8ckzx7yh9dx63s",
+             "iaafId": null,
+             "birthDate": "2003",
+             "hasProfile": true
+            },
+            "mark": "20:08",
+            "nationality": "GER",
+            "place": "19.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Hannes BURGER",
+             "urlSlug": "germany/hannes-burger-14795620",
+             "id": "jodmnulibe95dsar37a2g",
+             "iaafId": 325763,
+             "birthDate": "01 JUL 1999",
+             "hasProfile": true
+            },
+            "mark": "20:15",
+            "nationality": "GER",
+            "place": "20.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Luis HEYMANN",
+             "urlSlug": "germany/luis-heymann-15201015",
+             "id": "o4wbd9in6usjf9rtj8undd",
+             "iaafId": null,
+             "birthDate": "16 JUL 2006",
+             "hasProfile": true
+            },
+            "mark": "20:19",
+            "nationality": "GER",
+            "place": "21.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "David ŠLAPÁK",
+             "urlSlug": "czechia/david-slapak-14905340",
+             "id": "7xuq268tqbxes07ti85ybn",
+             "iaafId": 493393,
+             "birthDate": "20 APR 2003",
+             "hasProfile": true
+            },
+            "mark": "20:20",
+            "nationality": "CZE",
+            "place": "22.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Tim HÜBSCHER",
+             "urlSlug": "switzerland/tim-hubscher-15048609",
+             "id": "pgbdzfbjr5obpdxj1zotk",
+             "iaafId": null,
+             "birthDate": "2000",
+             "hasProfile": true
+            },
+            "mark": "20:23",
+            "nationality": "SUI",
+            "place": "23.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Lars FRANKEN",
+             "urlSlug": "germany/lars-franken-15052249",
+             "id": "1aybg2180nvsw5fweusj8",
+             "iaafId": null,
+             "birthDate": "05 FEB 2004",
+             "hasProfile": true
+            },
+            "mark": "20:27",
+            "nationality": "GER",
+            "place": "24.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Brian WEISHEIT",
+             "urlSlug": "germany/brian-weisheit-14702970",
+             "id": "hfyrgj0wfwgeh5kzztjf",
+             "iaafId": 412391,
+             "birthDate": "07 NOV 1997",
+             "hasProfile": true
+            },
+            "mark": "20:28",
+            "nationality": "GER",
+            "place": "25.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Paul WALOCHNY",
+             "urlSlug": "germany/paul-walochny-14993390",
+             "id": "bxpeo9phupri2pdzs2t4j",
+             "iaafId": null,
+             "birthDate": "14 AUG 2005",
+             "hasProfile": true
+            },
+            "mark": "20:30",
+            "nationality": "GER",
+            "place": "26.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Anton SAAR",
+             "urlSlug": "germany/anton-saar-14993383",
+             "id": "z2616j8x5frx67eio1oaum",
+             "iaafId": null,
+             "birthDate": "17 DEC 2004",
+             "hasProfile": true
+            },
+            "mark": "20:33",
+            "nationality": "GER",
+            "place": "27.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Elhassane MOUJAHID",
+             "urlSlug": "morocco/elhassane-moujahid-14843131",
+             "id": "hbl9lp7y6yovs6teepwo",
+             "iaafId": 408790,
+             "birthDate": "19 JAN 2000",
+             "hasProfile": true
+            },
+            "mark": "20:33",
+            "nationality": "MAR",
+            "place": "28.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Christopher DAHLMEYER",
+             "urlSlug": "germany/christopher-dahlmeyer-15094583",
+             "id": "5up4k5pjdx2c5v9t1ofki",
+             "iaafId": null,
+             "birthDate": "26 SEP 2006",
+             "hasProfile": true
+            },
+            "mark": "20:34",
+            "nationality": "GER",
+            "place": "29.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Matěj ZIMA",
+             "urlSlug": "czechia/matej-zima-14986953",
+             "id": "swb0zgc49scqbx00seu6x",
+             "iaafId": null,
+             "birthDate": "29 JUL 1998",
+             "hasProfile": true
+            },
+            "mark": "20:38",
+            "nationality": "CZE",
+            "place": "30.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "David SCHELLER",
+             "urlSlug": "germany/david-scheller-14996544",
+             "id": "hzdz42riv6v68xytbzyzl",
+             "iaafId": null,
+             "birthDate": "10 JUL 2006",
+             "hasProfile": true
+            },
+            "mark": "20:39",
+            "nationality": "GER",
+            "place": "31.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Erik SATO",
+             "urlSlug": "germany/erik-sato-15043094",
+             "id": "6kdbs2r2i4b7xa4yo3hjqf",
+             "iaafId": null,
+             "birthDate": "09 JAN 2006",
+             "hasProfile": true
+            },
+            "mark": "20:39",
+            "nationality": "GER",
+            "place": "32.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Tore MACHNOW",
+             "urlSlug": "germany/tore-machnow-15041631",
+             "id": "js0chgvvgm81fpej15qpdc",
+             "iaafId": null,
+             "birthDate": "14 JUN 2005",
+             "hasProfile": true
+            },
+            "mark": "20:41",
+            "nationality": "GER",
+            "place": "33.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Louis BIANCHIN",
+             "urlSlug": "germany/louis-bianchin-15107645",
+             "id": "gg8phi3cre7rjfwke0m2t",
+             "iaafId": null,
+             "birthDate": "2006",
+             "hasProfile": true
+            },
+            "mark": "20:55",
+            "nationality": "GER",
+            "place": "34.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Roman FREITAG",
+             "urlSlug": "germany/roman-freitag-14932926",
+             "id": "fv9dzfq68mhgotrllqob9",
+             "iaafId": 526085,
+             "birthDate": "17 SEP 2001",
+             "hasProfile": true
+            },
+            "mark": "21:00",
+            "nationality": "GER",
+            "place": "35.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Matteo GENINAZZA",
+             "urlSlug": "italy/matteo-geninazza-014630015",
+             "id": "ujgah46w35p51ymw00lam8",
+             "iaafId": 400510,
+             "birthDate": "23 APR 1997",
+             "hasProfile": true
+            },
+            "mark": "21:05",
+            "nationality": "ITA",
+            "place": "36.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Benedict NOON",
+             "urlSlug": "germany/benedict-noon-15185711",
+             "id": "8m05hxm0g8yauqu89aodpj",
+             "iaafId": null,
+             "birthDate": "2004",
+             "hasProfile": true
+            },
+            "mark": "21:08",
+            "nationality": "GER",
+            "place": "37.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Arvid LÖSEL",
+             "urlSlug": "germany/arvid-losel-15088436",
+             "id": "tvupj7ev9k6gxc0n9zbj3",
+             "iaafId": null,
+             "birthDate": "14 APR 2004",
+             "hasProfile": true
+            },
+            "mark": "21:11",
+            "nationality": "GER",
+            "place": "38.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Alex HULKA",
+             "urlSlug": "slovak-republic/alex-hulka-15041301",
+             "id": "v32f7bijzmg8ygib1lwxyu",
+             "iaafId": null,
+             "birthDate": "01 AUG 2006",
+             "hasProfile": true
+            },
+            "mark": "21:11",
+            "nationality": "SVK",
+            "place": "39.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Aimen HABOUBI",
+             "urlSlug": "germany/aimen-haboubi-014752560",
+             "id": "pk9c8k1yh3dvge905ubfu",
+             "iaafId": 409928,
+             "birthDate": "1984",
+             "hasProfile": true
+            },
+            "mark": "21:16",
+            "nationality": "GER",
+            "place": "40.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Niall FOLEY",
+             "urlSlug": "luxembourg/niall-foley-14850409",
+             "id": "smiykm66rmjo0tyqf9zce",
+             "iaafId": 427808,
+             "birthDate": "28 MAY 2001",
+             "hasProfile": true
+            },
+            "mark": "21:18",
+            "nationality": "LUX",
+            "place": "41.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Robert FÜLLE",
+             "urlSlug": "germany/robert-fulle-14928804",
+             "id": "zp592ypu8sfbcm9pwp063a",
+             "iaafId": 521506,
+             "birthDate": "29 AUG 2001",
+             "hasProfile": true
+            },
+            "mark": "21:28",
+            "nationality": "GER",
+            "place": "42.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Felix OTTO",
+             "urlSlug": "germany/felix-otto-15268963",
+             "id": "kek264tt29byex57gal9v",
+             "iaafId": null,
+             "birthDate": "1990",
+             "hasProfile": false
+            },
+            "mark": "21:29",
+            "nationality": "GER",
+            "place": "43.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Vít GULDÁN",
+             "urlSlug": "czechia/vit-guldan-15187036",
+             "id": "o23457m3ya1vutnh1brd1",
+             "iaafId": null,
+             "birthDate": "2004",
+             "hasProfile": true
+            },
+            "mark": "21:35",
+            "nationality": "CZE",
+            "place": "44.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Jonas PETSCHICK",
+             "urlSlug": "germany/jonas-petschick-15237175",
+             "id": "jytecjx1w1lwwgfu3ukhp8",
+             "iaafId": null,
+             "birthDate": "2004",
+             "hasProfile": true
+            },
+            "mark": "21:36",
+            "nationality": "GER",
+            "place": "45.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Henri HANSERT",
+             "urlSlug": "germany/henri-hansert-14615572",
+             "id": "o00yc07vlz9lf8nwyhihn",
+             "iaafId": 487270,
+             "birthDate": "18 NOV 1994",
+             "hasProfile": true
+            },
+            "mark": "21:45",
+            "nationality": "GER",
+            "place": "46.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Robin LINTEN",
+             "urlSlug": "germany/robin-linten-15055533",
+             "id": "2xb6yrq7okes3h5rdh9y4",
+             "iaafId": null,
+             "birthDate": "29 NOV 1992",
+             "hasProfile": true
+            },
+            "mark": "21:48",
+            "nationality": "GER",
+            "place": "47.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Lino PARADELO-HEINECKE",
+             "urlSlug": "germany/lino-paradelo-heinecke-15043087",
+             "id": "qeo7zaedmfhkowk59sd7",
+             "iaafId": null,
+             "birthDate": "08 SEP 2006",
+             "hasProfile": true
+            },
+            "mark": "21:49",
+            "nationality": "GER",
+            "place": "48.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Lennart RÖSSLER",
+             "urlSlug": "germany/lennart-rossler-15097283",
+             "id": "i46xdu4dflqep7toruqqk9",
+             "iaafId": null,
+             "birthDate": "15 MAY 2006",
+             "hasProfile": true
+            },
+            "mark": "21:53",
+            "nationality": "GER",
+            "place": "49.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Maurice GIERENS",
+             "urlSlug": "luxembourg/maurice-gierens-15006840",
+             "id": "hgknipxp1gpmxwoe9dtjch",
+             "iaafId": 534215,
+             "birthDate": "10 JUL 2003",
+             "hasProfile": true
+            },
+            "mark": "21:53",
+            "nationality": "LUX",
+            "place": "50.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Julian KRISTEN",
+             "urlSlug": "germany/julian-kristen-15268968",
+             "id": "fp03m9onytqe08peg8rnie",
+             "iaafId": null,
+             "birthDate": "2003",
+             "hasProfile": false
+            },
+            "mark": "21:53",
+            "nationality": "GER",
+            "place": "51.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Marek POMPE",
+             "urlSlug": "germany/marek-pompe-15268967",
+             "id": "0hgqxw6cpmum2ylnwxswwdp",
+             "iaafId": null,
+             "birthDate": "21 DEC 2003",
+             "hasProfile": true
+            },
+            "mark": "22:02",
+            "nationality": "GER",
+            "place": "52.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Janne HENSCHEL",
+             "urlSlug": "germany/janne-henschel-15043095",
+             "id": "um3apycilzmbcwsu7p2v16",
+             "iaafId": null,
+             "birthDate": "18 MAR 2006",
+             "hasProfile": true
+            },
+            "mark": "22:14",
+            "nationality": "GER",
+            "place": "53.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Dominik SEIP",
+             "urlSlug": "germany/dominik-seip-15276142",
+             "id": "tbymssoufwneuadytt88hg",
+             "iaafId": null,
+             "birthDate": "2000",
+             "hasProfile": true
+            },
+            "mark": "22:15",
+            "nationality": "GER",
+            "place": "54.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Holger KÖRNER",
+             "urlSlug": "germany/holger-korner-14496276",
+             "id": "5l24m8nb20bsogoa9qk5lj",
+             "iaafId": 340970,
+             "birthDate": "14 SEP 1993",
+             "hasProfile": true
+            },
+            "mark": "22:18",
+            "nationality": "GER",
+            "place": "55.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Jonas ROTH",
+             "urlSlug": "germany/jonas-roth-15185713",
+             "id": "ymjoj7ayjn9ar9f9lwx0d",
+             "iaafId": null,
+             "birthDate": "2004",
+             "hasProfile": true
+            },
+            "mark": "22:24",
+            "nationality": "GER",
+            "place": "56.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Simon KLÖPFER",
+             "urlSlug": "germany/simon-klopfer-15267438",
+             "id": "xhyqgon426gfafdbpdw9q",
+             "iaafId": null,
+             "birthDate": "2001",
+             "hasProfile": false
+            },
+            "mark": "22:42",
+            "nationality": "GER",
+            "place": "57.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Max BECKMANN",
+             "urlSlug": "germany/max-beckmann-15156743",
+             "id": "o79az9mdiorhj53ayc30i7",
+             "iaafId": null,
+             "birthDate": "2004",
+             "hasProfile": true
+            },
+            "mark": "22:44",
+            "nationality": "GER",
+            "place": "58.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Marius KNISEL",
+             "urlSlug": "germany/marius-knisel-15185716",
+             "id": "jlm7w4ljg7o81vgvmod23l",
+             "iaafId": null,
+             "birthDate": "2002",
+             "hasProfile": false
+            },
+            "mark": "22:45",
+            "nationality": "GER",
+            "place": "59.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Oscar WERNER",
+             "urlSlug": "germany/oscar-werner-15324297",
+             "id": "2vs98h8su8y8pd7o4fz4bd",
+             "iaafId": null,
+             "birthDate": "1998",
+             "hasProfile": true
+            },
+            "mark": "22:54",
+            "nationality": "GER",
+            "place": "60.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Luis Gabriel BRAUKHOFF",
+             "urlSlug": "peru/luis-gabriel-braukhoff-15090218",
+             "id": "d5wkm0h8wel2ialvi3adaj",
+             "iaafId": null,
+             "birthDate": "10 SEP 2002",
+             "hasProfile": true
+            },
+            "mark": "22:58",
+            "nationality": "PER",
+            "place": "61.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Linus SCHALLER",
+             "urlSlug": "germany/linus-schaller-15328103",
+             "id": "l8m513uckr7dse1syk7mq",
+             "iaafId": null,
+             "birthDate": "2006",
+             "hasProfile": false
+            },
+            "mark": "23:01",
+            "nationality": "GER",
+            "place": "62.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Benjamin HERZOG",
+             "urlSlug": "germany/benjamin-herzog-15357308",
+             "id": "s15y7cucs091uoh7m0mgxl",
+             "iaafId": null,
+             "birthDate": "2006",
+             "hasProfile": false
+            },
+            "mark": "23:02",
+            "nationality": "GER",
+            "place": "63.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Vegard BRECHENMACHER",
+             "urlSlug": "germany/vegard-brechenmacher-15357309",
+             "id": "o19ajqhytimk5ageqfq5gg",
+             "iaafId": null,
+             "birthDate": "1996",
+             "hasProfile": false
+            },
+            "mark": "23:07",
+            "nationality": "GER",
+            "place": "64.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Felix GERARD",
+             "urlSlug": "germany/felix-gerard-15240456",
+             "id": "atg6r2ekkvlr5xw34e1a6",
+             "iaafId": null,
+             "birthDate": "2005",
+             "hasProfile": true
+            },
+            "mark": "23:08",
+            "nationality": "GER",
+            "place": "65.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Christian KLÖNNE",
+             "urlSlug": "germany/christian-klonne-15357310",
+             "id": "7k4vxk9nr4rw853fbpiuki",
+             "iaafId": null,
+             "birthDate": "2006",
+             "hasProfile": false
+            },
+            "mark": "23:11",
+            "nationality": "GER",
+            "place": "66.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Adrian HAUSDING",
+             "urlSlug": "germany/adrian-hausding-15269029",
+             "id": "ec1h94c2iee3df908f14hy",
+             "iaafId": null,
+             "birthDate": "2005",
+             "hasProfile": false
+            },
+            "mark": "23:14",
+            "nationality": "GER",
+            "place": "67.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Philipp KERN",
+             "urlSlug": "germany/philipp-kern-14597042",
+             "id": "tbudomii9q438fscdwq89",
+             "iaafId": 355009,
+             "birthDate": "1995",
+             "hasProfile": true
+            },
+            "mark": "23:15",
+            "nationality": "GER",
+            "place": "68.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Artem PIDDUBNUY",
+             "urlSlug": "ukraine/artem-piddubnuy-14762721",
+             "id": "v51whkfy9ji6plnsg52p",
+             "iaafId": 403397,
+             "birthDate": "05 NOV 1993",
+             "hasProfile": true
+            },
+            "mark": "23:22",
+            "nationality": "UKR",
+            "place": "69.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Illia ARTAMONOV",
+             "urlSlug": "germany/illia-artamonov-15328098",
+             "id": "5jlg1u6gd04rorfo7so9gr",
+             "iaafId": null,
+             "birthDate": "2006",
+             "hasProfile": true
+            },
+            "mark": "24:46",
+            "nationality": "GER",
+            "place": "70.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Tobias ZEHNLE",
+             "urlSlug": "germany/tobias-zehnle-15357311",
+             "id": "lga2k4x9qnh74gjylo2ha7",
+             "iaafId": null,
+             "birthDate": "2006",
+             "hasProfile": false
+            },
+            "mark": "24:48",
+            "nationality": "GER",
+            "place": "71.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Louis RÜDEL",
+             "urlSlug": "germany/louis-rudel-15357312",
+             "id": "ck3imtyl2k4zuo5iyrnpu",
+             "iaafId": null,
+             "birthDate": "2005",
+             "hasProfile": false
+            },
+            "mark": "24:49",
+            "nationality": "GER",
+            "place": "72.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Laurin WOLF",
+             "urlSlug": "germany/laurin-wolf-15357313",
+             "id": "fmlhpy3feinydglpg5ip",
+             "iaafId": null,
+             "birthDate": "2006",
+             "hasProfile": false
+            },
+            "mark": "25:17",
+            "nationality": "GER",
+            "place": "73.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Sven KNOBELSPIEß",
+             "urlSlug": "germany/sven-knobelspie-15357314",
+             "id": "7zzay45q9lofyvb2wqq7g6",
+             "iaafId": null,
+             "birthDate": "1992",
+             "hasProfile": false
+            },
+            "mark": "25:38",
+            "nationality": "GER",
+            "place": "74.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Lokesh Reddy DEVARAPALLI",
+             "urlSlug": "india/lokesh-reddy-devarapalli-15357315",
+             "id": "53mdw24e808s0ald7s4h6",
+             "iaafId": null,
+             "birthDate": "2001",
+             "hasProfile": false
+            },
+            "mark": "26:10",
+            "nationality": "IND",
+            "place": "75.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Benedikt DURST",
+             "urlSlug": "germany/benedikt-durst-15357316",
+             "id": "jvoq0xcdbaoey7sy9mhtd",
+             "iaafId": null,
+             "birthDate": "1992",
+             "hasProfile": false
+            },
+            "mark": "27:31",
+            "nationality": "GER",
+            "place": "76.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Sven FÜLLER",
+             "urlSlug": "germany/sven-fuller-15357317",
+             "id": "q6ste2rbkhf0pd81oqc1rxk",
+             "iaafId": null,
+             "birthDate": "2002",
+             "hasProfile": false
+            },
+            "mark": "33:47",
+            "nationality": "GER",
+            "place": "77.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           }
+          ],
+          "startList": null
+         }
+        ],
+        "summary": null,
+        "withWind": false
+       },
+       {
+        "event": "Women's Cross Country",
+        "eventId": 10229544,
+        "gender": "W",
+        "isRelay": false,
+        "perResultWind": false,
+        "races": [
+         {
+          "date": null,
+          "day": null,
+          "race": "Final",
+          "raceId": 10,
+          "raceNumber": 0,
+          "wind": null,
+          "results": [
+           {
+            "id": null,
+            "competitor": {
+             "name": "Caren CHEPCHIRCHIR",
+             "urlSlug": "kenya/caren-chepchirchir-15228254",
+             "id": "h8l4vty6eh9od6vs2uen6",
+             "iaafId": null,
+             "birthDate": "25 DEC 2008",
+             "hasProfile": true
+            },
+            "mark": "22:50",
+            "nationality": "KEN",
+            "place": "1.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Francine NIYOMUKUNZI",
+             "urlSlug": "burundi/francine-niyomukunzi-14786755",
+             "id": "9kvyg489drfr02x8dz7dm",
+             "iaafId": 299135,
+             "birthDate": "01 AUG 1999",
+             "hasProfile": true
+            },
+            "mark": "22:52",
+            "nationality": "BDI",
+            "place": "2.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Elvanie NIMBONA",
+             "urlSlug": "italy/elvanie-nimbona-14660411",
+             "id": "4s1mi0fyq0nscvsdf0yhf",
+             "iaafId": 296924,
+             "birthDate": "15 MAR 1998",
+             "hasProfile": true
+            },
+            "mark": "23:19",
+            "nationality": "ITA",
+            "place": "3.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Elena BURKARD",
+             "urlSlug": "germany/elena-burkard-14420240",
+             "id": "ebury7tize8icpm7tro9pb",
+             "iaafId": 321631,
+             "birthDate": "10 FEB 1992",
+             "hasProfile": true
+            },
+            "mark": "23:27",
+            "nationality": "GER",
+            "place": "4.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Pia SCHLATTMANN",
+             "urlSlug": "germany/pia-schlattmann-14910283",
+             "id": "uwjjvsoxhdoshhcqat1i",
+             "iaafId": 498740,
+             "birthDate": "22 SEP 2004",
+             "hasProfile": true
+            },
+            "mark": "23:36",
+            "nationality": "GER",
+            "place": "5.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Veerle BAKKER",
+             "urlSlug": "netherlands/veerle-bakker-14513285",
+             "id": "5btsnsy3wxiocpy66q1e8c",
+             "iaafId": 283714,
+             "birthDate": "29 SEP 1997",
+             "hasProfile": true
+            },
+            "mark": "23:44",
+            "nationality": "NED",
+            "place": "6.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Antonia SCHIEL",
+             "urlSlug": "germany/antonia-schiel-14628850",
+             "id": "xblys6741d7s1l1gzusej",
+             "iaafId": null,
+             "birthDate": "18 MAY 1998",
+             "hasProfile": true
+            },
+            "mark": "24:06",
+            "nationality": "GER",
+            "place": "7.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Carolin HINRICHS",
+             "urlSlug": "germany/carolin-hinrichs-14927910",
+             "id": "rb8du7xt1vodbjpavkjzz8",
+             "iaafId": 520402,
+             "birthDate": "26 JAN 2004",
+             "hasProfile": true
+            },
+            "mark": "24:09",
+            "nationality": "GER",
+            "place": "8.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Marit GRIEP",
+             "urlSlug": "netherlands/marit-griep-14910969",
+             "id": "6374jupj6pxo89zsws06xr",
+             "iaafId": 499624,
+             "birthDate": "09 NOV 2004",
+             "hasProfile": true
+            },
+            "mark": "24:15",
+            "nationality": "NED",
+            "place": "9.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Kira WEIS",
+             "urlSlug": "germany/kira-weis-14844381",
+             "id": "qanmehtwfka5g6z7x2f62n",
+             "iaafId": 412411,
+             "birthDate": "16 MAR 2004",
+             "hasProfile": true
+            },
+            "mark": "24:16",
+            "nationality": "GER",
+            "place": "10.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Anneke VORTMEIER",
+             "urlSlug": "germany/anneke-vortmeier-14729932",
+             "id": "2r5u9dlmua3yobl9dq7oe",
+             "iaafId": 332357,
+             "birthDate": "18 MAR 2002",
+             "hasProfile": true
+            },
+            "mark": "24:20",
+            "nationality": "GER",
+            "place": "11.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Nele HEYMANN",
+             "urlSlug": "germany/nele-heymann-14844832",
+             "id": "kkgr93c2jnwza7sppp2ua",
+             "iaafId": 413954,
+             "birthDate": "24 SEP 2003",
+             "hasProfile": true
+            },
+            "mark": "24:24",
+            "nationality": "GER",
+            "place": "12.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Johanna EWERT",
+             "urlSlug": "germany/johanna-ewert-14998713",
+             "id": "o8umu4zri2flsvfljx725",
+             "iaafId": null,
+             "birthDate": "16 JUN 2006",
+             "hasProfile": true
+            },
+            "mark": "24:33",
+            "nationality": "GER",
+            "place": "13.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Leonie KRUSE",
+             "urlSlug": "germany/leonie-kruse-14985325",
+             "id": "957s4l3gdn6kw9a13jr38",
+             "iaafId": null,
+             "birthDate": "18 JAN 2004",
+             "hasProfile": true
+            },
+            "mark": "24:34",
+            "nationality": "GER",
+            "place": "14.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Theresa MENZEL",
+             "urlSlug": "germany/theresa-menzel-15269030",
+             "id": "w6yq77j0rds2i3ta5q8tch",
+             "iaafId": null,
+             "birthDate": "2003",
+             "hasProfile": true
+            },
+            "mark": "24:35",
+            "nationality": "GER",
+            "place": "15.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Ineke VAN KOLDAM",
+             "urlSlug": "netherlands/ineke-van-koldam-14883555",
+             "id": "7joh2m0z9habi3y09wvxmq",
+             "iaafId": 466354,
+             "birthDate": "21 NOV 1997",
+             "hasProfile": true
+            },
+            "mark": "24:44",
+            "nationality": "NED",
+            "place": "16.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Rosalie HAUSDORF",
+             "urlSlug": "germany/rosalie-hausdorf-14944831",
+             "id": "o9mjreur02suvllf2g4m",
+             "iaafId": null,
+             "birthDate": "24 MAY 2003",
+             "hasProfile": true
+            },
+            "mark": "24:55",
+            "nationality": "GER",
+            "place": "17.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Suus ALTORF",
+             "urlSlug": "netherlands/suus-altorf-14910036",
+             "id": "nuwjfuvkibfldm6yzba7ve",
+             "iaafId": 498463,
+             "birthDate": "14 MAY 2004",
+             "hasProfile": true
+            },
+            "mark": "24:57",
+            "nationality": "NED",
+            "place": "18.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Sarah SCHÄPERKLAUS",
+             "urlSlug": "germany/sarah-schaperklaus-15052241",
+             "id": "0yoyxtxj3fhnjl15s65iqjn",
+             "iaafId": null,
+             "birthDate": "18 FEB 2000",
+             "hasProfile": true
+            },
+            "mark": "25:05",
+            "nationality": "GER",
+            "place": "19.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Linda GRAU",
+             "urlSlug": "germany/linda-grau-15241568",
+             "id": "kv9q68jv2xs1fuo7k88x1z",
+             "iaafId": null,
+             "birthDate": "2006",
+             "hasProfile": true
+            },
+            "mark": "25:23",
+            "nationality": "GER",
+            "place": "20.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Emily QUAST",
+             "urlSlug": "germany/emily-quast-14950594",
+             "id": "p2f4q7aoi29ucyxpo8gt77",
+             "iaafId": null,
+             "birthDate": "28 APR 2005",
+             "hasProfile": true
+            },
+            "mark": "25:52",
+            "nationality": "GER",
+            "place": "21.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Sophie HINRICHS",
+             "urlSlug": "germany/sophie-hinrichs-14927911",
+             "id": "5lcuzbyvdq6w1wbwfr8ggo",
+             "iaafId": 520403,
+             "birthDate": "26 JAN 2004",
+             "hasProfile": true
+            },
+            "mark": "26:02",
+            "nationality": "GER",
+            "place": "22.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Maja SCHMIDT",
+             "urlSlug": "germany/maja-schmidt-15014484",
+             "id": "g771m7b7rn45agj6la44d",
+             "iaafId": null,
+             "birthDate": "04 MAY 2006",
+             "hasProfile": true
+            },
+            "mark": "26:07",
+            "nationality": "GER",
+            "place": "23.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Tereza LUKÁŠOVÁ",
+             "urlSlug": "czechia/tereza-lukasova-14943765",
+             "id": "er1bu4obocmxdccctvezh",
+             "iaafId": null,
+             "birthDate": "08 MAY 2000",
+             "hasProfile": true
+            },
+            "mark": "26:11",
+            "nationality": "CZE",
+            "place": "24.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Jule ROßNER",
+             "urlSlug": "germany/jule-roner-15269011",
+             "id": "z9e4em892vwwbuyshu2an",
+             "iaafId": null,
+             "birthDate": "2005",
+             "hasProfile": true
+            },
+            "mark": "26:21",
+            "nationality": "GER",
+            "place": "25.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Charlotte SKRZOS",
+             "urlSlug": "germany/charlotte-skrzos-15129056",
+             "id": "43rpt6t4y3zsg9r1ywe00n",
+             "iaafId": null,
+             "birthDate": "2005",
+             "hasProfile": true
+            },
+            "mark": "26:23",
+            "nationality": "GER",
+            "place": "26.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Laura HAMPEL",
+             "urlSlug": "germany/laura-hampel-14680386",
+             "id": "eij14s0dncvtabuu9udzn8",
+             "iaafId": 522992,
+             "birthDate": "05 AUG 1999",
+             "hasProfile": true
+            },
+            "mark": "26:39",
+            "nationality": "GER",
+            "place": "27.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Julia LANGEDER",
+             "urlSlug": "germany/julia-langeder-15357306",
+             "id": "b7gaxl0n2qnzjv4bdo61",
+             "iaafId": null,
+             "birthDate": "2001",
+             "hasProfile": false
+            },
+            "mark": "27:07",
+            "nationality": "GER",
+            "place": "28.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Tereza TRNKOVÁ",
+             "urlSlug": "czechia/tereza-trnkova-15295143",
+             "id": "msnd7zdi6lapx51xp0grng",
+             "iaafId": null,
+             "birthDate": "2003",
+             "hasProfile": true
+            },
+            "mark": "27:43",
+            "nationality": "CZE",
+            "place": "29.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Lena FENZ",
+             "urlSlug": "germany/lena-fenz-15118158",
+             "id": "r3ynd24xzap35xqnk4b0k",
+             "iaafId": null,
+             "birthDate": "2003",
+             "hasProfile": true
+            },
+            "mark": "27:55",
+            "nationality": "GER",
+            "place": "30.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Helena LACKNER",
+             "urlSlug": "germany/helena-lackner-15329488",
+             "id": "wni1zg90upghb0v48rpwjr",
+             "iaafId": null,
+             "birthDate": "1999",
+             "hasProfile": false
+            },
+            "mark": "28:41",
+            "nationality": "GER",
+            "place": "31.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Theresa SITZLER",
+             "urlSlug": "germany/theresa-sitzler-15185710",
+             "id": "gh6k1ty65f7dzi4gy0hf7g",
+             "iaafId": null,
+             "birthDate": "2002",
+             "hasProfile": false
+            },
+            "mark": "28:58",
+            "nationality": "GER",
+            "place": "32.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Ronja SCHNEIDER",
+             "urlSlug": "germany/ronja-schneider-15357307",
+             "id": "dfj5g7dmyhat8e1aqc58yf",
+             "iaafId": null,
+             "birthDate": "1999",
+             "hasProfile": false
+            },
+            "mark": "29:02",
+            "nationality": "GER",
+            "place": "33.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Joelle BERNHARDT",
+             "urlSlug": "germany/joelle-bernhardt-15269353",
+             "id": "594p760huay32p60extebv",
+             "iaafId": null,
+             "birthDate": "2005",
+             "hasProfile": false
+            },
+            "mark": "29:03",
+            "nationality": "GER",
+            "place": "34.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           }
+          ],
+          "startList": null
+         }
+        ],
+        "summary": null,
+        "withWind": false
+       }
+      ],
+      "rankingCategory": "GL"
+     },
+     {
+      "eventTitle": "XC 1.5km",
+      "events": [
+       {
+        "event": "Men's Cross Country",
+        "eventId": 10229623,
+        "gender": "M",
+        "isRelay": false,
+        "perResultWind": false,
+        "races": [
+         {
+          "date": null,
+          "day": null,
+          "race": "Final",
+          "raceId": 10,
+          "raceNumber": 0,
+          "wind": null,
+          "results": [
+           {
+            "id": null,
+            "competitor": {
+             "name": "Luis SCHAICH",
+             "urlSlug": "germany/luis-schaich-14931744",
+             "id": "14931744",
+             "iaafId": 524690,
+             "birthDate": "02 JUN 2003",
+             "hasProfile": true
+            },
+            "mark": "4:03",
+            "nationality": "GER",
+            "place": "1.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Jens MERGENTHALER",
+             "urlSlug": "germany/jens-mergenthaler-14700510",
+             "id": "14700510",
+             "iaafId": 359151,
+             "birthDate": "13 JUN 1997",
+             "hasProfile": true
+            },
+            "mark": "4:04",
+            "nationality": "GER",
+            "place": "2.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Moritz EBBESKOTTE",
+             "urlSlug": "germany/moritz-ebbeskotte-14934031",
+             "id": "14934031",
+             "iaafId": 527392,
+             "birthDate": "15 DEC 2003",
+             "hasProfile": true
+            },
+            "mark": "4:22",
+            "nationality": "GER",
+            "place": "3.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Tim HAUSER",
+             "urlSlug": "germany/tim-hauser-15171965",
+             "id": "15171965",
+             "iaafId": null,
+             "birthDate": "2000",
+             "hasProfile": true
+            },
+            "mark": "4:23",
+            "nationality": "GER",
+            "place": "4.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Felix WITTMANN",
+             "urlSlug": "germany/felix-wittmann-14853429",
+             "id": "14853429",
+             "iaafId": 432863,
+             "birthDate": "22 APR 2002",
+             "hasProfile": true
+            },
+            "mark": "4:23",
+            "nationality": "GER",
+            "place": "5.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Sascha BAß",
+             "urlSlug": "germany/sascha-ba-14828100",
+             "id": "14828100",
+             "iaafId": 362135,
+             "birthDate": "1998",
+             "hasProfile": true
+            },
+            "mark": "4:24",
+            "nationality": "GER",
+            "place": "6.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Eric BERGER",
+             "urlSlug": "germany/eric-berger-14999557",
+             "id": "14999557",
+             "iaafId": null,
+             "birthDate": "1999",
+             "hasProfile": true
+            },
+            "mark": "4:25",
+            "nationality": "GER",
+            "place": "7.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Max FEINAUER",
+             "urlSlug": "germany/max-feinauer-15159104",
+             "id": "15159104",
+             "iaafId": null,
+             "birthDate": "1997",
+             "hasProfile": true
+            },
+            "mark": "4:28",
+            "nationality": "GER",
+            "place": "8.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Tobias GIERING",
+             "urlSlug": "germany/tobias-giering-14194504",
+             "id": "14194504",
+             "iaafId": 422803,
+             "birthDate": "1982",
+             "hasProfile": true
+            },
+            "mark": "4:28",
+            "nationality": "GER",
+            "place": "9.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Simon KLÖPFER",
+             "urlSlug": "germany/simon-klopfer-15267438",
+             "id": "15267438",
+             "iaafId": null,
+             "birthDate": "2001",
+             "hasProfile": false
+            },
+            "mark": "4:34",
+            "nationality": "GER",
+            "place": "10.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Paul SCHMID",
+             "urlSlug": "germany/paul-schmid-15240458",
+             "id": "15240458",
+             "iaafId": null,
+             "birthDate": "2004",
+             "hasProfile": true
+            },
+            "mark": "4:39",
+            "nationality": "GER",
+            "place": "11.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Manuel KLEINERT",
+             "urlSlug": "germany/manuel-kleinert-15357320",
+             "id": "15357320",
+             "iaafId": null,
+             "birthDate": "2005",
+             "hasProfile": false
+            },
+            "mark": "4:51",
+            "nationality": "GER",
+            "place": "12.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Felix GRÜB",
+             "urlSlug": "germany/felix-grub-15160327",
+             "id": "15160327",
+             "iaafId": null,
+             "birthDate": "2002",
+             "hasProfile": true
+            },
+            "mark": "4:51",
+            "nationality": "GER",
+            "place": "13.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Reto HAAS",
+             "urlSlug": "germany/reto-haas-15357321",
+             "id": "15357321",
+             "iaafId": null,
+             "birthDate": "2002",
+             "hasProfile": false
+            },
+            "mark": "4:53",
+            "nationality": "GER",
+            "place": "14.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Lukas WAIDELICH",
+             "urlSlug": "germany/lukas-waidelich-15357322",
+             "id": "15357322",
+             "iaafId": null,
+             "birthDate": "2001",
+             "hasProfile": false
+            },
+            "mark": "4:55",
+            "nationality": "GER",
+            "place": "15.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Tobias DERONI",
+             "urlSlug": "germany/tobias-deroni-15357323",
+             "id": "15357323",
+             "iaafId": null,
+             "birthDate": "1995",
+             "hasProfile": false
+            },
+            "mark": "5:06",
+            "nationality": "GER",
+            "place": "16.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Tobias EBERHARDT",
+             "urlSlug": "germany/tobias-eberhardt-15267440",
+             "id": "15267440",
+             "iaafId": null,
+             "birthDate": "2001",
+             "hasProfile": false
+            },
+            "mark": "5:07",
+            "nationality": "GER",
+            "place": "17.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Julian CIUPKE",
+             "urlSlug": "germany/julian-ciupke-15357324",
+             "id": "15357324",
+             "iaafId": null,
+             "birthDate": "1997",
+             "hasProfile": false
+            },
+            "mark": "5:15",
+            "nationality": "GER",
+            "place": "18.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           }
+          ],
+          "startList": null
+         }
+        ],
+        "summary": null,
+        "withWind": false
+       },
+       {
+        "event": "Women's Cross Country",
+        "eventId": 10229544,
+        "gender": "W",
+        "isRelay": false,
+        "perResultWind": false,
+        "races": [
+         {
+          "date": null,
+          "day": null,
+          "race": "Final",
+          "raceId": 10,
+          "raceNumber": 0,
+          "wind": null,
+          "results": [
+           {
+            "id": null,
+            "competitor": {
+             "name": "Laure BILO",
+             "urlSlug": "belgium/laure-bilo-14803459",
+             "id": "14803459",
+             "iaafId": 415017,
+             "birthDate": "22 DEC 2003",
+             "hasProfile": true
+            },
+            "mark": "4:32",
+            "nationality": "BEL",
+            "place": "1.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Adia BUDDE",
+             "urlSlug": "germany/adia-budde-14926483",
+             "id": "14926483",
+             "iaafId": 518811,
+             "birthDate": "29 JUL 2005",
+             "hasProfile": true
+            },
+            "mark": "4:41",
+            "nationality": "GER",
+            "place": "2.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Vera PETRYKOWSKI",
+             "urlSlug": "germany/vera-petrykowski-14452374",
+             "id": "14452374",
+             "iaafId": 409980,
+             "birthDate": "11 SEP 1995",
+             "hasProfile": true
+            },
+            "mark": "4:44",
+            "nationality": "GER",
+            "place": "3.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Adeline HAISCH",
+             "urlSlug": "germany/adeline-haisch-14704803",
+             "id": "14704803",
+             "iaafId": 349859,
+             "birthDate": "08 APR 2000",
+             "hasProfile": true
+            },
+            "mark": "5:01",
+            "nationality": "GER",
+            "place": "4.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Lotte GRIEP",
+             "urlSlug": "netherlands/lotte-griep-15017419",
+             "id": "15017419",
+             "iaafId": null,
+             "birthDate": "2006",
+             "hasProfile": true
+            },
+            "mark": "5:03",
+            "nationality": "NED",
+            "place": "5.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Laura WILHELM",
+             "urlSlug": "germany/laura-wilhelm-14760950",
+             "id": "14760950",
+             "iaafId": 349248,
+             "birthDate": "05 NOV 2002",
+             "hasProfile": true
+            },
+            "mark": "5:03",
+            "nationality": "GER",
+            "place": "6.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Marie GÖVERT",
+             "urlSlug": "germany/marie-govert-14876248",
+             "id": "14876248",
+             "iaafId": 456813,
+             "birthDate": "13 DEC 2003",
+             "hasProfile": true
+            },
+            "mark": "5:04",
+            "nationality": "GER",
+            "place": "7.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Madlen HIRSCH",
+             "urlSlug": "germany/madlen-hirsch-15286065",
+             "id": "15286065",
+             "iaafId": null,
+             "birthDate": "2003",
+             "hasProfile": true
+            },
+            "mark": "5:05",
+            "nationality": "GER",
+            "place": "8.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Maja Louise FRIRDICH",
+             "urlSlug": "germany/maja-louise-frirdich-15125846",
+             "id": "15125846",
+             "iaafId": null,
+             "birthDate": "2000",
+             "hasProfile": true
+            },
+            "mark": "5:13",
+            "nationality": "GER",
+            "place": "9.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Ciara ELSHOLTZ",
+             "urlSlug": "germany/ciara-elsholtz-15341214",
+             "id": "15341214",
+             "iaafId": null,
+             "birthDate": "2002",
+             "hasProfile": false
+            },
+            "mark": "5:22",
+            "nationality": "GER",
+            "place": "10.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Annika RENNER",
+             "urlSlug": "germany/annika-renner-15357318",
+             "id": "15357318",
+             "iaafId": null,
+             "birthDate": "2000",
+             "hasProfile": false
+            },
+            "mark": "5:29",
+            "nationality": "GER",
+            "place": "11.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Lisa SCHILK",
+             "urlSlug": "germany/lisa-schilk-15357319",
+             "id": "15357319",
+             "iaafId": null,
+             "birthDate": "2003",
+             "hasProfile": false
+            },
+            "mark": "5:33",
+            "nationality": "GER",
+            "place": "12.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           },
+           {
+            "id": null,
+            "competitor": {
+             "name": "Luise EISENMANN",
+             "urlSlug": "germany/luise-eisenmann-14779471",
+             "id": "14779471",
+             "iaafId": 412407,
+             "birthDate": "21 APR 2004",
+             "hasProfile": true
+            },
+            "mark": "5:33",
+            "nationality": "GER",
+            "place": "13.",
+            "points": null,
+            "qualified": null,
+            "records": "",
+            "wind": null,
+            "remark": null,
+            "details": null
+           }
+          ],
+          "startList": null
+         }
+        ],
+        "summary": null,
+        "withWind": false
+       }
+      ],
+      "rankingCategory": "GL"
+     }
+    ],
+    "options": {
+     "days": [
+      {
+       "date": "14 NOV 2026",
+       "day": 1
+      }
+     ],
+     "events": [
+      {
+       "gender": "W",
+       "id": 10229544,
+       "name": "Women's Cross Country",
+       "combined": null
+      },
+      {
+       "gender": "M",
+       "id": 10229623,
+       "name": "Men's Cross Country",
+       "combined": null
+      }
+     ]
+    },
+    "parameters": {
+     "competitionId": 7235470,
+     "day": 1,
+     "eventId": null
+    }
+   }
+  }
+ }
+}

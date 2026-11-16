@@ -1,0 +1,20 @@
+{
+ "status": 200,
+ "body": {
+  "data": {
+   "resultsByAthlete": {
+    "results": [],
+    "parameters": {
+     "athleteIds": [
+      14914521,
+      14984080,
+      15007330
+     ],
+     "countryOfResidence": null,
+     "limit": 10,
+     "preferredCountry": null
+    }
+   }
+  }
+ }
+}

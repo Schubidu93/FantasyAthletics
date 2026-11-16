@@ -1,0 +1,26 @@
+{
+ "status": 200,
+ "body": {
+  "data": {
+   "getCalendarCompetitionResults": null
+  },
+  "errors": [
+   {
+    "path": [
+     "getCalendarCompetitionResults"
+    ],
+    "data": null,
+    "errorType": "Lambda:Unhandled",
+    "errorInfo": null,
+    "locations": [
+     {
+      "line": 1,
+      "column": 86,
+      "sourceName": null
+     }
+    ],
+    "message": "Cannot read properties of undefined (reading 'eventTitles')"
+   }
+  ]
+ }
+}
