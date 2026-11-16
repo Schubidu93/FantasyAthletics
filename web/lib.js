@@ -51,7 +51,8 @@ export const fmtDate = (d) => (d ? new Date(d.length === 10 ? d + 'T00:00:00' : 
   .toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '–');
 export const fmtDateTime = (d) =>
   d ? new Date(d).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }) : '–';
-export const fmtPts = (n) => (Math.round((Number(n) || 0) * 100) / 100).toLocaleString('de-DE');
+// Punkte einheitlich mit einer Nachkommastelle (468,1 · 307,0)
+export const fmtPts = (n) => (Number(n) || 0).toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 // Fristende anzeigen: 0:00 Uhr heißt „bis Ende des Vortags“ → nur das Datum des Vortags; sonst Datum mit Uhrzeit
 export function fmtUntil(ts, { weekday = false } = {}) {
   if (!ts) return '–';
