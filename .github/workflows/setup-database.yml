@@ -32,6 +32,15 @@ jobs:
         run: psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -q -f supabase/schema.sql -f supabase/reference_data.sql
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      - name: Punkte neu berechnen (geänderte Wertungsregeln gelten sofort)
+        run: |
+          psql "$SUPABASE_DB_URL" -q -v ON_ERROR_STOP=1 <<'SQL'
+          select rebuild_results(null);
+          select refresh_season_stats(y) from generate_series(2025, extract(year from current_date)::int) y;
+          select refresh_pool(null);
+          SQL
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
       - name: GitHub-Schlüssel für den Zeitplaner in den Vault übernehmen
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}

@@ -158,6 +158,10 @@ alter table scoring_config add column if not exists new_group_threshold int not 
 alter table scoring_config add column if not exists record_dr int not null default 50;
 alter table scoring_config add column if not exists record_er int not null default 80;
 alter table scoring_config add column if not exists record_wr int not null default 100;
+-- Standard seit 16.11.2026: 50/100/200 (alte Standardwerte 50/80/100 einmalig umstellen)
+alter table scoring_config alter column record_er set default 100;
+alter table scoring_config alter column record_wr set default 200;
+update scoring_config set record_er = 100, record_wr = 200 where record_dr = 50 and record_er = 80 and record_wr = 100;
 insert into scoring_config (id) values (1) on conflict do nothing;
 
 -- Rohdaten der Ergebnisse von World Athletics (ein Eintrag pro Lauf eines Athleten)
@@ -1976,7 +1980,9 @@ begin
              w.discipline || case when d.cross_table is not null and cross_km(w.competition) is not null
                                   then ' · ' || cross_km(w.competition) || 'km' else '' end
                || case when w.wa_race in ('', 'F') then '' else ' · ' || w.wa_race end label,
-             case when d.cross_table is not null then
+             -- Zwischenzeiten (z. B. 1500 m im Meilenrennen): keine Leistungs- und Platzierungspunkte, nur ein Rekord-Bonus
+             case when _is_split(w.competition, w.remark) then 0
+                  when d.cross_table is not null then
                     round(greatest(0, coalesce((select ps.points from placing_scores ps
                                                  where ps.placing_table = d.cross_table and ps.category = w.category
                                                    and ps.race_type = 'F' and ps.place = w.place and _race_type(w.race) = 'F'), 0)
@@ -1985,7 +1991,7 @@ begin
                   else round(greatest(0, coalesce(w.result_score, 0) - c.perf_threshold) * c.perf_factor * coalesce(d.factor, 0)
                              * coalesce(w.share, 1), 2)
              end perf,
-             case when d.cross_table is not null then 0
+             case when d.cross_table is not null or _is_split(w.competition, w.remark) then 0
                   else round(coalesce((select max(ps.points) from placing_scores ps
                                         where ps.placing_table = any (d.placing_tables) and ps.category = w.category
                                           and ps.race_type = coalesce(w.placing_round, _race_type(w.race))
@@ -1994,8 +2000,6 @@ begin
              end plc
         from wa_results w left join disciplines d on d.name = w.discipline
        where (p_from is null or w.date >= p_from) and w.date >= date '2025-01-01'
-         -- Zwischenzeiten (z. B. 1500 m im Meilenrennen) zählen nicht, nur das eigentliche Rennen
-         and not _is_split(w.competition, w.remark)
          -- Nachtrag entfällt, sobald World Athletics dasselbe Ergebnis führt (gleiche Disziplin, ±1 Tag)
          and not (w.source = 'manual' and w.relay is null and exists (select 1 from wa_results o
                    where o.athlete_id = w.athlete_id and o.source = 'wa' and o.discipline = w.discipline

@@ -26,10 +26,14 @@ const pts = async () => (await db.all("select label, points, record_points from 
   .map((r) => [r.label, Number(r.points), Number(r.record_points)]);
 
 describe("Zwischenzeiten und Rekorde", () => {
-  it("wertet Zwischenzeiten nicht", async () => {
+  it("wertet Zwischenzeiten nicht – außer als Rekord", async () => {
     const rows = await pts();
     expect(rows).toHaveLength(1);
     expect(rows[0][0]).toBe("Mile");
+    const split = (await db.one("select id from wa_results where remark = 'ST'")).id;
+    await db.query("select set_result_record($1, 'DR')", [split]);
+    const r = await db.one("select points, perf_points, placing_points, record_points from results where wa_result_id = $1", [split]);
+    expect([r.points, r.perf_points, r.placing_points, r.record_points].map(Number)).toEqual([50, 0, 0, 50]);
   });
 
   it("gibt den Bonus für den höchsten Rekord und nimmt ihn wieder weg", async () => {
@@ -72,7 +76,7 @@ describe("Rekorde aus All-time-Listen", () => {
                   { athlete_id: "wa-1", discipline: "Mile", date: `${Y}-07-18`, mark: "3:46.82", record: "ER" },
                   { athlete_id: "wa-9", discipline: "Mile", date: `${Y}-07-18`, mark: "3:40.00", record: "WR" }];
     expect((await db.one("select apply_records($1) n", [JSON.stringify(rows)])).n).toBe(1);
-    expect((await pts())[0][2]).toBe(80);
+    expect((await pts())[0][2]).toBe(100);
     // ein späterer DR-Fund stuft nicht zurück
     expect((await db.one("select apply_records($1) n", [JSON.stringify([rows[0]])])).n).toBe(0);
   });

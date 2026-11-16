@@ -20,7 +20,7 @@ function placeLabel(x) {
 const isSplit = (x) => /split time/i.test(x.competition || '') || x.remark === 'ST';
 const RECORD = { DR: 'Deutscher Rekord', ER: 'Europarekord', WR: 'Weltrekord' };
 function runNote(x) {
-  if (isSplit(x)) return 'Zwischenzeit – zählt nicht (nur das ganze Rennen gibt Punkte)';
+  if (isSplit(x)) return 'Zwischenzeit – gibt nur bei einem Rekord Punkte';
   if (x.wa_race && x.wa_race !== x.race) return `${raceLabel(x.wa_race)}: ${x.wa_place ?? '–'}. · kombiniert`;
   if (x.placing_round && x.placing_round !== 'F') return x.placing_place === 0 ? 'fürs Finale qualifiziert (Q/q)' : `Gesamtplatz der Runde: ${x.placing_place}.`;
   return '';
@@ -50,12 +50,13 @@ export function RiderModal() {
   const [year, setYear] = useState(null);
   const [allRuns, setAllRuns] = useState(true);
   const [disc, setDisc] = useState('');
+  const [editRec, setEditRec] = useState(false);   // Admin: Rekorde von Hand eintragen
   const [byPoints, setByPoints] = useState(false);
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const open = (e) => { setSlug(e.detail); setData(null); setError(null); setYear(null); setByPoints(false); setAllRuns(true); setDisc(''); };
+    const open = (e) => { setSlug(e.detail); setData(null); setError(null); setYear(null); setByPoints(false); setAllRuns(true); setDisc(''); setEditRec(false); };
     const esc = (e) => { if (e.key === 'Escape') setSlug(null); };
     addEventListener('rider:open', open);
     addEventListener('keydown', esc);
@@ -140,7 +141,7 @@ export function RiderModal() {
               ${x.record && html`<small><span class="badge b-rec">${x.record}</span> ${RECORD[x.record]}</small>`}
               ${x.pts && html`<small class="muted">Leistung ${fmtPts(x.pts.perf_points)} + Platzierung ${fmtPts(x.pts.placing_points)}${Number(x.pts.record_points)
                 ? ` + Rekord ${fmtPts(x.pts.record_points)}` : ''}</small>`}
-              ${data.admin && !isSplit(x) && html`<small onClick=${(e) => e.stopPropagation()}><select class="mini" value=${x.record || ''}
+              ${data.admin && editRec && html`<small onClick=${(e) => e.stopPropagation()}><select class="mini" value=${x.record || ''}
                 onChange=${(e) => setRecord(x, e.target.value)} aria-label="Rekord"><option value="">kein Rekord</option>
                 ${Object.entries(RECORD).map(([k, l]) => html`<option value=${k}>${l}</option>`)}</select></small>`}</span>
             <span class="res-place">${placeLabel(x)}</span>
@@ -150,7 +151,8 @@ export function RiderModal() {
         ${data.toplists.length > 0 && html`<details class="toplists"><summary class="small">Toplisten (DE)</summary>
           <ul class="list compact">${data.toplists.map((t) => html`<li key=${t.year + t.discipline} class=${L ? 'clickable' : ''} onClick=${() => toTop(t)}>
             <span>${t.year} · ${discLabel(t.discipline)}</span><span><strong>${t.rank}.</strong> <span class="muted">${t.mark}</span></span></li>`)}</ul></details>`}`}
-      <p class="muted small">Quelle: World Athletics, Nachträge mit eigener Quelle. Antippen öffnet den Wettkampf bzw. die Topliste.</p>
+      <p class="muted small">Quelle: World Athletics, Nachträge mit eigener Quelle. Antippen öffnet den Wettkampf bzw. die Topliste.
+        ${data?.admin && html` <button type="button" class="linkish small" onClick=${() => setEditRec(!editRec)}>${editRec ? 'Fertig' : 'Rekord von Hand eintragen'}</button>`}</p>
     </div>
   </div>`;
 }
