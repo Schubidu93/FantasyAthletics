@@ -151,6 +151,8 @@ const RESULTS_QUERY = `
   }`;
 
 export class ApiAuthError extends Error {}
+/** WA bremst (429) oder ist überlastet (503): Lauf beenden statt weiter anzufragen. */
+export class RateLimitError extends Error {}
 
 type RawResult = Record<string, string | number | null | undefined>;
 
@@ -188,6 +190,7 @@ export async function fetchAthleteResults(api: ApiConfig, athleteId: number, yea
       }),
     }).catch((e: Error) => ({ ok: false, status: 0, statusText: e.message }) as Response);
     if (res.status === 401 || res.status === 403) throw new ApiAuthError(`WA-API ${res.status}`);
+    if (res.status === 429 || (res.status === 503 && attempt >= 2)) throw new RateLimitError(`WA-API ${res.status}: zu viele Anfragen`);
     if (res.ok) {
       const body = (await res.json()) as {
         data?: { getSingleCompetitorResultsDate?: { resultsByDate?: RawResult[] } };
@@ -230,6 +233,7 @@ export async function fetchRecentResults(api: ApiConfig, athleteIds: number[]): 
         variables: { ids: athleteIds.map(String), limit: FEED_LIMIT } }),
     }).catch((e: Error) => ({ ok: false, status: 0, statusText: e.message }) as Response);
     if (res.status === 401 || res.status === 403) throw new ApiAuthError(`WA-API ${res.status}`);
+    if (res.status === 429 || (res.status === 503 && attempt >= 2)) throw new RateLimitError(`WA-API ${res.status}: zu viele Anfragen`);
     if (res.ok) {
       const body = (await res.json()) as { data?: { resultsByAthlete?: { results?: RawFeed[] } }; errors?: { message: string }[] };
       if (body.errors?.length) throw new Error(`Sammelabruf: ${body.errors[0].message}`);

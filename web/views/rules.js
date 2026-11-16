@@ -168,7 +168,7 @@ export function Rules({ c }) {
         <li><strong>Ergebnisse:</strong> stündlich von 8 bis 23 Uhr für alle Athleten im Pool und in den Kadern. Erscheinen, sobald World Athletics sie veröffentlicht –
           bei großen Meisterschaften meist am selben Tag, bei kleinen Wettkämpfen manchmal Tage später. Werden die Ergebnisse eines Wettkampfs nach und nach
           hochgeladen (z. B. erst 800 m, Stunden später 5000 m), kommen sie auch nach und nach in die Wertung.</li>
-        <li><strong>Kontrolle:</strong> Jede Nacht wird ein Teil der Athleten komplett neu abgeglichen, so dass jeder einmal pro Woche geprüft ist –
+        <li><strong>Kontrolle:</strong> Jede Nacht werden alle Athleten in den Kadern komplett neu abgeglichen, die übrigen einmal pro Woche –
           nachträgliche Korrekturen von World Athletics (andere Zeit, gestrichenes Ergebnis) werden so übernommen.</li>
         <li><strong>Jahre:</strong> „Punkte 2026“ zählt alle Wettkämpfe vom 1.1. bis 31.12.2026. Ergebnisse werden ab 2025 gespeichert.</li>
         <li><strong>Korrekturen:</strong> Bei falschen Daten kann der Admin Punkte manuell korrigieren – jede Korrektur wird protokolliert.</li>

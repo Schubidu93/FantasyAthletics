@@ -5,7 +5,7 @@ import { execFile, spawn, type ChildProcess } from "node:child_process";
 import { createServer, type Server } from "node:http";
 import { promisify } from "node:util";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { athlete, freshDb, urlFor, type Db } from "./db";
+import { as, athlete, createUser, freshDb, urlFor, type Db } from "./db";
 
 const run = promisify(execFile);
 const Y = new Date().getFullYear();
@@ -94,9 +94,18 @@ describe("Ergebnisabruf", () => {
     expect(await stored()).toHaveLength(3);
     expect(Number((await db.one("select count(*) n from results")).n)).toBe(3);
 
-    // zweite Nacht: nur noch ein Siebtel zur Kontrolle (bei 3 Athleten: einer)
+    // zweite Nacht: nur noch ein Siebtel zur Kontrolle (bei 3 Athleten: einer) ...
     await importer("nacht");
     expect(calls.single).toHaveLength(1);
+    // ... plus alle Kader-Athleten
+    const u = await createUser(db, "admin");
+    await as(db, u);
+    const lg = (await db.one("select create_league('Liga', 'Team', '{}') id")).id;
+    const mgr = (await db.one("select id from managers where league_id = $1", [lg])).id;
+    await db.query("insert into roster_entries (league_id, manager_id, rider_slug, price, source, acquired_on) values ($1, $2, 'wa-103', 1, 'offline', $3)", [lg, mgr, day(0)]);
+    await importer("nacht");
+    expect(calls.single).toContain(`103/${Y}`);
+    expect(calls.single).toHaveLength(2);   // wa-103 (Kader) + eines der beiden übrigen
   });
 
   it("stündlich: nur ein Sammelabruf, Einzelabruf nur bei Neuem", async () => {

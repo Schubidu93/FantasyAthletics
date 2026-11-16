@@ -3,7 +3,7 @@ name: Ergebnisse laden (World Athletics)
 # Gestartet vom Zeitplaner in der Datenbank:
 # - stündlich 8–23 Uhr "neu": ein Sammelabruf zeigt, wer in den letzten Wochen neue Ergebnisse hat;
 #   nur diese Athleten werden einzeln (mit WA-Punkten) nachgeladen
-# - 3 Uhr "nacht": neue Pool-Athleten komplett (aktuelles Jahr + Vorjahr) und ein Siebtel aller Athleten zur Kontrolle
+# - 3 Uhr "nacht": neue Pool-Athleten komplett (aktuelles Jahr + Vorjahr) sowie Kader-Athleten und ein Siebtel der übrigen zur Kontrolle
 # Von Hand: "voll" lädt alle Athleten komplett (optional mit Vorjahr).
 
 on:

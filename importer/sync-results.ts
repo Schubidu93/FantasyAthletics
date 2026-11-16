@@ -4,7 +4,7 @@
 //             Athleten (Blöcke zu 100, ohne WA-Punkte). Nur Athleten mit einem bisher unbekannten Ergebnis
 //             (neu, nachgereichte Disziplin, geänderte Zeit) werden einzeln mit WA-Punkten neu geladen.
 // MODUS=nacht (3 Uhr): Athleten ohne vollständigen Abruf (neu im Pool) für aktuelles Jahr und Vorjahr,
-//             außerdem ein Siebtel aller Athleten komplett (= jeder einmal pro Woche; fängt Korrekturen ab).
+//             außerdem alle Kader-Athleten und ein Siebtel der übrigen komplett (fängt Korrekturen ab).
 // MODUS=voll  (von Hand): alle Athleten für RESULT_YEARS komplett.
 //
 // Danach: geteilte Finals und Vorrunden auflösen, Wettkämpfe speichern, Punkte (rebuild_results),
@@ -14,9 +14,9 @@
 //           RESULT_YEARS (nur MODUS=voll, z. B. "2026,2025"), WA_CONCURRENCY
 import { adminClient, chunked, currentYear, rpc, run, selectAll } from "./supabase";
 import { combinedPlace, fetchEventRaces, isPrelimRace, isSplitFinal, prelimPlacing, PRELIM_CATEGORIES, type Race } from "./placings";
-import { ApiAuthError, discoverApiConfig, fetchAthleteResults, fetchRecentResults, FEED_LIMIT, sleep, type ApiConfig, type FeedResult } from "./wa";
+import { ApiAuthError, RateLimitError, discoverApiConfig, fetchAthleteResults, fetchRecentResults, FEED_LIMIT, sleep, type ApiConfig, type FeedResult } from "./wa";
 
-const CONCURRENCY = Number(process.env.WA_CONCURRENCY ?? 3);
+const CONCURRENCY = Number(process.env.WA_CONCURRENCY ?? 2);
 const MODE = (process.env.MODUS || "neu") as "neu" | "nacht" | "voll";
 const FEED_BLOCK = 100;
 const db = adminClient();
@@ -82,13 +82,16 @@ await run(db, async () => {
       if (!at.has(`${a.slug}|${Y}`)) add(a, Y);
       if (!at.has(`${a.slug}|${Y - 1}`)) add(a, Y - 1);
     }
-    // ein Siebtel der übrigen, am längsten nicht geprüften Athleten (im Januar auch das Vorjahr)
-    const share = Math.ceil(athletes.length / 7);
-    const oldest = athletes.filter((a) => at.has(`${a.slug}|${Y}`))
-      .sort((a, b) => String(at.get(`${a.slug}|${Y}`)).localeCompare(String(at.get(`${b.slug}|${Y}`)))).slice(0, share);
+    // Kader-Athleten jede Nacht (ihre Punkte zählen), dazu ein Siebtel der übrigen, am längsten nicht
+    // geprüften Athleten (= jeder einmal pro Woche); im Januar auch das Vorjahr
     const january = new Date().getMonth() === 0;
-    for (const a of oldest) { add(a, Y); if (january) add(a, Y - 1); }
-    summary = `nacht: ${fresh.length} neue Athleten, ${oldest.length} zur Kontrolle`;
+    const inRoster = new Set(rostered.map((r) => r.rider_slug));
+    const squad = athletes.filter((a) => inRoster.has(a.slug) && at.has(`${a.slug}|${Y}`));
+    const rest = athletes.filter((a) => !inRoster.has(a.slug) && at.has(`${a.slug}|${Y}`));
+    const oldest = rest.sort((a, b) => String(at.get(`${a.slug}|${Y}`)).localeCompare(String(at.get(`${b.slug}|${Y}`))))
+      .slice(0, Math.ceil(rest.length / 7));
+    for (const a of [...squad, ...oldest]) { add(a, Y); if (january) add(a, Y - 1); }
+    summary = `nacht: ${fresh.length} neue Athleten, ${squad.length} aus Kadern, ${oldest.length} weitere zur Kontrolle`;
   } else {
     // Sammelabruf
     const feed: FeedResult[] = [];
@@ -128,6 +131,7 @@ await run(db, async () => {
   const rows: Row[] = [];
   const loaded: Job[] = [];
   const failures: string[] = [];
+  let throttled = false;
   async function worker() {
     for (let job = queue.shift(); job; job = queue.shift()) {
       try {
@@ -145,6 +149,12 @@ await run(db, async () => {
         loaded.push(job);
       } catch (e) {
         if (e instanceof ApiAuthError) throw e;
+        if (e instanceof RateLimitError) {
+          // WA bremst: sofort aufhören, Geladenes speichern, Rest beim nächsten Lauf
+          throttled = true;
+          queue.length = 0;
+          break;
+        }
         failures.push(`${job.slug}/${job.year}: ${(e as Error).message}`);
       }
       await sleep(300 + Math.random() * 500);
@@ -209,11 +219,13 @@ await run(db, async () => {
   const scored = years.length ? await rpc<number>(db, "rebuild_results", { p_from: `${Math.min(...years)}-01-01` }) : 0;
   for (const y of new Set([...years, Y])) await rpc(db, "refresh_season_stats", { p_year: y });
   await rpc(db, "run_maintenance");
-  if (failures.length) {
-    await db.from("sync_status").update({ ok: false, message: `${failures.length} Athleten nicht geladen` }).eq("id", 1);
+  if (failures.length || throttled) {
+    await db.from("sync_status").update({ ok: false,
+      message: throttled ? "World Athletics bremst – Rest folgt beim nächsten Abruf" : `${failures.length} Athleten nicht geladen` }).eq("id", 1);
   }
 
   return `${summary}; geladen: ${loaded.length} Athleten/Jahre, ${unique.length} Ergebnisse, ${scored} mit Punkten; ${placings}` +
+    (throttled ? `\nWA bremst (429) – Lauf vorzeitig beendet, ${jobs.length - loaded.length} offen` : "") +
     (failures.length ? `\n${failures.length} Fehler:\n${failures.slice(0, 20).join("\n")}` : "");
 });
 

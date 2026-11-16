@@ -2529,7 +2529,7 @@ begin
   end;
   if m < 15 then
     if h = 6 then perform dispatch_workflow('import-athletes.yml'); end if;          -- Athletenpool aus den DE-Toplisten
-    -- Ergebnisse: stündlich neue Ergebnisse (Sammelabruf), nachts neue Athleten + ein Siebtel des Pools komplett
+    -- Ergebnisse: stündlich neue Ergebnisse (Sammelabruf), nachts neue Athleten, Kader und ein Siebtel des Pools komplett
     if h between 8 and 23 then perform dispatch_workflow('import-results.yml', '{"modus": "neu"}'); end if;
     if h = 3 then perform dispatch_workflow('import-results.yml', '{"modus": "nacht"}'); end if;
     if h = 9 and extract(isodow from t) = 1 then perform weekly_summary(); end if;   -- Wochen-Zusammenfassung (Mo)
