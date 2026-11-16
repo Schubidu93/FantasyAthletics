@@ -249,35 +249,91 @@ function proposal(kind, start, end) {
   return out;
 }
 
-// Standard: monatliche Spieltage von Montag bis Sonntag. Grenze = der Montag, der dem Monatsersten am nächsten liegt;
-// liegt ein Großereignis (OW, DF, GW, GL oder Deutsche Meisterschaften) auf der Grenze, rückt sie auf den Montag danach.
+// Standard: Meisterschaften als eigene Spieltage (Montag bis Sonntag der Meisterschaftswoche), dazwischen Spieltage von
+// etwa einem Monat (Montag bis Sonntag; Grenze = der Montag, der dem Monatsersten am nächsten liegt). Andere Großereignisse
+// (OW, DF, GW, GL) werden nicht auf zwei Spieltage verteilt.
 const MONTHS_DE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
-const nearestMonday = (s) => { const wd = (new Date(s + 'T00:00:00Z').getUTCDay() + 6) % 7; return addDays(s, wd <= 3 ? -wd : 7 - wd); };
-const mondayAfter = (s) => { const wd = (new Date(s + 'T00:00:00Z').getUTCDay() + 6) % 7; return addDays(s, 7 - wd); };
-export function monthlyProposal(start, end, bigEvents = []) {
-  const bounds = [];
-  for (let d = new Date(start + 'T00:00:00Z'); ; ) {
-    d = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1));
-    const first = iso(d);
-    if (first > end) break;
-    let b = nearestMonday(first);
-    for (let moved = true; moved; ) {   // so lange verschieben, bis kein Großereignis mehr geteilt wird
-      moved = false;
-      for (const e of bigEvents) {
-        const eEnd = e.end_date || e.start_date;
-        if (e.start_date < b && eEnd >= b) { b = mondayAfter(eEnd); moved = true; }
+const wdMon = (s) => (new Date(s + 'T00:00:00Z').getUTCDay() + 6) % 7;   // Montag = 0
+const nearestMonday = (s) => { const wd = wdMon(s); return addDays(s, wd <= 3 ? -wd : 7 - wd); };
+const mondayAfter = (s) => addDays(s, 7 - wdMon(s));
+const mondayOnOrBefore = (s) => addDays(s, -wdMon(s));
+const sundayOnOrAfter = (s) => addDays(s, 6 - wdMon(s));
+const days = (a, b) => (Date.parse(b) - Date.parse(a)) / 864e5 + 1;
+
+// Meisterschaften mit eigenem Spieltag (erkannt am Namen im WA-Kalender); Nachwuchs, Teams und Staffeln nicht
+const CHAMPIONSHIPS = [
+  ['Olympia', /olympic games/i],
+  ['Hallen-WM', /world athletics indoor championships/i],
+  ['Cross-WM', /world (athletics )?cross country championships/i],
+  ['Straßen-WM', /world (athletics )?road running championships/i],
+  ['WM', /world athletics championships/i],
+  ['Hallen-EM', /european athletics indoor championships/i],
+  ['Cross-EM', /european (athletics )?cross country championships/i],
+  ['Straßen-EM', /european (running|road running) championships/i],
+  ['EM', /european athletics championships/i],
+  ['Hallen-DM', /(german|deutsche).*(indoor|hallen).*(championships|meisterschaften)/i],
+  ['DM', /(german|deutsche) (athletics )?(championships|meisterschaften)/i],
+];
+const NOT_SENIOR_CHAMPS = /u\s?1[68]|u\s?2[03]|youth|junior|jugend|team|relays|staffel|masters|senioren|mountain|trail|10\s?km|half|marathon/i;
+export const championshipLabel = (e) => (NOT_SENIOR_CHAMPS.test(e.name) ? null : CHAMPIONSHIPS.find(([, re]) => re.test(e.name))?.[0] || null);
+
+export function monthlyProposal(start, end, events = []) {
+  // 1. Meisterschaften → eigene Spieltage (zusammengelegt, wenn sie sich überschneiden)
+  const champs = [];
+  for (const e of events) {
+    const label = championshipLabel(e);
+    if (!label) continue;
+    const s = mondayOnOrBefore(e.start_date < start ? start : e.start_date);
+    const t = sundayOnOrAfter((e.end_date || e.start_date) > end ? end : (e.end_date || e.start_date));
+    const prev = champs.find((c) => s <= c.ends_on && t >= c.starts_on);
+    if (prev) {
+      if (!prev.name.split(' + ').includes(label)) prev.name += ` + ${label}`;
+      prev.starts_on = s < prev.starts_on ? s : prev.starts_on; prev.ends_on = t > prev.ends_on ? t : prev.ends_on;
+    } else champs.push({ name: label, starts_on: s < start ? start : s, ends_on: t > end ? end : t, champ: true });
+  }
+  champs.sort((a, b) => a.starts_on.localeCompare(b.starts_on));
+  const big = events.filter((e) => ['OW', 'DF', 'GW', 'GL'].includes(e.category));
+  // 2. Lücken dazwischen in Abschnitte von etwa einem Monat teilen
+  const fill = (from, to) => {
+    if (from > to) return [];
+    const bounds = [];
+    for (let d = new Date(Date.UTC(+from.slice(0, 4), +from.slice(5, 7) - 1, 1)); ; ) {
+      d = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1));
+      const first = iso(d);
+      if (first > to) break;
+      let b = nearestMonday(first);
+      for (let moved = true; moved; ) {   // kein Großereignis teilen
+        moved = false;
+        for (const e of big) {
+          if (e.start_date < b && (e.end_date || e.start_date) >= b) { b = mondayAfter(e.end_date || e.start_date); moved = true; }
+        }
       }
+      // keine Mini-Spieltage: mindestens 2 Wochen bis zur nächsten Grenze bzw. zum Ende der Lücke
+      if (days(bounds.length ? bounds[bounds.length - 1] : from, addDays(b, -1)) >= 14 && days(b, to) >= 14) bounds.push(b);
     }
-    if (b > start && b <= end && (!bounds.length || b > bounds[bounds.length - 1].b)) bounds.push({ b, month: d.getUTCMonth() });
-  }
+    const out = [];
+    let s = from;
+    for (const b of [...bounds, addDays(to, 1)]) {
+      const e = addDays(b, -1);
+      const mid = new Date((Date.parse(s) + Date.parse(e)) / 2);
+      out.push({ name: MONTHS_DE[mid.getUTCMonth()], starts_on: s, ends_on: e });
+      s = b;
+    }
+    return out;
+  };
   const out = [];
-  let s = start, month = new Date(start + 'T00:00:00Z').getUTCMonth();
-  for (const { b, month: m } of bounds) {
-    out.push({ name: MONTHS_DE[month], starts_on: s, ends_on: addDays(b, -1) });
-    s = b; month = m;
+  let cursor = start;
+  for (const c of champs) {
+    out.push(...fill(cursor, addDays(c.starts_on, -1)), c);
+    cursor = addDays(c.ends_on, 1);
   }
-  out.push({ name: MONTHS_DE[month], starts_on: s, ends_on: end });
-  return out;
+  out.push(...fill(cursor, end));
+  // gleiche Monatsnamen unterscheiden (z. B. „Juli I“, „Juli II“)
+  const count = {};
+  for (const m of out) if (!m.champ) count[m.name] = (count[m.name] || 0) + 1;
+  const seen = {};
+  for (const m of out) if (!m.champ && count[m.name] > 1) m.name = `${m.name} ${['I', 'II', 'III'][seen[m.name] = (seen[m.name] || 0) + 1, seen[m.name] - 1]}`;
+  return out.map(({ champ, ...m }) => m);
 }
 
 // Saisonblöcke der Leichtathletik: Halle, Straße/Cross im Frühjahr, Bahnsaison in Monatsblöcken
@@ -299,7 +355,7 @@ function Matchdays({ c }) {
   // Großereignisse aus dem Kalender, die nicht auf zwei Spieltage verteilt werden sollen
   const big = useLoad(async () => (await q(sb.from('calendar_events').select('name,category,country,start_date,end_date')
     .gte('end_date', c.league.season_start).lte('start_date', c.league.season_end)))
-    .filter((e) => ['OW', 'DF', 'GW', 'GL'].includes(e.category) || (e.country === 'GER' && /german .*championships|deutsche meisterschaften/i.test(e.name))), [c.league.id]);
+    .filter((e) => ['OW', 'DF', 'GW', 'GL'].includes(e.category) || championshipLabel(e)), [c.league.id]);
   const a = useAction();
   const locked = (m) => m.waivers_done || new Date(m.waiver_deadline || m.deadline) <= new Date();
   const toLocal = (ts) => { const d = new Date(ts); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); };
@@ -361,8 +417,9 @@ function Matchdays({ c }) {
         <button onClick=${() => setGen(proposal('monthly', c.league.season_start, c.league.season_end))}>Kalendermonate</button>
         <button onClick=${() => setGen(proposal('weekly', c.league.season_start, c.league.season_end))}>Wöchentlich</button>
       </div>
-      <p class="muted small">Empfohlen: „Monatlich (Mo–So)“ – jeder Spieltag läuft von Montag bis Sonntag, Wechsel am Montag, der dem
-        Monatsersten am nächsten liegt; Großereignisse (WM, EM, Diamond League, Deutsche Meisterschaften …) werden nicht geteilt.</p>
+      <p class="muted small">Empfohlen: „Monatlich (Mo–So)“ – Olympia, WM, EM, Hallen-WM/-EM, Cross- und Straßen-WM/-EM, DM und Hallen-DM
+        bekommen eigene Spieltage (Montag bis Sonntag der Meisterschaftswoche), dazwischen Spieltage von etwa einem Monat (Montag bis Sonntag).
+        Andere Großereignisse werden nicht geteilt. Meisterschaften, die noch nicht im WA-Kalender stehen, später von Hand anlegen.</p>
       ${gen && html`<p class="muted small">Vorschlag für ${fmtDate(c.league.season_start)} – ${fmtDate(c.league.season_end)}.
           Nach dem Anlegen einzeln anpassbar. Spieltage in der Vergangenheit werden übersprungen.</p>
         <ul class="list compact">${gen.map((m) => html`<li><span>${m.name}</span><span class="muted">${fmtDate(m.starts_on)} – ${fmtDate(m.ends_on)}</span></li>`)}</ul>
