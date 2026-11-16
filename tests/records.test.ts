@@ -65,7 +65,10 @@ describe("Rekorde aus All-time-Listen", () => {
       row(3, "3:30.50", "2014-07-01"),   // alter Rekord
       row(4, "3:31.00", `${Y}-07-01`),   // schlechter als der alte Rekord
     ];
-    expect(recordMarks(rows, "2025-01-01").map((r) => r.athleteId)).toEqual([1, 2]);
+    expect(recordMarks(rows, "2025-01-01").map((r) => [r.athleteId, r.tied])).toEqual([[1, false], [2, false]]);
+    // gleiche Zeit wie der alte Rekord → eingestellt (zählt halb)
+    expect(recordMarks([row(5, "3:30.50", `${Y}-05-01`), row(3, "3:30.50", "2014-07-01")], "2025-01-01")
+      .map((r) => [r.athleteId, r.tied])).toEqual([[5, true]]);
     // gleiches Rennen: nur der Schnellere hält den Rekord
     expect(recordMarks([row(1, "3:29.0", "2026-05-01"), row(2, "3:29.5", "2026-05-01"), row(3, "3:30.5", "2014-07-01")], "2025-01-01")
       .map((r) => r.athleteId)).toEqual([1]);
@@ -79,5 +82,9 @@ describe("Rekorde aus All-time-Listen", () => {
     expect((await pts())[0][2]).toBe(100);
     // ein späterer DR-Fund stuft nicht zurück
     expect((await db.one("select apply_records($1) n", [JSON.stringify([rows[0]])])).n).toBe(0);
+    // eingestellter Rekord: halbe Punkte
+    const id = (await db.one("select id from wa_results where discipline = 'Mile'")).id;
+    await db.query("select set_result_record($1, '=WR')", [id]);
+    expect((await pts())[0][2]).toBe(100);
   });
 });

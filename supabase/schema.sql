@@ -221,6 +221,13 @@ alter table wa_results add column if not exists record text;
 do $$ begin
   alter table wa_results add constraint wa_results_record_check check (record in ('DR', 'ER', 'WR'));
 exception when duplicate_object then null; end $$;
+-- eingestellte Rekorde (=DR, =ER, =WR) zählen halb
+alter table wa_results drop constraint if exists wa_results_record_check;
+alter table wa_results add constraint wa_results_record_check check (record in ('DR', 'ER', 'WR', '=DR', '=ER', '=WR'));
+-- Rangfolge: höherer Rekord ersetzt niedrigeren, eingestellter zählt weniger als neuer
+create or replace function _record_rank(p text) returns int language sql immutable as $$
+  select coalesce(array_position(array['=DR', 'DR', '=ER', 'ER', '=WR', 'WR'], p), 0);
+$$;
 do $$ begin
   alter table wa_results add constraint wa_results_source_check check (source in ('wa', 'manual'));
 exception when duplicate_object then null; end $$;
@@ -1990,13 +1997,17 @@ $$;
 -- an früheren Tagen). Es muss vorher schon eine Leistung in der Disziplin geben; gleiche Zeit zählt nicht.
 -- Vorlauf und Finale an verschiedenen Tagen können beide PB sein.
 -- (plpgsql, weil mark_seconds weiter unten steht)
-create or replace function _is_pb(p_athlete text, p_discipline text, p_date date, p_mark text) returns boolean
+-- Ergebnis: 1 = neue PB, 0.5 = PB eingestellt (=PB, gleiche Zeit), 0 = keine
+drop function if exists _is_pb(text, text, date, text);
+create or replace function _pb_factor(p_athlete text, p_discipline text, p_date date, p_mark text) returns numeric
 language plpgsql stable as $$
+declare s numeric := mark_seconds(p_mark); prior numeric;
 begin
-  return coalesce(mark_seconds(p_mark) < least(
+  prior := least(
     (select mark_seconds(b.mark) from athlete_pb_before b where b.athlete_id = p_athlete and b.discipline = p_discipline),
     (select min(mark_seconds(o.mark)) from wa_results o
-      where o.athlete_id = p_athlete and o.discipline = p_discipline and o.date < p_date and o.relay is null)), false);
+      where o.athlete_id = p_athlete and o.discipline = p_discipline and o.date < p_date and o.relay is null));
+  return case when s is null or prior is null then 0 when s < prior then 1 when s = prior then 0.5 else 0 end;
 end $$;
 
 create or replace function rebuild_results(p_from date default null) returns int
@@ -2010,10 +2021,11 @@ begin
     from (
       select w.id, w.athlete_id, w.date, w.place,
              -- Staffel: Leistungs- und Platzierungspunkte nur anteilig (1/3 bzw. 1/4)
-             case w.record when 'WR' then c.record_wr when 'ER' then c.record_er when 'DR' then c.record_dr else 0 end rec,
+             case w.record when 'WR' then c.record_wr when 'ER' then c.record_er when 'DR' then c.record_dr
+                           when '=WR' then c.record_wr / 2.0 when '=ER' then c.record_er / 2.0 when '=DR' then c.record_dr / 2.0 else 0 end rec,
              -- PB-Bonus: nur für Leistungen ab der Schwelle, nicht für Zwischenzeiten und Staffeln
              case when w.relay is null and not _is_split(w.competition, w.remark) and coalesce(w.result_score, 0) >= c.perf_threshold
-                       and _is_pb(w.athlete_id, w.discipline, w.date, w.mark) then c.pb_points else 0 end pb,
+                  then c.pb_points * _pb_factor(w.athlete_id, w.discipline, w.date, w.mark) else 0 end pb,
              coalesce('wa-c' || w.wa_competition_id, 'wa-' || md5(w.competition || w.date::text)) competition_id,
              w.discipline || case when d.cross_table is not null and cross_km(w.competition) is not null
                                   then ' · ' || cross_km(w.competition) || 'km' else '' end
@@ -2089,7 +2101,7 @@ begin
   if not exists (select 1 from leagues where admin_user = auth.uid()) and not _is_service() then
     raise exception 'Nur Liga-Admins dürfen Rekorde eintragen.';
   end if;
-  if p_record is not null and p_record not in ('DR', 'ER', 'WR') then raise exception 'Unbekannter Rekord: %', p_record; end if;
+  if p_record is not null and p_record not in ('DR', 'ER', 'WR', '=DR', '=ER', '=WR') then raise exception 'Unbekannter Rekord: %', p_record; end if;
   update wa_results set record = p_record where id = p_id returning date into d;
   if d is null then raise exception 'Ergebnis nicht gefunden.'; end if;
   perform rebuild_results(d);
@@ -2110,10 +2122,10 @@ begin
       from jsonb_to_recordset(p_rows) j(athlete_id text, discipline text, date date, mark text, record text)
       join wa_results w on w.athlete_id = j.athlete_id and w.discipline = j.discipline and w.date = j.date
                        and mark_seconds(w.mark) = mark_seconds(j.mark)
-     where j.record in ('DR', 'ER', 'WR')
-     order by w.id, array_position(array['WR', 'ER', 'DR'], j.record))
+     where _record_rank(j.record) > 0
+     order by w.id, _record_rank(j.record) desc)
   update wa_results w set record = x.record from x
-   where w.id = x.id and coalesce(array_position(array['DR', 'ER', 'WR'], w.record), 0) < array_position(array['DR', 'ER', 'WR'], x.record);
+   where w.id = x.id and _record_rank(w.record) < _record_rank(x.record);
   get diagnostics n = row_count;
   if n > 0 then
     select min((j->>'date')::date) into d from jsonb_array_elements(p_rows) j;

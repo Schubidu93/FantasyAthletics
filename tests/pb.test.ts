@@ -20,18 +20,18 @@ const pb = async () => (await db.all("select result_date::text d, pb_points from
   .map((r) => [r.d, Number(r.pb_points)]);
 
 describe("PB-Bonus", () => {
-  it("zählt jede Verbesserung, Vorlauf und Finale einzeln, nicht gleiche Zeit, nicht erste Leistung", async () => {
+  it("zählt jede Verbesserung, Vorlauf und Finale einzeln, =PB halb, nicht erste Leistung", async () => {
     await add(`${Y}-05-01`, "3:33.00", 1200);                       // keine PB
     await add(`${Y}-06-01`, "3:31.50", 1225);                       // PB
     await add(`${Y}-06-01`, "3:31.50", 1225, { competition: "Meeting B" });   // gleicher Tag: auch schneller als vorher → PB
-    await add(`${Y}-07-01`, "3:31.50", 1225);                       // gleiche Zeit → keine PB
+    await add(`${Y}-07-01`, "3:31.50", 1225);                       // gleiche Zeit → =PB, halber Bonus
     await add(`${Y}-08-01`, "3:31.00", 1230, { wa_race: "H1" });    // Vorlauf PB
     await add(`${Y}-08-03`, "3:30.50", 1235);                       // Finale PB
     await add(`${Y}-08-10`, "3:29.00", 1250, { competition: "London - Split times", remark: "ST" });   // Zwischenzeit: kein Bonus, ohne Rekord gar keine Punkte
     await add(`${Y}-08-20`, "3:29.50", 1245);                       // langsamer als die Zwischenzeit → keine PB
     await add(`${Y}-09-01`, "13:10.00", 1200, { discipline: "5000 Metres" });   // erste Leistung → keine PB
     await db.query("select rebuild_results(null)");
-    expect(await pb()).toEqual([[`${Y}-05-01`, 0], [`${Y}-06-01`, 10], [`${Y}-06-01`, 10], [`${Y}-07-01`, 0],
+    expect(await pb()).toEqual([[`${Y}-05-01`, 0], [`${Y}-06-01`, 10], [`${Y}-06-01`, 10], [`${Y}-07-01`, 5],
       [`${Y}-08-01`, 10], [`${Y}-08-03`, 10], [`${Y}-08-20`, 0], [`${Y}-09-01`, 0]]);
   });
 

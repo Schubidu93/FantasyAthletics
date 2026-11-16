@@ -20,7 +20,8 @@ function placeLabel(x) {
 // „18.07.26“
 const dateShort = (d) => (d ? `${d.slice(8, 10)}.${d.slice(5, 7)}.${d.slice(2, 4)}` : '');
 const isSplit = (x) => /split time/i.test(x.competition || '') || x.remark === 'ST';
-const RECORD = { DR: 'Deutscher Rekord', ER: 'Europarekord', WR: 'Weltrekord' };
+const RECORD = { DR: 'Deutscher Rekord', ER: 'Europarekord', WR: 'Weltrekord',
+  '=DR': 'Deutscher Rekord eingestellt', '=ER': 'Europarekord eingestellt', '=WR': 'Weltrekord eingestellt' };
 function runNote(x) {
   if (isSplit(x)) return 'Zwischenzeit – gibt nur bei einem Rekord Punkte';
   if (x.wa_race && x.wa_race !== x.race) return `${raceLabel(x.wa_race)}: ${x.wa_place ?? '–'}. · kombiniert`;
@@ -45,7 +46,9 @@ async function loadRider(slug, league) {
     .sort((a, b) => discMeters(discLabel(a.discipline)) - discMeters(discLabel(b.discipline)) || a.discipline.localeCompare(b.discipline));
   const season = Object.fromEntries((await q(sb.from('athlete_season_stats').select('year,season_rank,points,athletes,overall_rank,overall_athletes').eq('athlete_id', slug)))
     .map((x) => [x.year, mixed && x.overall_rank ? { ...x, season_rank: x.overall_rank, athletes: x.overall_athletes } : x]));
-  const results = rows.map((r) => ({ ...r, pts: pts[r.id] || null }));
+  // voller PB-Bonus (zum Erkennen von =PB, das halb zählt)
+  const pbFull = Number((await q(sb.from('scoring_config').select('pb_points').eq('id', 1)))[0]?.pb_points ?? 10);
+  const results = rows.map((r) => ({ ...r, pts: pts[r.id] || null, pbFull }));
   return { rider, results, toplists, season, admin, pbs };
 }
 
@@ -148,7 +151,8 @@ export function RiderModal() {
               ${x.wa_competition_id && html`<small><a href=${waResultUrl(x.wa_competition_id, x.wa_event_id)} target="_blank" rel="noopener"
                 onClick=${(e) => e.stopPropagation()}>WA-Ergebnis ↗</a></small>`}
               ${x.record && html`<small><span class="badge b-rec">${x.record}</span> ${RECORD[x.record]}</small>`}
-              ${Number(x.pts?.pb_points) > 0 && html`<small><span class="badge b-pb">PB</span> persönliche Bestleistung</small>`}
+              ${Number(x.pts?.pb_points) > 0 && html`<small>${Number(x.pts.pb_points) < Number(x.pbFull)
+                ? html`<span class="badge b-pb">=PB</span> Bestleistung eingestellt` : html`<span class="badge b-pb">PB</span> persönliche Bestleistung`}</small>`}
               ${x.pts && html`<small class="muted">Leistung ${fmtPts(x.pts.perf_points)} + Platzierung ${fmtPts(x.pts.placing_points)}${Number(x.pts.record_points)
                 ? ` + Rekord ${fmtPts(x.pts.record_points)}` : ''}${Number(x.pts.pb_points) ? ` + PB ${fmtPts(x.pts.pb_points)}` : ''}</small>`}
               ${data.admin && editRec && html`<small onClick=${(e) => e.stopPropagation()}><select class="mini" value=${x.record || ''}
