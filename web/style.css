@@ -388,3 +388,9 @@ details.help li.chosen { background: var(--accent-soft); border-radius: 6px; pad
 .race-list li.cal-de { box-shadow: inset 3px 0 0 var(--accent); padding-left: .7rem; }
 .cal-events { overflow-wrap: anywhere; }
 .chips-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem .75rem; }
+/* Geschlecht: umrandeter Buchstabe */
+.sex { display: inline-block; min-width: 1.25em; padding: 0 .2em; border: 1.5px solid currentColor; border-radius: 4px;
+  font-size: .68rem; font-weight: 700; line-height: 1.25; text-align: center; vertical-align: .1em; }
+.sex-m { color: #2563eb; }
+.sex-f { color: #db2777; }
+.cal-unit { display: block; }

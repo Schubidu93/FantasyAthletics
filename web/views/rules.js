@@ -90,7 +90,7 @@ export function Rules({ c }) {
         <li><strong>Pool-Rang</strong> (Reihenfolge im Draft): nach den Punkten im Vorjahr der Saison, bei Gleichstand nach der besten Toplistenleistung.</li>
         ${lineup ? html`
           <li>Für jeden Spieltag stellst du bis zu ${slots.length} Athleten auf: ${l.lineup_mode === 'mf'
-            ? 'je Disziplin einen Mann (♂) und eine Frau (♀)' : 'je Disziplin einen Athleten dieser Gruppe'}${l.wildcards > 0
+            ? 'je Disziplin einen Mann und eine Frau' : 'je Disziplin einen Athleten dieser Gruppe'}${l.wildcards > 0
             ? `, dazu ${l.wildcards} Wildcard${l.wildcards > 1 ? 's' : ''} mit Athleten jeder Disziplin` : ''}.</li>
           <li>Positionen ohne passenden Athleten bleiben leer. Bis zum Stichtag änderbar, danach ist die Aufstellung für diesen Spieltag fest.
             Stellst du nicht neu auf, gilt die Aufstellung vom vorigen Spieltag (beim ersten Spieltag: automatisch deine teuersten bzw. besten passenden Athleten).</li>
