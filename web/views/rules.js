@@ -165,6 +165,8 @@ export function Rules({ c }) {
       <ul>
         <li><strong>Quelle:</strong> World Athletics – deutsche Toplisten und die Ergebnislisten der Athleten.</li>
         <li><strong>Athletenpool:</strong> täglich um 6 Uhr aus den Toplisten.</li>
+        <li><strong>Kalender:</strong> täglich um 6 Uhr die kommenden Wettkämpfe mit Laufdisziplinen aus dem Kalender von World Athletics –
+          international ab Gold Label, in Europa ab Kategorie A, in Deutschland ab Kategorie B (Straße und Cross ab E).</li>
         <li><strong>Ergebnisse:</strong> stündlich von 8 bis 23 Uhr für alle Athleten im Pool und in den Kadern. Erscheinen, sobald World Athletics sie veröffentlicht –
           bei großen Meisterschaften meist am selben Tag, bei kleinen Wettkämpfen manchmal Tage später. Werden die Ergebnisse eines Wettkampfs nach und nach
           hochgeladen (z. B. erst 800 m, Stunden später 5000 m), kommen sie auch nach und nach in die Wertung.</li>

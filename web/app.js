@@ -12,6 +12,7 @@ import { Admin } from './views/admin.js';
 import { RiderModal } from './views/rider.js';
 import { Riders } from './views/athletes.js';
 import { Races } from './views/races.js';
+import { Calendar } from './views/calendar.js';
 import { Rules } from './views/rules.js';
 import { More } from './views/more.js';
 import { Feedback } from './views/feedback.js';
@@ -85,7 +86,7 @@ function sections(c) {
       ? { key: 'draft', label: 'Draft', tabs: [['draft', 'Draft']] }
       : { key: 'team', label: 'Team', tabs: [['team', 'Kader'], ...(afterDraft ? [['waiver', 'Waiver']] : [])] },
     { key: 'athletes', label: 'Athleten', tabs: [['athletes', 'Athleten']] },
-    { key: 'races', label: 'Wettkämpfe', tabs: [['races', 'Wettkämpfe']] },
+    { key: 'races', label: 'Wettkämpfe', tabs: [['races', 'Ergebnisse'], ['calendar', 'Kalender']] },
     { key: 'more', label: 'Mehr', tabs: [['more', 'Menü'], ['rules', 'Regeln'],
       ...(!beforeDraft ? [['draft', 'Draft']] : []), ...(c.isAdmin ? [['admin', 'Admin']] : [])] },
   ];
@@ -97,7 +98,7 @@ function LeagueShell({ id, tab, sub, sub2, session }) {
   const c = { ...ctx.data, reload: ctx.reload, user: session.user };
   const defaultTab = c.league.status === 'drafting' ? 'draft' : 'home';
   const t = tab || defaultTab;
-  const View = { draft: Draft, team: Team, athletes: Riders, races: Races, rules: Rules, waiver: Waiver, results: Results,
+  const View = { draft: Draft, team: Team, athletes: Riders, races: Races, calendar: Calendar, rules: Rules, waiver: Waiver, results: Results,
     table: Table, admin: Admin, more: More, feedback: Feedback, home: Overview }[t] || Overview;
   const secs = sections(c);
   const current = secs.find((x) => x.tabs.some(([k]) => k === t))
