@@ -66,7 +66,7 @@
   ohne Punkte beste Leistung, neue Athleten erste Leistung ab `new_group_threshold` (975) im Spieljahr, sonst Toplisten.
 - Rekorde: `importer/sync-records.ts` liest die All-time-Listen (alle Leistungen) DE/Europa/Welt, `recordMarks()` erkennt Rekorde ab 2025
   (auch inzwischen verbesserte) → `apply_records` setzt `wa_results.record` (DR/ER/WR, nur hochstufen) → Bonus aus `scoring_config.record_*`.
-  Zwischenzeiten (`_is_split`: „… - Split times“ / ST) geben keine Punkte.
+  Zwischenzeiten (`_is_split`: „… - Split times“ / ST) geben nur den Rekord-Bonus. „Datenbank einrichten“ rechnet danach alle Punkte neu.
 - Kalender: `importer/sync-calendar.ts` → `calendar_events` (WA-Kalender: weltweit ab GL, Europa ab A, Deutschland ab E;
   Programm aus `getCompetitionOrganiserInfo`, Filter in `importer/calendar-filter.ts`).
 - Cross: Disziplin heißt nur „Cross Country“, die Distanz steht im Wettkampfnamen („… - XC 7.5km“) → `cross_km()` in der Datenbank,
