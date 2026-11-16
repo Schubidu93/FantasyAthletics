@@ -11,6 +11,8 @@ const OUT = "research/out/calendar";
 mkdirSync(OUT, { recursive: true });
 const log: string[] = [];
 const say = (s: string) => { console.log(s); log.push(s); };
+process.on("exit", () => writeFileSync(`${OUT}/log.txt`, log.join("\n")));
+process.on("uncaughtException", (e) => { say(`ABBRUCH: ${e.stack}`); process.exit(1); });
 const save = (name: string, data: unknown) => writeFileSync(`${OUT}/${name}.json`, JSON.stringify(data, null, 1));
 
 let api: ApiConfig;
@@ -69,7 +71,7 @@ const FIELDS = ["getCalendarEvents", "getCalendarCompetitionResults", "resultsBy
 const field = (n: string) => schema.find((f) => f.name === n);
 
 /** Ruft ein Abfragefeld mit allen Unterfeldern auf. */
-async function call(name: string, vars: Record<string, unknown>, depth = 4) {
+async function call(name: string, vars: Record<string, unknown>, depth = 4): Promise<any> {
   const f = field(name);
   if (!f) return { error: "Feld fehlt" };
   const args = f.args.filter((a: any) => a.name in vars);
@@ -107,50 +109,48 @@ const summary = (r: any) => {
     list.slice(0, 12).map((c: any) => `${c.id} ${c.name} (${c.area ?? c.country ?? ""}, ${c.rankingCategory ?? ""}, ${c.startDate}–${c.endDate}, Ergebnisse=${c.hasResults ?? "?"})`).join("; ");
 };
 
-// 1. ohne Filter, mit Optionen (zeigt die IDs für Land, Kategorie, Art)
-let r = await call("getCalendarEvents", { startDate: from, endDate: to, limit: 50, offset: 0, showOptionsWithNoHits: true, hideCompetitionsWithNoResults: true, orderDirection: "Descending" }, 3);
-save("calendar-all", r);
-say(`Kalender ${from}–${to}, nur mit Ergebnissen: ${summary(r)}`);
-const options = pick(r)?.options ?? {};
-say(`Optionen: ${Object.keys(options).join(", ")}`);
-const opt = (key: RegExp) => Object.entries(options).find(([k]) => key.test(k))?.[1] as any[] | undefined;
-const regionOpts = opt(/region/i) ?? [];
-const ger = (opt(/countr|region/i) ?? []).find((o: any) => /GER|Germany/i.test(JSON.stringify(o)));
-say(`Deutschland in Optionen: ${JSON.stringify(ger)}; Regionsoptionen: ${JSON.stringify(regionOpts).slice(0, 300)}`);
-
-// 2. Filter Land Deutschland (verschiedene Schreibweisen ausprobieren)
-const gerIds = [ger?.id, ger?.value, "GER", 84].filter((x) => x !== undefined);
-let gerCal: any = null;
-for (const regionType of ["countries", "country"]) {
-  for (const regionId of gerIds) {
-    r = await call("getCalendarEvents", { startDate: from, endDate: to, regionType, regionId: Number(regionId) || regionId, limit: 100, offset: 0, hideCompetitionsWithNoResults: true }, 3);
-    say(`Kalender GER (${regionType}=${regionId}): ${summary(r)}`);
-    if (pick(r)?.results?.length && !gerCal) { gerCal = r; save("calendar-ger", r); }
-  }
+// 1. Kalender: Deutschland (ID aus den Optionen: 13188422), ganze Saison bis heute -> Umfang kleiner Meetings
+const GER = 13188422;
+let r: any;
+let gerCal: any[] = [];
+for (let offset = 0; offset < 1000; offset += 100) {
+  r = await call("getCalendarEvents", { startDate: `${today.getFullYear()}-01-01`, endDate: to, regionType: "country", regionId: GER,
+    limit: 100, offset, hideCompetitionsWithNoResults: true }, 2);
+  const list = pick(r)?.results ?? [];
+  if (offset === 0) say(`Kalender GER ${today.getFullYear()} mit Ergebnissen: ${summary(r)}`);
+  gerCal.push(...list);
+  if (list.length < 100) break;
 }
-
-// 3. Ohne hideCompetitionsWithNoResults (zum Vergleich) und mit Kategorie / Art
-r = await call("getCalendarEvents", { startDate: from, endDate: to, limit: 100, offset: 0 }, 3);
-save("calendar-all-incl-no-results", r);
-say(`Kalender inkl. ohne Ergebnisse: ${summary(r)}`);
-for (const [k, v] of Object.entries(options)) {
-  if (!Array.isArray(v)) continue;
-  say(`Option ${k}: ${JSON.stringify(v.slice(0, 40)).slice(0, 1500)}`);
-}
+save("calendar-ger-season", gerCal);
+const cnt = (xs: any[], k: string) => Object.entries(xs.reduce((a: any, x: any) => ((a[x[k]] = (a[x[k]] ?? 0) + 1), a), {}));
+say(`GER Saison: ${gerCal.length} Wettkämpfe; Kategorien ${JSON.stringify(cnt(gerCal, "rankingCategory"))}; Arten ${JSON.stringify(cnt(gerCal, "disciplines"))}`);
+// Weltweit in einer Sommerwoche (Umfang für den stündlichen Abruf)
+r = await call("getCalendarEvents", { startDate: `${today.getFullYear()}-06-01`, endDate: `${today.getFullYear()}-06-07`, limit: 1, offset: 0, hideCompetitionsWithNoResults: true }, 2);
+say(`Weltweit 1.–7. Juni: ${pick(r)?.hits} Wettkämpfe mit Ergebnissen; Kategorien ${JSON.stringify(pick(r)?.options?.rankingCategories?.map((o: any) => [o.name, o.count]))}`);
+r = await call("getCalendarEvents", { startDate: `${today.getFullYear()}-06-01`, endDate: `${today.getFullYear()}-06-07`, regionType: "country", regionId: GER, limit: 1, offset: 0, hideCompetitionsWithNoResults: true }, 2);
+say(`GER 1.–7. Juni: ${pick(r)?.hits} Wettkämpfe mit Ergebnissen`);
+r = await call("getCalendarEvents", { startDate: `${today.getFullYear()}-06-01`, endDate: `${today.getFullYear()}-06-07`, regionType: "area", regionId: 3, limit: 1, offset: 0, hideCompetitionsWithNoResults: true }, 2);
+say(`Europa 1.–7. Juni: ${pick(r)?.hits} Wettkämpfe mit Ergebnissen`);
 
 // --- Wettkampfergebnisse ----------------------------------------------------------------
 const pool = new Set(readFileSync("research/athlete-ids.txt", "utf8").split(/\s+/).filter(Boolean).map(Number));
-const comps: any[] = (pick(gerCal) ?? pick(await call("getCalendarEvents", { startDate: from, endDate: to, limit: 20, offset: 0, hideCompetitionsWithNoResults: true }, 3)))?.results ?? [];
-for (const c of comps.slice(0, 4)) {
-  const res = await call("getCalendarCompetitionResults", { competitionId: Number(c.id), day: null, eventId: null }, 5);
-  save(`competition-${c.id}`, res);
-  const data = res.body?.data?.getCalendarCompetitionResults;
-  const races = (data?.eventTitles ?? []).flatMap((t: any) => (t.events ?? []).flatMap((e: any) => e.races ?? []));
-  const results = races.flatMap((x: any) => x.results ?? []);
-  const ours = results.filter((x: any) => pool.has(Number(x.competitor?.id)));
-  say(`Wettkampf ${c.id} ${c.name}: ${races.length} Läufe, ${results.length} Ergebnisse, ${ours.length} Pool-Athleten; ` +
-    `Felder Ergebnis: ${Object.keys(results[0] ?? {}).join(",")}; Felder Wettkampf: ${Object.keys(data?.competition ?? {}).join(",")}; ` +
-    `Tage-Optionen: ${JSON.stringify(data?.options ?? null).slice(0, 300)}`);
+// kleines deutsches Meeting, großes deutsches Meeting (meiste Tage), Pforzheim, WM Tokio (7190593)
+const multi = [...gerCal].sort((a, b) => (Date.parse(b.endDate) - Date.parse(b.startDate)) - (Date.parse(a.endDate) - Date.parse(a.startDate)))[0];
+const small = gerCal.find((c) => c.rankingCategory === "F" && /Track/.test(c.disciplines));
+const picks = [small, multi, gerCal.find((c) => /Pforzheim/.test(c.name)), { id: 7190593, name: "WM Tokio" }].filter(Boolean);
+for (const c of picks) {
+  for (const day of [null, 1, 2]) {
+    const res = await call("getCalendarCompetitionResults", { competitionId: Number(c.id), day, eventId: null }, 5);
+    save(`competition-${c.id}-day${day}`, res);
+    const data = res.body?.data?.getCalendarCompetitionResults;
+    const races = (data?.eventTitles ?? []).flatMap((t: any) => (t.events ?? []).flatMap((e: any) => e.races ?? []));
+    const results = races.flatMap((x: any) => x.results ?? []);
+    const ours = results.filter((x: any) => pool.has(Number(x.competitor?.id)));
+    say(`Wettkampf ${c.id} ${c.name} (${c.startDate}–${c.endDate}) Tag ${day}: ${races.length} Läufe, ${results.length} Ergebnisse, ` +
+      `${ours.length} Pool-Athleten, ${JSON.stringify(res.body).length} Bytes; Fehler: ${JSON.stringify(res.body?.errors ?? null).slice(0, 200)}; ` +
+      `Ergebnis-Beispiel: ${JSON.stringify(ours[0] ?? results[0] ?? null).slice(0, 500)}; ` +
+      `Optionen: ${JSON.stringify(data?.options ?? null).slice(0, 400)}`);
+  }
 }
 
 // --- Mehrere Athleten auf einmal ----------------------------------------------------------
@@ -166,7 +166,7 @@ for (const v of [
   { id: ids[0], resultsByLimitsStartDate: `${today.getFullYear()}-01-01`, resultsByLimitsEndDate: to },
 ]) {
   r = await call("getSingleCompetitorResultsByLimit", v, 4);
-  save(`byLimit-${"ids" in v ? v.ids.length : 1}`, r);
+  save(`byLimit-${v.ids?.length ?? 1}`, r);
   say(`getSingleCompetitorResultsByLimit(${JSON.stringify(v).slice(0, 80)}…): ${JSON.stringify(r.body).slice(0, 600)}`);
 }
 r = await call("competitionsByCountry", { countryOfResidence: "GER", limit: 20 }, 3);
