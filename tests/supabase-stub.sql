@@ -2,6 +2,7 @@
 do $$ begin
   create role anon; create role authenticated; create role service_role;
 exception when duplicate_object then null; end $$;
+alter role service_role bypassrls;   -- wie bei Supabase: Service-Key umgeht RLS
 create schema if not exists auth;
 create schema if not exists extensions;
 create table if not exists auth.users (id uuid primary key, email text);

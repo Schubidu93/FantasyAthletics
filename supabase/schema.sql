@@ -157,6 +157,23 @@ create table if not exists sync_status (
 );
 insert into sync_status (id) values (1) on conflict do nothing;
 
+-- Ergebnisabruf: wann wurden die Ergebnisse eines Athleten für ein Jahr zuletzt komplett geladen?
+create table if not exists athlete_sync (
+  rider_slug text not null references riders (pcs_slug) on delete cascade,
+  year       int  not null,
+  checked_at timestamptz not null default now(),
+  primary key (rider_slug, year)
+);
+
+-- Ergebnisabruf: Stand des WA-Sammelabrufs (neueste Ergebnisse der letzten ~30 Tage) je Athlet.
+-- Taucht ein unbekanntes Ergebnis auf (neu, nachgereichte Disziplin, geänderte Zeit), wird der Athlet neu geladen.
+create table if not exists athlete_feed (
+  rider_slug text primary key references riders (pcs_slug) on delete cascade,
+  keys       text[] not null default '{}',
+  changed_at timestamptz not null default now()
+);
+drop table if exists wa_watch;
+
 -- ---------------------------------------------------------------------
 -- Ligen und Manager
 -- ---------------------------------------------------------------------
@@ -2512,7 +2529,9 @@ begin
   end;
   if m < 15 then
     if h = 6 then perform dispatch_workflow('import-athletes.yml'); end if;          -- Athletenpool aus den DE-Toplisten
-    if h in (7, 21) then perform dispatch_workflow('import-results.yml'); end if;    -- Ergebnisse und Punkte
+    -- Ergebnisse: stündlich neue Ergebnisse (Sammelabruf), nachts neue Athleten + ein Siebtel des Pools komplett
+    if h between 8 and 23 then perform dispatch_workflow('import-results.yml', '{"modus": "neu"}'); end if;
+    if h = 3 then perform dispatch_workflow('import-results.yml', '{"modus": "nacht"}'); end if;
     if h = 9 and extract(isodow from t) = 1 then perform weekly_summary(); end if;   -- Wochen-Zusammenfassung (Mo)
   end if;
   if exists (select 1 from notifications where sent_at is null) then
@@ -2559,6 +2578,8 @@ alter table scoring_config  enable row level security;
 alter table cross_distance_factors enable row level security;
 alter table keepers         enable row level security;
 alter table app_config      enable row level security;   -- keine Policies: nur Service-Key
+alter table athlete_sync    enable row level security;   -- keine Policies: nur Service-Key
+alter table athlete_feed    enable row level security;   -- keine Policies: nur Service-Key
 alter table push_subscriptions enable row level security;
 alter table notifications   enable row level security;
 

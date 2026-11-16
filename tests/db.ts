@@ -17,7 +17,7 @@ async function admin() {
   return c;
 }
 
-function urlFor(db: string) {
+export function urlFor(db: string) {
   const u = new URL(ADMIN_URL);
   u.pathname = `/${db}`;
   return u.toString();

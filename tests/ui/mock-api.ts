@@ -146,13 +146,45 @@ async function callRpc(c: pg.PoolClient, fn: string, args: Record<string, unknow
   return (await c.query(sql, params)).rows[0].j;
 }
 
-function userFrom(req: IncomingMessage) {
+function claimsFrom(req: IncomingMessage): { sub?: string; role?: string } {
   const token = (req.headers.authorization ?? "").replace(/^Bearer /, "");
   try {
-    return JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString()).sub as string;
+    return JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString());
   } catch {
-    return null;
+    return {};
   }
+}
+
+// Schreiben (für den Importer mit Service-Key): Einfügen/Upsert, Ändern, Löschen
+function whereSql(q: URLSearchParams, params: unknown[]) {
+  const where: string[] = [];
+  for (const [k, v] of q) if (!["select", "columns", "on_conflict"].includes(k)) where.push(filterSql(k, v, params));
+  return where.length ? ` where ${where.join(" and ")}` : "";
+}
+async function writeTable(c: pg.PoolClient, method: string, table: string, q: URLSearchParams, body: unknown, prefer: string) {
+  const t = `public.${ident(table)}`;
+  const params: unknown[] = [];
+  if (method === "DELETE") return c.query(`delete from ${t} t${whereSql(q, params)}`, params);
+  if (method === "PATCH") {
+    const obj = body as Record<string, unknown>;
+    params.push(JSON.stringify(obj));
+    const sets = Object.keys(obj).map((k) => `${ident(k)} = (json_populate_record(null::${t}, $1::json)).${ident(k)}`);
+    return c.query(`update ${t} t set ${sets.join(", ")}${whereSql(q, params)}`, params);
+  }
+  const rows = (Array.isArray(body) ? body : [body]) as Record<string, unknown>[];
+  if (!rows.length) return;
+  const cols = [...new Set(rows.flatMap((r) => Object.keys(r)))];
+  const list = cols.map(ident).join(", ");
+  params.push(JSON.stringify(rows));
+  let sql = `insert into ${t} (${list}) select ${list} from json_populate_recordset(null::${t}, $1::json)`;
+  const conflict = q.get("on_conflict");
+  if (conflict) {
+    const keys = conflict.split(",");
+    const upd = cols.filter((x) => !keys.includes(x));
+    sql += ` on conflict (${keys.map(ident).join(", ")}) do ` +
+      (prefer.includes("ignore-duplicates") || !upd.length ? "nothing" : `update set ${upd.map((x) => `${ident(x)} = excluded.${ident(x)}`).join(", ")}`);
+  }
+  return c.query(sql, params);
 }
 
 function send(res: ServerResponse, status: number, body: unknown) {
@@ -169,7 +201,9 @@ function send(res: ServerResponse, status: number, body: unknown) {
 createServer(async (req, res) => {
   if (req.method === "OPTIONS") return send(res, 204, undefined);
   const url = new URL(req.url!, "http://x");
-  const sub = userFrom(req);
+  const claims = claimsFrom(req);
+  const sub = claims.sub ?? null;
+  const role = claims.role === "service_role" ? "service_role" : "authenticated";
   if (url.pathname.startsWith("/auth/v1/user")) {
     const u = sub && (await pool.query("select id, email from auth.users where id = $1", [sub])).rows[0];
     return u ? send(res, 200, { id: u.id, email: u.email, aud: "authenticated", role: "authenticated" })
@@ -183,8 +217,13 @@ createServer(async (req, res) => {
   const c = await pool.connect();
   try {
     await c.query("begin");
-    await c.query("set local role authenticated");
-    await c.query("select set_config('request.jwt.claim.sub', $1, true), set_config('request.jwt.claim.role', 'authenticated', true)", [sub ?? ""]);
+    await c.query(`set local role ${role}`);
+    await c.query("select set_config('request.jwt.claim.sub', $1, true), set_config('request.jwt.claim.role', $2, true)", [sub ?? "", role]);
+    if (!m[1] && req.method !== "GET") {
+      await writeTable(c, req.method!, m[2], url.searchParams, body ? JSON.parse(body) : {}, String(req.headers.prefer ?? ""));
+      await c.query("commit");
+      return send(res, req.method === "POST" ? 201 : 204, undefined);
+    }
     const data = m[1]
       ? await callRpc(c, m[2], body ? JSON.parse(body) : Object.fromEntries(url.searchParams))
       : await selectTable(c, m[2], url.searchParams, req.headers.range as string | undefined);

@@ -1,14 +1,21 @@
 name: Ergebnisse laden (World Athletics)
 
-# Ergebnisse aller Athleten im Pool und in den Kadern, mit kombinierten Finals und Q/q der Vorrunden;
-# berechnet danach die Punkte, Saisonwertungen und fällige Stichtage.
-# Täglich um 7 und 21 Uhr (gestartet vom Zeitplaner in der Datenbank).
+# Gestartet vom Zeitplaner in der Datenbank:
+# - stündlich 8–23 Uhr "neu": ein Sammelabruf zeigt, wer in den letzten Wochen neue Ergebnisse hat;
+#   nur diese Athleten werden einzeln (mit WA-Punkten) nachgeladen
+# - 3 Uhr "nacht": neue Pool-Athleten komplett (aktuelles Jahr + Vorjahr) und ein Siebtel aller Athleten zur Kontrolle
+# Von Hand: "voll" lädt alle Athleten komplett (optional mit Vorjahr).
 
 on:
   workflow_dispatch:
     inputs:
+      modus:
+        description: "neu = nur neue Ergebnisse, nacht = Kontrolle, voll = alle Athleten komplett"
+        type: choice
+        options: [neu, nacht, voll]
+        default: neu
       vorjahr:
-        description: "Auch das Vorjahr laden (für Draft-Report und Athletenseiten, beim ersten Mal empfohlen)"
+        description: "Bei „voll“ auch das Vorjahr laden"
         type: boolean
         default: false
 
@@ -33,6 +40,7 @@ jobs:
           if [ "${{ inputs.vorjahr }}" = "true" ]; then echo "RESULT_YEARS=$Y,$((Y-1))" >> "$GITHUB_ENV"; else echo "RESULT_YEARS=$Y" >> "$GITHUB_ENV"; fi
       - run: npm run import:results
         env:
+          MODUS: ${{ inputs.modus || 'neu' }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           WA_API_URL: ${{ secrets.WA_API_URL }}

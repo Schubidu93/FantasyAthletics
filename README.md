@@ -52,7 +52,7 @@ Der Zeitplaner läuft in der Datenbank (pg_cron, alle 15 Minuten, `scheduler_tic
 | Workflow | Wann | Was |
 |---|---|---|
 | Athletenpool laden (World Athletics) | täglich 6 Uhr | DE-Toplisten → Athleten, Disziplingruppe, Pool-Rang |
-| Ergebnisse laden (World Athletics) | täglich 7 und 21 Uhr | Ergebnisse aller Pool- und Kader-Athleten, Punkte, Saisonwertung, Stichtage |
+| Ergebnisse laden (World Athletics) | stündlich 8–23 Uhr („neu“), 3 Uhr („nacht“) | „neu“: ein Sammelabruf (Ergebnisse der letzten ~30 Tage aller Athleten, Blöcke zu 100) zeigt, wer Neues hat – nur diese Athleten werden einzeln mit WA-Punkten geladen (Stand in `athlete_feed`). „nacht“: neue Pool-Athleten komplett (Jahr + Vorjahr), dazu ein Siebtel aller Athleten zur Kontrolle (`athlete_sync`). Von Hand „voll“: alle komplett. Danach Punkte, Saisonwertung, Stichtage |
 | Benachrichtigungen senden | nach jedem Ergebnisabruf und bei neuen Nachrichten | Web-Push (Waiver, Draft, „Du bist dran“, neue Punkte …) |
 | Feedback senden | direkt nach dem Absenden in der App | E-Mail mit Text und Bildern an den Betreiber |
 | App veröffentlichen | bei Änderungen an `web/` auf `main` | App auf GitHub Pages |

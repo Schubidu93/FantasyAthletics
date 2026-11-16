@@ -203,3 +203,43 @@ export async function fetchAthleteResults(api: ApiConfig, athleteId: number, yea
     await sleep(1000 * 2 ** attempt + Math.random() * 1000);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Sammelabruf: neueste Ergebnisse vieler Athleten in einer Abfrage (Feed der Website für
+// "gefolgte Athleten"). Liefert die Ergebnisse der letzten ~30 Tage, aber ohne WA-Punkte und
+// Wettkampf-ID – dient nur als Signal, welche Athleten neu geladen werden müssen.
+// ---------------------------------------------------------------------------
+
+export type FeedResult = { athleteId: number; date: string | null; competition: string; discipline: string; mark: string; place: string; race: string };
+
+const FEED_QUERY = `
+  query ResultsByAthlete($ids: [String], $limit: Int) {
+    resultsByAthlete(athleteIds: $ids, limit: $limit) {
+      results { athlete { id } competition date discipline mark place race }
+    }
+  }`;
+
+export const FEED_LIMIT = 5000;
+
+export async function fetchRecentResults(api: ApiConfig, athleteIds: number[]): Promise<FeedResult[]> {
+  for (let attempt = 1; ; attempt++) {
+    const res = await fetch(api.url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": api.key, "User-Agent": USER_AGENT },
+      body: JSON.stringify({ operationName: "ResultsByAthlete", query: FEED_QUERY,
+        variables: { ids: athleteIds.map(String), limit: FEED_LIMIT } }),
+    }).catch((e: Error) => ({ ok: false, status: 0, statusText: e.message }) as Response);
+    if (res.status === 401 || res.status === 403) throw new ApiAuthError(`WA-API ${res.status}`);
+    if (res.ok) {
+      const body = (await res.json()) as { data?: { resultsByAthlete?: { results?: RawFeed[] } }; errors?: { message: string }[] };
+      if (body.errors?.length) throw new Error(`Sammelabruf: ${body.errors[0].message}`);
+      return (body.data?.resultsByAthlete?.results ?? []).map((r) => ({
+        athleteId: Number(r.athlete?.id), date: parseWaDate(String(r.date ?? "")), competition: String(r.competition ?? ""),
+        discipline: String(r.discipline ?? ""), mark: String(r.mark ?? ""), place: String(r.place ?? ""), race: String(r.race ?? ""),
+      })).filter((r) => r.athleteId);
+    }
+    if (attempt >= 4) throw new Error(`WA-API ${res.status} ${res.statusText} (Sammelabruf)`);
+    await sleep(1000 * 2 ** attempt + Math.random() * 1000);
+  }
+}
+type RawFeed = { athlete?: { id?: number | string }; competition?: string; date?: string; discipline?: string; mark?: string; place?: string; race?: string };

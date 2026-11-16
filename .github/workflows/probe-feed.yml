@@ -1,11 +1,8 @@
-name: WA-Kalender erkunden
+name: WA-Sammelabruf prüfen
 
-# Einmalige Erkundung für den Ergebnisabruf (Kalender, Wettkampfergebnisse, Mehr-Athleten-Abfragen).
-# Ergebnisse landen in research/out/calendar.
+# Erkundung: liefert der Sammelabruf (resultsByAthlete) noch alle Ergebnisse der letzten Wochen?
+# Vergleicht mit dem Einzelabruf; Ergebnis in research/out/calendar/feed-log.txt.
 on:
-  push:
-    branches: [claude/sleepy-planck-h90ess]
-    paths: [research/probe-feed.ts]
   workflow_dispatch:
 
 permissions:
@@ -28,7 +25,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f research/out/calendar
-          git commit -m "WA-Kalender: Rohdaten" || exit 0
+          git add -f research/out/calendar/feed-log.txt
+          git commit -m "WA-Sammelabruf: Prüfergebnis" || exit 0
           git pull --rebase origin "$GITHUB_REF_NAME"
           git push origin HEAD:"$GITHUB_REF_NAME"

@@ -53,7 +53,7 @@ export function Overview({ c }) {
 
     ${c.me && mine.length > 0 && html`<section class="card">
       <h3>Neue Punkte meiner Athleten</h3>
-      ${recent.length === 0 ? html`<p class="muted small">In den letzten 14 Tagen keine Punkte – Rennergebnisse kommen täglich um 20 Uhr.</p>`
+      ${recent.length === 0 ? html`<p class="muted small">In den letzten 14 Tagen keine Punkte – Ergebnisse werden stündlich von 8 bis 23 Uhr abgerufen.</p>`
         : html`<ul class="list compact">${recent.map((r, i) => html`<li key=${i}>
           <span><strong>${name(r.rider_slug)}</strong> <span class="muted small">${labelText(r.label)}</span></span>
           <span class="muted">${fmtDate(r.result_date)} · <strong>+${fmtPts(r.uci_points)}</strong></span></li>`)}</ul>`}

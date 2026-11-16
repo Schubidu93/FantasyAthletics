@@ -47,6 +47,9 @@
 - Quelle nur **World Athletics**: DE-Toplisten (`importer/sync-pool.ts`) und die GraphQL-Schnittstelle der Website
   (`importer/sync-results.ts`, `importer/placings.ts`). Ehrliche Kennung, Pausen zwischen Abfragen, keine Umgehung von Bot-Schutz.
   Den API-Schlüssel liest der Importer bei Bedarf selbst von worldathletics.org.
+- Ergebnisabruf sparsam: `resultsByAthlete` (Sammelabruf, letzte ~30 Tage, keine WA-Punkte/Wettkampf-ID) nur als Signal;
+  Einzelabruf (`getSingleCompetitorResultsDate`, ganzes Jahr mit WA-Punkten) nur für Athleten mit Neuem bzw. nachts zur Kontrolle.
+  Ende-zu-Ende-Test: `tests/importer.test.ts` (Nachbau von WA und Supabase-Schnittstelle).
 - Rohdaten in `wa_results`; `rebuild_results()` berechnet daraus die Punkte in `results` (die Spiellogik von UCI Fantasy liest nur `results`).
   Pool: `toplist_entries` → `refresh_pool()` setzt `riders.uci_rank` (Pool-Rang), `event_group`, Bestleistung.
 - Cross: Disziplin heißt nur „Cross Country“, die Distanz steht im Wettkampfnamen („… - XC 7.5km“) → `cross_km()` in der Datenbank,
