@@ -2,10 +2,11 @@
 // - __NEXT_DATA__ der Athletenseite (enthält die Daten samt Feldnamen)
 // - Abfragen getSingleCompetitor / AllTimePersonalTop10 / SeasonBests mit vermuteten Feldern (Fehlermeldungen nennen gültige Felder)
 // Ergebnis: research/out/pb/*
-import { writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { discoverApiConfig, sleep } from "../importer/wa";
 
 const OUT = "research/out/pb";
+mkdirSync(OUT, { recursive: true });
 const UA = "Mozilla/5.0 (compatible; FantasyAthletics/2.0)";
 const log: string[] = [];
 const say = (s: string) => { console.log(s); log.push(s); };
