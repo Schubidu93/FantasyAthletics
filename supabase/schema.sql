@@ -241,6 +241,22 @@ create table if not exists sync_status (
 );
 insert into sync_status (id) values (1) on conflict do nothing;
 
+-- Wettkampfkalender (kommende Wettkämpfe mit Laufdisziplinen, aus dem WA-Kalender; importer/sync-calendar.ts):
+-- international ab Gold Label, Europa ab Kategorie A, Deutschland ab B (Straße/Cross ab E)
+create table if not exists calendar_events (
+  id          bigint primary key,           -- WA-Wettkampf-ID
+  name        text not null,
+  venue       text,
+  country     text,                         -- IOC-Code
+  category    text,                         -- WA-Kategorie (OW, DF, GW, GL, A–F)
+  kinds       text[] not null default '{}', -- track, road, cross
+  competition_group text,                   -- z. B. „Wanda Diamond League“
+  start_date  date not null,
+  end_date    date,
+  updated_at  timestamptz not null default now()
+);
+create index if not exists calendar_events_start on calendar_events (start_date);
+
 -- Ergebnisabruf: wann wurden die Ergebnisse eines Athleten für ein Jahr zuletzt komplett geladen?
 create table if not exists athlete_sync (
   athlete_id text not null references athletes (id) on delete cascade,
@@ -2817,6 +2833,7 @@ alter table cross_distance_factors enable row level security;
 alter table keepers         enable row level security;
 alter table app_config      enable row level security;   -- keine Policies: nur Service-Key
 alter table scoring_coefficients enable row level security;
+alter table calendar_events enable row level security;
 alter table athlete_sync    enable row level security;   -- keine Policies: nur Service-Key
 alter table athlete_feed    enable row level security;   -- keine Policies: nur Service-Key
 alter table push_subscriptions enable row level security;
@@ -2827,7 +2844,8 @@ declare t text;
 begin
   -- öffentliche Stammdaten: lesbar für angemeldete Nutzer
   foreach t in array array['athletes', 'competitions', 'results', 'sync_status', 'athlete_season_stats', 'toplist_entries',
-                           'wa_results', 'disciplines', 'placing_scores', 'scoring_config', 'cross_distance_factors', 'scoring_coefficients'] loop
+                           'wa_results', 'disciplines', 'placing_scores', 'scoring_config', 'cross_distance_factors', 'scoring_coefficients',
+                           'calendar_events'] loop
     execute format('drop policy if exists read_all on %I', t);
     execute format('create policy read_all on %I for select to authenticated using (true)', t);
   end loop;

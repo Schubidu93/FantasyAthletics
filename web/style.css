@@ -377,3 +377,12 @@ details.help li.chosen { background: var(--accent-soft); border-radius: 6px; pad
 .race-link .race-name { display: flex; flex-direction: column; min-width: 0; }
 .race-link .race-name strong { overflow-wrap: anywhere; }
 .toplists summary { cursor: pointer; margin-top: .5rem; }
+
+/* Kalender */
+.cal-month { margin: 1rem 0 .25rem; font-size: .95rem; color: var(--muted); }
+.cal-item { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; width: 100%; min-width: 0; }
+.cal-text { display: flex; flex-direction: column; min-width: 0; }
+.cal-text .race-date { font-size: .8rem; color: var(--muted); }
+.cal-text .race-name { display: flex; flex-direction: column; min-width: 0; }
+.cal-text .race-name strong { overflow-wrap: anywhere; }
+.race-list li.cal-de { box-shadow: inset 3px 0 0 var(--accent); padding-left: .7rem; }
