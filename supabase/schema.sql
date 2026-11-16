@@ -154,6 +154,10 @@ alter table scoring_config alter column placing_factor set default 0.1;
 alter table scoring_config alter column cross_factor set default 0.1;
 alter table scoring_config add column if not exists game_year int;          -- Spieljahr von Hand (sonst ab 1.11. das Folgejahr)
 alter table scoring_config add column if not exists new_group_threshold int not null default 975;  -- neue Athleten: erste Leistung ab x WA-Punkten bestimmt die Gruppe
+-- Rekord-Bonus (nur der höchste zählt: WR > ER > DR)
+alter table scoring_config add column if not exists record_dr int not null default 50;
+alter table scoring_config add column if not exists record_er int not null default 80;
+alter table scoring_config add column if not exists record_wr int not null default 100;
 insert into scoring_config (id) values (1) on conflict do nothing;
 
 -- Rohdaten der Ergebnisse von World Athletics (ein Eintrag pro Lauf eines Athleten)
@@ -184,6 +188,11 @@ create table if not exists wa_results (
 alter table wa_results add column if not exists source text not null default 'wa';
 alter table wa_results add column if not exists source_url text;
 alter table wa_results add column if not exists added_by uuid;
+-- Rekord laut Admin: DR (deutscher), ER (Europa-), WR (Weltrekord); der Importer lässt die Spalte unverändert
+alter table wa_results add column if not exists record text;
+do $$ begin
+  alter table wa_results add constraint wa_results_record_check check (record in ('DR', 'ER', 'WR'));
+exception when duplicate_object then null; end $$;
 do $$ begin
   alter table wa_results add constraint wa_results_source_check check (source in ('wa', 'manual'));
 exception when duplicate_object then null; end $$;
@@ -234,7 +243,8 @@ create table if not exists results (
 alter table results add column if not exists updated_at timestamptz not null default now();
 alter table results add column if not exists perf_points numeric not null default 0;     -- Leistungsanteil
 alter table results add column if not exists placing_points numeric not null default 0;  -- Platzierungsanteil
-alter table results add column if not exists wa_result_id bigint;                        -- Quelle in wa_results
+alter table results add column if not exists wa_result_id bigint;
+alter table results add column if not exists record_points numeric not null default 0;          -- Rekord-Bonus                        -- Quelle in wa_results
 create index if not exists results_athlete_date on results (athlete_id, result_date);
 
 create table if not exists sync_status (
@@ -1941,16 +1951,23 @@ $$;
 --          max(0, Cross-Tabellenwert − perf_threshold) × cross_factor × Distanzfaktor (cross_distance_factors),
 --          keine Platzierungspunkte
 -- Gespeichert werden nur Ergebnisse mit Punkten. Eingefrorene Spieltage sind davon nicht betroffen.
+-- Zwischenzeit: WA führt sie als eigenen Wettkampf „… - Split times“ bzw. mit Vermerk ST
+create or replace function _is_split(p_competition text, p_remark text) returns boolean
+language sql immutable as $$
+  select coalesce(p_competition, '') ~* 'split time' or coalesce(p_remark, '') = 'ST';
+$$;
+
 create or replace function rebuild_results(p_from date default null) returns int
 language plpgsql security definer set search_path = public as $$
 declare c scoring_config; n int;
 begin
   select * into c from scoring_config where id = 1;
   delete from results where p_from is null or result_date >= p_from;
-  insert into results (athlete_id, competition_id, label, result_date, rank, points, perf_points, placing_points, wa_result_id)
-  select athlete_id, competition_id, label, date, place, perf + plc, perf, plc, id
+  insert into results (athlete_id, competition_id, label, result_date, rank, points, perf_points, placing_points, record_points, wa_result_id)
+  select athlete_id, competition_id, label, date, place, perf + plc + rec, perf, plc, rec, id
     from (
       select w.id, w.athlete_id, w.date, w.place,
+             case w.record when 'WR' then c.record_wr when 'ER' then c.record_er when 'DR' then c.record_dr else 0 end rec,
              coalesce('wa-c' || w.wa_competition_id, 'wa-' || md5(w.competition || w.date::text)) competition_id,
              w.discipline || case when d.cross_table is not null and cross_km(w.competition) is not null
                                   then ' · ' || cross_km(w.competition) || 'km' else '' end
@@ -1972,12 +1989,14 @@ begin
              end plc
         from wa_results w left join disciplines d on d.name = w.discipline
        where (p_from is null or w.date >= p_from) and w.date >= date '2025-01-01'
+         -- Zwischenzeiten (z. B. 1500 m im Meilenrennen) zählen nicht, nur das eigentliche Rennen
+         and not _is_split(w.competition, w.remark)
          -- Nachtrag entfällt, sobald World Athletics dasselbe Ergebnis führt (gleiche Disziplin, ±1 Tag)
          and not (w.source = 'manual' and exists (select 1 from wa_results o
                    where o.athlete_id = w.athlete_id and o.source = 'wa' and o.discipline = w.discipline
                      and abs(o.date - w.date) <= 1))
     ) x
-   where perf + plc > 0
+   where perf + plc + rec > 0
   on conflict (athlete_id, competition_id, label) do nothing;
   get diagnostics n = row_count;
   return n;
@@ -1998,16 +2017,37 @@ begin
     placing_factor = coalesce((s->>'placing_factor')::numeric, placing_factor),
     cross_factor   = coalesce((s->>'cross_factor')::numeric, cross_factor),
     new_group_threshold = coalesce((s->>'new_group_threshold')::int, new_group_threshold),
+    record_dr      = coalesce((s->>'record_dr')::int, record_dr),
+    record_er      = coalesce((s->>'record_er')::int, record_er),
+    record_wr      = coalesce((s->>'record_wr')::int, record_wr),
     game_year      = case when s ? 'game_year' then nullif(s->>'game_year', '')::int else game_year end,
     updated_at     = now()
   where id = 1;
-  if exists (select 1 from scoring_config where perf_factor < 0 or placing_factor < 0 or cross_factor < 0) then
-    raise exception 'Faktoren dürfen nicht negativ sein.';
+  if exists (select 1 from scoring_config where perf_factor < 0 or placing_factor < 0 or cross_factor < 0
+              or record_dr < 0 or record_er < 0 or record_wr < 0) then
+    raise exception 'Faktoren und Rekordpunkte dürfen nicht negativ sein.';
   end if;
   perform rebuild_results(null);
   perform refresh_pool(null);   -- Gruppe und Pool-Rang hängen an Punkten, Spieljahr und Schwellen
   insert into admin_log (league_id, user_id, action, details)
     select id, auth.uid(), 'scoring_config', s from leagues where admin_user = auth.uid();
+end $$;
+
+-- Rekord an einem Ergebnis markieren (DR/ER/WR) oder entfernen (null) – jeder Liga-Admin; Punkte werden neu berechnet
+create or replace function set_result_record(p_id bigint, p_record text) returns void
+language plpgsql security definer set search_path = public as $$
+declare d date;
+begin
+  if not exists (select 1 from leagues where admin_user = auth.uid()) and not _is_service() then
+    raise exception 'Nur Liga-Admins dürfen Rekorde eintragen.';
+  end if;
+  if p_record is not null and p_record not in ('DR', 'ER', 'WR') then raise exception 'Unbekannter Rekord: %', p_record; end if;
+  update wa_results set record = p_record where id = p_id returning date into d;
+  if d is null then raise exception 'Ergebnis nicht gefunden.'; end if;
+  perform rebuild_results(d);
+  perform refresh_season_stats(extract(year from d)::int);
+  insert into admin_log (league_id, user_id, action, details)
+    select id, auth.uid(), 'result_record', jsonb_build_object('wa_result', p_id, 'record', p_record) from leagues where admin_user = auth.uid();
 end $$;
 
 -- Punkte pro Athlet in einem Jahr (für die Athletenliste der App); p_gender 'mixed' = alle

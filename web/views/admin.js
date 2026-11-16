@@ -68,18 +68,22 @@ function ScoringConfig({ c }) {
       ${field('placing_factor', 'Platzierung: Faktor', '0.01')}
       ${field('cross_factor', 'Cross: Faktor', '0.01')}
       ${field('new_group_threshold', 'Neue Athleten: Gruppe ab WA-Punkten')}
+      ${field('record_dr', 'Bonus deutscher Rekord')}
+      ${field('record_er', 'Bonus Europarekord')}
+      ${field('record_wr', 'Bonus Weltrekord')}
       <label>Spieljahr<input type="number" min="2025" placeholder=${`automatisch (${new Date().getMonth() >= 10 ? new Date().getFullYear() + 1 : new Date().getFullYear()})`}
         value=${v.game_year ?? ''} onInput=${set('game_year')} /></label>
     </div>
     <p class="small muted">Disziplingruppe und Pool-Rang richten sich nach den Punkten im Vorjahr des Spieljahrs (Saison 2027 → Punkte 2026).
       Ab 1. November gilt automatisch das Folgejahr als Spieljahr.</p>
     <p class="small muted">Punkte je Ergebnis = (max(0, WA-Punkte − Schwelle) × Leistungsfaktor + WA-Platzierungspunkte × Platzierungsfaktor)
-      × Disziplinfaktor. Cross: max(0, Wert der WA-Cross-Tabelle − Schwelle) × Cross-Faktor × Distanzfaktor.</p>
+      × Disziplinfaktor. Cross: max(0, Wert der WA-Cross-Tabelle − Schwelle) × Cross-Faktor × Distanzfaktor.
+      Rekorde trägst du im Athletenfenster beim Ergebnis ein; es zählt nur der höchste (WR vor ER vor DR).</p>
     <div class="row"><button class="primary" disabled=${a.busy || !f}
       onClick=${() => a.run(async () => {
         await rpc('update_scoring_config', { p_settings: { pool_threshold: +v.pool_threshold, perf_threshold: +v.perf_threshold,
           perf_factor: +v.perf_factor, placing_factor: +v.placing_factor, cross_factor: +v.cross_factor,
-          new_group_threshold: +v.new_group_threshold, game_year: v.game_year === '' || v.game_year == null ? '' : +v.game_year } });
+          new_group_threshold: +v.new_group_threshold, record_dr: +v.record_dr, record_er: +v.record_er, record_wr: +v.record_wr, game_year: v.game_year === '' || v.game_year == null ? '' : +v.game_year } });
         setF(null); cfg.reload(); c.reload();
       }, 'Gespeichert, Punkte neu berechnet.')}>Speichern</button></div>
     <${Msg} msg=${a.msg} /></details>`;
