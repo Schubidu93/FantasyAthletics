@@ -10,6 +10,7 @@ export type ToplistRow = {
   name: string;
   birthDate: string | null; // ISO yyyy-mm-dd
   mark: string;
+  date?: string | null;     // Datum der Leistung (ISO), falls die Liste es zeigt
   score: number;
 };
 
@@ -42,6 +43,17 @@ export function toplistUrl(path: string, gender: Gender, year: number, country: 
     ageCategory: "senior",
   });
   return `${WA_BASE}/records/toplists/${path}/all/${g}/senior/${year}?${params}`;
+}
+
+/** All-time-Topliste mit allen Leistungen (nicht nur der besten je Athlet) – für die Rekord-Erkennung. */
+export type Region = { regionType: "countries" | "area" | "world"; region?: string };
+export function allTimeUrl(path: string, gender: Gender, region: Region, page: number) {
+  const g = gender === "M" ? "men" : "women";
+  const params = new URLSearchParams({
+    regionType: region.regionType, ...(region.region ? { region: region.region } : {}),
+    page: String(page), bestResultsOnly: "false", maxResultsByCountry: "all", ageCategory: "senior",
+  });
+  return `${WA_BASE}/records/all-time-toplists/${path}/all/${g}/senior?${params}`;
 }
 
 const MONTHS: Record<string, string> = {
@@ -84,6 +96,7 @@ export function parseToplist(html: string): ToplistRow[] {
       name: link.text().replace(/\s+/g, " ").trim(),
       birthDate: dob,
       mark: row.find('td[data-th="Mark"]').text().trim(),
+      date: parseWaDate(row.find('td[data-th="Date"]').text()),
       score,
     });
   });
@@ -113,6 +126,18 @@ export async function fetchToplist(
     all.push(...rows.filter((r) => r.score >= minScore));
     if (rows.length === 0 || rows.some((r) => r.score < minScore)) break;
     await sleep(500);
+  }
+  return all;
+}
+
+/** Alle Leistungen der All-time-Liste bis zur ersten Leistung vor `since` (danach kann nichts mehr Rekord sein). */
+export async function fetchAllTime(path: string, gender: Gender, region: Region, since: string, maxPages = 6): Promise<ToplistRow[]> {
+  const all: ToplistRow[] = [];
+  for (let page = 1; page <= maxPages; page++) {
+    const rows = parseToplist(await fetchText(allTimeUrl(path, gender, region, page)));
+    all.push(...rows);
+    if (rows.length === 0 || rows.some((r) => r.date && r.date < since)) break;
+    await sleep(800);
   }
   return all;
 }

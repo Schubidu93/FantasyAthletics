@@ -9,7 +9,8 @@
     "test": "vitest run",
     "import:pool": "tsx importer/sync-pool.ts",
     "import:results": "tsx importer/sync-results.ts",
-    "import:calendar": "tsx importer/sync-calendar.ts"
+    "import:calendar": "tsx importer/sync-calendar.ts",
+    "import:records": "tsx importer/sync-records.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",

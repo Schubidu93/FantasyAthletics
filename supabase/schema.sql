@@ -2050,6 +2050,31 @@ begin
     select id, auth.uid(), 'result_record', jsonb_build_object('wa_result', p_id, 'record', p_record) from leagues where admin_user = auth.uid();
 end $$;
 
+-- Rekorde aus den All-time-Listen übernehmen (Importer): p_rows = [{athlete_id, discipline, date, mark, record}].
+-- Kennzeichnet passende Ergebnisse (gleicher Tag, gleiche Zeit); ein höherer Rekord ersetzt einen niedrigeren, nie umgekehrt.
+create or replace function apply_records(p_rows jsonb) returns int
+language plpgsql security definer set search_path = public as $$
+declare n int; d date;
+begin
+  if not _is_service() then raise exception 'Nur für den Importer.'; end if;
+  with x as (
+    select distinct on (w.id) w.id, j.record
+      from jsonb_to_recordset(p_rows) j(athlete_id text, discipline text, date date, mark text, record text)
+      join wa_results w on w.athlete_id = j.athlete_id and w.discipline = j.discipline and w.date = j.date
+                       and mark_seconds(w.mark) = mark_seconds(j.mark)
+     where j.record in ('DR', 'ER', 'WR')
+     order by w.id, array_position(array['WR', 'ER', 'DR'], j.record))
+  update wa_results w set record = x.record from x
+   where w.id = x.id and coalesce(array_position(array['DR', 'ER', 'WR'], w.record), 0) < array_position(array['DR', 'ER', 'WR'], x.record);
+  get diagnostics n = row_count;
+  if n > 0 then
+    select min((j->>'date')::date) into d from jsonb_array_elements(p_rows) j;
+    perform rebuild_results(d);
+    for y in extract(year from d)::int .. extract(year from current_date)::int loop perform refresh_season_stats(y); end loop;
+  end if;
+  return n;
+end $$;
+
 -- Punkte pro Athlet in einem Jahr (für die Athletenliste der App); p_gender 'mixed' = alle
 create or replace function athlete_points(p_gender text, p_year int)
 returns table (athlete_id text, points numeric, results int)
@@ -3027,7 +3052,7 @@ begin
     'dispatch_workflow(text,jsonb)', 'refresh_season_stats(int)', '_lineup_swap(uuid,uuid,text,text,date)', 'weekly_summary()', 'scheduler_tick()', '_notify(uuid,text,text,text)', '_notify_turn(uuid,uuid,uuid,text,timestamptz)', '_check_trade_drops(uuid,text[],text[],int)', '_open_roster_slots(uuid)', '_reset_default_deadlines(uuid,text)', '_snake_pick(uuid,text)', '_score_rows(uuid)',
     '_claim_valid(waiver_claims,leagues)', '_execute_claim(waiver_claims,leagues,matchdays)',
     '_process_waivers(uuid)', '_process_trades(uuid)', '_league_points(uuid)', '_league_table(uuid)',
-    '_waiver_order(uuid)', 'run_maintenance()', 'fit_scoring_coefficients(int)'] loop
+    '_waiver_order(uuid)', 'run_maintenance()', 'fit_scoring_coefficients(int)', 'apply_records(jsonb)'] loop
     execute format('revoke execute on function %s from public', f);
     begin
       execute format('revoke execute on function %s from anon, authenticated', f);

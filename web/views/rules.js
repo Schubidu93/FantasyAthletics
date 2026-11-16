@@ -124,7 +124,8 @@ export function Rules({ c }) {
           in den Ergebnissen, gewertet wird aber nur das ganze Rennen.</li>
         <li><strong>Rekord-Bonus:</strong> deutscher Rekord +${cfg?.record_dr ?? 50}, Europarekord +${cfg?.record_er ?? 80},
           Weltrekord +${cfg?.record_wr ?? 100} Punkte – zusätzlich zu den normalen Punkten; es zählt nur der höchste Rekord.
-          Gilt für alle Laufdisziplinen inkl. Halle und Straße. Der Admin trägt Rekorde beim Ergebnis ein.</li>
+          Gilt für alle Laufdisziplinen inkl. Halle und Straße. Rekorde erkennt die App täglich an den All-time-Listen von World Athletics
+          (alle Leistungen) – auch solche, die inzwischen wieder verbessert wurden. Der Admin kann zusätzlich Rekorde von Hand eintragen.</li>
         <li>Punkte zählen nur innerhalb eines Spieltags – für die Spieltage, in denen der Athlet in deinem Kader steht${lineup ? ' und aufgestellt ist' : ''}.</li>
         <li>Korrigiert World Athletics ein Ergebnis, wird das automatisch übernommen, solange der Spieltag nicht eingefroren ist.</li>
       </ul>
@@ -177,6 +178,7 @@ export function Rules({ c }) {
       <ul>
         <li><strong>Quelle:</strong> World Athletics – deutsche Toplisten und die Ergebnislisten der Athleten.</li>
         <li><strong>Athletenpool:</strong> täglich um 6 Uhr aus den Toplisten.</li>
+        <li><strong>Rekorde:</strong> täglich nach dem Athletenpool aus den All-time-Listen von World Athletics für Deutschland, Europa und die Welt.</li>
         <li><strong>Kalender:</strong> täglich um 6 Uhr die kommenden Wettkämpfe mit Laufdisziplinen aus dem Kalender von World Athletics –
           international ab Gold Label, in Europa ab Kategorie A, in Deutschland ab Kategorie E; nur Wettkämpfe, deren Programm Laufdisziplinen ab 800 m enthält.</li>
         <li><strong>Ergebnisse:</strong> stündlich von 8 bis 23 Uhr für alle Athleten im Pool und in den Kadern. Erscheinen, sobald World Athletics sie veröffentlicht –

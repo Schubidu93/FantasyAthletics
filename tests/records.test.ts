@@ -50,3 +50,30 @@ describe("Zwischenzeiten und Rekorde", () => {
     expect((await db.one("select record from wa_results where id = $1", [id])).record).toBe("WR");
   });
 });
+
+describe("Rekorde aus All-time-Listen", () => {
+  it("erkennt auch inzwischen verbesserte Rekorde, aber keine schlechteren Leistungen", async () => {
+    const { recordMarks } = await import("../importer/records");
+    const row = (athleteId: number, mark: string, date: string) => ({ athleteId, name: `A${athleteId}`, birthDate: null, mark, date, score: 0 });
+    const rows = [
+      row(1, "3:29.80", `${Y}-08-20`),   // neuer Rekord
+      row(2, "3:30.05", `${Y}-06-01`),   // damals Rekord, inzwischen verbessert
+      row(3, "3:30.50", "2014-07-01"),   // alter Rekord
+      row(4, "3:31.00", `${Y}-07-01`),   // schlechter als der alte Rekord
+    ];
+    expect(recordMarks(rows, "2025-01-01").map((r) => r.athleteId)).toEqual([1, 2]);
+    // gleiches Rennen: nur der Schnellere hält den Rekord
+    expect(recordMarks([row(1, "3:29.0", "2026-05-01"), row(2, "3:29.5", "2026-05-01"), row(3, "3:30.5", "2014-07-01")], "2025-01-01")
+      .map((r) => r.athleteId)).toEqual([1]);
+  });
+
+  it("kennzeichnet passende Ergebnisse, der höhere Rekord gewinnt", async () => {
+    const rows = [{ athlete_id: "wa-1", discipline: "Mile", date: `${Y}-07-18`, mark: "3:46.82", record: "DR" },
+                  { athlete_id: "wa-1", discipline: "Mile", date: `${Y}-07-18`, mark: "3:46.82", record: "ER" },
+                  { athlete_id: "wa-9", discipline: "Mile", date: `${Y}-07-18`, mark: "3:40.00", record: "WR" }];
+    expect((await db.one("select apply_records($1) n", [JSON.stringify(rows)])).n).toBe(1);
+    expect((await pts())[0][2]).toBe(80);
+    // ein späterer DR-Fund stuft nicht zurück
+    expect((await db.one("select apply_records($1) n", [JSON.stringify([rows[0]])])).n).toBe(0);
+  });
+});
