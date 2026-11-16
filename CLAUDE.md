@@ -64,6 +64,9 @@
   Pool: `toplist_entries` → `refresh_pool()` setzt Bestleistung, `athletes.pool_rank` und `event_group`. Gruppe und Pool-Rang
   nach den Fantasy-Punkten im Vorjahr des Spieljahrs (`game_year()`: ab 1.11. das Folgejahr; Cross nach Länge über `_result_group`),
   ohne Punkte beste Leistung, neue Athleten erste Leistung ab `new_group_threshold` (975) im Spieljahr, sonst Toplisten.
+- Bestleistungen: `importer/sync-pbs.ts` (getSingleCompetitor: personalBests, progressionOfSeasonsBests) → `athlete_pbs` (Profil)
+  und `athlete_pb_before` (beste Leistung vor 2025). PB-Bonus `scoring_config.pb_points` über `_is_pb()` in `rebuild_results`
+  (schneller als alles davor, ab Schwelle, keine Zwischenzeiten/Staffeln; Halle = „… Short Track“).
 - Rekorde: `importer/sync-records.ts` liest die All-time-Listen (alle Leistungen) DE/Europa/Welt, `recordMarks()` erkennt Rekorde ab 2025
   (auch inzwischen verbesserte) → `apply_records` setzt `wa_results.record` (DR/ER/WR, nur hochstufen) → Bonus aus `scoring_config.record_*`.
   Zwischenzeiten (`_is_split`: „… - Split times“ / ST) geben nur den Rekord-Bonus. „Datenbank einrichten“ rechnet danach alle Punkte neu.

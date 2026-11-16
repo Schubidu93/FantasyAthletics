@@ -17,6 +17,8 @@ function placeLabel(x) {
   return final && x.place <= 3 ? html`<span class=${`medal m${x.place}`}>${x.place}.</span>` : `${x.place}.`;
 }
 // Zusatz zum Lauf: kombinierte Platzierung bzw. Wertung der Runde vor dem Finale
+// „18.07.26“
+const dateShort = (d) => (d ? `${d.slice(8, 10)}.${d.slice(5, 7)}.${d.slice(2, 4)}` : '');
 const isSplit = (x) => /split time/i.test(x.competition || '') || x.remark === 'ST';
 const RECORD = { DR: 'Deutscher Rekord', ER: 'Europarekord', WR: 'Weltrekord' };
 function runNote(x) {
@@ -36,13 +38,15 @@ async function loadRider(slug, league) {
   const rows = await all(() => sb.from('wa_results')
     .select('id,date,competition,discipline,category,race,place,wa_race,wa_place,placing_round,placing_place,mark,result_score,remark,wa_competition_id,wa_event_id,source,source_url,country,record,relay')
     .eq('athlete_id', slug).gte('date', `${FIRST_YEAR}-01-01`).order('date', { ascending: false }).order('id'));
-  const pts = Object.fromEntries((await all(() => sb.from('results').select('wa_result_id,points,perf_points,placing_points,record_points')
+  const pts = Object.fromEntries((await all(() => sb.from('results').select('wa_result_id,points,perf_points,placing_points,record_points,pb_points')
     .eq('athlete_id', slug).order('id'))).map((r) => [r.wa_result_id, r]));
   const toplists = await rpc('athlete_toplists', { p_athlete: slug });
+  const pbs = (await q(sb.from('athlete_pbs').select('discipline,mark,date,result_score').eq('athlete_id', slug)))
+    .sort((a, b) => discMeters(discLabel(a.discipline)) - discMeters(discLabel(b.discipline)) || a.discipline.localeCompare(b.discipline));
   const season = Object.fromEntries((await q(sb.from('athlete_season_stats').select('year,season_rank,points,athletes,overall_rank,overall_athletes').eq('athlete_id', slug)))
     .map((x) => [x.year, mixed && x.overall_rank ? { ...x, season_rank: x.overall_rank, athletes: x.overall_athletes } : x]));
   const results = rows.map((r) => ({ ...r, pts: pts[r.id] || null }));
-  return { rider, results, toplists, season, admin };
+  return { rider, results, toplists, season, admin, pbs };
 }
 
 export function RiderModal() {
@@ -110,6 +114,11 @@ export function RiderModal() {
         <button class="ghost small" onClick=${() => setSlug(null)} aria-label="Schließen">✕</button>
       </div>
       ${error ? html`<p class="note err">${error}</p>` : !data ? html`<p class="muted">Lädt …</p>` : html`
+        ${data.pbs.length > 0 && html`<details class="toplists" open><summary class="small">Bestleistungen</summary>
+          <ul class="list compact pb-list">${data.pbs.map((p) => html`<li key=${p.discipline} class=${p.date >= `${thisYear}-01-01` ? 'pb-new' : ''}>
+            <span>${discLabel(p.discipline)}</span><span><strong>${p.mark}</strong> <span class="muted small">${dateShort(p.date)}${p.result_score
+              ? ` · ${p.result_score}` : ''}</span></span></li>`)}</ul>
+          <p class="muted small">Zahl hinten: WA-Punkte. Hervorgehoben: Bestleistung aus ${thisYear}.</p></details>`}
         <div class="row between">
           ${years.length > 1 ? html`<div class="seg small">${years.map((yy) =>
             html`<button class=${yy === y ? 'active' : ''} onClick=${() => setYear(yy)}>${yy}</button>`)}</div>` : html`<span class="muted small">${y || ''}</span>`}
@@ -139,8 +148,9 @@ export function RiderModal() {
               ${x.wa_competition_id && html`<small><a href=${waResultUrl(x.wa_competition_id, x.wa_event_id)} target="_blank" rel="noopener"
                 onClick=${(e) => e.stopPropagation()}>WA-Ergebnis ↗</a></small>`}
               ${x.record && html`<small><span class="badge b-rec">${x.record}</span> ${RECORD[x.record]}</small>`}
+              ${Number(x.pts?.pb_points) > 0 && html`<small><span class="badge b-pb">PB</span> persönliche Bestleistung</small>`}
               ${x.pts && html`<small class="muted">Leistung ${fmtPts(x.pts.perf_points)} + Platzierung ${fmtPts(x.pts.placing_points)}${Number(x.pts.record_points)
-                ? ` + Rekord ${fmtPts(x.pts.record_points)}` : ''}</small>`}
+                ? ` + Rekord ${fmtPts(x.pts.record_points)}` : ''}${Number(x.pts.pb_points) ? ` + PB ${fmtPts(x.pts.pb_points)}` : ''}</small>`}
               ${data.admin && editRec && html`<small onClick=${(e) => e.stopPropagation()}><select class="mini" value=${x.record || ''}
                 onChange=${(e) => setRecord(x, e.target.value)} aria-label="Rekord"><option value="">kein Rekord</option>
                 ${Object.entries(RECORD).map(([k, l]) => html`<option value=${k}>${l}</option>`)}</select></small>`}</span>

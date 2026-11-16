@@ -118,6 +118,26 @@ create table if not exists toplist_entries (
   primary key (athlete_id, year, discipline)
 );
 
+-- Persönliche Bestleistungen laut World Athletics (Profil) und die beste Leistung vor 2025 je Disziplin
+-- (Grundlage für den PB-Bonus; ab 2025 kennt die App alle Ergebnisse selbst). Füllt importer/sync-pbs.ts.
+create table if not exists athlete_pbs (
+  athlete_id   text not null references athletes (id) on delete cascade,
+  discipline   text not null,
+  mark         text not null,
+  date         date,
+  result_score int,
+  venue        text,
+  updated_at   timestamptz not null default now(),
+  primary key (athlete_id, discipline)
+);
+create table if not exists athlete_pb_before (
+  athlete_id text not null references athletes (id) on delete cascade,
+  discipline text not null,
+  mark       text not null,
+  date       date,
+  primary key (athlete_id, discipline)
+);
+
 -- Disziplinen: eigener Faktor, Gruppe für Positionen, WA-Platzierungstabellen (Werte: reference_data.sql)
 create table if not exists disciplines (
   name           text primary key,             -- wie bei World Athletics, z. B. '1500 Metres'
@@ -159,6 +179,7 @@ alter table scoring_config add column if not exists record_dr int not null defau
 alter table scoring_config add column if not exists record_er int not null default 80;
 alter table scoring_config add column if not exists record_wr int not null default 100;
 -- Standard seit 16.11.2026: 50/100/200 (alte Standardwerte 50/80/100 einmalig umstellen)
+alter table scoring_config add column if not exists pb_points int not null default 10;   -- Bonus je persönlicher Bestleistung
 alter table scoring_config alter column record_er set default 100;
 alter table scoring_config alter column record_wr set default 200;
 update scoring_config set record_er = 100, record_wr = 200 where record_dr = 50 and record_er = 80 and record_wr = 100;
@@ -251,7 +272,8 @@ alter table results add column if not exists updated_at timestamptz not null def
 alter table results add column if not exists perf_points numeric not null default 0;     -- Leistungsanteil
 alter table results add column if not exists placing_points numeric not null default 0;  -- Platzierungsanteil
 alter table results add column if not exists wa_result_id bigint;
-alter table results add column if not exists record_points numeric not null default 0;          -- Rekord-Bonus                        -- Quelle in wa_results
+alter table results add column if not exists record_points numeric not null default 0;
+alter table results add column if not exists pb_points numeric not null default 0;          -- PB-Bonus          -- Rekord-Bonus                        -- Quelle in wa_results
 create index if not exists results_athlete_date on results (athlete_id, result_date);
 
 create table if not exists sync_status (
@@ -1964,18 +1986,34 @@ language sql immutable as $$
   select coalesce(p_competition, '') ~* 'split time' or coalesce(p_remark, '') = 'ST';
 $$;
 
+-- Persönliche Bestleistung: schneller als alles davor (beste Leistung vor 2025 laut WA und alle gespeicherten Ergebnisse
+-- an früheren Tagen). Es muss vorher schon eine Leistung in der Disziplin geben; gleiche Zeit zählt nicht.
+-- Vorlauf und Finale an verschiedenen Tagen können beide PB sein.
+-- (plpgsql, weil mark_seconds weiter unten steht)
+create or replace function _is_pb(p_athlete text, p_discipline text, p_date date, p_mark text) returns boolean
+language plpgsql stable as $$
+begin
+  return coalesce(mark_seconds(p_mark) < least(
+    (select mark_seconds(b.mark) from athlete_pb_before b where b.athlete_id = p_athlete and b.discipline = p_discipline),
+    (select min(mark_seconds(o.mark)) from wa_results o
+      where o.athlete_id = p_athlete and o.discipline = p_discipline and o.date < p_date and o.relay is null)), false);
+end $$;
+
 create or replace function rebuild_results(p_from date default null) returns int
 language plpgsql security definer set search_path = public as $$
 declare c scoring_config; n int;
 begin
   select * into c from scoring_config where id = 1;
   delete from results where p_from is null or result_date >= p_from;
-  insert into results (athlete_id, competition_id, label, result_date, rank, points, perf_points, placing_points, record_points, wa_result_id)
-  select athlete_id, competition_id, label, date, place, perf + plc + rec, perf, plc, rec, id
+  insert into results (athlete_id, competition_id, label, result_date, rank, points, perf_points, placing_points, record_points, pb_points, wa_result_id)
+  select athlete_id, competition_id, label, date, place, perf + plc + rec + pb, perf, plc, rec, pb, id
     from (
       select w.id, w.athlete_id, w.date, w.place,
              -- Staffel: Leistungs- und Platzierungspunkte nur anteilig (1/3 bzw. 1/4)
              case w.record when 'WR' then c.record_wr when 'ER' then c.record_er when 'DR' then c.record_dr else 0 end rec,
+             -- PB-Bonus: nur für Leistungen ab der Schwelle, nicht für Zwischenzeiten und Staffeln
+             case when w.relay is null and not _is_split(w.competition, w.remark) and coalesce(w.result_score, 0) >= c.perf_threshold
+                       and _is_pb(w.athlete_id, w.discipline, w.date, w.mark) then c.pb_points else 0 end pb,
              coalesce('wa-c' || w.wa_competition_id, 'wa-' || md5(w.competition || w.date::text)) competition_id,
              w.discipline || case when d.cross_table is not null and cross_km(w.competition) is not null
                                   then ' · ' || cross_km(w.competition) || 'km' else '' end
@@ -2005,7 +2043,7 @@ begin
                    where o.athlete_id = w.athlete_id and o.source = 'wa' and o.discipline = w.discipline
                      and abs(o.date - w.date) <= 1))
     ) x
-   where perf + plc + rec > 0
+   where perf + plc + rec + pb > 0
   on conflict (athlete_id, competition_id, label) do nothing;
   get diagnostics n = row_count;
   return n;
@@ -2027,13 +2065,14 @@ begin
     cross_factor   = coalesce((s->>'cross_factor')::numeric, cross_factor),
     new_group_threshold = coalesce((s->>'new_group_threshold')::int, new_group_threshold),
     record_dr      = coalesce((s->>'record_dr')::int, record_dr),
+    pb_points      = coalesce((s->>'pb_points')::int, pb_points),
     record_er      = coalesce((s->>'record_er')::int, record_er),
     record_wr      = coalesce((s->>'record_wr')::int, record_wr),
     game_year      = case when s ? 'game_year' then nullif(s->>'game_year', '')::int else game_year end,
     updated_at     = now()
   where id = 1;
   if exists (select 1 from scoring_config where perf_factor < 0 or placing_factor < 0 or cross_factor < 0
-              or record_dr < 0 or record_er < 0 or record_wr < 0) then
+              or record_dr < 0 or record_er < 0 or record_wr < 0 or pb_points < 0) then
     raise exception 'Faktoren und Rekordpunkte dürfen nicht negativ sein.';
   end if;
   perform rebuild_results(null);
@@ -3099,6 +3138,8 @@ alter table point_overrides enable row level security;
 alter table score_snapshot  enable row level security;
 alter table admin_log       enable row level security;
 alter table toplist_entries enable row level security;
+alter table athlete_pbs enable row level security;
+alter table athlete_pb_before enable row level security;
 alter table wa_results      enable row level security;
 alter table disciplines     enable row level security;
 alter table placing_scores  enable row level security;
@@ -3119,7 +3160,7 @@ begin
   -- öffentliche Stammdaten: lesbar für angemeldete Nutzer
   foreach t in array array['athletes', 'competitions', 'results', 'sync_status', 'athlete_season_stats', 'toplist_entries',
                            'wa_results', 'disciplines', 'placing_scores', 'scoring_config', 'cross_distance_factors', 'scoring_coefficients',
-                           'calendar_events'] loop
+                           'calendar_events', 'athlete_pbs', 'athlete_pb_before'] loop
     execute format('drop policy if exists read_all on %I', t);
     execute format('create policy read_all on %I for select to authenticated using (true)', t);
   end loop;
