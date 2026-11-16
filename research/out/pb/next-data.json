@@ -1,0 +1,1528 @@
+{
+ "props": {
+  "pageProps": {
+   "competitor": {
+    "__typename": "singleCompetitor",
+    "_id": 14650473,
+    "primaryMediaId": null,
+    "primaryMediaId2": null,
+    "primaryMedia": null,
+    "basicData": {
+     "__typename": "AthleteNewData",
+     "id": null,
+     "friendlyName": null,
+     "fullName": null,
+     "friendlyNameLetter": null,
+     "friendlyNameFirst3Letter": null,
+     "sexCode": null,
+     "birthPlace": null,
+     "birthPlaceCountryName": null,
+     "sexNameUrlSlug": null,
+     "birthPlaceCountryUrlSlug": null,
+     "birthCountryCode": null,
+     "primaryMediaId": null,
+     "facebookUsername": null,
+     "twitterUsername": null,
+     "instagramUsername": null,
+     "countryFullName": "United States",
+     "familyName": "ELYSSA",
+     "givenName": "Tracy",
+     "firstName": null,
+     "lastName": null,
+     "countryName": null,
+     "countryCode": "USA",
+     "countryUrlSlug": null,
+     "birthDate": null,
+     "birthDateStr": null,
+     "urlSlug": null,
+     "representativeId": null,
+     "biography": null,
+     "twitterLink": null,
+     "instagramLink": null,
+     "facebookLink": null,
+     "transfersOfAllegiance": [],
+     "iaafId": null,
+     "aaId": 14650473,
+     "primaryMediaEdited": null,
+     "male": false,
+     "primaryMedia": null
+    },
+    "athleteRepresentative": null,
+    "personalBests": {
+     "__typename": "personalBestsType",
+     "withWind": false,
+     "withRecords": false,
+     "results": [
+      {
+       "__typename": "singleCompetitorResult",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "pole-vault",
+       "typeNameUrlSlug": "jumps",
+       "discipline": "Pole Vault",
+       "linkToList": true,
+       "mark": "3.50",
+       "combinedPerformances": null,
+       "wind": null,
+       "notLegal": false,
+       "venue": "La Crosse, WI (USA)",
+       "date": "07 JUN 2014",
+       "listPosition": null,
+       "resultScore": 807,
+       "records": [],
+       "competitionId": null,
+       "eventId": "10229527",
+       "eventName": null
+      }
+     ]
+    },
+    "seasonsBests": {
+     "__typename": "seasonsBestsType",
+     "parameters": {
+      "__typename": "seasonsBestsParamsType",
+      "seasonsBestsSeason": 2015
+     },
+     "activeSeasons": [
+      "2015",
+      "2014"
+     ],
+     "withWind": false,
+     "withRecords": false,
+     "results": [
+      {
+       "__typename": "singleCompetitorResult",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "pole-vault",
+       "typeNameUrlSlug": "jumps",
+       "discipline": "Pole Vault",
+       "linkToList": true,
+       "mark": "3.20",
+       "combinedPerformances": null,
+       "wind": null,
+       "notLegal": false,
+       "venue": "Des Moines, IA (USA)",
+       "date": "11 APR 2015",
+       "listPosition": null,
+       "resultScore": 717,
+       "records": [],
+       "competitionId": null,
+       "eventId": "10229527",
+       "competition": "Des Moines Jim Duncan Invitational"
+      }
+     ]
+    },
+    "progressionOfSeasonsBests": [
+     {
+      "__typename": "singleCompetitorProgression",
+      "indoor": false,
+      "disciplineCode": null,
+      "disciplineNameUrlSlug": "pole-vault",
+      "typeNameUrlSlug": "jumps",
+      "discipline": "Pole Vault",
+      "withWind": false,
+      "mainEvent": true,
+      "eventId": "10229527",
+      "results": [
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2014",
+        "numericResult": 3.5,
+        "mark": "3.50",
+        "wind": null,
+        "venue": "La Crosse, WI (USA)",
+        "date": "07 JUN 2014",
+        "listPosition": null,
+        "resultScore": 807,
+        "competitionId": null,
+        "competition": "La Crosse D1 State Meet"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2015",
+        "numericResult": 3.2,
+        "mark": "3.20",
+        "wind": null,
+        "venue": "Des Moines, IA (USA)",
+        "date": "11 APR 2015",
+        "listPosition": null,
+        "resultScore": 717,
+        "competitionId": null,
+        "competition": "Des Moines Jim Duncan Invitational"
+       }
+      ]
+     }
+    ],
+    "worldRankings": {
+     "__typename": "worldRankingsType",
+     "parameters": {
+      "__typename": "worldRankingsParamsType",
+      "worldRankingsProgressionYear": null
+     },
+     "current": [],
+     "best": []
+    },
+    "honours": [],
+    "resultsByYear": {
+     "__typename": "resultsByYearType",
+     "parameters": {
+      "__typename": "resultByYearParamsType",
+      "resultsByYear": 2015,
+      "resultsByYearOrderBy": "discipline"
+     },
+     "activeYears": [
+      "2015",
+      "2014"
+     ],
+     "resultsByEvent": [
+      {
+       "__typename": "resultsByEvent",
+       "indoor": null,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": null,
+       "typeNameUrlSlug": null,
+       "discipline": "Pole Vault",
+       "withWind": null,
+       "results": [
+        {
+         "__typename": "resultsByEventResult",
+         "date": "11 APR 2015",
+         "competition": "Des Moines Jim Duncan Invitational, Des Moines, IA",
+         "venue": "Des Moines, IA (USA)",
+         "country": "USA",
+         "category": "F",
+         "race": "F",
+         "place": "5.",
+         "mark": "3.20",
+         "wind": null,
+         "notLegal": false,
+         "resultScore": 717,
+         "remark": "",
+         "competitionId": null,
+         "eventId": null,
+         "eventName": null
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "championships": {
+    "__typename": "majorChampionshipType",
+    "parameters": {
+     "__typename": "majorChampionshipParamsType",
+     "majorChampionshipsByCategory": true
+    },
+    "results": []
+   },
+   "allTimePersonalTop10": {
+    "__typename": "allTimePersonalTop10Type",
+    "parameters": {
+     "__typename": "allTimePersonalTop10ParamsType",
+     "allTimePersonalTop10Discipline": null
+    },
+    "disciplines": [
+     {
+      "__typename": "allTimePersonalTop10Disciplines",
+      "id": null,
+      "name": "All disciplines"
+     },
+     {
+      "__typename": "allTimePersonalTop10Disciplines",
+      "id": 10229527,
+      "name": "Pole Vault"
+     }
+    ],
+    "results": [
+     {
+      "__typename": "allTimePersonalTop10Details",
+      "discipline": "Pole Vault",
+      "date": "07 JUN 2014",
+      "competition": "La Crosse D1 State Meet, La Crosse, WI",
+      "country": "USA",
+      "category": "F",
+      "race": "F",
+      "place": "6.",
+      "result": "3.50",
+      "wind": null,
+      "drop": null,
+      "withWind": false,
+      "withDrop": false,
+      "score": 807,
+      "records": [],
+      "remark": null,
+      "eventId": "10229527",
+      "competitionId": null,
+      "listPosition": null
+     },
+     {
+      "__typename": "allTimePersonalTop10Details",
+      "discipline": "Pole Vault",
+      "date": "11 APR 2015",
+      "competition": "Des Moines Jim Duncan Invitational, Des Moines, IA",
+      "country": "USA",
+      "category": "F",
+      "race": "F",
+      "place": "5.",
+      "result": "3.20",
+      "wind": null,
+      "drop": null,
+      "withWind": false,
+      "withDrop": false,
+      "score": 717,
+      "records": [],
+      "remark": null,
+      "eventId": "10229527",
+      "competitionId": null,
+      "listPosition": null
+     }
+    ]
+   },
+   "honourSummary": [],
+   "winningStreaks": {
+    "__typename": "winningStreaksType",
+    "parameters": null,
+    "disciplineOptions": null,
+    "streaks": null
+   },
+   "resultsByLimit": {
+    "__typename": "resultsByLimit",
+    "parameters": {
+     "__typename": "resultsByLimitParams",
+     "resultsByLimitsDiscipline": null,
+     "resultsByLimitsStartDate": "1996-01-01",
+     "resultsByLimitsEndDate": "2026-02-25",
+     "resultsByLimitsOnlyRegular": false
+    },
+    "disciplines": [],
+    "results": []
+   },
+   "initialSpikes": [],
+   "videos": [
+    {
+     "__typename": "VideoPublished",
+     "id": "6af6e230907f3f64a3d37eca",
+     "contentId": "6af6e22e907f3f64a3d37ec9",
+     "publishedById": "61051f57fc8312000972edea",
+     "publishedByName": "Josh Allen",
+     "published": "2026-11-15T00:46:35.770Z",
+     "language": "en",
+     "ebuCountries": [],
+     "vimeoCountries": [],
+     "ebuPlayerUrl": null,
+     "gatedContent": true,
+     "campaignId": "68a1d3d4765a0c5481d4d13b",
+     "tags": [
+      "playlist_68c932a1d61bce611429d9b5"
+     ],
+     "title": "Watch again | Bank of China Hong Kong-Zhuhai-Macao Bridge Half Marathon",
+     "thumbnailId": "6af6e0d8ba2fcfe0e05ee289",
+     "thumbnailEdited": "eyJrZXkiOiI2YWY2ZTBkM2JhMmZjZmUwZTA1ZWUyODguanBlZyIsImVkaXRzIjp7InJlc2l6ZSI6eyJ3aWR0aCI6MTYwMCwiaGVpZ2h0IjoxMDAwfX19",
+     "thumbnailTitle": "Bank of China HM",
+     "videoId": null,
+     "vimeoVideoId": "https://vimeo.com/event/6353651/embed/interaction",
+     "vimeoHash": "58479",
+     "playerId": null,
+     "brightcoveCountries": [],
+     "metatags": "World Athletics,Athletics Highlights, Watch Athletics, Athletics, Outdoor Athletics, Indoor Athletics, Bank of China Hong Kong-Zhuhai-Macao Bridge Half Marathon",
+     "standFirst": "We're live! If the stream isn't loading try refreshing the page. Persistent issues? This broadcast is geo-blocked in certain regions and may be televised locally.\n\nGeo-restrictions may apply.",
+     "signedInCTA": "Watch now",
+     "signedOutCTA": "Sign up to Watch"
+    },
+    {
+     "__typename": "VideoPublished",
+     "id": "6adb7fb80175a2efa664b030",
+     "contentId": "6adb7fb60175a2efa664b02f",
+     "publishedById": "686544f8f09084d28464c16a",
+     "publishedByName": "mcr mcr",
+     "published": "2026-10-25T11:25:05.213Z",
+     "language": "en",
+     "ebuCountries": [],
+     "vimeoCountries": [],
+     "ebuPlayerUrl": null,
+     "gatedContent": false,
+     "campaignId": null,
+     "tags": [],
+     "title": "Watch again | 40th Wizz Air Venice Marathon",
+     "thumbnailId": "6adb7b2ac13c8cf91c1625d0",
+     "thumbnailEdited": "eyJrZXkiOiI2YWRiN2IyNWMxM2M4Y2Y5MWMxNjI1Y2YuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjoxNjAwLCJoZWlnaHQiOjEwMDB9fX0=",
+     "thumbnailTitle": "Venice Marathon",
+     "videoId": null,
+     "vimeoVideoId": "https://vimeo.com/event/6298075/embed/interaction",
+     "vimeoHash": "58479",
+     "playerId": null,
+     "brightcoveCountries": [],
+     "metatags": "Venice Marathon",
+     "standFirst": "Relive the action from 40th Wizz Air Venice Marathon. Geo-restrictions may apply.",
+     "signedInCTA": "Watch now",
+     "signedOutCTA": "Watch now"
+    },
+    {
+     "__typename": "VideoPublished",
+     "id": "6ab11b7ea20e1c2a6e9662d1",
+     "contentId": "6ab11b7ca20e1c2a6e9662d0",
+     "publishedById": "664230609a9e375b249f121f",
+     "publishedByName": "Anne-Gaelle Sy",
+     "published": "2026-09-21T11:56:45.929Z",
+     "language": "en",
+     "ebuCountries": [],
+     "vimeoCountries": [],
+     "ebuPlayerUrl": null,
+     "gatedContent": true,
+     "campaignId": "649318bcb7562c543c72eb53",
+     "tags": [
+      "playlist_68c932a1d61bce611429d9b5"
+     ],
+     "title": "Day 2 Extended Highlights | World Road Running Championships Copenhagen 26",
+     "thumbnailId": "6ab11b28db6273f853c2af92",
+     "thumbnailEdited": "eyJrZXkiOiI2YWIxMWIyMmRiNjI3M2Y4NTNjMmFmOTEuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjoxNjAwLCJoZWlnaHQiOjEwMDB9fX0=",
+     "thumbnailTitle": "3",
+     "videoId": null,
+     "vimeoVideoId": "https://player.vimeo.com/video/1228558132",
+     "vimeoHash": "58479",
+     "playerId": null,
+     "brightcoveCountries": [],
+     "metatags": "World Road Running Championships, Copenhagen, 2026, half marathon",
+     "standFirst": "Watch the full extended highlights from day 1 at the World Road Running Championships Copenhagen 26, including both the men and women's mile and 5km. ",
+     "signedInCTA": "Watch now",
+     "signedOutCTA": "Sign up to Watch"
+    },
+    {
+     "__typename": "VideoPublished",
+     "id": "6aafb6e1bd7314e553de2c91",
+     "contentId": "6aafb6e0bd7314e553de2c90",
+     "publishedById": "664230609a9e375b249f121f",
+     "publishedByName": "Anne-Gaelle Sy",
+     "published": "2026-09-20T14:00:00.000Z",
+     "language": "en",
+     "ebuCountries": [],
+     "vimeoCountries": [],
+     "ebuPlayerUrl": null,
+     "gatedContent": true,
+     "campaignId": "649318bcb7562c543c72eb53",
+     "tags": [
+      "playlist_68c932a1d61bce611429d9b5"
+     ],
+     "title": "Day 1 Extended Highlights | World Road Running Championships Copenhagen 26",
+     "thumbnailId": "6aafb655b728ee42056b5a2c",
+     "thumbnailEdited": "eyJrZXkiOiI2YWFmYjY0ZmI3MjhlZTQyMDU2YjVhMmIuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjoxNjAwLCJoZWlnaHQiOjEwMDB9fX0=",
+     "thumbnailTitle": "12",
+     "videoId": null,
+     "vimeoVideoId": "https://player.vimeo.com/video/1228400493",
+     "vimeoHash": "58479",
+     "playerId": null,
+     "brightcoveCountries": [],
+     "metatags": "World Road Running Championships, Copenhagen, 2026, mile, 5km",
+     "standFirst": "Watch the full extended highlights from day 1 at the World Road Running Championships Copenhagen 26, including both the men and women's mile and 5km. ",
+     "signedInCTA": "Watch now",
+     "signedOutCTA": "Sign up to Watch"
+    },
+    {
+     "__typename": "VideoPublished",
+     "id": "6a76164d953bb92fc7da32d6",
+     "contentId": "6a76164b953bb92fc7da32d5",
+     "publishedById": "61051f57fc8312000972edea",
+     "publishedByName": "Josh Allen",
+     "published": "2026-09-20T11:14:52.122Z",
+     "language": "en",
+     "ebuCountries": [],
+     "vimeoCountries": [],
+     "ebuPlayerUrl": null,
+     "gatedContent": true,
+     "campaignId": "649318bcb7562c543c72eb53",
+     "tags": [
+      "playlist_66cc251f1f35860625dd76eb",
+      "playlist_6a75cd46a2a8211064c53550"
+     ],
+     "title": "Full Long Jump Women Final | World U20 Championships Oregon 26",
+     "thumbnailId": "6a761611953bb92fc7da32d3",
+     "thumbnailEdited": "eyJrZXkiOiI2YTc2MTYwYzk1M2JiOTJmYzdkYTMyZDIuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjoxNjAwLCJoZWlnaHQiOjEwMDB9fX0=",
+     "thumbnailTitle": "d",
+     "videoId": null,
+     "vimeoVideoId": "1216381095",
+     "vimeoHash": "58479",
+     "playerId": null,
+     "brightcoveCountries": [],
+     "metatags": "World Athletics U20 Championships Oregon 2026",
+     "standFirst": "Watch the full women's Long Jump final from the World Athletics U20 Championships Oregon 2026!",
+     "signedInCTA": "Watch now",
+     "signedOutCTA": "Sign up to Watch"
+    }
+   ],
+   "playlist": [
+    {
+     "__typename": "Playlist",
+     "id": "6481f06f2b752f6287624495",
+     "title": "40 Years of World Champs",
+     "slug": "40-years-of-world-champs"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6481f0962b752f6287624496",
+     "title": "The Best of Athletics in 2022",
+     "slug": "the-best-of-athletics-in-2022"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6481f0b42b752f6287624497",
+     "title": "Record breaking moments",
+     "slug": "record-breaking-moments"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6481f0cd2b752f6287624498",
+     "title": "Recommended for you",
+     "slug": "recommended-for-you"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "64db75dfe396e10c651eae8c",
+     "title": "World Athletics+ Exclusives",
+     "slug": "world-athletics-exclusives"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "64df783ee396e10c651eae92",
+     "title": "World Championships",
+     "slug": "world-championships"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "65df64086798017bd73b010b",
+     "title": "World Athletics Indoor Championships",
+     "slug": "world-athletics-indoor-championships"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6608436410629a528b47c67c",
+     "title": "World Athletics Cross Country Championships Belgrade 24",
+     "slug": "wxc-belgrade-24"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6627d2db10629a528b47c7bf",
+     "title": "World Race Walking Team Championships",
+     "slug": "world-race-walking-team-champs"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6627d2f910629a528b47c7c0",
+     "title": "World Athletics Relays Bahamas 24",
+     "slug": "wre-bahamas-24"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "66cc24f81f35860625dd76e9",
+     "title": "World Athletics U20 Championships Lima 24 | VOD",
+     "slug": "wu20-championships-lima-24-vod"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "66cc251f1f35860625dd76eb",
+     "title": "World Athletics U20 Championships",
+     "slug": "wu20-championships"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6799f4f952b3364854cffe17",
+     "title": "World Indoor Tour Gold",
+     "slug": "world-indoor-tour-gold"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "67ebb2489d90c57beea13e1c",
+     "title": "Continental Tour Gold",
+     "slug": "continental-tour-gold"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6811d57f03bc7334fe011650",
+     "title": "World Relays",
+     "slug": "world-relays"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "689eeb78b0699e4a756f538b",
+     "title": "World Road Running Champs Riga 23",
+     "slug": "world-road-running-champs-riga-23"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "68c932a1d61bce611429d9b5",
+     "title": "Latest videos",
+     "slug": "latest-videos"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "697b1afd7b98e1263301e380",
+     "title": "World Cross Country Championships Tallahassee 26",
+     "slug": "wxc-tallahassee-26"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "697b1b277b98e1263301e381",
+     "title": "World Indoor Tour 2026",
+     "slug": "world-indoor-tour-2026"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "69b0249a2075843ced39a862",
+     "title": "World Athletics Indoor Championships Highlights",
+     "slug": "world-athletics-indoor-championships-highlights"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6a75cd46a2a8211064c53550",
+     "title": "World Athletics U20 Championships Highlights",
+     "slug": "world-athletics-u20-championships-highlights"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6a8f0ffaa0a20517f583ddda",
+     "title": "World Athletics Ultimate Championship",
+     "slug": "world-athletics-ultimate-championship"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6aa2635604a86924f12b9202",
+     "title": "World Athletics Ultimate Championship Highlights",
+     "slug": "world-athletics-ultimate-championship-highlights"
+    }
+   ],
+   "query": {
+    "counrty": "germany",
+    "competitorId": "robert-farken-14650473"
+   }
+  },
+  "user": null,
+  "isLooseAuthentication": false,
+  "device": {
+   "width": 1025
+  },
+  "apolloState": {
+   "data": {
+    "Playlist:6481f06f2b752f6287624495": {
+     "__typename": "Playlist",
+     "id": "6481f06f2b752f6287624495",
+     "title": "40 Years of World Champs",
+     "slug": "40-years-of-world-champs"
+    },
+    "Playlist:6481f0962b752f6287624496": {
+     "__typename": "Playlist",
+     "id": "6481f0962b752f6287624496",
+     "title": "The Best of Athletics in 2022",
+     "slug": "the-best-of-athletics-in-2022"
+    },
+    "Playlist:6481f0b42b752f6287624497": {
+     "__typename": "Playlist",
+     "id": "6481f0b42b752f6287624497",
+     "title": "Record breaking moments",
+     "slug": "record-breaking-moments"
+    },
+    "Playlist:6481f0cd2b752f6287624498": {
+     "__typename": "Playlist",
+     "id": "6481f0cd2b752f6287624498",
+     "title": "Recommended for you",
+     "slug": "recommended-for-you"
+    },
+    "Playlist:64db75dfe396e10c651eae8c": {
+     "__typename": "Playlist",
+     "id": "64db75dfe396e10c651eae8c",
+     "title": "World Athletics+ Exclusives",
+     "slug": "world-athletics-exclusives"
+    },
+    "Playlist:64df783ee396e10c651eae92": {
+     "__typename": "Playlist",
+     "id": "64df783ee396e10c651eae92",
+     "title": "World Championships",
+     "slug": "world-championships"
+    },
+    "Playlist:65df64086798017bd73b010b": {
+     "__typename": "Playlist",
+     "id": "65df64086798017bd73b010b",
+     "title": "World Athletics Indoor Championships",
+     "slug": "world-athletics-indoor-championships"
+    },
+    "Playlist:6608436410629a528b47c67c": {
+     "__typename": "Playlist",
+     "id": "6608436410629a528b47c67c",
+     "title": "World Athletics Cross Country Championships Belgrade 24",
+     "slug": "wxc-belgrade-24"
+    },
+    "Playlist:6627d2db10629a528b47c7bf": {
+     "__typename": "Playlist",
+     "id": "6627d2db10629a528b47c7bf",
+     "title": "World Race Walking Team Championships",
+     "slug": "world-race-walking-team-champs"
+    },
+    "Playlist:6627d2f910629a528b47c7c0": {
+     "__typename": "Playlist",
+     "id": "6627d2f910629a528b47c7c0",
+     "title": "World Athletics Relays Bahamas 24",
+     "slug": "wre-bahamas-24"
+    },
+    "Playlist:66cc24f81f35860625dd76e9": {
+     "__typename": "Playlist",
+     "id": "66cc24f81f35860625dd76e9",
+     "title": "World Athletics U20 Championships Lima 24 | VOD",
+     "slug": "wu20-championships-lima-24-vod"
+    },
+    "Playlist:66cc251f1f35860625dd76eb": {
+     "__typename": "Playlist",
+     "id": "66cc251f1f35860625dd76eb",
+     "title": "World Athletics U20 Championships",
+     "slug": "wu20-championships"
+    },
+    "Playlist:6799f4f952b3364854cffe17": {
+     "__typename": "Playlist",
+     "id": "6799f4f952b3364854cffe17",
+     "title": "World Indoor Tour Gold",
+     "slug": "world-indoor-tour-gold"
+    },
+    "Playlist:67ebb2489d90c57beea13e1c": {
+     "__typename": "Playlist",
+     "id": "67ebb2489d90c57beea13e1c",
+     "title": "Continental Tour Gold",
+     "slug": "continental-tour-gold"
+    },
+    "Playlist:6811d57f03bc7334fe011650": {
+     "__typename": "Playlist",
+     "id": "6811d57f03bc7334fe011650",
+     "title": "World Relays",
+     "slug": "world-relays"
+    },
+    "Playlist:689eeb78b0699e4a756f538b": {
+     "__typename": "Playlist",
+     "id": "689eeb78b0699e4a756f538b",
+     "title": "World Road Running Champs Riga 23",
+     "slug": "world-road-running-champs-riga-23"
+    },
+    "Playlist:68c932a1d61bce611429d9b5": {
+     "__typename": "Playlist",
+     "id": "68c932a1d61bce611429d9b5",
+     "title": "Latest videos",
+     "slug": "latest-videos"
+    },
+    "Playlist:697b1afd7b98e1263301e380": {
+     "__typename": "Playlist",
+     "id": "697b1afd7b98e1263301e380",
+     "title": "World Cross Country Championships Tallahassee 26",
+     "slug": "wxc-tallahassee-26"
+    },
+    "Playlist:697b1b277b98e1263301e381": {
+     "__typename": "Playlist",
+     "id": "697b1b277b98e1263301e381",
+     "title": "World Indoor Tour 2026",
+     "slug": "world-indoor-tour-2026"
+    },
+    "Playlist:69b0249a2075843ced39a862": {
+     "__typename": "Playlist",
+     "id": "69b0249a2075843ced39a862",
+     "title": "World Athletics Indoor Championships Highlights",
+     "slug": "world-athletics-indoor-championships-highlights"
+    },
+    "Playlist:6a75cd46a2a8211064c53550": {
+     "__typename": "Playlist",
+     "id": "6a75cd46a2a8211064c53550",
+     "title": "World Athletics U20 Championships Highlights",
+     "slug": "world-athletics-u20-championships-highlights"
+    },
+    "Playlist:6a8f0ffaa0a20517f583ddda": {
+     "__typename": "Playlist",
+     "id": "6a8f0ffaa0a20517f583ddda",
+     "title": "World Athletics Ultimate Championship",
+     "slug": "world-athletics-ultimate-championship"
+    },
+    "Playlist:6aa2635604a86924f12b9202": {
+     "__typename": "Playlist",
+     "id": "6aa2635604a86924f12b9202",
+     "title": "World Athletics Ultimate Championship Highlights",
+     "slug": "world-athletics-ultimate-championship-highlights"
+    },
+    "ROOT_QUERY": {
+     "__typename": "Query",
+     "getVideoPlaylist": [
+      {
+       "__ref": "Playlist:6481f06f2b752f6287624495"
+      },
+      {
+       "__ref": "Playlist:6481f0962b752f6287624496"
+      },
+      {
+       "__ref": "Playlist:6481f0b42b752f6287624497"
+      },
+      {
+       "__ref": "Playlist:6481f0cd2b752f6287624498"
+      },
+      {
+       "__ref": "Playlist:64db75dfe396e10c651eae8c"
+      },
+      {
+       "__ref": "Playlist:64df783ee396e10c651eae92"
+      },
+      {
+       "__ref": "Playlist:65df64086798017bd73b010b"
+      },
+      {
+       "__ref": "Playlist:6608436410629a528b47c67c"
+      },
+      {
+       "__ref": "Playlist:6627d2db10629a528b47c7bf"
+      },
+      {
+       "__ref": "Playlist:6627d2f910629a528b47c7c0"
+      },
+      {
+       "__ref": "Playlist:66cc24f81f35860625dd76e9"
+      },
+      {
+       "__ref": "Playlist:66cc251f1f35860625dd76eb"
+      },
+      {
+       "__ref": "Playlist:6799f4f952b3364854cffe17"
+      },
+      {
+       "__ref": "Playlist:67ebb2489d90c57beea13e1c"
+      },
+      {
+       "__ref": "Playlist:6811d57f03bc7334fe011650"
+      },
+      {
+       "__ref": "Playlist:689eeb78b0699e4a756f538b"
+      },
+      {
+       "__ref": "Playlist:68c932a1d61bce611429d9b5"
+      },
+      {
+       "__ref": "Playlist:697b1afd7b98e1263301e380"
+      },
+      {
+       "__ref": "Playlist:697b1b277b98e1263301e381"
+      },
+      {
+       "__ref": "Playlist:69b0249a2075843ced39a862"
+      },
+      {
+       "__ref": "Playlist:6a75cd46a2a8211064c53550"
+      },
+      {
+       "__ref": "Playlist:6a8f0ffaa0a20517f583ddda"
+      },
+      {
+       "__ref": "Playlist:6aa2635604a86924f12b9202"
+      }
+     ],
+     "getVideoList({\"isRelatedVideos\":false,\"language\":\"en\",\"limit\":5,\"offset\":0,\"slug\":\"latest-videos\"})": [
+      {
+       "__ref": "VideoPublished:6af6e230907f3f64a3d37eca"
+      },
+      {
+       "__ref": "VideoPublished:6adb7fb80175a2efa664b030"
+      },
+      {
+       "__ref": "VideoPublished:6ab11b7ea20e1c2a6e9662d1"
+      },
+      {
+       "__ref": "VideoPublished:6aafb6e1bd7314e553de2c91"
+      },
+      {
+       "__ref": "VideoPublished:6a76164d953bb92fc7da32d6"
+      }
+     ],
+     "getSingleCompetitorMajorChampionships({\"urlSlug\":\"robert-farken-14650473\"})": {
+      "__typename": "majorChampionshipType",
+      "parameters": {
+       "__typename": "majorChampionshipParamsType",
+       "majorChampionshipsByCategory": true
+      },
+      "results": []
+     },
+     "getSingleCompetitorResultsByLimit({\"urlSlug\":\"robert-farken-14650473\"})": {
+      "__typename": "resultsByLimit",
+      "parameters": {
+       "__typename": "resultsByLimitParams",
+       "resultsByLimitsDiscipline": null,
+       "resultsByLimitsStartDate": "1996-01-01",
+       "resultsByLimitsEndDate": "2026-02-25",
+       "resultsByLimitsOnlyRegular": false
+      },
+      "disciplines": [],
+      "results": []
+     },
+     "getSingleCompetitorWinningStreak({\"urlSlug\":\"robert-farken-14650473\"})": {
+      "__typename": "winningStreaksType",
+      "parameters": null,
+      "disciplineOptions": null,
+      "streaks": null
+     },
+     "getSingleCompetitorAllTimePersonalTop10({\"urlSlug\":\"robert-farken-14650473\"})": {
+      "__typename": "allTimePersonalTop10Type",
+      "parameters": {
+       "__typename": "allTimePersonalTop10ParamsType",
+       "allTimePersonalTop10Discipline": null
+      },
+      "disciplines": [
+       {
+        "__typename": "allTimePersonalTop10Disciplines",
+        "id": null,
+        "name": "All disciplines"
+       },
+       {
+        "__ref": "allTimePersonalTop10Disciplines:10229527"
+       }
+      ],
+      "results": [
+       {
+        "__typename": "allTimePersonalTop10Details",
+        "discipline": "Pole Vault",
+        "date": "07 JUN 2014",
+        "competition": "La Crosse D1 State Meet, La Crosse, WI",
+        "country": "USA",
+        "category": "F",
+        "race": "F",
+        "place": "6.",
+        "result": "3.50",
+        "wind": null,
+        "drop": null,
+        "withWind": false,
+        "withDrop": false,
+        "score": 807,
+        "records": [],
+        "remark": null,
+        "eventId": "10229527",
+        "competitionId": null,
+        "listPosition": null
+       },
+       {
+        "__typename": "allTimePersonalTop10Details",
+        "discipline": "Pole Vault",
+        "date": "11 APR 2015",
+        "competition": "Des Moines Jim Duncan Invitational, Des Moines, IA",
+        "country": "USA",
+        "category": "F",
+        "race": "F",
+        "place": "5.",
+        "result": "3.20",
+        "wind": null,
+        "drop": null,
+        "withWind": false,
+        "withDrop": false,
+        "score": 717,
+        "records": [],
+        "remark": null,
+        "eventId": "10229527",
+        "competitionId": null,
+        "listPosition": null
+       }
+      ]
+     },
+     "getSingleCompetitorHonourSummary({\"urlSlug\":\"robert-farken-14650473\"})": [],
+     "getSingleCompetitor({\"urlSlug\":\"robert-farken-14650473\"})": {
+      "__ref": "singleCompetitor:14650473"
+     },
+     "getSpikes({\"RelatedCompetitorIds\":\"14650473\",\"limit\":3,\"offset\":0,\"orderBy\":\"LiveFrom\",\"orderDirection\":\"Descending\"})": []
+    },
+    "VideoPublished:6af6e230907f3f64a3d37eca": {
+     "__typename": "VideoPublished",
+     "id": "6af6e230907f3f64a3d37eca",
+     "contentId": "6af6e22e907f3f64a3d37ec9",
+     "publishedById": "61051f57fc8312000972edea",
+     "publishedByName": "Josh Allen",
+     "published": "2026-11-15T00:46:35.770Z",
+     "language": "en",
+     "ebuCountries": [],
+     "vimeoCountries": [],
+     "ebuPlayerUrl": null,
+     "gatedContent": true,
+     "campaignId": "68a1d3d4765a0c5481d4d13b",
+     "tags": [
+      "playlist_68c932a1d61bce611429d9b5"
+     ],
+     "title": "Watch again | Bank of China Hong Kong-Zhuhai-Macao Bridge Half Marathon",
+     "thumbnailId": "6af6e0d8ba2fcfe0e05ee289",
+     "thumbnailEdited": "eyJrZXkiOiI2YWY2ZTBkM2JhMmZjZmUwZTA1ZWUyODguanBlZyIsImVkaXRzIjp7InJlc2l6ZSI6eyJ3aWR0aCI6MTYwMCwiaGVpZ2h0IjoxMDAwfX19",
+     "thumbnailTitle": "Bank of China HM",
+     "videoId": null,
+     "vimeoVideoId": "https://vimeo.com/event/6353651/embed/interaction",
+     "vimeoHash": "58479",
+     "playerId": null,
+     "brightcoveCountries": [],
+     "metatags": "World Athletics,Athletics Highlights, Watch Athletics, Athletics, Outdoor Athletics, Indoor Athletics, Bank of China Hong Kong-Zhuhai-Macao Bridge Half Marathon",
+     "standFirst": "We're live! If the stream isn't loading try refreshing the page. Persistent issues? This broadcast is geo-blocked in certain regions and may be televised locally.\n\nGeo-restrictions may apply.",
+     "signedInCTA": "Watch now",
+     "signedOutCTA": "Sign up to Watch"
+    },
+    "VideoPublished:6adb7fb80175a2efa664b030": {
+     "__typename": "VideoPublished",
+     "id": "6adb7fb80175a2efa664b030",
+     "contentId": "6adb7fb60175a2efa664b02f",
+     "publishedById": "686544f8f09084d28464c16a",
+     "publishedByName": "mcr mcr",
+     "published": "2026-10-25T11:25:05.213Z",
+     "language": "en",
+     "ebuCountries": [],
+     "vimeoCountries": [],
+     "ebuPlayerUrl": null,
+     "gatedContent": false,
+     "campaignId": null,
+     "tags": [],
+     "title": "Watch again | 40th Wizz Air Venice Marathon",
+     "thumbnailId": "6adb7b2ac13c8cf91c1625d0",
+     "thumbnailEdited": "eyJrZXkiOiI2YWRiN2IyNWMxM2M4Y2Y5MWMxNjI1Y2YuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjoxNjAwLCJoZWlnaHQiOjEwMDB9fX0=",
+     "thumbnailTitle": "Venice Marathon",
+     "videoId": null,
+     "vimeoVideoId": "https://vimeo.com/event/6298075/embed/interaction",
+     "vimeoHash": "58479",
+     "playerId": null,
+     "brightcoveCountries": [],
+     "metatags": "Venice Marathon",
+     "standFirst": "Relive the action from 40th Wizz Air Venice Marathon. Geo-restrictions may apply.",
+     "signedInCTA": "Watch now",
+     "signedOutCTA": "Watch now"
+    },
+    "VideoPublished:6ab11b7ea20e1c2a6e9662d1": {
+     "__typename": "VideoPublished",
+     "id": "6ab11b7ea20e1c2a6e9662d1",
+     "contentId": "6ab11b7ca20e1c2a6e9662d0",
+     "publishedById": "664230609a9e375b249f121f",
+     "publishedByName": "Anne-Gaelle Sy",
+     "published": "2026-09-21T11:56:45.929Z",
+     "language": "en",
+     "ebuCountries": [],
+     "vimeoCountries": [],
+     "ebuPlayerUrl": null,
+     "gatedContent": true,
+     "campaignId": "649318bcb7562c543c72eb53",
+     "tags": [
+      "playlist_68c932a1d61bce611429d9b5"
+     ],
+     "title": "Day 2 Extended Highlights | World Road Running Championships Copenhagen 26",
+     "thumbnailId": "6ab11b28db6273f853c2af92",
+     "thumbnailEdited": "eyJrZXkiOiI2YWIxMWIyMmRiNjI3M2Y4NTNjMmFmOTEuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjoxNjAwLCJoZWlnaHQiOjEwMDB9fX0=",
+     "thumbnailTitle": "3",
+     "videoId": null,
+     "vimeoVideoId": "https://player.vimeo.com/video/1228558132",
+     "vimeoHash": "58479",
+     "playerId": null,
+     "brightcoveCountries": [],
+     "metatags": "World Road Running Championships, Copenhagen, 2026, half marathon",
+     "standFirst": "Watch the full extended highlights from day 1 at the World Road Running Championships Copenhagen 26, including both the men and women's mile and 5km. ",
+     "signedInCTA": "Watch now",
+     "signedOutCTA": "Sign up to Watch"
+    },
+    "VideoPublished:6aafb6e1bd7314e553de2c91": {
+     "__typename": "VideoPublished",
+     "id": "6aafb6e1bd7314e553de2c91",
+     "contentId": "6aafb6e0bd7314e553de2c90",
+     "publishedById": "664230609a9e375b249f121f",
+     "publishedByName": "Anne-Gaelle Sy",
+     "published": "2026-09-20T14:00:00.000Z",
+     "language": "en",
+     "ebuCountries": [],
+     "vimeoCountries": [],
+     "ebuPlayerUrl": null,
+     "gatedContent": true,
+     "campaignId": "649318bcb7562c543c72eb53",
+     "tags": [
+      "playlist_68c932a1d61bce611429d9b5"
+     ],
+     "title": "Day 1 Extended Highlights | World Road Running Championships Copenhagen 26",
+     "thumbnailId": "6aafb655b728ee42056b5a2c",
+     "thumbnailEdited": "eyJrZXkiOiI2YWFmYjY0ZmI3MjhlZTQyMDU2YjVhMmIuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjoxNjAwLCJoZWlnaHQiOjEwMDB9fX0=",
+     "thumbnailTitle": "12",
+     "videoId": null,
+     "vimeoVideoId": "https://player.vimeo.com/video/1228400493",
+     "vimeoHash": "58479",
+     "playerId": null,
+     "brightcoveCountries": [],
+     "metatags": "World Road Running Championships, Copenhagen, 2026, mile, 5km",
+     "standFirst": "Watch the full extended highlights from day 1 at the World Road Running Championships Copenhagen 26, including both the men and women's mile and 5km. ",
+     "signedInCTA": "Watch now",
+     "signedOutCTA": "Sign up to Watch"
+    },
+    "VideoPublished:6a76164d953bb92fc7da32d6": {
+     "__typename": "VideoPublished",
+     "id": "6a76164d953bb92fc7da32d6",
+     "contentId": "6a76164b953bb92fc7da32d5",
+     "publishedById": "61051f57fc8312000972edea",
+     "publishedByName": "Josh Allen",
+     "published": "2026-09-20T11:14:52.122Z",
+     "language": "en",
+     "ebuCountries": [],
+     "vimeoCountries": [],
+     "ebuPlayerUrl": null,
+     "gatedContent": true,
+     "campaignId": "649318bcb7562c543c72eb53",
+     "tags": [
+      "playlist_66cc251f1f35860625dd76eb",
+      "playlist_6a75cd46a2a8211064c53550"
+     ],
+     "title": "Full Long Jump Women Final | World U20 Championships Oregon 26",
+     "thumbnailId": "6a761611953bb92fc7da32d3",
+     "thumbnailEdited": "eyJrZXkiOiI2YTc2MTYwYzk1M2JiOTJmYzdkYTMyZDIuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjoxNjAwLCJoZWlnaHQiOjEwMDB9fX0=",
+     "thumbnailTitle": "d",
+     "videoId": null,
+     "vimeoVideoId": "1216381095",
+     "vimeoHash": "58479",
+     "playerId": null,
+     "brightcoveCountries": [],
+     "metatags": "World Athletics U20 Championships Oregon 2026",
+     "standFirst": "Watch the full women's Long Jump final from the World Athletics U20 Championships Oregon 2026!",
+     "signedInCTA": "Watch now",
+     "signedOutCTA": "Sign up to Watch"
+    },
+    "allTimePersonalTop10Disciplines:10229527": {
+     "__typename": "allTimePersonalTop10Disciplines",
+     "id": 10229527,
+     "name": "Pole Vault"
+    },
+    "singleCompetitor:14650473": {
+     "__typename": "singleCompetitor",
+     "_id": 14650473,
+     "primaryMediaId": null,
+     "primaryMediaId2": null,
+     "primaryMedia": null,
+     "basicData": {
+      "__typename": "AthleteNewData",
+      "id": null,
+      "friendlyName": null,
+      "fullName": null,
+      "friendlyNameLetter": null,
+      "friendlyNameFirst3Letter": null,
+      "sexCode": null,
+      "birthPlace": null,
+      "birthPlaceCountryName": null,
+      "sexNameUrlSlug": null,
+      "birthPlaceCountryUrlSlug": null,
+      "birthCountryCode": null,
+      "primaryMediaId": null,
+      "facebookUsername": null,
+      "twitterUsername": null,
+      "instagramUsername": null,
+      "countryFullName": "United States",
+      "familyName": "ELYSSA",
+      "givenName": "Tracy",
+      "firstName": null,
+      "lastName": null,
+      "countryName": null,
+      "countryCode": "USA",
+      "countryUrlSlug": null,
+      "birthDate": null,
+      "birthDateStr": null,
+      "urlSlug": null,
+      "representativeId": null,
+      "biography": null,
+      "twitterLink": null,
+      "instagramLink": null,
+      "facebookLink": null,
+      "transfersOfAllegiance": [],
+      "iaafId": null,
+      "aaId": 14650473,
+      "primaryMediaEdited": null,
+      "male": false,
+      "primaryMedia": null
+     },
+     "athleteRepresentative": null,
+     "personalBests": {
+      "__typename": "personalBestsType",
+      "withWind": false,
+      "withRecords": false,
+      "results": [
+       {
+        "__typename": "singleCompetitorResult",
+        "indoor": false,
+        "disciplineCode": null,
+        "disciplineNameUrlSlug": "pole-vault",
+        "typeNameUrlSlug": "jumps",
+        "discipline": "Pole Vault",
+        "linkToList": true,
+        "mark": "3.50",
+        "combinedPerformances": null,
+        "wind": null,
+        "notLegal": false,
+        "venue": "La Crosse, WI (USA)",
+        "date": "07 JUN 2014",
+        "listPosition": null,
+        "resultScore": 807,
+        "records": [],
+        "competitionId": null,
+        "eventId": "10229527",
+        "eventName": null
+       }
+      ]
+     },
+     "seasonsBests": {
+      "__typename": "seasonsBestsType",
+      "parameters": {
+       "__typename": "seasonsBestsParamsType",
+       "seasonsBestsSeason": 2015
+      },
+      "activeSeasons": [
+       "2015",
+       "2014"
+      ],
+      "withWind": false,
+      "withRecords": false,
+      "results": [
+       {
+        "__typename": "singleCompetitorResult",
+        "indoor": false,
+        "disciplineCode": null,
+        "disciplineNameUrlSlug": "pole-vault",
+        "typeNameUrlSlug": "jumps",
+        "discipline": "Pole Vault",
+        "linkToList": true,
+        "mark": "3.20",
+        "combinedPerformances": null,
+        "wind": null,
+        "notLegal": false,
+        "venue": "Des Moines, IA (USA)",
+        "date": "11 APR 2015",
+        "listPosition": null,
+        "resultScore": 717,
+        "records": [],
+        "competitionId": null,
+        "eventId": "10229527",
+        "competition": "Des Moines Jim Duncan Invitational"
+       }
+      ]
+     },
+     "progressionOfSeasonsBests": [
+      {
+       "__typename": "singleCompetitorProgression",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "pole-vault",
+       "typeNameUrlSlug": "jumps",
+       "discipline": "Pole Vault",
+       "withWind": false,
+       "mainEvent": true,
+       "eventId": "10229527",
+       "results": [
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2014",
+         "numericResult": 3.5,
+         "mark": "3.50",
+         "wind": null,
+         "venue": "La Crosse, WI (USA)",
+         "date": "07 JUN 2014",
+         "listPosition": null,
+         "resultScore": 807,
+         "competitionId": null,
+         "competition": "La Crosse D1 State Meet"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2015",
+         "numericResult": 3.2,
+         "mark": "3.20",
+         "wind": null,
+         "venue": "Des Moines, IA (USA)",
+         "date": "11 APR 2015",
+         "listPosition": null,
+         "resultScore": 717,
+         "competitionId": null,
+         "competition": "Des Moines Jim Duncan Invitational"
+        }
+       ]
+      }
+     ],
+     "worldRankings": {
+      "__typename": "worldRankingsType",
+      "parameters": {
+       "__typename": "worldRankingsParamsType",
+       "worldRankingsProgressionYear": null
+      },
+      "current": [],
+      "best": []
+     },
+     "honours": [],
+     "resultsByYear": {
+      "__typename": "resultsByYearType",
+      "parameters": {
+       "__typename": "resultByYearParamsType",
+       "resultsByYear": 2015,
+       "resultsByYearOrderBy": "discipline"
+      },
+      "activeYears": [
+       "2015",
+       "2014"
+      ],
+      "resultsByEvent": [
+       {
+        "__typename": "resultsByEvent",
+        "indoor": null,
+        "disciplineCode": null,
+        "disciplineNameUrlSlug": null,
+        "typeNameUrlSlug": null,
+        "discipline": "Pole Vault",
+        "withWind": null,
+        "results": [
+         {
+          "__typename": "resultsByEventResult",
+          "date": "11 APR 2015",
+          "competition": "Des Moines Jim Duncan Invitational, Des Moines, IA",
+          "venue": "Des Moines, IA (USA)",
+          "country": "USA",
+          "category": "F",
+          "race": "F",
+          "place": "5.",
+          "mark": "3.20",
+          "wind": null,
+          "notLegal": false,
+          "resultScore": 717,
+          "remark": "",
+          "competitionId": null,
+          "eventId": null,
+          "eventName": null
+         }
+        ]
+       }
+      ]
+     }
+    }
+   }
+  },
+  "apollo": null
+ },
+ "page": "/athletes/[counrty]/[competitorId]",
+ "query": {
+  "counrty": "germany",
+  "competitorId": "robert-farken-14650473"
+ },
+ "buildId": "YVWn3rsemDR2HTvm1ThoZ",
+ "isFallback": false,
+ "gip": true,
+ "appGip": true,
+ "locale": "en",
+ "locales": [
+  "en",
+  "sr",
+  "hr",
+  "es",
+  "gd",
+  "IT",
+  "it",
+  "pl",
+  "da",
+  "hu",
+  "fr",
+  "zh",
+  "lv",
+  "jp",
+  "ru",
+  "pt",
+  "ar",
+  "tr"
+ ],
+ "defaultLocale": "en",
+ "head": [
+  [
+   "meta",
+   {
+    "name": "viewport",
+    "content": "width=device-width, initial-scale=1",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "charSet": "utf-8",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "title",
+   {
+    "className": "jsx-2451524013",
+    "children": "Tracy ELYSSA | Profile | World Athletics"
+   }
+  ],
+  [
+   "link",
+   {
+    "rel": "apple-touch-icon",
+    "href": "/static/icons/256x256.png",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "link",
+   {
+    "rel": "apple-touch-icon",
+    "sizes": "72x72",
+    "href": "/static/icons/72x72.png",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "link",
+   {
+    "rel": "apple-touch-icon",
+    "sizes": "114x114",
+    "href": "/static/icons/114x114.png",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "link",
+   {
+    "rel": "apple-touch-icon",
+    "sizes": "144x144",
+    "href": "/static/icons/144x144.png",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "link",
+   {
+    "rel": "canonical",
+    "href": "https://worldathletics.org/athletes/germany/robert-farken-14650473",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "name": "apple-mobile-web-app-capable",
+    "content": "yes",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "name": "mobile-web-app-capable",
+    "content": "yes",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "name": "apple-mobile-web-app-status-bar-style",
+    "content": "#ff2534",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "name": "apple-itunes-app",
+    "content": "app-id=6764098476",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "property": "og:title",
+    "name": "title",
+    "content": "Tracy ELYSSA | Profile | World Athletics",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "property": "og:type",
+    "name": "type",
+    "content": "website",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "property": "og:url",
+    "name": "url",
+    "content": "https://worldathletics.org/athletes/germany/robert-farken-14650473",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "property": "og:site_name",
+    "name": "site_name",
+    "content": "worldathletics.org",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "property": "og:image",
+    "name": "image",
+    "content": "/static/athlete-blank-hero-min.jpg",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "property": "og:description",
+    "name": "description",
+    "content": "Tracy ELYSSA, United States",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "name": "keywords",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "name": "twitter:card",
+    "content": "summary_large_image",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "name": "twitter:site",
+    "content": "@WorldAthletics",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "name": "twitter:title",
+    "content": "Tracy ELYSSA | Profile | World Athletics",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "name": "twitter:description",
+    "content": "Tracy ELYSSA, United States",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "name": "twitter:image",
+    "content": "/static/athlete-blank-hero-min.jpg",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "property": "thumbnail",
+    "content": "/static/athlete-blank-hero-min.jpg",
+    "className": "jsx-2451524013"
+   }
+  ]
+ ]
+}

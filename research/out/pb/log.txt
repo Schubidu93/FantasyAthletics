@@ -1,0 +1,8 @@
+Seite: 200, 76563 Zeichen
+__NEXT_DATA__ gespeichert (34791 Zeichen)
+pb: 200, {"data":{"getSingleCompetitor":{"personalBests":{"withWind":false,"results":[{"indoor":false,"discipline":"Pole Vault","mark":"3.50","notLegal":false,"venue":"La Crosse, WI (USA)","date":"07 JUN 2014","resultScore":807,"records":[]}]}}}}
+pb-min: 200, {"data":{"getSingleCompetitor":{"personalBests":{"results":[{"discipline":"Pole Vault","mark":"3.50","date":"07 JUN 2014"}]}}}}
+progression: 200, {"data":{"getSingleCompetitor":{"progressionOfSeasonsBests":[{"discipline":"Pole Vault","indoor":false,"results":[{"season":"2014","mark":"3.50","date":"07 JUN 2014","venue":"La Crosse, WI (USA)","resultScore":807},{"season":"2015","mark":"3.20","date":"11 APR 2015","venue":"Des Moines, IA (USA)","resultScore":717}]}]}}}
+top10: 200, {"data":null,"errors":[{"path":null,"locations":[{"line":1,"column":112,"sourceName":null}],"message":"Validation error of type VariableTypeMismatch: Variable type 'String' doesn't match expected type 'Int' @ 'getSingleCompetitorAllTimePersonalTop10'"},{"path":null,"locations":[{"line":1,"column":139,"sourceName":null}],"message":"Validation error of type FieldUndefined: Field 'mark' in type 'allTimePersonalTop10Details' is undefined @ 'getSingleCompetitorAllTimePersonalTop10/results/mark'"},{"path":null,"locations":[{"line":1,"column":149,"sourceName":null}],"message":"Validation error of typ
+seasonbests-2024: 200, {"data":{"getSingleCompetitorSeasonBests":{"results":null}}}
+typename: 200, {"data":{"getSingleCompetitor":{"__typename":"singleCompetitor"}}}
