@@ -124,6 +124,41 @@ describe("Punkte nach WA-Regeln 2026", () => {
 });
 
 describe("Athletenpool", () => {
+  it("Gruppe und Pool-Rang nach den Punkten des Vorjahrs vom Spieljahr", async () => {
+    await db.query("update scoring_config set game_year = $1", [Y + 1]);   // Spieljahr Y+1 → Bezugsjahr Y
+    const ins = (slug: string, date: string, discipline: string, score: number, competition = "Meeting", category = "F", place = 9) =>
+      db.query(`insert into wa_results (athlete_id, date, competition, discipline, category, race, wa_race, place, result_score)
+                values ($1, $2, $3, $4, $5, 'F', 'F', $6, $7)`, [slug, date, competition, discipline, category, place, score]);
+    const a = await athlete(db, 1, "Mehr 5000", "men", "10,000 Metres", 1300);        // Toplisten-Bestwert 10.000 m
+    const b = await athlete(db, 2, "Knapp drunter", "men", "800 Metres", 1200);
+    const n = await athlete(db, 3, "Neu", "women", "1500 Metres", 1100);
+    const x = await athlete(db, 4, "Crosser", "men", "5000 Metres", 1100);
+    // A: 5000er-Block 129,9 Punkte (3000 m: 100 + 5000 m: 23 × 1,3), 10.000er-Block 120 (75 × 1,6)
+    await ins(a, `${Y}-05-01`, "3000 Metres", 1100);
+    await ins(a, `${Y}-06-01`, "5000 Metres", 1023);
+    await ins(a, `${Y}-07-01`, "10,000 Metres", 1075);
+    // B: nur Leistungen unter der Schwelle → Gruppe der höchsten Leistung (1500 m)
+    await ins(b, `${Y}-05-01`, "1500 Metres", 999);
+    await ins(b, `${Y}-06-01`, "800 Metres", 990);
+    // N: keine Ergebnisse im Bezugsjahr → erste Leistung ab 975 im Spieljahr (Hindernis, nicht die spätere 1500 m)
+    await ins(n, `${Y + 1}-03-01`, "1500 Metres", 960);
+    await ins(n, `${Y + 1}-04-01`, "3000 Metres Steeplechase", 980);
+    await ins(n, `${Y + 1}-05-01`, "1500 Metres", 1050);
+    // X: Cross nach Distanz – 1,5 km zählt für 1500, 7,5 km für 10.000
+    await ins(x, `${Y}-11-01`, "Cross Country", 0, "Cross A - XC 1.5km", "GL", 1);   // 1200 → 200 × 1
+    await ins(x, `${Y}-11-02`, "Cross Country", 0, "Cross B - XC 7.5km", "GL", 12);  // 1070 → 70 × 1,6 = 112
+    await db.query("select rebuild_results(null)");
+    await db.query("select refresh_pool(null)");
+    const rows = await db.all("select id, event_group, group_basis, group_points, pool_rank from athletes order by id");
+    expect(rows.map((r) => [r.id, r.event_group, r.group_basis, Number(r.group_points ?? -1), r.pool_rank])).toEqual([
+      ["wa-1", "5000", "points", 249.9, 2],
+      ["wa-2", "1500", "best", 0, 3],
+      ["wa-3", "Hindernis", "first", -1, 4],
+      ["wa-4", "1500", "points", 312, 1],
+    ]);
+  });
+
+
   it("bildet Rang und Gruppe aus den Toplisten der letzten zwei Jahre", async () => {
     await athlete(db, 1, "Schnell", "men", "1500 Metres", 1200);
     await athlete(db, 2, "Hindernis", "women", "3000 Metres Steeplechase", 1150);

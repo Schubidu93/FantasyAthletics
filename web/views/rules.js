@@ -14,6 +14,8 @@ const fmtNum = (n) => Number(n).toLocaleString('de-DE');
 export function Rules({ c }) {
   const l = c.league;
   const cfg = useLoad(() => q(sb.from('scoring_config').select('*').eq('id', 1)).then((r) => r[0]), []).data;
+  // Spieljahr: ab 1. November das Folgejahr (wie game_year() in der Datenbank)
+  const gy = cfg?.game_year || new Date().getFullYear() + (new Date().getMonth() >= 10 ? 1 : 0);
   const two = l.transfer_mode === 'waiver_free';
   const lineup = l.scoring_mode === 'lineup';
   const slots = leagueSlots(l);
@@ -80,7 +82,12 @@ export function Rules({ c }) {
         <li><strong>Pool:</strong> deutsche Läuferinnen und Läufer, die in der DE-Topliste (Senioren) des aktuellen Jahres oder des Vorjahres
           in einer Laufdisziplin ab 800 m (inkl. Halle, Hindernis und Straße) mindestens ${cfg ? cfg.pool_threshold : 1000} WA-Punkte erreicht haben.
           ${l.gender !== 'mixed' ? `In dieser Liga nur ${GENDER_LABEL[l.gender]}.` : ''} Der Pool wird täglich aktualisiert; neue Athleten sind automatisch frei.</li>
-        <li><strong>Disziplingruppe:</strong> 800 m, 1500 m, 5000 m, 10.000 m, Marathon oder Hindernis – nach der besten Toplistenleistung (z. B. Meile → 1500 m, 3000 m → 5000 m, Halbmarathon → Marathon).</li>
+        <li><strong>Disziplingruppe:</strong> 800 m, 1500 m, 5000 m, 10.000 m, Marathon oder Hindernis. Maßgeblich sind die Punkte im Vorjahr
+          der Saison (Saison ${gy} → Punkte ${gy - 1}): Die Gruppe, in der ein Athlet die meisten Punkte geholt hat, gilt die ganze Saison
+          (z. B. Meile → 1500 m, 3000 m → 5000 m, Halbmarathon → Marathon; Cross nach Länge: bis 3 km 1500 m, bis 6 km 5000 m, bis 12 km 10.000 m,
+          darüber Marathon). Ohne Punkte zählt die beste Leistung im Vorjahr; neue Athleten ohne Vorjahresergebnisse kommen in die Gruppe ihrer
+          ersten Leistung ab ${cfg?.new_group_threshold ?? 975} WA-Punkten in der Saison, bis dahin in die ihrer besten Toplistenleistung.</li>
+        <li><strong>Pool-Rang</strong> (Reihenfolge im Draft): nach den Punkten im Vorjahr der Saison, bei Gleichstand nach der besten Toplistenleistung.</li>
         ${lineup ? html`
           <li>Für jeden Spieltag stellst du bis zu ${slots.length} Athleten auf: ${l.lineup_mode === 'mf'
             ? 'je Disziplin einen Mann (♂) und eine Frau (♀)' : 'je Disziplin einen Athleten dieser Gruppe'}${l.wildcards > 0
@@ -166,7 +173,7 @@ export function Rules({ c }) {
         <li><strong>Quelle:</strong> World Athletics – deutsche Toplisten und die Ergebnislisten der Athleten.</li>
         <li><strong>Athletenpool:</strong> täglich um 6 Uhr aus den Toplisten.</li>
         <li><strong>Kalender:</strong> täglich um 6 Uhr die kommenden Wettkämpfe mit Laufdisziplinen aus dem Kalender von World Athletics –
-          international ab Gold Label, in Europa ab Kategorie A, in Deutschland ab Kategorie B (Straße und Cross ab E).</li>
+          international ab Gold Label, in Europa ab Kategorie A, in Deutschland ab Kategorie E; nur Wettkämpfe, deren Programm Laufdisziplinen ab 800 m enthält.</li>
         <li><strong>Ergebnisse:</strong> stündlich von 8 bis 23 Uhr für alle Athleten im Pool und in den Kadern. Erscheinen, sobald World Athletics sie veröffentlicht –
           bei großen Meisterschaften meist am selben Tag, bei kleinen Wettkämpfen manchmal Tage später. Werden die Ergebnisse eines Wettkampfs nach und nach
           hochgeladen (z. B. erst 800 m, Stunden später 5000 m), kommen sie auch nach und nach in die Wertung.</li>
