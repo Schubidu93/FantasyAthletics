@@ -122,6 +122,7 @@ await run(db, async () => {
   }
 
   if (!jobs.length) {
+    await rpc(db, "refresh_pool", {});   // Pool-Rang aktuell halten (z. B. nach Nachträgen oder geänderter Wertung)
     await rpc(db, "run_maintenance");
     return `${summary} – nichts zu laden`;
   }
@@ -220,8 +221,9 @@ await run(db, async () => {
   for (const y of new Set([...years, Y])) await rpc(db, "refresh_season_stats", { p_year: y });
   // nachts: WA-Punkteformel für Nachträge aus den aktuellen Daten neu berechnen
   if (MODE !== "neu") console.log(`WA-Punktetabellen: ${await rpc<number>(db, "fit_scoring_coefficients", {})}`);
-  // nachts: Disziplingruppe und Pool-Rang aus den Punkten des Bezugsjahrs neu bestimmen
-  if (MODE !== "neu") await rpc(db, "refresh_pool", {});
+  // Disziplingruppe und Pool-Rang aus den Punkten des Bezugsjahrs neu bestimmen – nach jedem Abruf mit neuen Ergebnissen,
+  // damit die Reihenfolge im Pool zu den angezeigten Punkten passt
+  await rpc(db, "refresh_pool", {});
   await rpc(db, "run_maintenance");
   if (failures.length || throttled) {
     await db.from("sync_status").update({ ok: false,
