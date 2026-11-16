@@ -1848,16 +1848,21 @@ $$;
 
 -- Toplisten eines Athleten mit Platz in der DE-Topliste (je Jahr, Disziplin und Geschlecht; gleiche Punkte = gleicher Platz).
 -- Gespeichert sind alle Einträge ab der Pool-Schwelle, also auch alle, die vor dem Athleten liegen.
+-- Platz nach der Zeit (wie die WA-Topliste), nicht nach WA-Punkten (Hallenzeiten haben mehr Punkte)
+-- (plpgsql, weil mark_seconds weiter unten steht)
 create or replace function athlete_toplists(p_athlete text)
 returns table (year int, discipline text, mark text, score int, rank int)
-language sql stable security definer set search_path = public as $$
+language plpgsql stable security definer set search_path = public as $$
+begin
+  return query
   select t.year, t.discipline, t.mark, t.score,
          (select count(*) + 1 from toplist_entries o join athletes oa on oa.id = o.athlete_id
-           where o.year = t.year and o.discipline = t.discipline and oa.gender = a.gender and o.score > t.score)::int
+           where o.year = t.year and o.discipline = t.discipline and oa.gender = a.gender
+             and mark_seconds(o.mark) < mark_seconds(t.mark))::int
     from toplist_entries t join athletes a on a.id = t.athlete_id
    where t.athlete_id = p_athlete
    order by t.year desc, t.score desc;
-$$;
+end $$;
 
 -- Toplisten-Ansicht: vorhandene Jahre/Disziplinen/Geschlechter und die besten Einträge einer Liste
 create or replace function toplist_index()
@@ -1869,12 +1874,14 @@ language sql stable security definer set search_path = public as $$
 $$;
 create or replace function toplist(p_year int, p_discipline text, p_gender text, p_limit int default 20)
 returns table (rank int, athlete_id text, name text, nation text, mark text, score int)
-language sql stable security definer set search_path = public as $$
-  select (rank() over (order by t.score desc))::int, t.athlete_id, a.name, a.nation, t.mark, t.score
+language plpgsql stable security definer set search_path = public as $$
+begin
+  return query
+  select (rank() over (order by mark_seconds(t.mark) nulls last))::int, t.athlete_id, a.name, a.nation, t.mark, t.score
     from toplist_entries t join athletes a on a.id = t.athlete_id
    where t.year = p_year and t.discipline = p_discipline and a.gender = p_gender
-   order by t.score desc, a.name limit least(coalesce(p_limit, 20), 200);
-$$;
+   order by mark_seconds(t.mark) nulls last, a.name limit least(coalesce(p_limit, 20), 200);
+end $$;
 
 -- Spieljahr: die Saison, für die gerade gedraftet bzw. gespielt wird. Ab 1. November zählt das Folgejahr
 -- (Draft für die neue Saison); von Hand festlegbar über scoring_config.game_year.
