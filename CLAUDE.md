@@ -20,6 +20,13 @@
 - Mobile first: Die App wird fast nur auf dem iPhone (installiert als Web-App) genutzt. Nichts darf rechts
   abgeschnitten sein; lieber umbrechen oder kürzen. Fristen mit 0:00 Uhr als Vortag ohne Uhrzeit anzeigen (`fmtUntil` in `web/lib.js`).
 
+## Plan des Nutzers
+
+- Der Nutzer führt einen Plan als Dokument: „Runner Fantasy – mein Plan“
+  (https://claude.ai/artifact/9zo7NFLFnNTV7QsQFuRgJC, Claude-Docs-Dokument).
+- **Nach jeder Aktion und jeder Anfrage aktualisieren:** neue Aufgaben eintragen, Erledigtes abhaken bzw. in „Schon erledigt“
+  verschieben, länger Erledigtes und nicht mehr Relevantes entfernen. Kurz halten.
+
 ## Ablauf einer Änderung
 
 1. Auf einem Arbeitszweig ändern, lokal prüfen (siehe unten).
