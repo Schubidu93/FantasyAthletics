@@ -91,12 +91,13 @@ export function parseToplist(html: string): ToplistRow[] {
     const score = Number(row.find('td[data-th="ResultScore"]').text().trim());
     if (!athleteId || !Number.isFinite(score)) return;
     const dob = parseWaDate(row.find('td[data-th="DOB"]').text());
+    const date = parseWaDate(row.find('td[data-th="Date"]').text());
     rows.push({
+      ...(date ? { date } : {}),
       athleteId,
       name: link.text().replace(/\s+/g, " ").trim(),
       birthDate: dob,
       mark: row.find('td[data-th="Mark"]').text().trim(),
-      date: parseWaDate(row.find('td[data-th="Date"]').text()),
       score,
     });
   });
