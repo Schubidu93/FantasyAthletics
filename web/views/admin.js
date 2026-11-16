@@ -249,6 +249,37 @@ function proposal(kind, start, end) {
   return out;
 }
 
+// Standard: monatliche Spieltage von Montag bis Sonntag. Grenze = der Montag, der dem Monatsersten am nächsten liegt;
+// liegt ein Großereignis (OW, DF, GW, GL oder Deutsche Meisterschaften) auf der Grenze, rückt sie auf den Montag danach.
+const MONTHS_DE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+const nearestMonday = (s) => { const wd = (new Date(s + 'T00:00:00Z').getUTCDay() + 6) % 7; return addDays(s, wd <= 3 ? -wd : 7 - wd); };
+const mondayAfter = (s) => { const wd = (new Date(s + 'T00:00:00Z').getUTCDay() + 6) % 7; return addDays(s, 7 - wd); };
+export function monthlyProposal(start, end, bigEvents = []) {
+  const bounds = [];
+  for (let d = new Date(start + 'T00:00:00Z'); ; ) {
+    d = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1));
+    const first = iso(d);
+    if (first > end) break;
+    let b = nearestMonday(first);
+    for (let moved = true; moved; ) {   // so lange verschieben, bis kein Großereignis mehr geteilt wird
+      moved = false;
+      for (const e of bigEvents) {
+        const eEnd = e.end_date || e.start_date;
+        if (e.start_date < b && eEnd >= b) { b = mondayAfter(eEnd); moved = true; }
+      }
+    }
+    if (b > start && b <= end && (!bounds.length || b > bounds[bounds.length - 1].b)) bounds.push({ b, month: d.getUTCMonth() });
+  }
+  const out = [];
+  let s = start, month = new Date(start + 'T00:00:00Z').getUTCMonth();
+  for (const { b, month: m } of bounds) {
+    out.push({ name: MONTHS_DE[month], starts_on: s, ends_on: addDays(b, -1) });
+    s = b; month = m;
+  }
+  out.push({ name: MONTHS_DE[month], starts_on: s, ends_on: end });
+  return out;
+}
+
 // Saisonblöcke der Leichtathletik: Halle, Straße/Cross im Frühjahr, Bahnsaison in Monatsblöcken
 // (Meisterschaften meist im Juni bis August), Herbst mit Straßenläufen und Marathons.
 function seasonProposal(start, end) {
@@ -265,6 +296,10 @@ function Matchdays({ c }) {
   const two = c.league.transfer_mode === 'waiver_free';
   const [f, setF] = useState(empty);
   const [gen, setGen] = useState(null);
+  // Großereignisse aus dem Kalender, die nicht auf zwei Spieltage verteilt werden sollen
+  const big = useLoad(async () => (await q(sb.from('calendar_events').select('name,category,country,start_date,end_date')
+    .gte('end_date', c.league.season_start).lte('start_date', c.league.season_end)))
+    .filter((e) => ['OW', 'DF', 'GW', 'GL'].includes(e.category) || (e.country === 'GER' && /german .*championships|deutsche meisterschaften/i.test(e.name))), [c.league.id]);
   const a = useAction();
   const locked = (m) => m.waivers_done || new Date(m.waiver_deadline || m.deadline) <= new Date();
   const toLocal = (ts) => { const d = new Date(ts); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); };
@@ -320,11 +355,14 @@ function Matchdays({ c }) {
 
     <details><summary>Spieltage automatisch vorschlagen</summary>
       <div class="row">
-        <button class="primary" onClick=${() => setGen(proposal('biweekly', c.league.season_start, c.league.season_end))}>Alle 2 Wochen</button>
+        <button class="primary" onClick=${() => setGen(monthlyProposal(c.league.season_start, c.league.season_end, big.data || []))}>Monatlich (Mo–So)</button>
+        <button onClick=${() => setGen(proposal('biweekly', c.league.season_start, c.league.season_end))}>Alle 2 Wochen</button>
         <button onClick=${() => setGen(seasonProposal(c.league.season_start, c.league.season_end))}>Saisonblöcke</button>
-        <button onClick=${() => setGen(proposal('monthly', c.league.season_start, c.league.season_end))}>Monatlich</button>
+        <button onClick=${() => setGen(proposal('monthly', c.league.season_start, c.league.season_end))}>Kalendermonate</button>
         <button onClick=${() => setGen(proposal('weekly', c.league.season_start, c.league.season_end))}>Wöchentlich</button>
       </div>
+      <p class="muted small">Empfohlen: „Monatlich (Mo–So)“ – jeder Spieltag läuft von Montag bis Sonntag, Wechsel am Montag, der dem
+        Monatsersten am nächsten liegt; Großereignisse (WM, EM, Diamond League, Deutsche Meisterschaften …) werden nicht geteilt.</p>
       ${gen && html`<p class="muted small">Vorschlag für ${fmtDate(c.league.season_start)} – ${fmtDate(c.league.season_end)}.
           Nach dem Anlegen einzeln anpassbar. Spieltage in der Vergangenheit werden übersprungen.</p>
         <ul class="list compact">${gen.map((m) => html`<li><span>${m.name}</span><span class="muted">${fmtDate(m.starts_on)} – ${fmtDate(m.ends_on)}</span></li>`)}</ul>

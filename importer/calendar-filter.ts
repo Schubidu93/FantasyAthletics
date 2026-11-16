@@ -7,3 +7,15 @@ export const runningEvents = (events: string[]) => events.filter((e) => RUNNING_
 
 // Ohne Programm: Wettkämpfe, die dem Namen nach keine Laufdisziplinen haben
 export const NOT_RUNNING = /pole vault|jump|throw|hammer|javelin|discus|shot ?put|combined events|multi|decathlon|heptathlon|pentathlon|race ?walk|walking|sprint|stabhoch|sprung|wurf|mehrkampf|geher|kugel|speer/i;
+
+// Meisterschaften und Spiele anderer Kontinente bzw. Länder – dort starten keine Deutschen
+export const OTHER_REGION = /\b(asian|african|africa|oceania|south american|pan[- ]?american|nacac|central american|caribbean|carifta|arab|gulf|commonwealth|bolivarian|francophonie|sea games|asean|mediterranean|island games|ibero-?american|balkan)\b/i;
+export function irrelevantChampionship(e: { name: string; area?: string | null; country?: string | null; competitionGroup?: string | null }) {
+  const text = `${e.name} ${e.competitionGroup ?? ""}`;
+  if (OTHER_REGION.test(text)) return true;
+  // Kontinentalmeisterschaften außerhalb Europas
+  if (/\barea\b.*championships/i.test(e.competitionGroup ?? "") && e.area && e.area !== "Europe") return true;
+  // nationale Meisterschaften anderer Länder
+  if (/national.*championships|national championships/i.test(text) && e.country !== "GER") return true;
+  return false;
+}

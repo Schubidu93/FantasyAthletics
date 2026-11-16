@@ -1,6 +1,6 @@
 // Kalender: Laufdisziplinen ab 800 m im Wettkampfprogramm erkennen (Beispiele aus echten WA-Programmen)
 import { describe, expect, it } from "vitest";
-import { NOT_RUNNING, runningEvents } from "../importer/calendar-filter";
+import { NOT_RUNNING, irrelevantChampionship, runningEvents } from "../importer/calendar-filter";
 
 describe("Kalender", () => {
   it("erkennt Laufdisziplinen ab 800 m im Programm", () => {
@@ -17,5 +17,16 @@ describe("Kalender", () => {
     expect(NOT_RUNNING.test("Hylo Javelin Meeting")).toBe(true);
     expect(NOT_RUNNING.test("2. LTR Wurf-Festival")).toBe(true);
     expect(NOT_RUNNING.test("Night of Hasbergen")).toBe(false);
+  });
+
+  it("lässt Meisterschaften anderer Kontinente und Länder weg", () => {
+    expect(irrelevantChampionship({ name: "Asian Athletics Championships", area: "Asia", country: "KOR" })).toBe(true);
+    expect(irrelevantChampionship({ name: "Oceania Championships", area: "Oceania", country: "AUS" })).toBe(true);
+    expect(irrelevantChampionship({ name: "Campeonato", area: "South America", country: "BRA", competitionGroup: "Area Senior Outdoor Championships" })).toBe(true);
+    expect(irrelevantChampionship({ name: "USATF Championships", area: "North and Central America", country: "USA", competitionGroup: "National Senior Championships" })).toBe(true);
+    expect(irrelevantChampionship({ name: "European Athletics Championships", area: "Europe", country: "GBR", competitionGroup: "Area Senior Outdoor Championships" })).toBe(false);
+    expect(irrelevantChampionship({ name: "German Championships", area: "Europe", country: "GER", competitionGroup: "National Senior Championships" })).toBe(false);
+    expect(irrelevantChampionship({ name: "World Athletics Championships", area: "Asia", country: "CHN", competitionGroup: "World Athletics Championships" })).toBe(false);
+    expect(irrelevantChampionship({ name: "Wanda Diamond League", area: "Asia", country: "CHN", competitionGroup: "Wanda Diamond League" })).toBe(false);
   });
 });
