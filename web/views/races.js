@@ -1,6 +1,6 @@
 // Wettkämpfe: alle Wettkämpfe, bei denen Athleten aus dem Pool gestartet sind, mit deren Ergebnissen und Punkten
 import { html, useState, useMemo } from '../vendor/preact-htm.js';
-import { sb, q, all, useLoad, Loading, fmtDate, fmtPts, openRider, normName, flag, withFlag, nationCode, discWithKm, raceLabel } from '../lib.js';
+import { sb, q, all, useLoad, Loading, fmtDate, fmtPts, openRider, normName, flag, withFlag, nationCode, discWithKm, raceLabel , waResultUrl } from '../lib.js';
 
 // WA-Wettkampfkategorien (World-Ranking-Regeln): OW = Olympia/WM … F = nationale Meetings
 const CATS = [['', 'Alle Kategorien'], ['top', 'OW, DF, GW, GL'], ['OW', 'OW – Olympia/WM'], ['DF', 'DF – DL-Finale'],
@@ -77,7 +77,7 @@ function RaceDetail({ c, slug }) {
     const [race] = await q(sb.from('competitions').select('*').eq('id', slug));
     const id = slug.startsWith('wa-c') ? +slug.slice(4) : null;
     const rows = id ? await all(() => sb.from('wa_results')
-      .select('id,athlete_id,date,competition,discipline,category,race,place,wa_race,wa_place,placing_round,placing_place,mark,result_score,remark')
+      .select('id,athlete_id,date,competition,discipline,category,race,place,wa_race,wa_place,placing_round,placing_place,mark,result_score,remark,wa_event_id')
       .eq('wa_competition_id', id).order('date').order('id')) : [];
     const pts = {};
     const ids = rows.map((r) => r.id);
@@ -97,7 +97,7 @@ function RaceDetail({ c, slug }) {
     const disc = discWithKm(r.discipline, r.competition);
     const key = `${r.date}|${disc}|${r.wa_race}`;
     let g = groups.find((x) => x.key === key);
-    if (!g) groups.push(g = { key, date: r.date, disc, race: r.wa_race, rows: [] });
+    if (!g) groups.push(g = { key, date: r.date, disc, race: r.wa_race, event: r.wa_event_id, rows: [] });
     g.rows.push(r);
   }
   groups.forEach((g) => g.rows.sort((a, b) => (a.wa_place ?? 999) - (b.wa_place ?? 999)));
@@ -108,10 +108,11 @@ function RaceDetail({ c, slug }) {
       <h2>${(race.name || '').replace(/\s*-\s*XC\s*[\d.,]+\s*km$/i, '')}</h2>
       <p class="muted small">${fmtDate(race.start_date)}${race.end_date && race.end_date !== race.start_date ? ` – ${fmtDate(race.end_date)}` : ''}
         ${race.venue ? ` · ${race.venue}` : ''}${race.category ? ` · Kategorie ${race.category}` : ''} · ${fmtPts(total)} Punkte gesamt</p>
+      ${race.id?.startsWith('wa-c') && html`<a class="small" href=${waResultUrl(race.id.slice(4))} target="_blank" rel="noopener">Ergebnisse bei World Athletics ↗</a>`}
     </div>
     ${groups.length === 0 ? html`<p class="muted">Keine Ergebnisse von Pool-Athleten.</p>` : groups.map((g) => html`<div class="detail-rider" key=${g.key}>
       <div class="row between"><strong>${g.disc}${g.race && g.race !== 'F' ? ` · ${raceLabel(g.race)}` : ''}</strong>
-        <span class="muted small">${fmtDate(g.date)}</span></div>
+        <span class="muted small">${fmtDate(g.date)}${race.id?.startsWith('wa-c') && g.event ? html` · <a href=${waResultUrl(race.id.slice(4), g.event)} target="_blank" rel="noopener">WA ↗</a>` : ''}</span></div>
       <ul class="list compact">${g.rows.map((r) => {
         const owner = c.managerMap[c.owner[r.athlete_id]];
         const name = c.riderMap[r.athlete_id]?.name || r.athlete_id;

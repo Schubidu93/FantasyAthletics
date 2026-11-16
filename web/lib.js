@@ -99,6 +99,16 @@ export function slotLabel(slot) {
   const base = /^WC(\d+)$/.test(g) ? `Wildcard ${g.slice(2)}` : GROUP_LABEL[g] || g;
   return sex ? `${base} ${sex === 'M' ? 'M' : 'F'}` : base;
 }
+// Links zu World Athletics: Athletenprofil (Pfad aus Land und Name, entscheidend ist die ID am Ende) und Ergebnisse
+const WA_COUNTRY = { GER: 'germany', AUT: 'austria', SUI: 'switzerland' };
+export function waAthleteUrl(r) {
+  const id = r.wa_id || String(r.id || '').replace(/^wa-/, '');
+  const slug = (r.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/ß/g, 'ss')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return `https://worldathletics.org/athletes/${WA_COUNTRY[r.nation] || 'germany'}/${slug}-${id}`;
+}
+export const waResultUrl = (competitionId, eventId) =>
+  `https://worldathletics.org/competition/calendar-results/results/${competitionId}${eventId ? `?eventId=${eventId}` : ''}`;
 // Geschlecht als umrandeter Buchstabe: blaues M, rosa F (g = 'men'/'women' oder 'M'/'W')
 export const SexBadge = ({ g }) => {
   const f = g === 'women' || g === 'W' || g === 'F';

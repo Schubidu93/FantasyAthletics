@@ -7,7 +7,7 @@
 // Täglich im Ablauf „Athletenpool laden“. Umgebung: SUPABASE_URL, SUPABASE_SERVICE_KEY, optional WA_API_URL/WA_API_KEY.
 import { adminClient, chunked } from "./supabase";
 import { discoverApiConfig, sleep, type ApiConfig } from "./wa";
-import { NOT_RUNNING, runningEvents } from "./calendar-filter";
+import { NOT_RUNNING, irrelevantChampionship, runningEvents } from "./calendar-filter";
 
 const db = adminClient();
 const DAYS_AHEAD = 365;
@@ -46,10 +46,10 @@ const QUERY = `
     getCalendarEvents(startDate: $startDate, endDate: $endDate, regionType: $regionType, regionId: $regionId,
                       disciplineId: $disciplineId, rankingCategoryId: $rankingCategoryId, limit: $limit, offset: $offset) {
       hits
-      results { id name venue country rankingCategory disciplines competitionGroup startDate endDate }
+      results { id name venue area country rankingCategory disciplines competitionGroup startDate endDate }
     }
   }`;
-type Ev = { id: number; name: string; venue: string | null; country: string | null; rankingCategory: string | null;
+type Ev = { id: number; name: string; venue: string | null; area: string | null; country: string | null; rankingCategory: string | null;
             disciplines: string | null; competitionGroup: string | null; startDate: string; endDate: string | null };
 
 async function load(api: ApiConfig, vars: Record<string, unknown>): Promise<Ev[]> {
@@ -88,7 +88,7 @@ const main = async () => {
       for (const cat of categories) {
         try {
           for (const e of await load(api, { startDate: from, endDate: to, disciplineId: KINDS[kind], rankingCategoryId: CATEGORY_IDS[cat], ...region })) {
-            if (NOT_RUNNING.test(e.name)) { skipped.add(e.name); continue; }
+            if (NOT_RUNNING.test(e.name) || irrelevantChampionship(e)) { skipped.add(e.name); continue; }
             const prev = byId.get(Number(e.id));
             if (prev) { prev.kinds.add(kind); continue; }
             byId.set(Number(e.id), {
