@@ -403,3 +403,5 @@ details.help li.chosen { background: var(--accent-soft); border-radius: 6px; pad
 .sort-head.res-pts { text-align: right; display: block; }
 .b-rec { background: #d97706; }
 select.mini { font-size: .75rem; padding: 2px 6px; width: auto; min-height: 0; }
+.manual-row { flex-wrap: wrap; gap: .4rem; }
+.row.nowrap { flex-wrap: nowrap; gap: .4rem; }

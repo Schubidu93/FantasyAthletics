@@ -1,7 +1,7 @@
 // Athleten-Fenster: Stammdaten, Toplisten und alle Ergebnisse (Lauf, Zeit, WA-Punkte, Fantasy-Punkte)
 import { html, useState, useEffect } from '../vendor/preact-htm.js';
 import { sb, q, all, rpc, waAthleteUrl, waResultUrl, flag, riderGroup, GROUP_LABEL, discLabel, discWithKm, raceLabel,
-  fmtPts, CatBadge, discMeters, SexBadge } from '../lib.js';
+  fmtPts, CatBadge, discMeters, SexBadge, RELAYS } from '../lib.js';
 
 // Ergebnisse werden ab dieser Saison gespeichert
 const FIRST_YEAR = 2025;
@@ -34,7 +34,7 @@ async function loadRider(slug, league) {
   // Liga-Admins dürfen Rekorde an Ergebnissen eintragen
   const admin = !!lg && lg.admin_user === (await sb.auth.getUser()).data?.user?.id;
   const rows = await all(() => sb.from('wa_results')
-    .select('id,date,competition,discipline,category,race,place,wa_race,wa_place,placing_round,placing_place,mark,result_score,remark,wa_competition_id,wa_event_id,source,source_url,country,record')
+    .select('id,date,competition,discipline,category,race,place,wa_race,wa_place,placing_round,placing_place,mark,result_score,remark,wa_competition_id,wa_event_id,source,source_url,country,record,relay')
     .eq('athlete_id', slug).gte('date', `${FIRST_YEAR}-01-01`).order('date', { ascending: false }).order('id'));
   const pts = Object.fromEntries((await all(() => sb.from('results').select('wa_result_id,points,perf_points,placing_points,record_points')
     .eq('athlete_id', slug).order('id'))).map((r) => [r.wa_result_id, r]));
@@ -129,7 +129,8 @@ export function RiderModal() {
             <button type="button" class=${`sort-head res-pts ${byPoints ? 'active' : ''}`} onClick=${() => setByPoints(true)}>Pkt.</button></div>
           <div class="res-table">${shown.map((x) => html`<div key=${x.id} class=${`res-row ${L && x.wa_competition_id ? 'clickable' : ''}`} onClick=${() => go(x)}>
             <span class="res-date">${shortDate(x.date)}</span>
-            <span class="res-what"><b>${discWithKm(x.discipline, x.competition)}${x.race && x.race !== 'F' ? ` · ${raceLabel(x.race)}` : ''} · ${x.mark || '–'}</b>
+            <span class="res-what"><b>${x.relay ? `Staffel ${RELAYS[x.relay]?.label || x.relay}` : discWithKm(x.discipline, x.competition)}${x.race && x.race !== 'F' ? ` · ${raceLabel(x.race)}` : ''} · ${x.mark || '–'}</b>
+              ${x.relay && html`<small class="muted">gewertet als ${discLabel(x.discipline)} (Durchschnitt je Läufer), 1/${RELAYS[x.relay]?.legs || 3} der Punkte</small>`}
               <small>${x.country ? `${flag(x.country)} ` : ''}${x.competition}${x.category ? html` <${CatBadge} cat=${x.category} />` : ''}${x.result_score ? ` · ${x.result_score} WA-P.` : ''}</small>
               ${x.source === 'manual' && html`<small class="muted">Nachtrag${x.source_url ? html` · <a href=${x.source_url} target="_blank" rel="noopener"
                 onClick=${(e) => e.stopPropagation()}>Quelle</a>` : ''}${!x.pts ? ' · zählt nicht (World Athletics führt das Ergebnis oder unter der Schwelle)' : ''}</small>`}

@@ -103,3 +103,41 @@ describe("Ergebnisse nachtragen", () => {
     await expect(db.query("select delete_manual_result((select id from wa_results where athlete_id = 'wa-1'))")).rejects.toThrow(/nicht gefunden/);
   });
 });
+
+describe("Nachträge: Staffeln, Bearbeiten, Land", () => {
+  beforeEach(async () => {
+    await db.query("select fit_scoring_coefficients()");
+    await athlete(db, 1, "Läufer Eins", "men", "800 Metres", 1150);
+    await athlete(db, 2, "Läufer Zwei", "men", "800 Metres", 1150);
+    await athlete(db, 3, "Läufer Drei", "men", "800 Metres", 1150);
+  });
+  const save = (p: Record<string, unknown>) => db.one("select save_manual_result($1) n",
+    [{ date: D, competition: "Staffel-DM", country: "GER", source_url: "https://example.org", ...p }]);
+
+  it("Staffel: Teilstrecke aus der Endzeit, ein Drittel der Punkte inkl. Platzierung", async () => {
+    await save({ relay: "3x800", athlete_ids: ["wa-1", "wa-2", "wa-3"], mark: "6:08:33", wa_points: 1150, category: "B", place: 1 });
+    const rows = await db.all("select athlete_id, discipline, mark, share, category, wa_race from wa_results where source = 'manual' order by athlete_id");
+    expect(rows).toHaveLength(3);
+    expect(rows[0]).toMatchObject({ discipline: "800 Metres", mark: "6:08.33", category: "B", wa_race: "Staffel 3x800" });
+    expect(Number(rows[0].share)).toBeCloseTo(1 / 3, 3);
+    const r = await db.one("select perf_points, placing_points from results where athlete_id = 'wa-1'");
+    expect(Number(r.perf_points)).toBeCloseTo(150 * 0.1 / 3, 1);
+    const full = Number((await db.one(`select max(points) p from placing_scores ps join disciplines d on ps.placing_table = any (d.placing_tables)
+      where d.name = '800 Metres' and ps.category = 'B' and ps.race_type = 'F' and ps.place = 1`)).p);
+    expect(Number(r.placing_points)).toBeCloseTo(full * 0.1 / 3, 1);
+    expect((await db.one("select _fmt_seconds(122.777) t")).t).toBe("2:02.78");
+  });
+
+  it("Land ist Pflicht; Bearbeiten ersetzt den Nachtrag", async () => {
+    await expect(save({ athlete_ids: ["wa-1"], discipline: "10 Kilometres Road", mark: "28:00", country: "" })).rejects.toThrow(/Land/);
+    await save({ athlete_ids: ["wa-1"], discipline: "10 Kilometres Road", mark: "28:00" });
+    const { id } = await db.one("select id from wa_results where source = 'manual'");
+    await save({ athlete_ids: ["wa-1"], discipline: "10 Kilometres Road", mark: "28:30", replace_ids: [id], date: `${Y}-03-03` });
+    expect(await db.all("select mark, date::text d from wa_results where source = 'manual'")).toEqual([{ mark: "28:30", d: `${Y}-03-03` }]);
+    // vorhandene Veranstaltung übernehmen
+    const comp = await db.one("select id, country, category from competitions where name = 'Staffel-DM'");
+    expect(comp).toMatchObject({ country: "GER", category: "F" });
+    await save({ athlete_ids: ["wa-2"], discipline: "10 Kilometres Road", mark: "29:00", competition: "", competition_id: comp.id, country: "" });
+    expect((await db.one("select competition, country from wa_results where athlete_id = 'wa-2'"))).toEqual({ competition: "Staffel-DM", country: "GER" });
+  });
+});

@@ -1,5 +1,6 @@
 import { html, useState } from '../vendor/preact-htm.js';
-import { sb, q, all, rpc, useLoad, useAction, Msg, Loading, RiderPicker, RiderCell, fmtDate, fmtDateTime, normName, discLabel, today } from '../lib.js';
+import { sb, q, all, rpc, useLoad, useAction, Msg, Loading, RiderPicker, RiderCell, fmtDate, fmtDateTime, normName, discLabel, today,
+  RELAYS, COUNTRY_CODES, withFlag, flag, CatBadge } from '../lib.js';
 import { fmtUntil } from '../lib.js';
 import { LeagueSettingsFields } from './home.js';
 
@@ -442,62 +443,133 @@ function Matchdays({ c }) {
 const ROAD = ['5 Kilometres Road', '10 Kilometres Road', '15 Kilometres Road', '10 Miles Road', '20 Kilometres Road',
   'Half Marathon', '25 Kilometres Road', '30 Kilometres Road', 'Marathon'];
 
+const EMPTY_MANUAL = { relay: '', discipline: '10 Kilometres Road', competition_id: '', date: '', mark: '', competition: '', venue: '',
+  country: '', category: 'F', place: '', source_url: '', wa_points: '' };
+// Staffel-Endzeit „6:08:33“ als 6:08,33 lesen; Teilstrecke = Endzeit / Anzahl Läufer
+const relayMark = (m) => (/^\d{1,2}:\d{2}:\d{2}$/.test(m.trim()) && +m.split(':')[0] < 30 ? m.trim().replace(/:(\d{2})$/, '.$1') : m.trim());
+const secs = (m) => { const v = String(m || '').replace(',', '.').match(/^(\d+(?::\d{1,2}){0,2}(?:\.\d+)?)/); return v ? v[1].split(':').reduce((a, x) => a * 60 + +x, 0) : null; };
+const fmtSecs = (t) => `${Math.floor(t / 60)}:${(t % 60).toFixed(2).padStart(5, '0')}`;
+
 function ManualResults({ c }) {
-  const list = useLoad(() => q(sb.from('wa_results').select('id,athlete_id,date,competition,discipline,mark,result_score,source_url')
-    .eq('source', 'manual').order('date', { ascending: false }).limit(200)), []);
+  const list = useLoad(() => q(sb.from('wa_results')
+    .select('id,athlete_id,date,competition,venue,country,category,place,discipline,mark,result_score,source_url,relay')
+    .eq('source', 'manual').order('date', { ascending: false }).order('id').limit(500)), []);
+  const comps = useLoad(() => rpc('manual_competitions'), []);
   const counted = useLoad(async () => {
     const ids = (list.data || []).map((x) => x.id);
     return ids.length ? new Set((await q(sb.from('results').select('wa_result_id').in('wa_result_id', ids))).map((x) => x.wa_result_id)) : new Set();
   }, [list.data]);
-  const [rider, setRider] = useState(null);
-  const [f, setF] = useState({ discipline: '10 Kilometres Road', date: '', mark: '', competition: '', venue: '', source_url: '', wa_points: '' });
+  const [riders, setRiders] = useState([]);
+  const [f, setF] = useState(EMPTY_MANUAL);
+  const [edit, setEdit] = useState(null);       // IDs der Zeilen, die ersetzt werden
   const [check, setCheck] = useState(null);
   const a = useAction();
   const set = (k) => (e) => { setF({ ...f, [k]: e.target.value }); setCheck(null); };
-  const ready = rider && f.discipline && f.date && f.mark.trim();
-  const doCheck = () => a.run(async () => setCheck(await rpc('manual_result_check',
-    { p_rider: rider.id, p_discipline: f.discipline, p_date: f.date, p_mark: f.mark })));
+  const relay = RELAYS[f.relay];
+  const maxRiders = relay ? relay.legs : 1;
+  const mark = relay ? relayMark(f.mark) : f.mark.trim();
+  const legMark = relay && secs(mark) ? fmtSecs(secs(mark) / relay.legs) : mark;
+  const comp = (comps.data || []).find((x) => x.id === f.competition_id);
+  const ready = riders.length && f.date && f.mark.trim() && (comp || (f.competition.trim() && f.country));
+  const pick = (r) => { if (!riders.some((x) => x.id === r.id)) setRiders(relay ? [...riders, r].slice(0, maxRiders) : [r]); setCheck(null); };
+  const pickComp = (id) => {
+    const x = (comps.data || []).find((y) => y.id === id);
+    setF({ ...f, competition_id: id, ...(x ? { competition: x.name, venue: x.venue || '', country: x.country || '', category: x.category || 'F',
+      date: f.date && f.date >= x.start_date ? f.date : x.start_date } : { competition: '', venue: '', country: '', category: 'F' }) });
+    setCheck(null);
+  };
+  const doCheck = () => a.run(async () => {
+    const out = [];
+    for (const r of riders) {
+      out.push({ r, ...(await rpc('manual_result_check', { p_rider: r.id, p_discipline: relay ? relay.leg : f.discipline, p_date: f.date, p_mark: legMark })) });
+    }
+    setCheck(out);
+  });
+  const reset = () => { setF(EMPTY_MANUAL); setRiders([]); setCheck(null); setEdit(null); };
   const save = () => a.run(async () => {
-    await rpc('add_manual_result', { p: { ...f, athlete_id: rider.id, wa_points: f.wa_points === '' ? null : +f.wa_points } });
-    setF({ ...f, mark: '', wa_points: '' }); setRider(null); setCheck(null); list.reload();
-  }, 'Ergebnis nachgetragen – zählt ab sofort in der Wertung.');
-  const pts = check?.wa_points ?? (f.wa_points === '' ? null : +f.wa_points);
+    await rpc('save_manual_result', { p: { ...f, mark, athlete_ids: riders.map((r) => r.id), place: f.place === '' ? null : +f.place,
+      wa_points: f.wa_points === '' ? null : +f.wa_points, ...(edit ? { replace_ids: edit } : {}) } });
+    reset(); list.reload(); comps.reload();
+  }, edit ? 'Nachtrag geändert.' : 'Ergebnis nachgetragen – zählt ab sofort in der Wertung.');
+  const missing = check && check.some((x) => x.wa_points == null) && f.wa_points === '';
+  const dup = check && !relay && check.find((x) => x.duplicate && !(edit && x.duplicate));
+  // Liste: Staffeln zusammenfassen
+  const groups = [];
+  for (const x of list.data || []) {
+    const key = x.relay ? `${x.date}|${x.competition}|${x.relay}|${x.mark}` : `id${x.id}`;
+    const g = groups.find((y) => y.key === key);
+    if (g) g.rows.push(x); else groups.push({ key, rows: [x] });
+  }
+  const startEdit = (g) => {
+    const x = g.rows[0];
+    setF({ ...EMPTY_MANUAL, relay: x.relay || '', discipline: x.relay ? EMPTY_MANUAL.discipline : x.discipline, date: x.date, mark: x.mark || '',
+      competition: x.competition, venue: x.venue || '', country: x.country || '', category: x.category || 'F', place: x.place ?? '',
+      source_url: x.source_url || '' });
+    setRiders(g.rows.map((y) => c.riderMap[y.athlete_id] || { id: y.athlete_id, name: y.athlete_id }));
+    setEdit(g.rows.map((y) => y.id)); setCheck(null);
+    document.querySelector('.scroll')?.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return html`<div class="stack">
     <section class="card stack">
-      <h3>Ergebnis nachtragen</h3>
+      <h3>${edit ? 'Nachtrag ändern' : 'Ergebnis nachtragen'}</h3>
       <p class="muted small">Für Rennen auf vermessenen Strecken, die World Athletics nicht führt (z. B. Ergebnisse bei RaceResult).
-        Bruttozeit eintragen – die App berechnet die WA-Punkte. Taucht das Ergebnis später bei World Athletics auf, gilt das WA-Ergebnis.</p>
-      ${rider ? html`<div class="row between"><${RiderCell} r=${rider} /><button class="small ghost" onClick=${() => { setRider(null); setCheck(null); }}>Ändern</button></div>`
-        : html`<${RiderPicker} athletes=${c.athletes} onPick=${(r) => { setRider(r); setCheck(null); }} limit=${8} />`}
+        Bruttozeit eintragen – die App berechnet die WA-Punkte. Mit Platz und Kategorie gibt es auch Platzierungspunkte.
+        Staffeln: Endzeit eintragen; gewertet wird die Durchschnittszeit je Läufer, jeder bekommt ein Drittel bzw. Viertel der Punkte.
+        Taucht ein Einzelergebnis später bei World Athletics auf, gilt das WA-Ergebnis.</p>
       <div class="grid2 compact">
-        <label>Disziplin<select value=${f.discipline} onChange=${set('discipline')}>${ROAD.map((d) => html`<option value=${d}>${discLabel(d)}</option>`)}</select></label>
+        <label>Art<select value=${f.relay} onChange=${(e) => { setF({ ...f, relay: e.target.value }); setRiders(riders.slice(0, RELAYS[e.target.value]?.legs || 1)); setCheck(null); }}>
+          <option value="">Einzelergebnis</option>${Object.entries(RELAYS).map(([k, r]) => html`<option value=${k}>Staffel ${r.label}</option>`)}</select></label>
+        ${!relay && html`<label>Disziplin<select value=${f.discipline} onChange=${set('discipline')}>${ROAD.map((d) => html`<option value=${d}>${discLabel(d)}</option>`)}</select></label>`}
+      </div>
+      ${riders.map((r) => html`<div class="row between" key=${r.id}><${RiderCell} r=${r} />
+        <button class="small ghost" onClick=${() => { setRiders(riders.filter((x) => x.id !== r.id)); setCheck(null); }}>Entfernen</button></div>`)}
+      ${riders.length < maxRiders && html`<${RiderPicker} athletes=${c.athletes} onPick=${pick} limit=${6}
+        placeholder=${relay ? `Läufer ${riders.length + 1} von bis zu ${maxRiders} suchen …` : 'Athlet suchen …'} />`}
+      <div class="grid2 compact">
+        <label>Veranstaltung<select value=${f.competition_id} onChange=${(e) => pickComp(e.target.value)}>
+          <option value="">Neue Veranstaltung</option>
+          ${(comps.data || []).map((x) => html`<option value=${x.id}>${fmtDate(x.start_date)} · ${x.name}</option>`)}</select></label>
         <label>Datum<input type="date" max=${today()} value=${f.date} onInput=${set('date')} /></label>
-        <label>Bruttozeit<input inputmode="decimal" placeholder="z. B. 29:18 oder 1:02:45" value=${f.mark} onInput=${set('mark')} /></label>
-        <label>Wettkampf<input placeholder="z. B. Stadtlauf Musterstadt" value=${f.competition} onInput=${set('competition')} /></label>
+        ${!comp && html`<label>Wettkampf<input placeholder="z. B. Stadtlauf Musterstadt" value=${f.competition} onInput=${set('competition')} /></label>`}
+        <label>Land<select value=${f.country} onChange=${set('country')} required>
+          <option value="">– bitte wählen –</option>${COUNTRY_CODES.map((x) => html`<option value=${x}>${withFlag(x)}</option>`)}</select></label>
         <label>Ort (optional)<input value=${f.venue} onInput=${set('venue')} /></label>
+        <label>Kategorie<select value=${f.category} onChange=${set('category')}>
+          ${['F', 'E', 'D', 'C', 'B', 'A', 'GL', 'GW', 'DF', 'OW'].map((k) => html`<option value=${k}>${k}</option>`)}</select></label>
+        <label>${relay ? 'Endzeit der Staffel' : 'Bruttozeit'}<input inputmode="decimal" placeholder=${relay ? 'z. B. 6:08.33' : 'z. B. 29:18 oder 1:02:45'}
+          value=${f.mark} onInput=${set('mark')} /></label>
+        <label>Platz (optional)<input type="number" min="1" value=${f.place} onInput=${set('place')} /></label>
         <label>Quelle (Link)<input type="url" placeholder="https://my.raceresult.com/…" value=${f.source_url} onInput=${set('source_url')} /></label>
       </div>
-      <div class="row"><button disabled=${a.busy || !ready} onClick=${doCheck}>Punkte berechnen</button></div>
+      ${relay && secs(mark) && html`<p class="small muted">Durchschnitt je Läufer: <strong>${legMark}</strong> über ${discLabel(relay.leg)}</p>`}
+      <div class="row"><button disabled=${a.busy || !ready} onClick=${doCheck}>Punkte berechnen</button>
+        ${edit && html`<button class="ghost" onClick=${reset}>Abbrechen</button>`}</div>
       ${check && html`<div class="stack">
-        ${check.duplicate && html`<p class="note err">Schon vorhanden: ${fmtDate(check.duplicate.date)} · ${check.duplicate.competition} · ${check.duplicate.mark}
-          (${check.duplicate.source === 'wa' ? 'World Athletics' : 'Nachtrag'}) – nicht doppelt eintragen.</p>`}
-        ${check.has_table ? html`<p class=${`note ${pts > check.threshold ? 'ok' : ''}`}><strong>${pts} WA-Punkte</strong>${' – '}${pts > check.threshold ? 'über der Schwelle, zählt in der Wertung.' : `unter der Schwelle von ${check.threshold}, bringt keine Punkte.`}</p>`
-          : html`<label>WA-Punkte<input type="number" value=${f.wa_points} onInput=${(e) => setF({ ...f, wa_points: e.target.value })} />
-            <small class="muted">Für diese Disziplin kann die App die Punkte noch nicht berechnen (zu wenige WA-Ergebnisse) – bitte von Hand eintragen.</small></label>`}
+        ${dup && html`<p class="note err">Schon vorhanden: ${fmtDate(dup.duplicate.date)} · ${dup.duplicate.competition} · ${dup.duplicate.mark}
+          (${dup.duplicate.source === 'wa' ? 'World Athletics' : 'Nachtrag'}) – nicht doppelt eintragen.</p>`}
+        ${check.map((x) => x.wa_points != null && html`<p class=${`note ${x.wa_points > x.threshold ? 'ok' : ''}`} key=${x.r.id}>
+          ${riders.length > 1 ? `${x.r.name}: ` : ''}<strong>${x.wa_points} WA-Punkte</strong>${' – '}${x.wa_points > x.threshold
+            ? `über der Schwelle${relay ? `, zählt zu 1/${relay.legs}` : ', zählt in der Wertung'}.` : `unter der Schwelle von ${x.threshold}.`}</p>`)}
+        ${check.some((x) => x.wa_points == null) && html`<label>WA-Punkte<input type="number" value=${f.wa_points} onInput=${(e) => setF({ ...f, wa_points: e.target.value })} />
+          <small class="muted">Für diese Disziplin kann die App die Punkte noch nicht berechnen (zu wenige WA-Ergebnisse) – bitte von Hand eintragen.</small></label>`}
       </div>`}
-      <div class="row"><button class="primary" disabled=${a.busy || !check || check.duplicate || pts === null || !f.competition.trim()} onClick=${save}>Speichern</button></div>
+      <div class="row"><button class="primary" disabled=${a.busy || !check || dup || missing || !ready} onClick=${save}>${edit ? 'Änderung speichern' : 'Speichern'}</button></div>
       <${Msg} msg=${a.msg} />
     </section>
     <section class="card stack">
-      <h3>Bisherige Nachträge</h3>
-      ${!list.data ? html`<${Loading} error=${list.error} />` : list.data.length === 0 ? html`<p class="muted small">Noch keine.</p>` : html`<ul class="list compact">
-        ${list.data.map((x) => html`<li key=${x.id}>
-          <span>${fmtDate(x.date)} · <strong>${c.riderMap[x.athlete_id]?.name || x.athlete_id}</strong> · ${discLabel(x.discipline)} ${x.mark} · ${x.result_score} WA-P.
-            <span class="muted"> – ${x.competition}${x.source_url ? html` · <a href=${x.source_url} target="_blank" rel="noopener">Quelle</a>` : ''}
-            ${counted.data && !counted.data.has(x.id) ? ' · zählt nicht' : ''}</span></span>
+      <h3>Alle Nachträge</h3>
+      ${!list.data ? html`<${Loading} error=${list.error} />` : groups.length === 0 ? html`<p class="muted small">Noch keine.</p>` : html`<ul class="list compact">
+        ${groups.map((g) => { const x = g.rows[0]; return html`<li key=${g.key} class="manual-row">
+          <span>${fmtDate(x.date)} · <strong>${g.rows.map((y) => c.riderMap[y.athlete_id]?.name || y.athlete_id).join(', ')}</strong>
+            <br />${x.relay ? `Staffel ${RELAYS[x.relay]?.label || x.relay}` : discLabel(x.discipline)} ${x.mark} · ${x.result_score} WA-P.${x.place ? ` · Platz ${x.place}` : ''}
+            <span class="muted"> – ${x.country ? flag(x.country) + ' ' : ''}${x.competition} <${CatBadge} cat=${x.category} />${x.source_url
+              ? html` · <a href=${x.source_url} target="_blank" rel="noopener">Quelle</a>` : ''}
+            ${counted.data && !g.rows.some((y) => counted.data.has(y.id)) ? ' · zählt nicht' : ''}</span></span>
+          <span class="row nowrap"><button class="small" disabled=${a.busy} onClick=${() => startEdit(g)}>Bearbeiten</button>
           <button class="small ghost" disabled=${a.busy} onClick=${() => confirm('Nachtrag löschen?') && a.run(async () => {
-            await rpc('delete_manual_result', { p_id: x.id }); list.reload(); }, 'Nachtrag gelöscht.')}>Löschen</button></li>`)}</ul>`}
+            for (const y of g.rows) await rpc('delete_manual_result', { p_id: y.id });
+            list.reload(); }, 'Nachtrag gelöscht.')}>Löschen</button></span></li>`; })}</ul>`}
     </section>
   </div>`;
 }

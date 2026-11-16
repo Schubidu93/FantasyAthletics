@@ -189,6 +189,15 @@ export function flag(code) {
   if (!iso) return '';
   return String.fromCodePoint(...[...iso].map((ch) => 0x1f1e6 + ch.charCodeAt(0) - 65));
 }
+// Länderauswahl (IOC-Codes), Deutschland und Nachbarn zuerst
+export const COUNTRY_CODES = (() => {
+  const all = [...new Set(Object.keys(ISO2).map((c) => nationCode(c)))].filter((c) => ISO2[c]).sort();
+  const top = ['GER', 'AUT', 'SUI', 'NED', 'BEL', 'FRA', 'ITA', 'ESP', 'GBR', 'USA'];
+  return [...top, ...all.filter((c) => !top.includes(c))];
+})();
+// Staffel-Nachträge
+export const RELAYS = { '3x800': { label: '3 × 800 m', leg: '800 Metres', legs: 3 }, '3x1000': { label: '3 × 1000 m', leg: '1000 Metres', legs: 3 },
+  '4x400': { label: '4 × 400 m', leg: '400 Metres', legs: 4 } };
 export const withFlag = (code) => (code ? `${flag(code)} ${nationCode(code)}`.trim() : '');
 
 // ---- Hooks ---------------------------------------------------------------
