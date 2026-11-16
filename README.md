@@ -68,8 +68,8 @@ Der Zeitplaner läuft in der Datenbank (pg_cron, alle 15 Minuten, `scheduler_tic
 
 | Secret | Wofür |
 |---|---|
-| `SUPABASE_URL`, `SUPABASE_ANON_KEY` | App (der anon-Key darf öffentlich sein) |
-| `SUPABASE_SERVICE_KEY` | Datenabruf und Push-Versand |
+| `SUPABASE_URL`, `SUPABASE_ANON_KEY` | App: Project URL und **Publishable key** (`sb_publishable_…`, darf öffentlich sein; alter anon-Key geht auch) |
+| `SUPABASE_SERVICE_KEY` | Datenabruf und Push-Versand: **Secret key** (`sb_secret_…`; alter service_role-Key geht auch) |
 | `SUPABASE_DB_URL` | Schema einspielen, Diagnose |
 | `GH_DISPATCH_TOKEN` | Zeitplaner darf Workflows starten (wird in den Supabase-Vault übernommen) |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `FEEDBACK_TO` | Feedback per E-Mail (optional) |
