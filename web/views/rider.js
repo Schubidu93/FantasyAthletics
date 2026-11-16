@@ -19,8 +19,8 @@ function placeLabel(x) {
 // Zusatz zum Lauf: kombinierte Platzierung bzw. Wertung der Runde vor dem Finale
 // Wettkampf kurz: Name vor dem ersten Komma, dazu der Ort (letzter Teil), wenn er nicht schon im Namen steht
 function compShort(c) {
-  const [main, ...rest] = String(c || '').replace(/\s+-\s+(Diamond Discipline|Split times)$/i, '').split(', ');
-  const city = rest.length ? rest[rest.length - 1].replace(/\s*\(i\)$/, '') : '';
+  const [main, ...rest] = String(c || '').replace(/\s+-\s+[^,]*$/, '').split(', ');
+  const city = rest.length ? rest[rest.length - 1].replace(/\s*\(i\)\s*$/, '') : '';
   return city && !main.includes(city) ? `${main} · ${city}` : main;
 }
 // „18.07.26“
@@ -123,11 +123,12 @@ export function RiderModal() {
         <button class="ghost small" onClick=${() => setSlug(null)} aria-label="Schließen">✕</button>
       </div>
       ${error ? html`<p class="note err">${error}</p>` : !data ? html`<p class="muted">Lädt …</p>` : html`
-        ${data.pbs.length > 0 && html`<details class="toplists" open><summary class="small">Bestleistungen</summary>
-          <ul class="list compact pb-list">${data.pbs.map((p) => html`<li key=${p.discipline} class=${p.date >= `${thisYear}-01-01` ? 'pb-new' : ''}>
-            <span>${discLabel(p.discipline)}</span><span><strong>${p.mark}</strong> <span class="muted small">${dateShort(p.date)}${p.result_score
-              ? ` · ${p.result_score}` : ''}</span></span></li>`)}</ul>
-          <p class="muted small">Zahl hinten: WA-Punkte. Hervorgehoben: Bestleistung aus ${thisYear}.</p></details>`}
+        ${data.pbs.length > 0 && html`<details class="toplists"><summary class="small">Bestleistungen (${data.pbs.length})</summary>
+          <table class="pb-tbl"><thead><tr><th>Disziplin</th><th class="num">Zeit</th><th class="num">Datum</th><th class="num">WA-P.</th></tr></thead>
+            <tbody>${data.pbs.map((p) => html`<tr key=${p.discipline} class=${p.date >= `${thisYear}-01-01` ? 'pb-new' : ''}>
+              <td>${discLabel(p.discipline)}</td><td class="num"><strong>${p.mark}</strong></td>
+              <td class="num muted">${dateShort(p.date)}</td><td class="num muted">${p.result_score || ''}</td></tr>`)}</tbody></table>
+          <p class="muted small">Farbig: Bestleistung aus ${thisYear}.</p></details>`}
         <div class="row between">
           ${years.length > 1 ? html`<div class="seg small">${years.map((yy) =>
             html`<button class=${yy === y ? 'active' : ''} onClick=${() => setYear(yy)}>${yy}</button>`)}</div>` : html`<span class="muted small">${y || ''}</span>`}
@@ -172,8 +173,10 @@ export function RiderModal() {
           </div>`)}</div>
         </div>`}
         ${data.toplists.length > 0 && html`<details class="toplists"><summary class="small">Toplisten (DE)</summary>
-          <ul class="list compact">${data.toplists.map((t) => html`<li key=${t.year + t.discipline} class=${L ? 'clickable' : ''} onClick=${() => toTop(t)}>
-            <span>${t.year} · ${discLabel(t.discipline)}</span><span><strong>${t.rank}.</strong> <span class="muted">${t.mark}</span></span></li>`)}</ul></details>`}`}
+          <table class="pb-tbl"><thead><tr><th>Jahr</th><th>Disziplin</th><th class="num">Platz</th><th class="num">Zeit</th></tr></thead>
+            <tbody>${data.toplists.map((t) => html`<tr key=${t.year + t.discipline} class=${L ? 'clickable' : ''} onClick=${() => toTop(t)}>
+              <td class="muted">${t.year}</td><td>${discLabel(t.discipline)}</td><td class="num"><strong>${t.rank}.</strong></td>
+              <td class="num">${t.mark}</td></tr>`)}</tbody></table></details>`}`}
       <p class="muted small">Quelle: World Athletics, Nachträge mit eigener Quelle. Antippen öffnet den Wettkampf bzw. die Topliste.
         ${data?.admin && html` <button type="button" class="linkish small" onClick=${() => setEditRec(!editRec)}>${editRec ? 'Fertig' : 'Rekord von Hand eintragen'}</button>`}</p>
     </div>
