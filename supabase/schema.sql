@@ -82,12 +82,14 @@ create table if not exists scoring_config (
   id              int primary key default 1 check (id = 1),
   pool_threshold  int     not null default 1000,  -- Pool: WA-Punkte in der DE-Topliste (Jahr oder Vorjahr) mindestens
   perf_threshold  int     not null default 1000,  -- Leistungspunkte = max(0, WA-Punkte − Schwelle) × Faktor
-  perf_factor     numeric not null default 1,
-  placing_factor  numeric not null default 1,     -- Platzierungspunkte = Tabellenwert × Faktor
-  cross_factor    numeric not null default 1,     -- Cross: max(0, Cross-Tabellenwert − perf_threshold) × Faktor × Distanzfaktor
+  perf_factor     numeric not null default 0.1,   -- 0,1 = gleiche Größenordnung wie im alten Spiel (AppSheet)
+  placing_factor  numeric not null default 0.1,   -- Platzierungspunkte = Tabellenwert × Faktor
+  cross_factor    numeric not null default 0.1,   -- Cross: max(0, Cross-Tabellenwert − perf_threshold) × Faktor × Distanzfaktor
   updated_at      timestamptz not null default now()
 );
-alter table scoring_config alter column cross_factor set default 1;
+alter table scoring_config alter column perf_factor set default 0.1;
+alter table scoring_config alter column placing_factor set default 0.1;
+alter table scoring_config alter column cross_factor set default 0.1;
 insert into scoring_config (id) values (1) on conflict do nothing;
 
 -- Rohdaten der Ergebnisse von World Athletics (ein Eintrag pro Lauf eines Athleten)
@@ -1750,15 +1752,15 @@ begin
                                                  where ps.placing_table = d.cross_table and ps.category = w.category
                                                    and ps.race_type = 'F' and ps.place = w.place and _race_type(w.race) = 'F'), 0)
                                       - c.perf_threshold)
-                          * c.cross_factor * coalesce(_cross_factor(cross_km(w.competition)), d.factor, 0), 1)
-                  else round(greatest(0, coalesce(w.result_score, 0) - c.perf_threshold) * c.perf_factor * coalesce(d.factor, 0), 1)
+                          * c.cross_factor * coalesce(_cross_factor(cross_km(w.competition)), d.factor, 0), 2)
+                  else round(greatest(0, coalesce(w.result_score, 0) - c.perf_threshold) * c.perf_factor * coalesce(d.factor, 0), 2)
              end perf,
              case when d.cross_table is not null then 0
                   else round(coalesce((select max(ps.points) from placing_scores ps
                                         where ps.placing_table = any (d.placing_tables) and ps.category = w.category
                                           and ps.race_type = coalesce(w.placing_round, _race_type(w.race))
                                           and ps.place = coalesce(w.placing_place, w.place)), 0)
-                          * c.placing_factor * coalesce(d.factor, 0), 1)
+                          * c.placing_factor * coalesce(d.factor, 0), 2)
              end plc
         from wa_results w left join disciplines d on d.name = w.discipline
        where (p_from is null or w.date >= p_from) and w.date >= date '2025-01-01'
@@ -2259,7 +2261,7 @@ begin
   for md in update matchdays set status = 'closed', closed_at = now() where status = 'running' and ends_on < current_date
              returning * loop
     perform _notify(t.manager_id, '🏁 ' || md.name || ' abgeschlossen',
-        coalesce((select round(sum(p.points))::text from _league_points(md.league_id) p
+        coalesce((select round(sum(p.points), 1)::text from _league_points(md.league_id) p
                    where p.matchday_id = md.id and p.manager_id = t.manager_id), '0')
         || ' Punkte · Gesamt Platz ' || t."position", '#/league/' || md.league_id || '/table')
        from _league_table(md.league_id) t;
@@ -2460,7 +2462,7 @@ begin
       select rp.manager_id, rp.name, sum(rp.p) p from (
         select rp.*, row_number() over (partition by rp.manager_id, rp.name order by rp.p desc) rn from rp) rp
        where rn <= v_x group by 1, 2)
-    select p_league, mg.id, coalesce(sum(b.p), 0), coalesce(jsonb_object_agg(b.name, round(b.p, 1)) filter (where b.name is not null), '{}'), v_sig
+    select p_league, mg.id, coalesce(sum(b.p), 0), coalesce(jsonb_object_agg(b.name, round(b.p, 2)) filter (where b.name is not null), '{}'), v_sig
       from managers mg left join best b on b.manager_id = mg.id
      where mg.league_id = p_league group by mg.id;
   end if;
@@ -2481,9 +2483,9 @@ begin
         from week group by 1)
     insert into notifications (user_id, title, body, url)
     select m.user_id,
-           '📊 Deine Woche: +' || round(coalesce(p.total, 0))::text || ' Punkte',
+           '📊 Deine Woche: +' || round(coalesce(p.total, 0), 1)::text || ' Punkte',
            lg.name || ': Platz ' || t."position" || ' von ' || (select count(*) from managers where league_id = lg.id)
-             || coalesce(' · bester Athlet ' || _rname(p.best_rider) || ' (+' || round(p.best_pts)::text || ')', ' · diese Woche keine Punkte'),
+             || coalesce(' · bester Athlet ' || _rname(p.best_rider) || ' (+' || round(p.best_pts, 1)::text || ')', ' · diese Woche keine Punkte'),
            '#/league/' || lg.id || '/home'
       from managers m
       join _league_table(lg.id) t on t.manager_id = m.id

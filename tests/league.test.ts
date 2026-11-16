@@ -9,6 +9,7 @@ const day = (n: number) => iso(new Date(Date.now() + n * 864e5));
 
 beforeEach(async () => {
   db = await freshDb();
+  await db.query("update scoring_config set perf_factor = 1, placing_factor = 1, cross_factor = 1");   // Zahlen leichter nachvollziehbar
   alice = await createUser(db, "alice");
   bob = await createUser(db, "bob");
 });

@@ -1,6 +1,6 @@
 // Athleten-Übersicht: alle Athleten der Wertung mit Punkten der Saison und Besitzer in der Liga
 import { html, useState, useMemo } from '../vendor/preact-htm.js';
-import { rpc, useLoad, Loading, RiderCell, normName, rpcAll, GROUPS, GROUP_LABEL, riderGroup } from '../lib.js';
+import { rpc, useLoad, Loading, RiderCell, normName, rpcAll, fmtPts, GROUPS, GROUP_LABEL, riderGroup } from '../lib.js';
 
 export function Riders({ c }) {
   const years = useLoad(() => rpc('result_years'), []);
@@ -57,7 +57,7 @@ export function Riders({ c }) {
           <td><${RiderCell} r=${r} /></td>
           <td class="col-owner">${m ? m.team_name : html`<span class="tag ok">frei</span>`}</td>
           <td class="num hide-sm">${p?.results || 0}</td>
-          <td class="num"><strong>${Math.round(Number(p?.points) || 0).toLocaleString('de-DE')}</strong></td></tr>`;
+          <td class="num"><strong>${fmtPts(p?.points)}</strong></td></tr>`;
       })}</tbody>
     </table></div>
     ${list.length > limit && html`<div class="row"><button onClick=${() => setLimit(limit + 200)}>Mehr anzeigen (${list.length - limit} weitere)</button></div>`}

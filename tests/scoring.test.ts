@@ -7,9 +7,31 @@ const D = `${Y}-06-01`;
 
 beforeEach(async () => {
   db = await freshDb();
+  // Die meisten Tests rechnen mit Faktor 1 (leichter nachvollziehbar); Standard ist 0,1 – siehe eigener Test
+  await db.query("update scoring_config set perf_factor = 1, placing_factor = 1, cross_factor = 1");
 });
 afterEach(async () => {
   await db.end();
+});
+
+describe("Standardwerte wie im alten Spiel (Faktor 0,1)", () => {
+  it("Ergebnisse von Filimon Abraham", async () => {
+    await db.query("update scoring_config set perf_factor = default, placing_factor = default, cross_factor = default");
+    const a = await athlete(db, 1, "Filimon ABRAHAM", "men", "Marathon", 1150);
+    await result(a, "15 Kilometres Road", "F", "F", 24, 1019, { competition: "a 15 km Nijmegen" });
+    await result(a, "Marathon", "F", "F", 9, 1135, { competition: "b Marathon Frankfurt" });
+    await result(a, "10 Kilometres Road", "B", "F", 2, 1077, { competition: "c 10 km DM Siegburg" });
+    await result(a, "10 Kilometres Road", "F", "F", 2, 1086, { competition: "d 10 km Berlin" });
+    await result(a, "Cross Country", "GL", "F", 1, 0, { competition: "e Cross Pforzheim - XC 7.5km" });
+    await db.query("select rebuild_results(null)");
+    expect(await points()).toEqual({
+      "a 15 km Nijmegen": [3.04, 0],        // altes Spiel: 3,04
+      "b Marathon Frankfurt": [40.5, 0],    // altes Spiel: 40,50
+      "c 10 km DM Siegburg": [12.32, 4],    // WA 2026: Road Running B 2. = 25 (altes Spiel: 50 → 20,32)
+      "d 10 km Berlin": [13.76, 0.32],      // WA 2026: Road Running F 2. = 2 (altes Spiel: 14,40)
+      "e Cross Pforzheim - XC 7.5km": [32, 0], // (1200 − 1000) × 0,1 × 1,6 – wie im alten Spiel
+    });
+  });
 });
 
 async function result(slug: string, discipline: string, category: string, race: string, place: number | null, score: number,

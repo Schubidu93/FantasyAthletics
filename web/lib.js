@@ -51,7 +51,7 @@ export const fmtDate = (d) => (d ? new Date(d.length === 10 ? d + 'T00:00:00' : 
   .toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '–');
 export const fmtDateTime = (d) =>
   d ? new Date(d).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }) : '–';
-export const fmtPts = (n) => (Math.round((Number(n) || 0) * 10) / 10).toLocaleString('de-DE');
+export const fmtPts = (n) => (Math.round((Number(n) || 0) * 100) / 100).toLocaleString('de-DE');
 // Fristende anzeigen: 0:00 Uhr heißt „bis Ende des Vortags“ → nur das Datum des Vortags; sonst Datum mit Uhrzeit
 export function fmtUntil(ts, { weekday = false } = {}) {
   if (!ts) return '–';

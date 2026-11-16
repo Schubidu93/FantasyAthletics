@@ -96,9 +96,11 @@ export function Rules({ c }) {
       <summary><h3>Punkte</h3></summary>
       <ul>
         <li>Jedes Ergebnis bei World Athletics bringt
-          <strong>Leistungspunkte</strong> = (WA-Punkte − ${cfg ? cfg.perf_threshold : 1000}) × ${cfg ? fmtNum(cfg.perf_factor) : 1} (nur über der Schwelle) plus
-          <strong>Platzierungspunkte</strong> = WA-Platzierungspunkte × ${cfg ? fmtNum(cfg.placing_factor) : 1},
-          beides mal dem <strong>Disziplinfaktor</strong> (z. B. 5000 m 1,3 · 10.000 m 1,6 · Halbmarathon 2 · Marathon 3 · Gehen und Sprintstaffeln 0).</li>
+          <strong>Leistungspunkte</strong> = (WA-Punkte − ${cfg ? cfg.perf_threshold : 1000}) × ${cfg ? fmtNum(cfg.perf_factor) : '0,1'} (nur über der Schwelle) plus
+          <strong>Platzierungspunkte</strong> = WA-Platzierungspunkte × ${cfg ? fmtNum(cfg.placing_factor) : '0,1'},
+          beides mal dem <strong>Disziplinfaktor</strong> (z. B. 5000 m 1,3 · 10.000 m 1,6 · Halbmarathon 2 · Marathon 3 · Gehen und Sprintstaffeln 0).
+          ${cfg && cfg.perf_threshold === 1000 && html`Beispiel: Marathon in 2:09:43 (1135 WA-Punkte), Platz 9 ohne Platzierungspunkte →
+            135 × ${fmtNum(cfg.perf_factor)} × 3 = ${fmtNum(Math.round(135 * cfg.perf_factor * 3 * 100) / 100)} Punkte.`}</li>
         <li><strong>Platzierungspunkte</strong> genau nach den World-Ranking-Regeln 2026 von World Athletics: abhängig von Wettkampfkategorie
           (OW = Olympia/WM, DF = Diamond-League-Finale, GW = Hallen-WM/Diamond League, GL = EM, A–F) und Platz.
           Eigene Tabellen für 800/1500 m, 5000 m/Hindernis, 10.000 m, Marathon und Straße; passt eine Disziplin zu mehreren Tabellen, zählt die bessere.</li>
@@ -107,7 +109,7 @@ export function Rules({ c }) {
         <li><strong>Finals mit mehreren Läufen</strong> (z. B. 10.000 m in zwei Läufen): Platz über alle Läufe nach Zeit, gewertet wie ein Finale.</li>
         <li><strong>Cross:</strong> World Athletics vergibt hier statt WA-Punkten für die Zeit einen festen Wert je Platz und Kategorie
           (z. B. GL-Sieg 1200, GL-3. 1165). Gewertet wird wie eine Leistung: (Wert − ${cfg ? cfg.perf_threshold : 1000}, nur darüber)
-          × ${cfg ? fmtNum(cfg.cross_factor) : 1} × Distanzfaktor, keine Platzierungspunkte. Distanzfaktor:
+          × ${cfg ? fmtNum(cfg.cross_factor) : '0,1'} × Distanzfaktor, keine Platzierungspunkte. Distanzfaktor:
           bis 3 km 1 (wie 1500 m), über 3 bis 6 km 1,3 (wie 5000 m), über 6 bis 12 km 1,6 (wie 10.000 m), über 12 km 2 (wie Halbmarathon).
           Die Distanz steht bei World Athletics im Wettkampfnamen; ohne Angabe gilt 1,6. Rennen über verschiedene Distanzen werden getrennt gewertet.
           Berg- und Traillauf nutzen die Tabelle für 10 km Straße.</li>
