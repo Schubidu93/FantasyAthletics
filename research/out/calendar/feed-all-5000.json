@@ -1,0 +1,17 @@
+{
+ "status": 200,
+ "errors": [
+  {
+   "path": null,
+   "locations": [
+    {
+     "line": 2,
+     "column": 83,
+     "sourceName": null
+    }
+   ],
+   "message": "Validation error of type SubSelectionRequired: Sub selection required for type Team of field team @ 'resultsByAthlete/results/team'"
+  }
+ ],
+ "results": []
+}
