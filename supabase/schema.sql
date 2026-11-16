@@ -216,6 +216,9 @@ alter table wa_results add column if not exists added_by uuid;
 -- Staffel-Nachträge: je Läufer eine Zeile mit der Teilstrecke (z. B. 800 Metres bei 3x800), Anteil 1/3 bzw. 1/4 der Punkte
 alter table wa_results add column if not exists relay text;
 alter table wa_results add column if not exists share numeric;
+-- Meisterschaftsplatz, wenn die Meisterschaft in ein offenes Rennen eingebettet ist (vom Admin; der Importer lässt es stehen)
+alter table wa_results add column if not exists champ_place int;
+alter table wa_results add column if not exists champ_category text;
 -- Rekord laut Admin: DR (deutscher), ER (Europa-), WR (Weltrekord); der Importer lässt die Spalte unverändert
 alter table wa_results add column if not exists record text;
 do $$ begin
@@ -2048,11 +2051,17 @@ begin
                   else round(greatest(0, coalesce(w.result_score, 0) - c.perf_threshold) * c.perf_factor * coalesce(d.factor, 0)
                              * coalesce(w.share, 1), 2)
              end perf,
+             -- Meisterschaft im offenen Rennen (z. B. DM im Frankfurt-Marathon): der höhere Wert aus Platz im Rennen
+             -- und Meisterschaftsplatz (champ_place, Kategorie champ_category, Standard B) zählt
              case when d.cross_table is not null or _is_split(w.competition, w.remark) then 0
-                  else round(coalesce((select max(ps.points) from placing_scores ps
-                                        where ps.placing_table = any (d.placing_tables) and ps.category = w.category
-                                          and ps.race_type = coalesce(w.placing_round, _race_type(w.race))
-                                          and ps.place = coalesce(w.placing_place, w.place)), 0)
+                  else round(greatest(
+                         coalesce((select max(ps.points) from placing_scores ps
+                                    where ps.placing_table = any (d.placing_tables) and ps.category = w.category
+                                      and ps.race_type = coalesce(w.placing_round, _race_type(w.race))
+                                      and ps.place = coalesce(w.placing_place, w.place)), 0),
+                         coalesce((select max(ps.points) from placing_scores ps
+                                    where ps.placing_table = any (d.placing_tables) and ps.category = coalesce(w.champ_category, 'B')
+                                      and ps.race_type = 'F' and ps.place = w.champ_place), 0))
                           * c.placing_factor * coalesce(d.factor, 0) * coalesce(w.share, 1), 2)
              end plc
         from wa_results w left join disciplines d on d.name = w.discipline
@@ -2101,6 +2110,28 @@ begin
 end $$;
 
 -- Rekord an einem Ergebnis markieren (DR/ER/WR) oder entfernen (null) – jeder Liga-Admin; Punkte werden neu berechnet
+-- Meisterschaftsplatz an einem Ergebnis eintragen (null = entfernen) – jeder Liga-Admin; Punkte werden neu berechnet
+create or replace function set_result_champ(p_id bigint, p_place int, p_category text default 'B') returns void
+language plpgsql security definer set search_path = public as $$
+declare d date;
+begin
+  if not exists (select 1 from leagues where admin_user = auth.uid()) and not _is_service() then
+    raise exception 'Nur Liga-Admins dürfen Meisterschaftsplätze eintragen.';
+  end if;
+  if p_place is not null and p_place < 1 then raise exception 'Ungültiger Platz.'; end if;
+  if p_category is not null and p_category not in ('OW', 'DF', 'GW', 'GL', 'A', 'B', 'C', 'D', 'E', 'F') then
+    raise exception 'Unbekannte Kategorie: %', p_category;
+  end if;
+  update wa_results set champ_place = p_place, champ_category = case when p_place is null then null else coalesce(p_category, 'B') end
+   where id = p_id returning date into d;
+  if d is null then raise exception 'Ergebnis nicht gefunden.'; end if;
+  perform rebuild_results(d);
+  perform refresh_season_stats(extract(year from d)::int);
+  insert into admin_log (league_id, user_id, action, details)
+    select id, auth.uid(), 'result_champ', jsonb_build_object('wa_result', p_id, 'place', p_place, 'category', p_category)
+      from leagues where admin_user = auth.uid();
+end $$;
+
 create or replace function set_result_record(p_id bigint, p_record text) returns void
 language plpgsql security definer set search_path = public as $$
 declare d date;
