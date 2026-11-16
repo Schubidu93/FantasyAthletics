@@ -188,6 +188,9 @@ create table if not exists wa_results (
 alter table wa_results add column if not exists source text not null default 'wa';
 alter table wa_results add column if not exists source_url text;
 alter table wa_results add column if not exists added_by uuid;
+-- Staffel-Nachträge: je Läufer eine Zeile mit der Teilstrecke (z. B. 800 Metres bei 3x800), Anteil 1/3 bzw. 1/4 der Punkte
+alter table wa_results add column if not exists relay text;
+alter table wa_results add column if not exists share numeric;
 -- Rekord laut Admin: DR (deutscher), ER (Europa-), WR (Weltrekord); der Importer lässt die Spalte unverändert
 alter table wa_results add column if not exists record text;
 do $$ begin
@@ -1967,6 +1970,7 @@ begin
   select athlete_id, competition_id, label, date, place, perf + plc + rec, perf, plc, rec, id
     from (
       select w.id, w.athlete_id, w.date, w.place,
+             -- Staffel: Leistungs- und Platzierungspunkte nur anteilig (1/3 bzw. 1/4)
              case w.record when 'WR' then c.record_wr when 'ER' then c.record_er when 'DR' then c.record_dr else 0 end rec,
              coalesce('wa-c' || w.wa_competition_id, 'wa-' || md5(w.competition || w.date::text)) competition_id,
              w.discipline || case when d.cross_table is not null and cross_km(w.competition) is not null
@@ -1978,21 +1982,22 @@ begin
                                                    and ps.race_type = 'F' and ps.place = w.place and _race_type(w.race) = 'F'), 0)
                                       - c.perf_threshold)
                           * c.cross_factor * coalesce(_cross_factor(cross_km(w.competition)), d.factor, 0), 2)
-                  else round(greatest(0, coalesce(w.result_score, 0) - c.perf_threshold) * c.perf_factor * coalesce(d.factor, 0), 2)
+                  else round(greatest(0, coalesce(w.result_score, 0) - c.perf_threshold) * c.perf_factor * coalesce(d.factor, 0)
+                             * coalesce(w.share, 1), 2)
              end perf,
              case when d.cross_table is not null then 0
                   else round(coalesce((select max(ps.points) from placing_scores ps
                                         where ps.placing_table = any (d.placing_tables) and ps.category = w.category
                                           and ps.race_type = coalesce(w.placing_round, _race_type(w.race))
                                           and ps.place = coalesce(w.placing_place, w.place)), 0)
-                          * c.placing_factor * coalesce(d.factor, 0), 2)
+                          * c.placing_factor * coalesce(d.factor, 0) * coalesce(w.share, 1), 2)
              end plc
         from wa_results w left join disciplines d on d.name = w.discipline
        where (p_from is null or w.date >= p_from) and w.date >= date '2025-01-01'
          -- Zwischenzeiten (z. B. 1500 m im Meilenrennen) zählen nicht, nur das eigentliche Rennen
          and not _is_split(w.competition, w.remark)
          -- Nachtrag entfällt, sobald World Athletics dasselbe Ergebnis führt (gleiche Disziplin, ±1 Tag)
-         and not (w.source = 'manual' and exists (select 1 from wa_results o
+         and not (w.source = 'manual' and w.relay is null and exists (select 1 from wa_results o
                    where o.athlete_id = w.athlete_id and o.source = 'wa' and o.discipline = w.discipline
                      and abs(o.date - w.date) <= 1))
     ) x
@@ -2697,6 +2702,109 @@ begin
   perform refresh_season_stats(extract(year from v_date)::int);
   return v_id;
 end $$;
+
+-- Staffel-Kennung → Teilstrecke und Anzahl Läufer
+create or replace function _relay_leg(p_relay text) returns table (discipline text, legs int)
+language sql immutable as $$
+  select v.d, v.n from (values ('3x800', '800 Metres', 3), ('3x1000', '1000 Metres', 3), ('4x400', '400 Metres', 4)) v(r, d, n)
+   where v.r = p_relay;
+$$;
+-- Zeit als Text (m:ss.cc bzw. h:mm:ss)
+create or replace function _fmt_seconds(p numeric) returns text
+language sql immutable as $$
+  select case when p >= 3600 then to_char(floor(p / 3600), 'FM9') || ':' || to_char(floor(mod(p, 3600) / 60), 'FM00') || ':' || to_char(floor(mod(p, 60)), 'FM00')
+              else to_char(floor(p / 60), 'FM99') || ':' || to_char(mod(p, 60), 'FM00.00') end;
+$$;
+
+-- Nachtrag anlegen oder ändern (ersetzt dann die Zeilen in replace_ids). p:
+--   athlete_ids (1 Athlet, bei Staffeln bis zu 3 bzw. 4), relay ('3x800', '3x1000', '4x400' oder leer), discipline (ohne Staffel),
+--   date, mark (Bruttozeit bzw. Staffel-Endzeit), competition, venue, country (Pflicht), category (Standard F), place (optional),
+--   source_url, wa_points (nur wenn die App sie nicht berechnen kann), competition_id (vorhandene Nachtrags-Veranstaltung)
+create or replace function save_manual_result(p jsonb) returns int
+language plpgsql security definer set search_path = public as $$
+declare r athletes; d disciplines; v_date date := (p->>'date')::date; v_mark text := nullif(trim(p->>'mark'), '');
+        v_comp text := nullif(trim(p->>'competition'), ''); v_country text := upper(nullif(trim(p->>'country'), ''));
+        v_cat text := upper(coalesce(nullif(trim(p->>'category'), ''), 'F')); v_place int := nullif(p->>'place', '')::int;
+        v_relay text := nullif(p->>'relay', ''); v_disc text := p->>'discipline'; v_legs int := 1; v_secs numeric;
+        v_leg text; pts int; v_ids text[]; v_old date; v_slug text := nullif(p->>'competition_id', ''); n int := 0; a text;
+        v_venue text := nullif(trim(p->>'venue'), '');
+begin
+  perform _require_any_admin();
+  select array_agg(x) into v_ids from jsonb_array_elements_text(coalesce(p->'athlete_ids', jsonb_build_array(p->>'athlete_id'))) x where x is not null;
+  if coalesce(cardinality(v_ids), 0) = 0 then raise exception 'Bitte einen Athleten wählen.'; end if;
+  if v_relay is not null then
+    select l.discipline, l.legs into v_disc, v_legs from _relay_leg(v_relay) l;
+    if v_disc is null then raise exception 'Unbekannte Staffel: %', v_relay; end if;
+    if cardinality(v_ids) > v_legs then raise exception 'Höchstens % Läufer.', v_legs; end if;
+    -- „6:08:33“ bei Staffeln = 6:08,33 Minuten
+    if v_mark ~ '^\d{1,2}:\d{2}:\d{2}$' and split_part(v_mark, ':', 1)::int < 30 then
+      v_mark := regexp_replace(v_mark, '^(\d+:\d{2}):(\d{2})$', '\1.\2');
+    end if;
+  elsif cardinality(v_ids) > 1 then raise exception 'Mehrere Läufer nur bei Staffeln.';
+  end if;
+  select * into d from disciplines where name = v_disc;
+  if d.name is null or coalesce(d.factor, 0) = 0 or d.cross_table is not null then
+    raise exception 'Disziplin % kann nicht nachgetragen werden.', v_disc;
+  end if;
+  if v_date is null or v_date > current_date or v_date < date '2025-01-01' then raise exception 'Ungültiges Datum.'; end if;
+  if v_slug is not null then
+    select name, coalesce(v_venue, venue), coalesce(v_country, country), coalesce(nullif(p->>'category', ''), category, 'F')
+      into v_comp, v_venue, v_country, v_cat from competitions where id = v_slug and id !~ '^wa-c';
+    if v_comp is null then raise exception 'Veranstaltung nicht gefunden.'; end if;
+  end if;
+  if v_comp is null then raise exception 'Bitte den Wettkampf angeben.'; end if;
+  if v_country is null or v_country !~ '^[A-Z]{3}$' then raise exception 'Bitte das Land angeben (z. B. GER).'; end if;
+  if v_cat not in ('OW', 'DF', 'GW', 'GL', 'A', 'B', 'C', 'D', 'E', 'F') then raise exception 'Unbekannte Kategorie: %', v_cat; end if;
+  v_secs := mark_seconds(v_mark);
+  if v_secs is null then raise exception 'Zeit nicht erkannt (z. B. 29:18 oder 1:02:45).'; end if;
+  v_leg := _fmt_seconds(round(v_secs / v_legs, 2));
+  -- Bearbeiten: alte Zeilen entfernen (nur Nachträge)
+  if p ? 'replace_ids' then
+    select min(date) into v_old from wa_results where id in (select x::bigint from jsonb_array_elements_text(p->'replace_ids') x);
+    if exists (select 1 from wa_results where id in (select x::bigint from jsonb_array_elements_text(p->'replace_ids') x) and source <> 'manual') then
+      raise exception 'Nur Nachträge können geändert werden.';
+    end if;
+    delete from wa_results where id in (select x::bigint from jsonb_array_elements_text(p->'replace_ids') x);
+  end if;
+  foreach a in array v_ids loop
+    select * into r from athletes where id = a;
+    if r.id is null then raise exception 'Athlet nicht gefunden.'; end if;
+    if v_relay is null and exists (select 1 from wa_results w where w.athlete_id = r.id and w.discipline = d.name and w.relay is null
+                                     and abs(w.date - v_date) <= 1) then
+      raise exception 'Für % gibt es in dieser Disziplin um diesen Tag schon ein Ergebnis.', r.name;
+    end if;
+    pts := coalesce(wa_points(d.name, r.gender, v_leg), (p->>'wa_points')::int);
+    if pts is null then raise exception 'WA-Punkte für % können noch nicht berechnet werden – bitte von Hand angeben.', r.name; end if;
+    insert into wa_results (athlete_id, date, competition, venue, country, category, discipline, race, wa_race, place, wa_place,
+                            mark, result_score, remark, relay, share, source, source_url, added_by)
+    values (r.id, v_date, v_comp, v_venue, v_country, v_cat, d.name, 'F', coalesce('Staffel ' || v_relay, 'F'), v_place, v_place,
+            v_mark, pts, case when v_relay is null then 'Nachtrag' else 'Staffel' end, v_relay,
+            case when v_relay is null then null else round(1.0 / v_legs, 4) end,
+            'manual', nullif(trim(p->>'source_url'), ''), auth.uid());
+    n := n + 1;
+  end loop;
+  v_slug := coalesce(v_slug, 'wa-' || md5(v_comp || v_date::text));
+  insert into competitions (id, name, venue, country, category, start_date, end_date, loaded_at)
+  values (v_slug, v_comp, v_venue, v_country, v_cat, v_date, v_date, now())
+  on conflict (id) do update set start_date = least(competitions.start_date, excluded.start_date),
+                                 end_date = greatest(competitions.end_date, excluded.end_date),
+                                 country = coalesce(excluded.country, competitions.country),
+                                 venue = coalesce(excluded.venue, competitions.venue), category = excluded.category;
+  perform rebuild_results(least(v_date, coalesce(v_old, v_date)));
+  perform refresh_season_stats(extract(year from v_date)::int);
+  if v_old is not null and extract(year from v_old) <> extract(year from v_date) then perform refresh_season_stats(extract(year from v_old)::int); end if;
+  return n;
+end $$;
+
+-- Veranstaltungen aus Nachträgen (zur Auswahl beim nächsten Nachtrag)
+create or replace function manual_competitions()
+returns table (id text, name text, venue text, country text, category text, start_date date, end_date date)
+language sql stable security definer set search_path = public as $$
+  select c.id, c.name, c.venue, c.country, c.category, c.start_date, c.end_date from competitions c
+   where c.id !~ '^wa-c' and exists (select 1 from wa_results w where w.source = 'manual' and 'wa-' || md5(w.competition || w.date::text) = c.id
+                                      or (w.source = 'manual' and w.competition = c.name))
+   order by c.start_date desc limit 200;
+$$;
 
 create or replace function delete_manual_result(p_id bigint) returns void
 language plpgsql security definer set search_path = public as $$
