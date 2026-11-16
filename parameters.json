@@ -1,6 +1,0 @@
-{
-	"scoreThreshold": 975,
-	"years": [2023, 2024, 2025, 2026],
-	"batchSize": 10,
-	"intervalMinutes": 20
-}
