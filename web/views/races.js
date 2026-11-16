@@ -1,6 +1,6 @@
 // Wettkämpfe: alle Wettkämpfe, bei denen Athleten aus dem Pool gestartet sind, mit deren Ergebnissen und Punkten
 import { html, useState, useMemo } from '../vendor/preact-htm.js';
-import { sb, q, all, useLoad, Loading, fmtDate, fmtPts, openRider, normName, flag, withFlag, nationCode, discWithKm, raceLabel , waResultUrl , SexBadge } from '../lib.js';
+import { sb, q, all, useLoad, Loading, fmtDate, fmtPts, openRider, normName, flag, withFlag, nationCode, discWithKm, raceLabel , waResultUrl , SexBadge, CatBadge, discMeters, raceOrder } from '../lib.js';
 
 // WA-Wettkampfkategorien (World-Ranking-Regeln): OW = Olympia/WM … F = nationale Meetings
 const CATS = [['', 'Alle Kategorien'], ['top', 'OW, DF, GW, GL'], ['OW', 'OW – Olympia/WM'], ['DF', 'DF – DL-Finale'],
@@ -66,7 +66,7 @@ function RaceList({ c, races }) {
       <a class="race-link" href=${`#/league/${c.league.id}/races/${encodeURIComponent(r.id)}`}>
         <span class="race-date">${fmtDate(r.start_date)}${r.end_date && r.end_date !== r.start_date ? ` – ${fmtDate(r.end_date)}` : ''}</span>
         <span class="race-name"><strong>${(r.name || '').replace(/\s*-\s*XC\s*[\d.,]+\s*km$/i, '')}</strong>
-          <small>${[r.country && `${flag(r.country)} ${r.country}`, r.category].filter(Boolean).join(' · ')}</small></span>
+          <small><${CatBadge} cat=${r.category} /> ${r.country ? `${flag(r.country)} ${r.venue ? r.venue.replace(/\s*\([A-Z]{3}\)\s*$/, '') : r.country}` : ''}</small></span>
       </a></li>`)}</ul>`}
     ${list.length > 300 && html`<p class="muted small">Es werden die neuesten 300 angezeigt – Filter eingrenzen.</p>`}
   </section>`;
@@ -103,17 +103,18 @@ function RaceDetail({ c, slug }) {
     g.rows.push(r);
   }
   groups.forEach((g) => g.rows.sort((a, b) => (a.wa_place ?? 999) - (b.wa_place ?? 999)));
-  // gleiche Disziplin: Männer vor Frauen
-  groups.sort((a, b) => a.date.localeCompare(b.date) || a.disc.localeCompare(b.disc) || (a.race || '').localeCompare(b.race || '')
-    || (a.sex === 'women') - (b.sex === 'women'));
+  // erst alle Männer-Disziplinen aufsteigend nach Strecke, dann die der Frauen; je Disziplin Vorläufe → Finale 1, 2, 3
+  groups.sort((a, b) => (a.sex === 'women') - (b.sex === 'women') || discMeters(a.disc) - discMeters(b.disc)
+    || a.disc.localeCompare(b.disc) || raceOrder(a.race) - raceOrder(b.race) || a.date.localeCompare(b.date));
   const total = rows.reduce((s, r) => s + Number(r.pts || 0), 0);
   return html`<section class="card stack">
     ${back}
     <div>
       <h2>${(race.name || '').replace(/\s*-\s*XC\s*[\d.,]+\s*km$/i, '')}</h2>
       <p class="muted small">${fmtDate(race.start_date)}${race.end_date && race.end_date !== race.start_date ? ` – ${fmtDate(race.end_date)}` : ''}
-        ${race.venue ? ` · ${race.venue}` : ''}${race.category ? ` · Kategorie ${race.category}` : ''} · ${fmtPts(total)} Punkte gesamt</p>
-      ${race.id?.startsWith('wa-c') && html`<a class="small" href=${waResultUrl(race.id.slice(4))} target="_blank" rel="noopener">Ergebnisse bei World Athletics ↗</a>`}
+        ${race.venue ? ` · ${race.country ? flag(race.country) + ' ' : ''}${race.venue}` : ''} · ${fmtPts(total)} Punkte gesamt
+        ${race.category ? html` <${CatBadge} cat=${race.category} />` : ''}</p>
+      ${race.id?.startsWith('wa-c') && html`<a class="small" href=${waResultUrl(race.id.slice(4))} target="_blank" rel="noopener">WA-Ergebnisse ↗</a>`}
     </div>
     ${groups.length === 0 ? html`<p class="muted">Keine Ergebnisse von Pool-Athleten.</p>` : groups.map((g) => html`<div class="detail-rider" key=${g.key}>
       <div class="row between"><strong>${g.disc}${g.race && g.race !== 'F' ? ` · ${raceLabel(g.race)}` : ''}${g.sex
