@@ -394,3 +394,6 @@ details.help li.chosen { background: var(--accent-soft); border-radius: 6px; pad
 .sex-m { color: #2563eb; }
 .sex-f { color: #db2777; }
 .cal-unit { display: block; }
+.sort-head { all: unset; cursor: pointer; font: inherit; color: inherit; }
+.sort-head.active { color: var(--accent); }
+.sort-head.res-pts { text-align: right; display: block; }

@@ -167,6 +167,10 @@ describe("Athletenpool", () => {
     await db.query("insert into toplist_entries values ('wa-1', $1, '800 Metres', '-', 1100)", [Y]);
     await db.query("select refresh_pool(null)");
     const rows = await db.all("select id, pool_rank, event_group, ranking_points from athletes order by id");
+    // Platz in der DE-Topliste je Jahr/Disziplin/Geschlecht
+    expect(await db.all("select year, discipline, rank from athlete_toplists('wa-1')")).toEqual([
+      { year: Y, discipline: "800 Metres", rank: 1 }, { year: Y - 1, discipline: "1500 Metres", rank: 1 },
+    ]);
     expect(rows.map((r) => [r.id, r.pool_rank, r.event_group, Number(r.ranking_points) || null])).toEqual([
       ["wa-1", 1, "1500", 1200],     // beste Leistung bestimmt die Gruppe
       ["wa-2", 2, "Hindernis", 1150],
