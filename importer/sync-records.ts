@@ -26,8 +26,9 @@ const main = async () => {
           if (!rows.length) failures.push(`${rec} ${d.name} ${gender}: leere Liste`);
           else if (!rows.some((r) => r.date)) failures.push(`${rec} ${d.name} ${gender}: Liste ohne Datum`);
           for (const r of recordMarks(rows, SINCE)) {
-            found.push({ athlete_id: `wa-${r.athleteId}`, discipline: d.name, date: r.date!, mark: r.mark, record: rec });
-            console.log(`${rec} ${d.name} ${gender}: ${r.name} ${r.mark} (${r.date})`);
+            const record = r.tied ? `=${rec}` : rec;
+            found.push({ athlete_id: `wa-${r.athleteId}`, discipline: d.name, date: r.date!, mark: r.mark, record });
+            console.log(`${record} ${d.name} ${gender}: ${r.name} ${r.mark} (${r.date})`);
           }
         } catch (e) {
           failures.push(`${rec} ${d.name} ${gender}: ${(e as Error).message}`);

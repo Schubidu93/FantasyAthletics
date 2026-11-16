@@ -122,8 +122,14 @@ export function Rules({ c }) {
           Berg- und Traillauf nutzen die Tabelle für 10 km Straße.</li>
         <li><strong>Zwischenzeiten</strong> (z. B. die 1500 m in einem Meilenrennen) geben keine Leistungs- und Platzierungspunkte. Sie stehen
           mit ihren WA-Punkten in den Ergebnissen; Punkte gibt es nur, wenn die Zwischenzeit ein Rekord ist (Rekord-Bonus).</li>
+        <li><strong>PB-Bonus:</strong> +${cfg?.pb_points ?? 10} Punkte für jede persönliche Bestleistung – schneller als alle früheren
+          Leistungen des Athleten in dieser Disziplin (laut World Athletics, auch vor 2025). Halle, Bahn und Straße zählen getrennt.
+          Nur mit vorheriger Leistung in der Disziplin (das erste Rennen zählt nicht), nur ab ${cfg ? cfg.perf_threshold : 1000} WA-Punkten,
+          eine gleiche Zeit (=PB) bringt den halben Bonus. Vorlauf und Finale können beide PB sein. Zwischenzeiten und Staffeln bekommen keinen PB-Bonus;
+          eine Zwischenzeit zählt aber als Bestleistung, die danach übertroffen werden muss.</li>
         <li><strong>Rekord-Bonus:</strong> deutscher Rekord +${cfg?.record_dr ?? 50}, Europarekord +${cfg?.record_er ?? 100},
           Weltrekord +${cfg?.record_wr ?? 200} Punkte – zusätzlich zu den normalen Punkten; es zählt nur der höchste Rekord.
+          Ein eingestellter Rekord (gleiche Zeit, z. B. =DR) bringt die Hälfte.
           Gilt für alle Laufdisziplinen inkl. Halle und Straße. Rekorde erkennt die App täglich an den All-time-Listen von World Athletics
           (alle Leistungen) – auch solche, die inzwischen wieder verbessert wurden. Der Admin kann zusätzlich Rekorde von Hand eintragen.</li>
         <li>Punkte zählen nur innerhalb eines Spieltags – für die Spieltage, in denen der Athlet in deinem Kader steht${lineup ? ' und aufgestellt ist' : ''}.</li>
@@ -178,6 +184,7 @@ export function Rules({ c }) {
       <ul>
         <li><strong>Quelle:</strong> World Athletics – deutsche Toplisten und die Ergebnislisten der Athleten.</li>
         <li><strong>Athletenpool:</strong> täglich um 6 Uhr aus den Toplisten.</li>
+        <li><strong>Bestleistungen:</strong> täglich nach dem Athletenpool je Athlet von World Athletics (für Profil und PB-Bonus).</li>
         <li><strong>Rekorde:</strong> täglich nach dem Athletenpool aus den All-time-Listen von World Athletics für Deutschland, Europa und die Welt.</li>
         <li><strong>Kalender:</strong> täglich um 6 Uhr die kommenden Wettkämpfe mit Laufdisziplinen aus dem Kalender von World Athletics –
           international ab Gold Label, in Europa ab Kategorie A, in Deutschland ab Kategorie E; nur Wettkämpfe, deren Programm Laufdisziplinen ab 800 m enthält.</li>
