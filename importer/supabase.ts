@@ -35,7 +35,8 @@ export async function run(db: Db, fn: () => Promise<string>) {
   try {
     console.log(await fn());
   } catch (e) {
-    const message = (e as Error).stack ?? String(e);
+    // Fehler der Supabase-Schnittstelle sind keine Error-Objekte – Inhalt lesbar ausgeben
+    const message = e instanceof Error ? (e.stack ?? e.message) : JSON.stringify(e);
     console.error(message);
     await db.from("sync_status").update({ last_run: new Date().toISOString(), ok: false, message: message.slice(0, 500) }).eq("id", 1);
     process.exitCode = 1;
