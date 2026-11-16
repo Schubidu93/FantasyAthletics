@@ -51,7 +51,7 @@ describe("Punkte nach WA-Regeln 2026", () => {
       "d WM-Vorlauf 5000 Q": [130, 72.8],          // Faktor 1,3; Tab. 2.6 Q/q 56
       "e Marathon GL 2.": [450, 225],              // Faktor 3; Tab. 4.1 GL 2. = 75
       "f Halbmarathon GW-Sieg": [0, 200],          // max(Tab. 4.2: 32, Tab. 4.3: 100) × 2
-      "g Cross GL 3.": [0, 186.4],                 // Tab. 6.1 GL 3. = 1165 × 0,1 × 1,6, keine Leistungspunkte
+      "g Cross GL 3.": [264, 0],                   // Tab. 6.1 GL 3. = 1165 → (1165 − 1000) × 1 × 1,6, keine Platzierungspunkte
       "h Berglauf GL 2.": [0, 43.2],               // Tab. 2.10 GL 2. = 27 × 1,6
       "i Staffel": null,                           // Faktor 0
       "j geteiltes Finale unaufgelöst": null,      // F1 ohne kombinierte Platzierung
@@ -72,15 +72,21 @@ describe("Punkte nach WA-Regeln 2026", () => {
              ($3, $4, 'Cross ohne Angabe', 'Cross Country', 'GL', 'F', 'F', 3, 0, 7400003),
              ($2, $4, 'Kurzer Cross - XC 4,2 km', 'Cross Country', 'B', 'F', 'F', 1, 0, 7400004)`, [a, b, c, D]);
     await db.query("select rebuild_results(null)");
-    const rows = await db.all(`select r.rider_slug, r.label, r.placing_points from results r order by r.rider_slug, r.label`);
-    expect(rows.map((r) => [r.rider_slug, r.label, Number(r.placing_points)])).toEqual([
-      ["wa-1", "Cross Country · 1.5km", 116.5],   // GL 3. = 1165 × 0,1 × 1
-      ["wa-1", "Cross Country · 7.5km", 192],     // GL 1. = 1200 × 0,1 × 1,6
-      ["wa-2", "Cross Country · 1.5km", 120],     // GL 1. = 1200 × 0,1 × 1
-      ["wa-2", "Cross Country · 4.2km", 136.5],   // B 1. = 1050 × 0,1 × 1,3
-      ["wa-3", "Cross Country", 186.4],           // ohne Distanz: Disziplinfaktor 1,6
-      ["wa-3", "Cross Country · 30.0km", 214],    // GL 12. = 1070 × 0,1 × 2
+    const rows = await db.all(`select r.rider_slug, r.label, r.perf_points, r.placing_points from results r order by r.rider_slug, r.label`);
+    // Wertung: max(0, Cross-Tabellenwert − 1000) × Cross-Faktor (1) × Distanzfaktor
+    expect(rows.map((r) => [r.rider_slug, r.label, Number(r.perf_points), Number(r.placing_points)])).toEqual([
+      ["wa-1", "Cross Country · 1.5km", 165, 0],   // GL 3. = 1165 → 165 × 1
+      ["wa-1", "Cross Country · 7.5km", 320, 0],   // GL 1. = 1200 → 200 × 1,6
+      ["wa-2", "Cross Country · 1.5km", 200, 0],   // GL 1. = 1200 → 200 × 1
+      ["wa-2", "Cross Country · 4.2km", 65, 0],    // B 1. = 1050 → 50 × 1,3
+      ["wa-3", "Cross Country", 264, 0],           // ohne Distanz: GL 3. = 1165 → 165 × 1,6
+      ["wa-3", "Cross Country · 30.0km", 140, 0],  // GL 12. = 1070 → 70 × 2
     ]);
+    // unter 1000 gibt es nichts (B 20. = 770)
+    await db.query(`insert into wa_results (rider_slug, date, competition, discipline, category, race, wa_race, place, result_score, wa_competition_id)
+      values ($1, $2, 'Hinten - XC 8km', 'Cross Country', 'B', 'F', 'F', 20, 0, 7400005)`, [a, D]);
+    await db.query("select rebuild_results(null)");
+    expect(await db.one("select count(*)::int n from results where label = 'Cross Country · 8km'")).toEqual({ n: 0 });
   });
 
   it("Wertungsparameter ändern rechnet alle Punkte neu (nur Liga-Admins)", async () => {

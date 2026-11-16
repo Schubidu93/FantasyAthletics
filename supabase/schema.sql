@@ -84,9 +84,10 @@ create table if not exists scoring_config (
   perf_threshold  int     not null default 1000,  -- Leistungspunkte = max(0, WA-Punkte − Schwelle) × Faktor
   perf_factor     numeric not null default 1,
   placing_factor  numeric not null default 1,     -- Platzierungspunkte = Tabellenwert × Faktor
-  cross_factor    numeric not null default 0.1,   -- Cross: Tabellenwert × Faktor (keine Leistungspunkte)
+  cross_factor    numeric not null default 1,     -- Cross: max(0, Cross-Tabellenwert − perf_threshold) × Faktor × Distanzfaktor
   updated_at      timestamptz not null default now()
 );
+alter table scoring_config alter column cross_factor set default 1;
 insert into scoring_config (id) values (1) on conflict do nothing;
 
 -- Rohdaten der Ergebnisse von World Athletics (ein Eintrag pro Lauf eines Athleten)
@@ -1726,7 +1727,9 @@ $$;
 -- Punkte je Ergebnis (in results) aus den WA-Rohdaten neu berechnen:
 --   Leistung   = max(0, WA-Punkte − perf_threshold) × perf_factor × Disziplinfaktor
 --   Platzierung = WA-Platzierungspunkte (bester Wert der Tabellen der Disziplin) × placing_factor × Disziplinfaktor
---   Cross: nur Platzierung = Cross-Tabelle × cross_factor × Distanzfaktor (cross_distance_factors)
+--   Cross: WA vergibt dort nur einen Wert je Platz (Tab. 6.1, wie WA-Punkte); gewertet wird wie eine Leistung:
+--          max(0, Cross-Tabellenwert − perf_threshold) × cross_factor × Distanzfaktor (cross_distance_factors),
+--          keine Platzierungspunkte
 -- Gespeichert werden nur Ergebnisse mit Punkten. Eingefrorene Spieltage sind davon nicht betroffen.
 create or replace function rebuild_results(p_from date default null) returns int
 language plpgsql security definer set search_path = public as $$
@@ -1742,14 +1745,15 @@ begin
              w.discipline || case when d.cross_table is not null and cross_km(w.competition) is not null
                                   then ' · ' || cross_km(w.competition) || 'km' else '' end
                || case when w.wa_race in ('', 'F') then '' else ' · ' || w.wa_race end label,
-             case when d.cross_table is not null then 0
+             case when d.cross_table is not null then
+                    round(greatest(0, coalesce((select ps.points from placing_scores ps
+                                                 where ps.placing_table = d.cross_table and ps.category = w.category
+                                                   and ps.race_type = 'F' and ps.place = w.place and _race_type(w.race) = 'F'), 0)
+                                      - c.perf_threshold)
+                          * c.cross_factor * coalesce(_cross_factor(cross_km(w.competition)), d.factor, 0), 1)
                   else round(greatest(0, coalesce(w.result_score, 0) - c.perf_threshold) * c.perf_factor * coalesce(d.factor, 0), 1)
              end perf,
-             case when d.cross_table is not null then
-                    round(coalesce((select ps.points from placing_scores ps
-                                     where ps.placing_table = d.cross_table and ps.category = w.category
-                                       and ps.race_type = 'F' and ps.place = w.place and _race_type(w.race) = 'F'), 0)
-                          * c.cross_factor * coalesce(_cross_factor(cross_km(w.competition)), d.factor, 0), 1)
+             case when d.cross_table is not null then 0
                   else round(coalesce((select max(ps.points) from placing_scores ps
                                         where ps.placing_table = any (d.placing_tables) and ps.category = w.category
                                           and ps.race_type = coalesce(w.placing_round, _race_type(w.race))

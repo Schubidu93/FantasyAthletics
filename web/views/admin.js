@@ -69,7 +69,7 @@ function ScoringConfig({ c }) {
       ${field('cross_factor', 'Cross: Faktor', '0.01')}
     </div>
     <p class="small muted">Punkte je Ergebnis = (max(0, WA-Punkte − Schwelle) × Leistungsfaktor + WA-Platzierungspunkte × Platzierungsfaktor)
-      × Disziplinfaktor. Cross: nur Platzierungspunkte der WA-Cross-Tabelle × Cross-Faktor × Disziplinfaktor.</p>
+      × Disziplinfaktor. Cross: max(0, Wert der WA-Cross-Tabelle − Schwelle) × Cross-Faktor × Distanzfaktor.</p>
     <div class="row"><button class="primary" disabled=${a.busy || !f}
       onClick=${() => a.run(async () => {
         await rpc('update_scoring_config', { p_settings: { pool_threshold: +v.pool_threshold, perf_threshold: +v.perf_threshold,
