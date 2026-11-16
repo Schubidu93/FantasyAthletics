@@ -1,14 +1,14 @@
 // Rekorde (DR, ER, WR) an Ergebnissen ab 2025 kennzeichnen – aus den All-time-Listen von World Athletics
 // (Deutschland, Europa, Welt; alle Leistungen statt nur der besten je Athlet). Erkennt auch Rekorde,
 // die inzwischen wieder verbessert wurden. Täglich im Ablauf „Athletenpool laden“.
-import { TOPLIST_DISCIPLINES } from "./disciplines";
+import { COUNTRY, TOPLIST_DISCIPLINES } from "./disciplines";
 import { recordMarks } from "./records";
 import { adminClient, rpc } from "./supabase";
 import { fetchAllTime, sleep, type Gender, type Region } from "./wa";
 
 const db = adminClient();
 const SINCE = "2025-01-01";
-const REGIONS: [string, Region][] = [["DR", { regionType: "countries", region: "germany" }],
+const REGIONS: [string, Region][] = [["DR", { regionType: "countries", region: COUNTRY }],
   ["ER", { regionType: "area", region: "europe" }], ["WR", { regionType: "world" }]];
 
 // eigener Ablauf ohne sync_status: ein Fehler hier soll in der App nicht als Ergebnis-Fehler erscheinen
@@ -22,6 +22,9 @@ const main = async () => {
         try {
           const rows = await fetchAllTime(d.path, gender, region, SINCE);
           lists++;
+          // leere Liste = vermutlich falscher Aufruf (z. B. Region) – sichtbar machen statt still nichts zu finden
+          if (!rows.length) failures.push(`${rec} ${d.name} ${gender}: leere Liste`);
+          else if (!rows.some((r) => r.date)) failures.push(`${rec} ${d.name} ${gender}: Liste ohne Datum`);
           for (const r of recordMarks(rows, SINCE)) {
             found.push({ athlete_id: `wa-${r.athleteId}`, discipline: d.name, date: r.date!, mark: r.mark, record: rec });
             console.log(`${rec} ${d.name} ${gender}: ${r.name} ${r.mark} (${r.date})`);
