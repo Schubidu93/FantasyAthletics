@@ -1,0 +1,117 @@
+== https://my.raceresult.com/robots.txt (200)
+User-Agent: * 
+Disallow: /*/certificates
+Disallow: /RREvents
+Disallow: /RRPublish
+Disallow: /RRRegStart
+Disallow: /*/*/list
+Disallow: /*/*/pdf
+Disallow: /*/*/view
+Disallow: /*/*/details
+Disallow: /*/*/certificate
+Disallow: /*/*/certificate/*
+Disallow: /*/*/certificate/*/*
+Disallow: /users
+Disallow: /users/*
+Disallow: /users/*/*
+Disallow: /users/*/*/*
+
+User-agent: Yandex
+Disallow: /
+== https://www.raceresult.com/robots.txt (200)
+User-Agent: *
+Disallow: /*/company/index
+
+== my.raceresult.com (200) EN ARاَللُّغَةُ اَلْعَرَبِيَّة BGбългарски език CATCatalà CHSChinese (simplified) CHTChinese (traditional) CSCzech DEDeutsch DKDansk EEEesti Keel ENEnglish ESEspañol FISuomi FRFrançais GRελληνική γλώσσα HRHrvatski HUMagyar ITItaliano JPJapanese KR한국어 LVLatvian NBNorsk - Bokmål NLNederlands NNNorsk - Nynorsk PLPolski PTPortuguês RURussian SESvenska SISlovenski SKSlovenský SRсрпски THThai TRTürkçe UAUkrainian VNtiếng Việ EN ARاَللُّغَةُ اَلْعَرَبِيَّة BGбългарски език CATCatalà CHSChinese (simplified) CHTChinese (traditional) CSCzech DEDeutsch DKDansk EEEesti Keel ENEnglish ESEspañol FISuomi FRFrançais GRελληνική γλώσσα HRHrvatski HUMagyar ITItaliano JPJapanese KR한국어 LVLatvian NBNorsk - Bokmål NLNederlands NNNorsk - Nynorsk PLPolski PTPortuguês RURussian SESvenska SISlovenski SKSlovenský SRс
+Links Bedingungen: https://my.raceresult.com/imprint/imprint https://www.raceresult.com/fw/contact/dataprivacy https://my.raceresult.com/imprint/termsofuse https://www.raceresult.com/%22https://www.youtube.com/t/terms/%22 https://www.raceresult.com/de-de/company/imprint https://www.raceresult.com/de-de/company/AGB https://www.raceresult.com/de-de/company/dataprivacy
+== https://my.raceresult.com/imprint/imprint (200, 2782 Zeichen)
+EN ARاَللُّغَةُ اَلْعَرَبِيَّة BGбългарски език CATCatalà CHSChinese (simplified) CHTChinese (traditional) CSCzech DEDeutsch DKDansk EEEesti Keel ENEnglish ESEspañol FISuomi FRFrançais GRελληνική γλώσσα HRHrvatski HUMagyar ITItaliano JPJapanese KR한국어 LVLatvian NBNorsk - Bokmål NLNederlands NNNorsk - Nynorsk PLPolski PTPortuguês RURussian SESvenska SISlovenski SKSlovenský SRсрпски THThai TRTürkçe UAUkrainian VNtiếng Việ EN ARاَللُّغَةُ اَلْعَرَبِيَّة BGбългарски език CATCatalà CHSChinese (simplified) CHTChinese (traditional) CSCzech DEDeutsch DKDansk EEEesti Keel ENEnglish ESEspañol FISuomi FRFrançais GRελληνική γλώσσα HRHrvatski HUMagyar ITItaliano JPJapanese KR한국어 LVLatvian NBNorsk - Bokmål NLNederlands NNNorsk - Nynorsk PLPolski PTPortuguês RURussian SESvenska SISlovenski SKSlovenský SRсрпски THThai TRTürkçe UAUkrainian VNtiếng Việ my.raceresult.com Information and services on this website are provided by: race result AG Joseph-von-Fraunhofer-Str.
+11 76327 Pfinztal Germany info@raceresult.com CEO: Sönke Petersen Head of Board of Directors: Johannes Maier Amtsgericht Mannheim: HRB 717 610 VAT ID: DE265920240 race result Swiss GmbH Hardstrasse 40 8570 Weinfelden Switzerland info@raceresult.ch CEO: Johannes Maier VAT ID: CHW 367.306.209 © Copyright 2026 race result AG.
+All materials texts, graphics, photographs, animations and videos displayed on this site are protected by copyright law and may not be reproduced, distributed, transmitted, displayed, published or broadcast without the prior written permission by race result AG or in the case of third party materials, the owner of that content.
+my race result in no way guarantees that the information made available on this Web site is complete, accurate or up-to-date in all cases.
+my race result shall not be held responsible for the contents of a page accessed via such a link.
+my race result reserves the right to amend or supplement the information supplied without prior notice.
+my race result can contain information about sporting events, in particular general information about the event, lists of participants and result lists.
+my race result does not publish information about sporting events without acceptance by the organizer.
+race result has no information about the event.
+Served by my-us-1.raceresult.com
+== https://www.raceresult.com/fw/contact/dataprivacy (200, 23522 Zeichen)
+<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W9BTGH5" height="0" width="0" style="display:none;visibility:hidden"></iframe> Home Systems Overview Ubidium Transponders Equipment Track Box Configurator Decoder Software RACE RESULT 14 my.raceresult Download Solutions Event Setups Supplies For Race Timers For Race Directors Support Getting Started Knowledge Base Forum Documents Company About Us Contact News Responsibility Jobs Shop Products Samples Help Looking for your participant profile?
+Go to my.raceresult.com RACE RESULT Customer Login: Two Factor Authentication Enter the 6-digit code from your Authenticator App Trust this browser (for 1 week) Sign in as...
+Register US Home Systems Overview Ubidium Transponders Equipment Track Box Configurator Decoder Software RACE RESULT 14 my.raceresult Download Solutions Event Setups Supplies For Race Timers For Race Directors Support Getting Started Knowledge Base Forum Documents Company About Us Contact News Responsibility Jobs Shop Products Samples Help Data Privacy Declaration The data privacy declaration is legally relevant and binding.
+RACE RESULT AG and RACE RESULT Americas, Inc.
+Verantwortlicher Verantwortlicher für diese Internetseiten ist die race result AG (Joseph-von-Fraunhofer-Str.
+Wir nutzen dabei sowohl Session-Cookies, die unmittelbar nach Beendigung des Besuchs der Internetseiten automatisch von Ihrem Browser gelöscht werden.
+persistente Cookies ein, die nicht automatisch nach Beendigung des Besuchs unserer Internetseite gelöscht werden.
+Die Nutzung von Vimeo erfolgt im Interesse einer ansprechenden Darstellung unserer Online-Angebote.
+Sie erreichen diesen wie folgt: postalisch E-Mail race result AG - Datenschutzbeauftragter – Joseph-von-Fraunhofer-Str.
+11 76327 Pfinztal Allemagne dsb@raceresult.com Für allgemeine Datenschutzanliegen und Betroffenenanfragen wenden Sie sich an datenschutz@raceresult.com.
+RACE RESULT Americas Inc.
+609 S Taylor Ave Unit E Louisville, CO 80027 Call or text message: Tel.: (303) 390-1235 support.usa@raceresult.com info.usa@raceresult.com Systems Overview Ubidium Transponders Equipment Track Box Configurator Decoder Software RACE RESULT 14 my.raceresult Download Solutions Event Setups Supplies Advantages For Race Timers For Race Directors Support Getting Started Knowledge Base Forum Documents Shop Overview Print Products with Transponder Print Products without Transponder Passive Transponders Active Transponders Supplies Timing Systems Race Result System 5000S Other Equipment Rental Equipment Company About Us Contact News Responsibility Jobs ↗ Protection for Whistleblowers Imprint Terms of Trade Revocation Data Privacy Cookie Settings About Us Contact News Responsibility Protection for Whistleblowers Jobs Imprint Terms of Trade Revocation Data Privacy Cookie Settings Cookie Consent We use necessary cookies to make our site work.
+The team at RACE RESULT will be happy to assess your individual needs, troubleshoot existing issues and answer any questions that you might have.
+== https://my.raceresult.com/imprint/termsofuse (200, 5710 Zeichen)
+Allgemeine Nutzungsbedingungen §1 Geltungsbereich Für die Geschäftsbeziehung zwischen dem Internet-Portal my race result, vertreten durch die race result AG sowie deren verbundene Unternehmen (nachfolgend wir), und seinen Nutzern (Sportler und Veranstalter) gelten ausschließlich die nachfolgenden Allgemeinen Nutzungsbedingungen in ihrer zum Zeitpunkt des Vertragsschlusses gültigen Fassung.
+my race result ermöglicht es Sportlern für sie interessante Sportveranstaltungen schnell und einfach aufzufinden, sich über die Veranstaltung zu informieren, sich online anzumelden, das Startgeld für die Veranstaltung zu bezahlen, Teilnehmerlisten und Ergebnisse einzusehen und mit anderen Sportlern und dem Veranstalter über das Event zu kommunizieren.
+Für den Veranstalter ist eine Nutzung der Software "RACE RESULT 14" notwendig, darüber hinaus entstehen keine weiteren Kosten.
+my race result behält sich vor, den Leistungsumfang jederzeit zu erweitern oder zu reduzieren, neue Funktionen bereitzustellen, Layouts zu modifizieren oder Werbung zu schalten.
+Race Result stellt Teilnehmern und Veranstaltern die Funktion der Online-Anmeldung zu Veranstaltungen, insbesondere Sportveranstaltungen bereit.
+Der Veranstalter hat Race Result ermächtigt und bevollmächtigt, Verträge mit Teilnehmern betreffend Sporteventdienstleistungen des Veranstalters, welche über die Plattform angeboten werden, im Namen und auf Rechnung des Veranstalters abzuschließen und die entsprechenden Zahlungen mit schuldbefreiender Wirkung zugunsten des Veranstalters entgegenzunehmen.
+Bei Verwendung der Online-Anmeldung beauftragt der Teilnehmer Race Result, einen Vertrag zwischen ihm/ihr und dem Veranstalter zu vermitteln, die Teilnahmegebühr entgegenzunehmen und an den Veranstalter weiterzuleiten.
+Das Absenden der Anmeldung gilt in diesem Fall als Angebot zum Vertragsabschluss mit dem jeweiligen Veranstalter.
+Race Result prüft die eingegangenen Angebote und nimmt diese nach positiver Prüfung im Namen und auf Rechnung des Veranstalters an.
+Eine Vertragsbeziehung zwischen Race Result und Ihnen als Endkunden über die Inanspruchnahme von Sporteventdienstleistungen wird hingegen nicht begründet.
+Soweit ein Vertrag erfolgreich vermittelt wurde, kann sich der Teilnehmer im Falle von Fragen oder Unstimmigkeiten sowohl an den Veranstalter als auch an Race Result wenden.
+Es gilt unsere separate Datenschutzerklärung in der jeweils aktuellen Fassung, einzusehen auf der Startseite my race result.
+Veranstaltern wird es ermöglicht, Teilnehmerlisten und Ergebnisse auf my race result zu veröffentlichen.
+Eine Nutzung der Daten durch my race result erfolgt nicht, es sei denn dies wurde durch den Sportler explizit gestattet.
+§5 Haftung Für Schäden und Folgeschäden, einschließlich entgangenem Gewinn und Verlust von Daten, die durch Verwendung des Portals my race result entstanden sind, übernehmen wir keine Haftung, es sei denn der Schaden beruht auf Vorsatz oder grober Fahrlässigkeit.
+race result has no information about the event.
+Served by my-us-1.raceresult.com
+== https://www.raceresult.com/%22https://www.youtube.com/t/terms/%22 (404, 97 Zeichen)
+
+== https://www.raceresult.com/de-de/company/imprint (200, 8466 Zeichen)
+<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W9BTGH5" height="0" width="0" style="display:none;visibility:hidden"></iframe> Home Systeme Überblick Ubidium Transponder Equipment Track Box Konfigurator Decoder Software RACE RESULT 14 my.raceresult Download Lösungen Event-Setups Event-Material Für Zeitnehmer Für Organisatoren Support Übersicht Knowledge Base Forum Dokumente Unternehmen Über uns Kontakt News Verantwortung Karriere Shop Produkte Muster Hilfe Suchst du dein Teilnehmerprofil?
+Gehe zu my.raceresult.com RACE RESULT Customer Login: Zwei-Faktor-Authentifizierung Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein Diesem Browser vertrauen (für 1 Woche) Einloggen als...
+Registrieren DE Home Systeme Überblick Ubidium Transponder Equipment Track Box Konfigurator Decoder Software RACE RESULT 14 my.raceresult Download Lösungen Event-Setups Event-Material Für Zeitnehmer Für Organisatoren Support Übersicht Knowledge Base Forum Dokumente Unternehmen Über uns Kontakt News Verantwortung Karriere Shop Produkte Muster Hilfe www.raceresult.com Die Informationen und Services dieser Website werden bereit gestellt durch: race result AG Joseph-von-Fraunhofer-Str.
+11 76327 Pfinztal info@raceresult.com Vorstand: Sönke Petersen Vorsitz des AR: Johannes Maier AG Mannheim: HRB 717 610 Ust-ID: DE265920240 WEEE-Reg.-Nr.: DE 33304936 © Copyright 2026 race result AG.
+Diese Links dienen dem erleichterten Auffinden von Informationen im Internet, begründen aber keine Haftung durch den Autor für die gelinkten Seiten oder für Inhalte, Leistungen oder Produkte, die durch diese gelinkten Seiten angeboten werden.
+Rechtliche Hinweise Link zur Plattform der Europäischen Kommission gemäß der Verordnung über Online-Streitbeilegung in Verbraucherangelegenheiten race result AG Joseph-von-Fraunhofer-Str.
+11 D-76327 Pfinztal Tel.: +49 (721) 961 409 00 support@raceresult.com info@raceresult.com Systeme Überblick Ubidium Transponder Equipment Track Box Konfigurator Decoder Software RACE RESULT 14 my.raceresult Download Lösungen Event-Setups Event-Material Vorteile Für Zeitnehmer Für Organisatoren Support Übersicht Knowledge Base Forum Dokumente Shop Überblick Druckprodukte mit Transponder Druckprodukte ohne Transponder Passiv-Transponder Aktiv-Transponder Verbrauchsmaterialien Timing-Systeme Race Result System 5000S Anderes Equipment Miet-Equipment Unternehmen Über uns Kontakt News Verantwortung Karriere ↗ Schutz von Hinweisgebern Impressum AGB Widerrufsrecht Datenschutz Cookie-Einstellungen Über uns Kontakt News Verantwortung Schutz von Hinweisgebern Karriere Impressum AGB Widerrufsrecht Datenschutz Cookie-Einstellungen Cookie-Zustimmung Wir verwenden notwendige Cookies, um unsere Website funktionsfähig zu machen.
+Das Team von RACE RESULT berät Sie gerne zu Ihren individuellen Bedürfnissen, behebt bestehende Probleme und beantwortet Ihre Fragen.
+== https://www.raceresult.com/de-de/company/AGB (200, 22711 Zeichen)
+<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W9BTGH5" height="0" width="0" style="display:none;visibility:hidden"></iframe> Home Systeme Überblick Ubidium Transponder Equipment Track Box Konfigurator Decoder Software RACE RESULT 14 my.raceresult Download Lösungen Event-Setups Event-Material Für Zeitnehmer Für Organisatoren Support Übersicht Knowledge Base Forum Dokumente Unternehmen Über uns Kontakt News Verantwortung Karriere Shop Produkte Muster Hilfe Suchst du dein Teilnehmerprofil?
+Gehe zu my.raceresult.com RACE RESULT Customer Login: Zwei-Faktor-Authentifizierung Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein Diesem Browser vertrauen (für 1 Woche) Einloggen als...
+Registrieren DE Home Systeme Überblick Ubidium Transponder Equipment Track Box Konfigurator Decoder Software RACE RESULT 14 my.raceresult Download Lösungen Event-Setups Event-Material Für Zeitnehmer Für Organisatoren Support Übersicht Knowledge Base Forum Dokumente Unternehmen Über uns Kontakt News Verantwortung Karriere Shop Produkte Muster Hilfe Allgemeine Geschäftsbedingungen §1 Geltungsbereich Für die Geschäftsbeziehung zwischen der race result AG, der race result Amercias Inc.
+(registriert im State Colorado), der race result Swiss GmbH (nachfolgend wir) und seinen Kunden gelten ausschließlich die nachfolgenden Allgemeinen Geschäftsbedingungen in ihrer zum Zeitpunkt des Vertragsschlusses gültigen Fassung.
+Für unsere SaaS-Angebote garantieren wir kein Service Level.
+Der Leistungsumfang unserer Standardsoftware ist definiert durch den aktuellen Stand der Demoversion, einsehbar auf www.raceresult.com.
+Für den Support steht das Forum auf www.raceresult.com zur Verfügung.
+Wir behalten uns das Recht vor, die angebotenen Dienste ganz oder teilweise, vorübergehend oder dauerhaft einzustellen, oder den Zugang zu beschränken, sollte offenen Forderungen nicht nachgekommen werden.
+2.7 Bei der Nutzung unseres Online-Services my.raceresult.com und dessen Einbettung in Webseiten Dritter wird ein Logo von RACE RESULT unterhalb der Anmeldemaske bzw.
+Der Kunde kann im Rahmen der Nutzung unserer Dienste, insbesondere des Online-Services my.raceresult.com, eigene Inhalte einstellen, hochladen oder veröffentlichen.
+Inhalte in diesem Sinne sind insbesondere Fotos, Videos, Grafiken, Logos, Texte, Kartenmaterial sowie Teilnehmer- und Ergebnisdaten.
+Die Entscheidung über Art, Umfang und Zeitpunkt der Veröffentlichung von Inhalten, insbesondere von Teilnehmerdaten, Ergebnislisten und Fotos, trifft allein der Kunde.
+7 DSGVO allein dafür verantwortlich, dass die Veröffentlichung personenbezogener Daten, einschließlich Fotos und Ergebnissen, auf einer tragfähigen Rechtsgrundlage beruht und die betroffenen Personen ordnungsgemäß informiert wurden.
+Meldungen über rechtswidrige Inhalte können an info@raceresult.com gerichtet werden.​​​​​​​ §3 Eigentumsvorbehalt 3.1.
+Verpfändungen oder Sicherungsübereignungen sowie die Vereinbarung von Abtretungsverboten sind unzulässig.
+§ 6 Zustandekommen des Vertrags 6.1 Die Darstellung unserer Waren und Dienstleistungen im Webshop oder in sonstigen Medien stellt kein rechtlich bindendes Angebot dar, sondern eine Aufforderung zur Abgabe eines Angebots (invitatio ad offerendum).
+6.2 Durch Anklicken des Buttons „Zahlungspflichtig bestellen“ gibt der Kunde ein verbindliches Angebot über die im Warenkorb enthaltenen Waren oder Dienstleistungen ab.
+Eine automatisch erzeugte Bestellbestätigung per E-Mail stellt noch keine Annahme des Angebots dar.
+6.3 Angebote, die wir dem Kunden per E-Mail oder auf anderem Wege übersenden, sind freibleibend und unverbindlich, sofern sie nicht ausdrücklich als verbindlich gekennzeichnet sind.
+Länderspezifische Regelungen Unique Identification Number (UIN) France FR027437_05SAKO race result AG Joseph-von-Fraunhofer-Str.
+11 D-76327 Pfinztal Tel.: +49 (721) 961 409 00 support@raceresult.com info@raceresult.com Systeme Überblick Ubidium Transponder Equipment Track Box Konfigurator Decoder Software RACE RESULT 14 my.raceresult Download Lösungen Event-Setups Event-Material Vorteile Für Zeitnehmer Für Organisatoren Support Übersicht Knowledge Base Forum Dokumente Shop Überblick Druckprodukte mit Transponder Druckprodukte ohne Transponder Passiv-Transponder Aktiv-Transponder Verbrauchsmaterialien Timing-Systeme Race Result System 5000S Anderes Equipment Miet-Equipment Unternehmen Über uns Kontakt News Verantwortung Karriere ↗ Schutz von Hinweisgebern Impressum AGB Widerrufsrecht Datenschutz Cookie-Einstellungen Über uns Kontakt News Verantwortung Schutz von Hinweisgebern Karriere Impressum AGB Widerrufsrecht Datenschutz Cookie-Einstellungen Cookie-Zustimmung Wir verwenden notwendige Cookies, um unsere Website funktionsfähig zu machen.
+Das Team von RACE RESULT berät Sie gerne zu Ihren individuellen Bedürfnissen, behebt bestehende Probleme und beantwortet Ihre Fragen.
+== https://www.raceresult.com/de-de/company/dataprivacy (200, 23798 Zeichen)
+<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W9BTGH5" height="0" width="0" style="display:none;visibility:hidden"></iframe> Home Systeme Überblick Ubidium Transponder Equipment Track Box Konfigurator Decoder Software RACE RESULT 14 my.raceresult Download Lösungen Event-Setups Event-Material Für Zeitnehmer Für Organisatoren Support Übersicht Knowledge Base Forum Dokumente Unternehmen Über uns Kontakt News Verantwortung Karriere Shop Produkte Muster Hilfe Suchst du dein Teilnehmerprofil?
+Gehe zu my.raceresult.com RACE RESULT Customer Login: Zwei-Faktor-Authentifizierung Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein Diesem Browser vertrauen (für 1 Woche) Einloggen als...
+Registrieren DE Home Systeme Überblick Ubidium Transponder Equipment Track Box Konfigurator Decoder Software RACE RESULT 14 my.raceresult Download Lösungen Event-Setups Event-Material Für Zeitnehmer Für Organisatoren Support Übersicht Knowledge Base Forum Dokumente Unternehmen Über uns Kontakt News Verantwortung Karriere Shop Produkte Muster Hilfe Datenschutzerklärung Wir möchten Sie nachfolgend über die Verarbeitung personenbezogener Daten im Rahmen der Nutzung unserer Internetseiten informieren.
+Verantwortlicher Verantwortlicher für diese Internetseiten ist die race result AG (Joseph-von-Fraunhofer-Str.
+Wir nutzen dabei sowohl Session-Cookies, die unmittelbar nach Beendigung des Besuchs der Internetseiten automatisch von Ihrem Browser gelöscht werden.
+persistente Cookies ein, die nicht automatisch nach Beendigung des Besuchs unserer Internetseite gelöscht werden.
+Die Nutzung von Vimeo erfolgt im Interesse einer ansprechenden Darstellung unserer Online-Angebote.
+Sie erreichen diesen wie folgt: postalisch E-Mail race result AG - Datenschutzbeauftragter – Joseph-von-Fraunhofer-Str.
+11 76327 Pfinztal Allemagne dsb@raceresult.com Für allgemeine Datenschutzanliegen und Betroffenenanfragen wenden Sie sich an datenschutz@raceresult.com.
+race result AG Joseph-von-Fraunhofer-Str.
+11 D-76327 Pfinztal Tel.: +49 (721) 961 409 00 support@raceresult.com info@raceresult.com Systeme Überblick Ubidium Transponder Equipment Track Box Konfigurator Decoder Software RACE RESULT 14 my.raceresult Download Lösungen Event-Setups Event-Material Vorteile Für Zeitnehmer Für Organisatoren Support Übersicht Knowledge Base Forum Dokumente Shop Überblick Druckprodukte mit Transponder Druckprodukte ohne Transponder Passiv-Transponder Aktiv-Transponder Verbrauchsmaterialien Timing-Systeme Race Result System 5000S Anderes Equipment Miet-Equipment Unternehmen Über uns Kontakt News Verantwortung Karriere ↗ Schutz von Hinweisgebern Impressum AGB Widerrufsrecht Datenschutz Cookie-Einstellungen Über uns Kontakt News Verantwortung Schutz von Hinweisgebern Karriere Impressum AGB Widerrufsrecht Datenschutz Cookie-Einstellungen Cookie-Zustimmung Wir verwenden notwendige Cookies, um unsere Website funktionsfähig zu machen.
+Das Team von RACE RESULT berät Sie gerne zu Ihren individuellen Bedürfnissen, behebt bestehende Probleme und beantwortet Ihre Fragen.
+Veranstaltungs-IDs auf der Startseite: 
