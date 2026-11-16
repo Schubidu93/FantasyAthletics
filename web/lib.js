@@ -114,6 +114,16 @@ const DISC = [[/^10,000 Metres/, '10.000 m'], [/ Metres Steeplechase/, ' m Hinde
   [/^Cross Country/, 'Cross'], [/ Short Track$/, ' (Halle)'], [/ Relay/, ' Staffel'], [/ Race Walk/, ' Gehen'],
   [/^Mountain Running /, 'Berglauf '], [/^Mountain Classic/, 'Berglauf']];
 export const discLabel = (d) => DISC.reduce((t, [re, rep]) => t.replace(re, rep), d || '');
+// Cross-Distanz aus dem Wettkampfnamen ("… - XC 7.5km") wie cross_km in der Datenbank
+export const crossKm = (competition) => {
+  const m = (competition || '').match(/XC\s*([0-9]+(?:[.,][0-9]+)?)\s*km/i);
+  return m ? Number(m[1].replace(',', '.')) : null;
+};
+// Disziplin mit Cross-Distanz, z. B. "Cross 7,5 km"
+export const discWithKm = (d, competition) => {
+  const km = /^Cross Country/.test(d || '') ? crossKm(competition) : null;
+  return discLabel(d) + (km ? ` ${km.toLocaleString('de-DE')} km` : '');
+};
 // Lauf laut WA: F, F1, SF2, H3, QF1 …
 export function raceLabel(r) {
   const m = (r || '').match(/^(F|SF|QF|H|R)(\d*)$/);

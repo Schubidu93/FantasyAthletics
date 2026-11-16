@@ -1,6 +1,6 @@
 // Athleten-Fenster: Stammdaten, Toplisten und alle Ergebnisse (Lauf, Zeit, WA-Punkte, Fantasy-Punkte)
 import { html, useState, useEffect } from '../vendor/preact-htm.js';
-import { sb, q, all, fmtPts, flag, riderGroup, GROUP_LABEL, discLabel, raceLabel } from '../lib.js';
+import { sb, q, all, fmtPts, flag, riderGroup, GROUP_LABEL, discLabel, discWithKm, raceLabel } from '../lib.js';
 
 // Ergebnisse werden ab dieser Saison gespeichert
 const FIRST_YEAR = 2025;
@@ -106,7 +106,7 @@ export function RiderModal() {
           <div class="res-row res-head"><span>Datum</span><span>Wettkampf · Lauf · Zeit</span><span class="res-place">Platz</span><span class="res-pts">Pkt.</span></div>
           <div class="res-table">${shown.map((x) => html`<div key=${x.id} class=${`res-row ${L && x.wa_competition_id ? 'clickable' : ''}`} onClick=${() => go(x)}>
             <span class="res-date">${shortDate(x.date)}</span>
-            <span class="res-what"><b>${discLabel(x.discipline)}${x.race && x.race !== 'F' ? ` · ${raceLabel(x.race)}` : ''} · ${x.mark || '–'}</b>
+            <span class="res-what"><b>${discWithKm(x.discipline, x.competition)}${x.race && x.race !== 'F' ? ` · ${raceLabel(x.race)}` : ''} · ${x.mark || '–'}</b>
               <small>${x.competition}${x.category ? ` · ${x.category}` : ''}${x.result_score ? ` · ${x.result_score} WA-P.` : ''}</small>
               ${runNote(x) && html`<small class="muted">${runNote(x)}</small>`}
               ${x.pts && html`<small class="muted">Leistung ${fmtPts(x.pts.perf_points)} + Platzierung ${fmtPts(x.pts.placing_points)}</small>`}</span>

@@ -8,8 +8,11 @@ const MD_STATUS = (md) => (md.frozen ? 'eingefroren' : md.status === 'closed' ? 
 // Bezeichnung eines gewerteten Ergebnisses: "1500 Metres · SF1" → "1500 m · Halbfinale 1"
 export const labelText = (l) => {
   if (!l) return 'Ergebnis';
-  const [disc, run] = l.split(' · ');
-  return run ? `${discLabel(disc)} · ${raceLabel(run)}` : discLabel(disc);
+  const parts = l.split(' · ');
+  const km = parts.find((x) => /^[\d.]+km$/.test(x));
+  const run = parts.slice(1).find((x) => x !== km);
+  const disc = discLabel(parts[0]) + (km ? ` ${Number(km.slice(0, -2)).toLocaleString('de-DE')} km` : '');
+  return run ? `${disc} · ${raceLabel(run)}` : disc;
 };
 
 export function Results({ c }) {

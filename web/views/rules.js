@@ -105,7 +105,9 @@ export function Rules({ c }) {
         <li><strong>Vorläufe und Halbfinals</strong> bringen nur bei OW, DF, GW und GL Platzierungspunkte – und nur in der letzten Runde vor dem Finale:
           qualifiziert (Q oder q) = fester Wert, ausgeschieden = Gesamtplatz der Runde (erst alle Qualifizierten, dann die anderen nach Zeit).</li>
         <li><strong>Finals mit mehreren Läufen</strong> (z. B. 10.000 m in zwei Läufen): Platz über alle Läufe nach Zeit, gewertet wie ein Finale.</li>
-        <li><strong>Cross:</strong> keine Leistungspunkte, nur Platzierungspunkte nach der WA-Cross-Tabelle × ${cfg ? fmtNum(cfg.cross_factor) : 0.1} × Disziplinfaktor.
+        <li><strong>Cross:</strong> keine Leistungspunkte, nur Platzierungspunkte nach der WA-Cross-Tabelle × ${cfg ? fmtNum(cfg.cross_factor) : 0.1} × Distanzfaktor:
+          bis 3 km 1 (wie 1500 m), über 3 bis 6 km 1,3 (wie 5000 m), über 6 bis 12 km 1,6 (wie 10.000 m), über 12 km 2 (wie Halbmarathon).
+          Die Distanz steht bei World Athletics im Wettkampfnamen; ohne Angabe gilt 1,6. Rennen über verschiedene Distanzen werden getrennt gewertet.
           Berg- und Traillauf nutzen die Tabelle für 10 km Straße.</li>
         <li>Punkte zählen nur innerhalb eines Spieltags – für die Spieltage, in denen der Athlet in deinem Kader steht${lineup ? ' und aufgestellt ist' : ''}.</li>
         <li>Korrigiert World Athletics ein Ergebnis, wird das automatisch übernommen, solange der Spieltag nicht eingefroren ist.</li>

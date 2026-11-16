@@ -82,6 +82,16 @@ await res(slugs[20], 3, "3000 Metres Steeplechase", "H1", 3, "8:20.10", 1150, { 
 await res(slugs[12], 3, "10,000 Metres", "F", 7, "28:01.00", 1150, { wr: "F2", wp: 3 });
 await res(slugs[16], 4, "Marathon", "F", 9, "2:08:40", 1190);
 await res(slugs[17], 4, "Marathon", "F", 6, "2:23:50", 1195);
+// Cross Pforzheim: zwei Rennen (1,5 und 7,5 km) im selben Wettkampf
+comps.push([7300006, "Sparkassen Cross Pforzheim, Pforzheim", "GL", "GER", -2]);
+const pf = async (slug: string, km: string, place: number, mark: string) => db.query(
+  `insert into wa_results (rider_slug, date, competition, venue, discipline, country, category, race, place, wa_race, wa_place, mark, result_score, wa_competition_id, wa_event_id)
+   values ($1, $2, $3, 'Pforzheim (GER)', 'Cross Country', 'GER', 'GL', 'F', $4, 'F', $4, $5, 0, 7300006, 2)`,
+  [slug, day(-2), `Sparkassen Cross Pforzheim, Pforzheim - XC ${km}km`, place, mark]);
+await pf(slugs[12], "7.5", 4, "00:19:34");
+await pf(slugs[13], "7.5", 5, "00:23:36");
+await pf(slugs[4], "1.5", 1, "00:04:03");
+await pf(slugs[5], "1.5", 2, "00:04:41");
 for (const [cid, name, cat, country, off] of comps) {
   await db.query("insert into races (pcs_slug, name, venue, country, uci_class, start_date, end_date) values ($1, $2, $2, $3, $4, $5, $5)",
     [`wa-c${cid}`, name, country, cat, day(off)]);

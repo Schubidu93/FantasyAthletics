@@ -1,6 +1,6 @@
 // Wettkämpfe: alle Wettkämpfe, bei denen Athleten aus dem Pool gestartet sind, mit deren Ergebnissen und Punkten
 import { html, useState, useMemo } from '../vendor/preact-htm.js';
-import { sb, q, all, useLoad, Loading, fmtDate, fmtPts, openRider, normName, flag, withFlag, nationCode, discLabel, raceLabel } from '../lib.js';
+import { sb, q, all, useLoad, Loading, fmtDate, fmtPts, openRider, normName, flag, withFlag, nationCode, discWithKm, raceLabel } from '../lib.js';
 
 // WA-Wettkampfkategorien (World-Ranking-Regeln): OW = Olympia/WM … F = nationale Meetings
 const CATS = [['', 'Alle Kategorien'], ['top', 'OW, DF, GW, GL'], ['OW', 'OW – Olympia/WM'], ['DF', 'DF – DL-Finale'],
@@ -65,7 +65,7 @@ function RaceList({ c, races }) {
     ${list.length === 0 ? html`<p class="muted">Keine Wettkämpfe gefunden.</p>` : html`<ul class="list race-list">${list.slice(0, 300).map((r) => html`<li key=${r.pcs_slug}>
       <a class="race-link" href=${`#/league/${c.league.id}/races/${encodeURIComponent(r.pcs_slug)}`}>
         <span class="race-date">${fmtDate(r.start_date)}${r.end_date && r.end_date !== r.start_date ? ` – ${fmtDate(r.end_date)}` : ''}</span>
-        <span class="race-name"><strong>${r.name}</strong>
+        <span class="race-name"><strong>${(r.name || '').replace(/\s*-\s*XC\s*[\d.,]+\s*km$/i, '')}</strong>
           <small>${[r.country && `${flag(r.country)} ${r.country}`, r.uci_class].filter(Boolean).join(' · ')}</small></span>
       </a></li>`)}</ul>`}
     ${list.length > 300 && html`<p class="muted small">Es werden die neuesten 300 angezeigt – Filter eingrenzen.</p>`}
@@ -77,7 +77,7 @@ function RaceDetail({ c, slug }) {
     const [race] = await q(sb.from('races').select('*').eq('pcs_slug', slug));
     const id = slug.startsWith('wa-c') ? +slug.slice(4) : null;
     const rows = id ? await all(() => sb.from('wa_results')
-      .select('id,rider_slug,date,discipline,category,race,place,wa_race,wa_place,placing_round,placing_place,mark,result_score,remark')
+      .select('id,rider_slug,date,competition,discipline,category,race,place,wa_race,wa_place,placing_round,placing_place,mark,result_score,remark')
       .eq('wa_competition_id', id).order('date').order('id')) : [];
     const pts = {};
     const ids = rows.map((r) => r.id);
@@ -93,9 +93,11 @@ function RaceDetail({ c, slug }) {
   // nach Disziplin und Lauf gruppieren, innerhalb nach Platz
   const groups = [];
   for (const r of rows) {
-    const key = `${r.date}|${r.discipline}|${r.wa_race}`;
+    // Cross: Rennen über verschiedene Distanzen (z. B. 1,5 und 7,5 km) getrennt
+    const disc = discWithKm(r.discipline, r.competition);
+    const key = `${r.date}|${disc}|${r.wa_race}`;
     let g = groups.find((x) => x.key === key);
-    if (!g) groups.push(g = { key, date: r.date, discipline: r.discipline, race: r.wa_race, rows: [] });
+    if (!g) groups.push(g = { key, date: r.date, disc, race: r.wa_race, rows: [] });
     g.rows.push(r);
   }
   groups.forEach((g) => g.rows.sort((a, b) => (a.wa_place ?? 999) - (b.wa_place ?? 999)));
@@ -103,12 +105,12 @@ function RaceDetail({ c, slug }) {
   return html`<section class="card stack">
     ${back}
     <div>
-      <h2>${race.name}</h2>
+      <h2>${(race.name || '').replace(/\s*-\s*XC\s*[\d.,]+\s*km$/i, '')}</h2>
       <p class="muted small">${fmtDate(race.start_date)}${race.end_date && race.end_date !== race.start_date ? ` – ${fmtDate(race.end_date)}` : ''}
         ${race.venue ? ` · ${race.venue}` : ''}${race.uci_class ? ` · Kategorie ${race.uci_class}` : ''} · ${fmtPts(total)} Punkte gesamt</p>
     </div>
     ${groups.length === 0 ? html`<p class="muted">Keine Ergebnisse von Pool-Athleten.</p>` : groups.map((g) => html`<div class="detail-rider" key=${g.key}>
-      <div class="row between"><strong>${discLabel(g.discipline)}${g.race && g.race !== 'F' ? ` · ${raceLabel(g.race)}` : ''}</strong>
+      <div class="row between"><strong>${g.disc}${g.race && g.race !== 'F' ? ` · ${raceLabel(g.race)}` : ''}</strong>
         <span class="muted small">${fmtDate(g.date)}</span></div>
       <ul class="list compact">${g.rows.map((r) => {
         const owner = c.managerMap[c.owner[r.rider_slug]];

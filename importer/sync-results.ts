@@ -98,7 +98,8 @@ await run(db, async () => {
     const prev = races.get(slug);
     const d = String(r.date);
     races.set(slug, {
-      pcs_slug: slug, name: r.competition, venue: r.venue, country: r.country, uci_class: r.category,
+      // Cross: Distanzangabe ("- XC 7.5km") gehört zum Rennen, nicht zum Wettkampf
+      pcs_slug: slug, name: String(r.competition).replace(/\s*-\s*XC\s*[\d.,]+\s*km$/i, ""), venue: r.venue, country: r.country, uci_class: r.category,
       start_date: prev && String(prev.start_date) < d ? prev.start_date : d,
       end_date: prev && String(prev.end_date) > d ? prev.end_date : d,
       loaded_at: started,

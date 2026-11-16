@@ -1698,10 +1698,35 @@ begin
   return n;
 end $$;
 
+-- Cross: Distanz steht nur im Wettkampfnamen, z. B. "Sparkassen Cross Pforzheim, Pforzheim - XC 7.5km"
+create or replace function cross_km(p_competition text) returns numeric
+language sql immutable as $$
+  select replace((regexp_match(coalesce(p_competition, ''), 'XC\s*([0-9]+(?:[.,][0-9]+)?)\s*km', 'i'))[1], ',', '.')::numeric;
+$$;
+
+-- Disziplinfaktor für Cross nach Distanz (analog Bahn/Straße): bis max_km gilt factor.
+-- Ohne Distanzangabe gilt der Faktor aus disciplines. Anpassbar im Supabase Table Editor.
+create table if not exists cross_distance_factors (
+  max_km numeric primary key,
+  factor numeric not null check (factor >= 0),
+  label  text
+);
+insert into cross_distance_factors (max_km, factor, label) values
+  (3, 1, 'bis 3 km – wie 1500 m'),
+  (6, 1.3, 'über 3 bis 6 km – wie 3000/5000 m'),
+  (12, 1.6, 'über 6 bis 12 km – wie 10.000 m'),
+  (1000, 2, 'über 12 km – wie Halbmarathon/25 km Straße')
+on conflict (max_km) do nothing;
+
+create or replace function _cross_factor(p_km numeric) returns numeric
+language sql stable security definer set search_path = public as $$
+  select factor from cross_distance_factors where p_km is not null and p_km <= max_km order by max_km limit 1;
+$$;
+
 -- Punkte je Ergebnis (in results) aus den WA-Rohdaten neu berechnen:
 --   Leistung   = max(0, WA-Punkte − perf_threshold) × perf_factor × Disziplinfaktor
 --   Platzierung = WA-Platzierungspunkte (bester Wert der Tabellen der Disziplin) × placing_factor × Disziplinfaktor
---   Cross: nur Platzierung = Cross-Tabelle × cross_factor × Disziplinfaktor
+--   Cross: nur Platzierung = Cross-Tabelle × cross_factor × Distanzfaktor (cross_distance_factors)
 -- Gespeichert werden nur Ergebnisse mit Punkten. Eingefrorene Spieltage sind davon nicht betroffen.
 create or replace function rebuild_results(p_from date default null) returns int
 language plpgsql security definer set search_path = public as $$
@@ -1714,7 +1739,9 @@ begin
     from (
       select w.id, w.rider_slug, w.date, w.place,
              coalesce('wa-c' || w.wa_competition_id, 'wa-' || md5(w.competition || w.date::text)) race_slug,
-             w.discipline || case when w.wa_race in ('', 'F') then '' else ' · ' || w.wa_race end label,
+             w.discipline || case when d.cross_table is not null and cross_km(w.competition) is not null
+                                  then ' · ' || cross_km(w.competition) || 'km' else '' end
+               || case when w.wa_race in ('', 'F') then '' else ' · ' || w.wa_race end label,
              case when d.cross_table is not null then 0
                   else round(greatest(0, coalesce(w.result_score, 0) - c.perf_threshold) * c.perf_factor * coalesce(d.factor, 0), 1)
              end perf,
@@ -1722,7 +1749,7 @@ begin
                     round(coalesce((select ps.points from placing_scores ps
                                      where ps.placing_table = d.cross_table and ps.category = w.category
                                        and ps.race_type = 'F' and ps.place = w.place and _race_type(w.race) = 'F'), 0)
-                          * c.cross_factor * coalesce(d.factor, 0), 1)
+                          * c.cross_factor * coalesce(_cross_factor(cross_km(w.competition)), d.factor, 0), 1)
                   else round(coalesce((select max(ps.points) from placing_scores ps
                                         where ps.placing_table = any (d.placing_tables) and ps.category = w.category
                                           and ps.race_type = coalesce(w.placing_round, _race_type(w.race))
@@ -2523,6 +2550,7 @@ alter table wa_results      enable row level security;
 alter table disciplines     enable row level security;
 alter table placing_scores  enable row level security;
 alter table scoring_config  enable row level security;
+alter table cross_distance_factors enable row level security;
 alter table keepers         enable row level security;
 alter table app_config      enable row level security;   -- keine Policies: nur Service-Key
 alter table push_subscriptions enable row level security;
@@ -2533,7 +2561,7 @@ declare t text;
 begin
   -- öffentliche Stammdaten: lesbar für angemeldete Nutzer
   foreach t in array array['riders', 'races', 'results', 'sync_status', 'rider_season_stats', 'toplist_entries',
-                           'wa_results', 'disciplines', 'placing_scores', 'scoring_config'] loop
+                           'wa_results', 'disciplines', 'placing_scores', 'scoring_config', 'cross_distance_factors'] loop
     execute format('drop policy if exists read_all on %I', t);
     execute format('create policy read_all on %I for select to authenticated using (true)', t);
   end loop;
