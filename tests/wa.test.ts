@@ -52,3 +52,13 @@ describe("WA-Parser", () => {
     });
   });
 });
+
+describe("All-time-Liste", () => {
+  it("liest das Datum der Leistung", async () => {
+    const { parseToplist } = await import("../importer/wa");
+    const rows = parseToplist(`<table><tr><td data-th="Mark">3:30.09</td>
+      <td data-th="Competitor"><a href="/athletes/germany/robert-farken-14650473">Robert FARKEN</a></td>
+      <td data-th="Date">18 JUL 2026</td><td data-th="ResultScore">1243</td></tr></table>`);
+    expect(rows[0]).toMatchObject({ athleteId: 14650473, mark: "3:30.09", date: "2026-07-18" });
+  });
+});

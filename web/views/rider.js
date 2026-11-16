@@ -17,7 +17,10 @@ function placeLabel(x) {
   return final && x.place <= 3 ? html`<span class=${`medal m${x.place}`}>${x.place}.</span>` : `${x.place}.`;
 }
 // Zusatz zum Lauf: kombinierte Platzierung bzw. Wertung der Runde vor dem Finale
+const isSplit = (x) => /split time/i.test(x.competition || '') || x.remark === 'ST';
+const RECORD = { DR: 'Deutscher Rekord', ER: 'Europarekord', WR: 'Weltrekord' };
 function runNote(x) {
+  if (isSplit(x)) return 'Zwischenzeit – zählt nicht (nur das ganze Rennen gibt Punkte)';
   if (x.wa_race && x.wa_race !== x.race) return `${raceLabel(x.wa_race)}: ${x.wa_place ?? '–'}. · kombiniert`;
   if (x.placing_round && x.placing_round !== 'F') return x.placing_place === 0 ? 'fürs Finale qualifiziert (Q/q)' : `Gesamtplatz der Runde: ${x.placing_place}.`;
   return '';
@@ -26,17 +29,20 @@ function runNote(x) {
 async function loadRider(slug, league) {
   const [rider] = await q(sb.from('athletes').select('*').eq('id', slug));
   // Mixed-Liga: Platz in der Saisonwertung über Männer und Frauen hinweg
-  const mixed = league ? (await q(sb.from('leagues').select('gender').eq('id', league)))[0]?.gender === 'mixed' : false;
+  const lg = league ? (await q(sb.from('leagues').select('gender,admin_user').eq('id', league)))[0] : null;
+  const mixed = lg?.gender === 'mixed';
+  // Liga-Admins dürfen Rekorde an Ergebnissen eintragen
+  const admin = !!lg && lg.admin_user === (await sb.auth.getUser()).data?.user?.id;
   const rows = await all(() => sb.from('wa_results')
-    .select('id,date,competition,discipline,category,race,place,wa_race,wa_place,placing_round,placing_place,mark,result_score,remark,wa_competition_id,wa_event_id,source,source_url,country')
+    .select('id,date,competition,discipline,category,race,place,wa_race,wa_place,placing_round,placing_place,mark,result_score,remark,wa_competition_id,wa_event_id,source,source_url,country,record')
     .eq('athlete_id', slug).gte('date', `${FIRST_YEAR}-01-01`).order('date', { ascending: false }).order('id'));
-  const pts = Object.fromEntries((await all(() => sb.from('results').select('wa_result_id,points,perf_points,placing_points')
+  const pts = Object.fromEntries((await all(() => sb.from('results').select('wa_result_id,points,perf_points,placing_points,record_points')
     .eq('athlete_id', slug).order('id'))).map((r) => [r.wa_result_id, r]));
   const toplists = await rpc('athlete_toplists', { p_athlete: slug });
   const season = Object.fromEntries((await q(sb.from('athlete_season_stats').select('year,season_rank,points,athletes,overall_rank,overall_athletes').eq('athlete_id', slug)))
     .map((x) => [x.year, mixed && x.overall_rank ? { ...x, season_rank: x.overall_rank, athletes: x.overall_athletes } : x]));
   const results = rows.map((r) => ({ ...r, pts: pts[r.id] || null }));
-  return { rider, results, toplists, season };
+  return { rider, results, toplists, season, admin };
 }
 
 export function RiderModal() {
@@ -81,6 +87,10 @@ export function RiderModal() {
   const sr = data?.season?.[y];
   const g = riderGroup(r);
   const L = leagueId();
+  const setRecord = async (x, v) => {
+    try { await rpc('set_result_record', { p_id: x.id, p_record: v || null }); setData(await loadRider(slug, L)); }
+    catch (e) { setError(e.message); }
+  };
   const toTop = (t) => { if (!L) return; setSlug(null); location.hash = `#/league/${L}/toplists/${t.year}/${encodeURIComponent(t.discipline)}/${r?.gender || 'men'}`; };
   const go = (x) => { if (!L || !x.wa_competition_id) return; setSlug(null); location.hash = `#/league/${L}/races/wa-c${x.wa_competition_id}`; };
 
@@ -126,7 +136,12 @@ export function RiderModal() {
               ${runNote(x) && html`<small class="muted">${runNote(x)}</small>`}
               ${x.wa_competition_id && html`<small><a href=${waResultUrl(x.wa_competition_id, x.wa_event_id)} target="_blank" rel="noopener"
                 onClick=${(e) => e.stopPropagation()}>WA-Ergebnis ↗</a></small>`}
-              ${x.pts && html`<small class="muted">Leistung ${fmtPts(x.pts.perf_points)} + Platzierung ${fmtPts(x.pts.placing_points)}</small>`}</span>
+              ${x.record && html`<small><span class="badge b-rec">${x.record}</span> ${RECORD[x.record]}</small>`}
+              ${x.pts && html`<small class="muted">Leistung ${fmtPts(x.pts.perf_points)} + Platzierung ${fmtPts(x.pts.placing_points)}${Number(x.pts.record_points)
+                ? ` + Rekord ${fmtPts(x.pts.record_points)}` : ''}</small>`}
+              ${data.admin && !isSplit(x) && html`<small onClick=${(e) => e.stopPropagation()}><select class="mini" value=${x.record || ''}
+                onChange=${(e) => setRecord(x, e.target.value)} aria-label="Rekord"><option value="">kein Rekord</option>
+                ${Object.entries(RECORD).map(([k, l]) => html`<option value=${k}>${l}</option>`)}</select></small>`}</span>
             <span class="res-place">${placeLabel(x)}</span>
             <span class="res-pts">${x.pts ? fmtPts(x.pts.points) : ''}</span>
           </div>`)}</div>
