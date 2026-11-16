@@ -387,3 +387,4 @@ details.help li.chosen { background: var(--accent-soft); border-radius: 6px; pad
 .cal-text .race-name strong { overflow-wrap: anywhere; }
 .race-list li.cal-de { box-shadow: inset 3px 0 0 var(--accent); padding-left: .7rem; }
 .cal-events { overflow-wrap: anywhere; }
+.chips-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem .75rem; }
