@@ -1,0 +1,3963 @@
+{
+ "props": {
+  "pageProps": {
+   "competitor": {
+    "__typename": "singleCompetitor",
+    "_id": 14682657,
+    "primaryMediaId": null,
+    "primaryMediaId2": null,
+    "primaryMedia": null,
+    "basicData": {
+     "__typename": "AthleteNewData",
+     "id": null,
+     "friendlyName": null,
+     "fullName": null,
+     "friendlyNameLetter": null,
+     "friendlyNameFirst3Letter": null,
+     "sexCode": null,
+     "birthPlace": null,
+     "birthPlaceCountryName": null,
+     "sexNameUrlSlug": null,
+     "birthPlaceCountryUrlSlug": null,
+     "birthCountryCode": null,
+     "primaryMediaId": null,
+     "facebookUsername": null,
+     "twitterUsername": null,
+     "instagramUsername": null,
+     "countryFullName": "Germany",
+     "familyName": "THURLEY",
+     "givenName": "Tom",
+     "firstName": null,
+     "lastName": null,
+     "countryName": null,
+     "countryCode": "GER",
+     "countryUrlSlug": null,
+     "birthDate": "13 SEP 1993",
+     "birthDateStr": null,
+     "urlSlug": null,
+     "representativeId": null,
+     "biography": null,
+     "twitterLink": null,
+     "instagramLink": null,
+     "facebookLink": null,
+     "transfersOfAllegiance": [],
+     "iaafId": 338341,
+     "aaId": 14682657,
+     "primaryMediaEdited": null,
+     "male": true,
+     "primaryMedia": null
+    },
+    "athleteRepresentative": {
+     "__typename": "representativeType",
+     "_id": 410645,
+     "name": "Philipp Kopp",
+     "countryCode": null,
+     "countryName": "Germany",
+     "email": "philipp@issberlin.de",
+     "telephone": null,
+     "mobile": "+49 1772971941",
+     "website": [
+      "https:// www.issberlin.de"
+     ]
+    },
+    "personalBests": {
+     "__typename": "personalBestsType",
+     "withWind": false,
+     "withRecords": false,
+     "results": [
+      {
+       "__typename": "singleCompetitorResult",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "3000-metres",
+       "typeNameUrlSlug": "middlelong",
+       "discipline": "3000 Metres",
+       "linkToList": true,
+       "mark": "8:39.24",
+       "combinedPerformances": null,
+       "wind": null,
+       "notLegal": false,
+       "venue": "Potsdam (GER) (i)",
+       "date": "13 JAN 2018",
+       "listPosition": null,
+       "resultScore": 856,
+       "records": [],
+       "competitionId": null,
+       "eventId": "10229607",
+       "eventName": null
+      },
+      {
+       "__typename": "singleCompetitorResult",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "3000-metres-short-track",
+       "typeNameUrlSlug": "middlelong",
+       "discipline": "3000 Metres Short Track",
+       "linkToList": true,
+       "mark": "8:39.24",
+       "combinedPerformances": null,
+       "wind": null,
+       "notLegal": false,
+       "venue": "Potsdam (GER) (i)",
+       "date": "13 JAN 2018",
+       "listPosition": null,
+       "resultScore": 856,
+       "records": [],
+       "competitionId": null,
+       "eventId": "10229560",
+       "eventName": null
+      },
+      {
+       "__typename": "singleCompetitorResult",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "5000-metres",
+       "typeNameUrlSlug": "middlelong",
+       "discipline": "5000 Metres",
+       "linkToList": true,
+       "mark": "14:53.95",
+       "combinedPerformances": null,
+       "wind": null,
+       "notLegal": false,
+       "venue": "Sportforum, Berlin (GER)",
+       "date": "23 AUG 2020",
+       "listPosition": null,
+       "resultScore": 828,
+       "records": [],
+       "competitionId": null,
+       "eventId": "10229609",
+       "eventName": null
+      },
+      {
+       "__typename": "singleCompetitorResult",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "10000-metres",
+       "typeNameUrlSlug": "middlelong",
+       "discipline": "10,000 Metres",
+       "linkToList": true,
+       "mark": "31:49.80",
+       "combinedPerformances": null,
+       "wind": null,
+       "notLegal": false,
+       "venue": "Berlin (GER)",
+       "date": "16 APR 2016",
+       "listPosition": null,
+       "resultScore": 805,
+       "records": [],
+       "competitionId": null,
+       "eventId": "10229610",
+       "eventName": null
+      },
+      {
+       "__typename": "singleCompetitorResult",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "5-kilometres",
+       "typeNameUrlSlug": "road-running",
+       "discipline": "5 Kilometres Road",
+       "linkToList": true,
+       "mark": "14:44",
+       "combinedPerformances": null,
+       "wind": null,
+       "notLegal": false,
+       "venue": "Berlin (GER)",
+       "date": "12 JUL 2020",
+       "listPosition": null,
+       "resultScore": 858,
+       "records": [],
+       "competitionId": "7149794",
+       "eventId": "204597",
+       "eventName": null
+      },
+      {
+       "__typename": "singleCompetitorResult",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "10-kilometres",
+       "typeNameUrlSlug": "road-running",
+       "discipline": "10 Kilometres Road",
+       "linkToList": true,
+       "mark": "28:58",
+       "combinedPerformances": null,
+       "wind": null,
+       "notLegal": false,
+       "venue": "Berlin (GER)",
+       "date": "12 OCT 2025",
+       "listPosition": null,
+       "resultScore": 1044,
+       "records": [],
+       "competitionId": "7221562",
+       "eventId": "10229507",
+       "eventName": null
+      },
+      {
+       "__typename": "singleCompetitorResult",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "half-marathon",
+       "typeNameUrlSlug": "road-running",
+       "discipline": "Half Marathon",
+       "linkToList": true,
+       "mark": "1:03:56",
+       "combinedPerformances": null,
+       "wind": null,
+       "notLegal": false,
+       "venue": "Köln (GER)",
+       "date": "05 OCT 2025",
+       "listPosition": null,
+       "resultScore": 1033,
+       "records": [],
+       "competitionId": "7224739",
+       "eventId": "10229633",
+       "eventName": null
+      },
+      {
+       "__typename": "singleCompetitorResult",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "marathon",
+       "typeNameUrlSlug": "road-running",
+       "discipline": "Marathon",
+       "linkToList": true,
+       "mark": "2:11:02",
+       "combinedPerformances": null,
+       "wind": null,
+       "notLegal": false,
+       "venue": "Friedrichswall, Hannover (GER)",
+       "date": "12 APR 2026",
+       "listPosition": null,
+       "resultScore": 1112,
+       "records": [],
+       "competitionId": "7236399",
+       "eventId": "10229634",
+       "eventName": null
+      }
+     ]
+    },
+    "seasonsBests": {
+     "__typename": "seasonsBestsType",
+     "parameters": {
+      "__typename": "seasonsBestsParamsType",
+      "seasonsBestsSeason": 2026
+     },
+     "activeSeasons": [
+      "2026",
+      "2025",
+      "2024",
+      "2023",
+      "2022",
+      "2021",
+      "2020",
+      "2019",
+      "2018",
+      "2017",
+      "2016",
+      "2015"
+     ],
+     "withWind": false,
+     "withRecords": false,
+     "results": [
+      {
+       "__typename": "singleCompetitorResult",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "10-kilometres",
+       "typeNameUrlSlug": "road-running",
+       "discipline": "10 Kilometres Road",
+       "linkToList": true,
+       "mark": "30:07",
+       "combinedPerformances": null,
+       "wind": null,
+       "notLegal": false,
+       "venue": "Würzburg (GER)",
+       "date": "26 APR 2026",
+       "listPosition": null,
+       "resultScore": 945,
+       "records": [],
+       "competitionId": "7238026",
+       "eventId": "10229507",
+       "competition": "36. Internationaler Würzburger Residenzlauf"
+      },
+      {
+       "__typename": "singleCompetitorResult",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "half-marathon",
+       "typeNameUrlSlug": "road-running",
+       "discipline": "Half Marathon",
+       "linkToList": true,
+       "mark": "1:04:07",
+       "combinedPerformances": null,
+       "wind": null,
+       "notLegal": false,
+       "venue": "Mainz (GER)",
+       "date": "10 MAY 2026",
+       "listPosition": null,
+       "resultScore": 1026,
+       "records": [],
+       "competitionId": "7242791",
+       "eventId": "10229633",
+       "competition": "Gutenberg Halbmarathon Mainz"
+      },
+      {
+       "__typename": "singleCompetitorResult",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "marathon",
+       "typeNameUrlSlug": "road-running",
+       "discipline": "Marathon",
+       "linkToList": true,
+       "mark": "2:11:02",
+       "combinedPerformances": null,
+       "wind": null,
+       "notLegal": false,
+       "venue": "Friedrichswall, Hannover (GER)",
+       "date": "12 APR 2026",
+       "listPosition": "534",
+       "resultScore": 1112,
+       "records": [],
+       "competitionId": "7236399",
+       "eventId": "10229634",
+       "competition": "Hannover Marathon"
+      }
+     ]
+    },
+    "progressionOfSeasonsBests": [
+     {
+      "__typename": "singleCompetitorProgression",
+      "indoor": false,
+      "disciplineCode": null,
+      "disciplineNameUrlSlug": "3000-metres",
+      "typeNameUrlSlug": "middlelong",
+      "discipline": "3000 Metres",
+      "withWind": false,
+      "mainEvent": false,
+      "eventId": "10229607",
+      "results": [
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2015",
+        "numericResult": 531.17,
+        "mark": "8:51.17",
+        "wind": null,
+        "venue": "Berlin (GER) (i)",
+        "date": "25 JAN 2015",
+        "listPosition": null,
+        "resultScore": 793,
+        "competitionId": null,
+        "competition": "Berlin Regional Indoor Championships"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2016",
+        "numericResult": 556.36,
+        "mark": "9:16.36",
+        "wind": null,
+        "venue": "Potsdam (GER) (i)",
+        "date": "24 JAN 2016",
+        "listPosition": null,
+        "resultScore": 669,
+        "competitionId": null,
+        "competition": "Potsdam Regional Indoor Championships"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2017",
+        "numericResult": 538.31,
+        "mark": "8:58.31",
+        "wind": null,
+        "venue": "Berlin (GER) (i)",
+        "date": "22 JAN 2017",
+        "listPosition": null,
+        "resultScore": 757,
+        "competitionId": null,
+        "competition": "Berlin Regional Indoor Championships"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2018",
+        "numericResult": 519.24,
+        "mark": "8:39.24",
+        "wind": null,
+        "venue": "Potsdam (GER) (i)",
+        "date": "13 JAN 2018",
+        "listPosition": null,
+        "resultScore": 856,
+        "competitionId": null,
+        "competition": "Potsdam Regional Indoor Championships"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2019",
+        "numericResult": 519.25,
+        "mark": "8:39.25",
+        "wind": null,
+        "venue": "Neubrandenburg (GER) (i)",
+        "date": "03 FEB 2019",
+        "listPosition": null,
+        "resultScore": 856,
+        "competitionId": null,
+        "competition": "Regional Indoor Championships"
+       }
+      ]
+     },
+     {
+      "__typename": "singleCompetitorProgression",
+      "indoor": false,
+      "disciplineCode": null,
+      "disciplineNameUrlSlug": "3000-metres-short-track",
+      "typeNameUrlSlug": "middlelong",
+      "discipline": "3000 Metres Short Track",
+      "withWind": false,
+      "mainEvent": false,
+      "eventId": "10229560",
+      "results": [
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2015",
+        "numericResult": 531.17,
+        "mark": "8:51.17",
+        "wind": null,
+        "venue": "Berlin (GER) (i)",
+        "date": "25 JAN 2015",
+        "listPosition": null,
+        "resultScore": 793,
+        "competitionId": null,
+        "competition": "Berlin Regional Indoor Championships"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2016",
+        "numericResult": 556.36,
+        "mark": "9:16.36",
+        "wind": null,
+        "venue": "Potsdam (GER) (i)",
+        "date": "24 JAN 2016",
+        "listPosition": null,
+        "resultScore": 669,
+        "competitionId": null,
+        "competition": "Potsdam Regional Indoor Championships"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2017",
+        "numericResult": 538.31,
+        "mark": "8:58.31",
+        "wind": null,
+        "venue": "Berlin (GER) (i)",
+        "date": "22 JAN 2017",
+        "listPosition": null,
+        "resultScore": 757,
+        "competitionId": null,
+        "competition": "Berlin Regional Indoor Championships"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2018",
+        "numericResult": 519.24,
+        "mark": "8:39.24",
+        "wind": null,
+        "venue": "Potsdam (GER) (i)",
+        "date": "13 JAN 2018",
+        "listPosition": null,
+        "resultScore": 856,
+        "competitionId": null,
+        "competition": "Potsdam Regional Indoor Championships"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2019",
+        "numericResult": 519.25,
+        "mark": "8:39.25",
+        "wind": null,
+        "venue": "Neubrandenburg (GER) (i)",
+        "date": "03 FEB 2019",
+        "listPosition": null,
+        "resultScore": 856,
+        "competitionId": null,
+        "competition": "Regional Indoor Championships"
+       }
+      ]
+     },
+     {
+      "__typename": "singleCompetitorProgression",
+      "indoor": false,
+      "disciplineCode": null,
+      "disciplineNameUrlSlug": "5000-metres",
+      "typeNameUrlSlug": "middlelong",
+      "discipline": "5000 Metres",
+      "withWind": false,
+      "mainEvent": false,
+      "eventId": "10229609",
+      "results": [
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2016",
+        "numericResult": 939.1,
+        "mark": "15:39.10",
+        "wind": null,
+        "venue": "Paderborn (GER)",
+        "date": "26 MAY 2016",
+        "listPosition": null,
+        "resultScore": 697,
+        "competitionId": null,
+        "competition": "Paderborn German University Championships"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2019",
+        "numericResult": 909.69,
+        "mark": "15:09.69",
+        "wind": null,
+        "venue": "Hannover (GER)",
+        "date": "21 JUL 2019",
+        "listPosition": null,
+        "resultScore": 781,
+        "competitionId": null,
+        "competition": "Regional Championships"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2020",
+        "numericResult": 893.95,
+        "mark": "14:53.95",
+        "wind": null,
+        "venue": "Sportforum, Berlin (GER)",
+        "date": "23 AUG 2020",
+        "listPosition": null,
+        "resultScore": 828,
+        "competitionId": null,
+        "competition": "BBM Männer/Frauen/U20/U18"
+       }
+      ]
+     },
+     {
+      "__typename": "singleCompetitorProgression",
+      "indoor": false,
+      "disciplineCode": null,
+      "disciplineNameUrlSlug": "10000-metres",
+      "typeNameUrlSlug": "middlelong",
+      "discipline": "10,000 Metres",
+      "withWind": false,
+      "mainEvent": false,
+      "eventId": "10229610",
+      "results": [
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2016",
+        "numericResult": 1909.8,
+        "mark": "31:49.80",
+        "wind": null,
+        "venue": "Berlin (GER)",
+        "date": "16 APR 2016",
+        "listPosition": null,
+        "resultScore": 805,
+        "competitionId": null,
+        "competition": "Berlin"
+       }
+      ]
+     },
+     {
+      "__typename": "singleCompetitorProgression",
+      "indoor": false,
+      "disciplineCode": null,
+      "disciplineNameUrlSlug": "5-kilometres",
+      "typeNameUrlSlug": "road-running",
+      "discipline": "5 Kilometres Road",
+      "withWind": false,
+      "mainEvent": false,
+      "eventId": "204597",
+      "results": [
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2020",
+        "numericResult": 884,
+        "mark": "14:44",
+        "wind": null,
+        "venue": "Berlin (GER)",
+        "date": "12 JUL 2020",
+        "listPosition": 308,
+        "resultScore": 858,
+        "competitionId": "7149794",
+        "competition": "Berlin 5K Invitational"
+       }
+      ]
+     },
+     {
+      "__typename": "singleCompetitorProgression",
+      "indoor": false,
+      "disciplineCode": null,
+      "disciplineNameUrlSlug": "10-kilometres",
+      "typeNameUrlSlug": "road-running",
+      "discipline": "10 Kilometres Road",
+      "withWind": false,
+      "mainEvent": false,
+      "eventId": "10229507",
+      "results": [
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2015",
+        "numericResult": 1883,
+        "mark": "31:23",
+        "wind": null,
+        "venue": "Bad Liebenzell (GER)",
+        "date": "06 SEP 2015",
+        "listPosition": null,
+        "resultScore": 841,
+        "competitionId": null,
+        "competition": "German 10km Championships"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2020",
+        "numericResult": 1838,
+        "mark": "30:38",
+        "wind": null,
+        "venue": "Berlin (GER)",
+        "date": "26 SEP 2020",
+        "listPosition": 690,
+        "resultScore": 901,
+        "competitionId": null,
+        "competition": "Berlin 10k Invitational II"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2021",
+        "numericResult": 1788,
+        "mark": "29:48",
+        "wind": null,
+        "venue": "Berlin (GER)",
+        "date": "08 AUG 2021",
+        "listPosition": 518,
+        "resultScore": 972,
+        "competitionId": null,
+        "competition": "The Great 10K Berlin"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2022",
+        "numericResult": 1828,
+        "mark": "30:28",
+        "wind": null,
+        "venue": "Berlin (GER)",
+        "date": "30 JUL 2022",
+        "listPosition": 905,
+        "resultScore": 915,
+        "competitionId": null,
+        "competition": "Adidas Runners City Night"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2023",
+        "numericResult": 1812,
+        "mark": "30:12",
+        "wind": null,
+        "venue": "Berlin (GER)",
+        "date": "29 JUL 2023",
+        "listPosition": 711,
+        "resultScore": 938,
+        "competitionId": "7197642",
+        "competition": "City-Nachtlauf"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2024",
+        "numericResult": 1777,
+        "mark": "29:37",
+        "wind": null,
+        "venue": "Dresden (GER)",
+        "date": "24 MAR 2024",
+        "listPosition": 551,
+        "resultScore": 987,
+        "competitionId": "7208490",
+        "competition": "NTT DATA Citylauf Dresden"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2025",
+        "numericResult": 1738,
+        "mark": "28:58",
+        "wind": null,
+        "venue": "Berlin (GER)",
+        "date": "12 OCT 2025",
+        "listPosition": 409,
+        "resultScore": 1044,
+        "competitionId": "7221562",
+        "competition": "The Great 10K"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2026",
+        "numericResult": 1807,
+        "mark": "30:07",
+        "wind": null,
+        "venue": "Würzburg (GER)",
+        "date": "26 APR 2026",
+        "listPosition": null,
+        "resultScore": 945,
+        "competitionId": "7238026",
+        "competition": "36. Internationaler Würzburger Residenzlauf"
+       }
+      ]
+     },
+     {
+      "__typename": "singleCompetitorProgression",
+      "indoor": false,
+      "disciplineCode": null,
+      "disciplineNameUrlSlug": "half-marathon",
+      "typeNameUrlSlug": "road-running",
+      "discipline": "Half Marathon",
+      "withWind": false,
+      "mainEvent": false,
+      "eventId": "10229633",
+      "results": [
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2015",
+        "numericResult": 4188,
+        "mark": "1:09:48",
+        "wind": null,
+        "venue": "Berlin (GER)",
+        "date": "29 MAR 2015",
+        "listPosition": null,
+        "resultScore": 825,
+        "competitionId": null,
+        "competition": "Berlin Half Marathon"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2017",
+        "numericResult": 4179,
+        "mark": "1:09:39",
+        "wind": null,
+        "venue": "Hannover (GER)",
+        "date": "09 APR 2017",
+        "listPosition": null,
+        "resultScore": 830,
+        "competitionId": null,
+        "competition": "Hannover German Half Marathon Championships"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2018",
+        "numericResult": 4074,
+        "mark": "1:07:54",
+        "wind": null,
+        "venue": "Hannover (GER)",
+        "date": "08 APR 2018",
+        "listPosition": null,
+        "resultScore": 890,
+        "competitionId": "7117489",
+        "competition": "Hannover German Half Marathon Championships"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2019",
+        "numericResult": 4047,
+        "mark": "1:07:27",
+        "wind": null,
+        "venue": "Mainz (GER)",
+        "date": "05 MAY 2019",
+        "listPosition": null,
+        "resultScore": 905,
+        "competitionId": null,
+        "competition": "Gutenberg Half Marathon Mainz"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2020",
+        "numericResult": 3870,
+        "mark": "1:04:30",
+        "wind": null,
+        "venue": "Dresden (GER)",
+        "date": "08 NOV 2020",
+        "listPosition": 746,
+        "resultScore": 1012,
+        "competitionId": "7157943",
+        "competition": "Laufszene Invitational Run"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2021",
+        "numericResult": 3893,
+        "mark": "1:04:53",
+        "wind": null,
+        "venue": "Dresden (GER)",
+        "date": "21 MAR 2021",
+        "listPosition": 721,
+        "resultScore": 998,
+        "competitionId": "7163199",
+        "competition": "itelligence Citylauf Invitational"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2024",
+        "numericResult": 3889,
+        "mark": "1:04:49",
+        "wind": null,
+        "venue": "Mainz (GER)",
+        "date": "05 MAY 2024",
+        "listPosition": null,
+        "resultScore": 1000,
+        "competitionId": "7210307",
+        "competition": "Gutenberg Halbmarathon Mainz"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2025",
+        "numericResult": 3836,
+        "mark": "1:03:56",
+        "wind": null,
+        "venue": "Köln (GER)",
+        "date": "05 OCT 2025",
+        "listPosition": null,
+        "resultScore": 1033,
+        "competitionId": "7224739",
+        "competition": "Generali Köln Half Marathon"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2026",
+        "numericResult": 3847,
+        "mark": "1:04:07",
+        "wind": null,
+        "venue": "Mainz (GER)",
+        "date": "10 MAY 2026",
+        "listPosition": null,
+        "resultScore": 1026,
+        "competitionId": "7242791",
+        "competition": "Gutenberg Halbmarathon Mainz"
+       }
+      ]
+     },
+     {
+      "__typename": "singleCompetitorProgression",
+      "indoor": false,
+      "disciplineCode": null,
+      "disciplineNameUrlSlug": "marathon",
+      "typeNameUrlSlug": "road-running",
+      "discipline": "Marathon",
+      "withWind": false,
+      "mainEvent": true,
+      "eventId": "10229634",
+      "results": [
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2021",
+        "numericResult": 8635,
+        "mark": "2:23:55",
+        "wind": null,
+        "venue": "München (GER)",
+        "date": "10 OCT 2021",
+        "listPosition": null,
+        "resultScore": 892,
+        "competitionId": "7160165",
+        "competition": "Generali München Marathon"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2023",
+        "numericResult": 8348,
+        "mark": "2:19:08",
+        "wind": null,
+        "venue": "Köln (GER)",
+        "date": "01 OCT 2023",
+        "listPosition": null,
+        "resultScore": 971,
+        "competitionId": "7198918",
+        "competition": "Generali Köln Marathon"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2024",
+        "numericResult": 8092,
+        "mark": "2:14:52",
+        "wind": null,
+        "venue": "Hannover (GER)",
+        "date": "14 APR 2024",
+        "listPosition": 906,
+        "resultScore": 1044,
+        "competitionId": "7207469",
+        "competition": "ADAC Marathon Hannover"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2025",
+        "numericResult": 7879,
+        "mark": "2:11:19",
+        "wind": null,
+        "venue": "Frankfurt (GER)",
+        "date": "26 OCT 2025",
+        "listPosition": 501,
+        "resultScore": 1106,
+        "competitionId": "7229997",
+        "competition": "Mainova Frankfurt Marathon"
+       },
+       {
+        "__typename": "singleCompetitorProgressionResult",
+        "season": "2026",
+        "numericResult": 7862,
+        "mark": "2:11:02",
+        "wind": null,
+        "venue": "Friedrichswall, Hannover (GER)",
+        "date": "12 APR 2026",
+        "listPosition": 534,
+        "resultScore": 1112,
+        "competitionId": "7236399",
+        "competition": "Hannover Marathon"
+       }
+      ]
+     }
+    ],
+    "worldRankings": {
+     "__typename": "worldRankingsType",
+     "parameters": {
+      "__typename": "worldRankingsParamsType",
+      "worldRankingsProgressionYear": null
+     },
+     "current": [
+      {
+       "__typename": "worldRankingCurrent",
+       "rankingCalculationId": "146076947",
+       "eventGroup": "Men's Marathon",
+       "male": true,
+       "urlSlug": "marathon",
+       "place": 436,
+       "rankingScore": 1125
+      },
+      {
+       "__typename": "worldRankingCurrent",
+       "rankingCalculationId": "146074169",
+       "eventGroup": "Men's Road Running",
+       "male": true,
+       "urlSlug": "road-running",
+       "place": 602,
+       "rankingScore": 1040
+      },
+      {
+       "__typename": "worldRankingCurrent",
+       "rankingCalculationId": "146132749",
+       "eventGroup": "Men's Overall Ranking",
+       "male": true,
+       "urlSlug": "overall-ranking",
+       "place": 3011,
+       "rankingScore": 1125
+      }
+     ],
+     "best": [
+      {
+       "__typename": "worldRankingBest",
+       "eventGroup": "Men's Road Running",
+       "eventGroupId": 20,
+       "urlSlug": "road-running",
+       "place": "392",
+       "weeks": 1
+      },
+      {
+       "__typename": "worldRankingBest",
+       "eventGroup": "Men's Marathon",
+       "eventGroupId": 21,
+       "urlSlug": "marathon",
+       "place": "399",
+       "weeks": 2
+      },
+      {
+       "__typename": "worldRankingBest",
+       "eventGroup": "Men's Overall Ranking",
+       "eventGroupId": 46,
+       "urlSlug": "overall-ranking",
+       "place": "2983",
+       "weeks": 1
+      }
+     ]
+    },
+    "honours": [],
+    "resultsByYear": {
+     "__typename": "resultsByYearType",
+     "parameters": {
+      "__typename": "resultByYearParamsType",
+      "resultsByYear": 2026,
+      "resultsByYearOrderBy": "discipline"
+     },
+     "activeYears": [
+      "2026",
+      "2025",
+      "2024",
+      "2023",
+      "2022",
+      "2021",
+      "2020",
+      "2019",
+      "2018",
+      "2017",
+      "2016",
+      "2015"
+     ],
+     "resultsByEvent": [
+      {
+       "__typename": "resultsByEvent",
+       "indoor": null,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": null,
+       "typeNameUrlSlug": null,
+       "discipline": "10 Kilometres Road",
+       "withWind": null,
+       "results": [
+        {
+         "__typename": "resultsByEventResult",
+         "date": "26 APR 2026",
+         "competition": "36. Internationaler Würzburger Residenzlauf, Würzburg",
+         "venue": "Würzburg (GER)",
+         "country": "GER",
+         "category": "F",
+         "race": "F",
+         "place": "4.",
+         "mark": "30:07",
+         "wind": null,
+         "notLegal": false,
+         "resultScore": 945,
+         "remark": "",
+         "competitionId": "7238026",
+         "eventId": "10229507",
+         "eventName": null
+        }
+       ]
+      },
+      {
+       "__typename": "resultsByEvent",
+       "indoor": null,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": null,
+       "typeNameUrlSlug": null,
+       "discipline": "Half Marathon",
+       "withWind": null,
+       "results": [
+        {
+         "__typename": "resultsByEventResult",
+         "date": "22 MAR 2026",
+         "competition": "Frankfurter Mainova Half Marathon, Frankfurt - German Half Marathon Ch.",
+         "venue": "Frankfurt (GER)",
+         "country": "GER",
+         "category": "B",
+         "race": "F",
+         "place": "3.",
+         "mark": "1:04:24",
+         "wind": null,
+         "notLegal": false,
+         "resultScore": 1016,
+         "remark": "",
+         "competitionId": "7238034",
+         "eventId": "10229633",
+         "eventName": null
+        },
+        {
+         "__typename": "resultsByEventResult",
+         "date": "10 MAY 2026",
+         "competition": "Gutenberg Halbmarathon Mainz, Mainz",
+         "venue": "Mainz (GER)",
+         "country": "GER",
+         "category": "F",
+         "race": "F",
+         "place": "11.",
+         "mark": "1:04:07",
+         "wind": null,
+         "notLegal": false,
+         "resultScore": 1026,
+         "remark": "",
+         "competitionId": "7242791",
+         "eventId": "10229633",
+         "eventName": null
+        },
+        {
+         "__typename": "resultsByEventResult",
+         "date": "06 SEP 2026",
+         "competition": "Dresden HALF, Dresden",
+         "venue": "Dresden (GER)",
+         "country": "GER",
+         "category": "E",
+         "race": "F",
+         "place": "3.",
+         "mark": "1:06:37",
+         "wind": null,
+         "notLegal": false,
+         "resultScore": 935,
+         "remark": "",
+         "competitionId": "7245390",
+         "eventId": "10229633",
+         "eventName": null
+        },
+        {
+         "__typename": "resultsByEventResult",
+         "date": "11 OCT 2026",
+         "competition": "München Half Marathon & 10K, München",
+         "venue": "München (GER)",
+         "country": "GER",
+         "category": "F",
+         "race": "F",
+         "place": "3.",
+         "mark": "1:05:35",
+         "wind": null,
+         "notLegal": false,
+         "resultScore": 0,
+         "remark": "UNC",
+         "competitionId": "7247477",
+         "eventId": "10229633",
+         "eventName": null
+        }
+       ]
+      },
+      {
+       "__typename": "resultsByEvent",
+       "indoor": null,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": null,
+       "typeNameUrlSlug": null,
+       "discipline": "Marathon",
+       "withWind": null,
+       "results": [
+        {
+         "__typename": "resultsByEventResult",
+         "date": "12 APR 2026",
+         "competition": "Hannover Marathon, Friedrichswall, Hannover - German Marathon Ch.",
+         "venue": "Friedrichswall, Hannover (GER)",
+         "country": "GER",
+         "category": "B",
+         "race": "F",
+         "place": "6.",
+         "mark": "2:11:02",
+         "wind": null,
+         "notLegal": false,
+         "resultScore": 1112,
+         "remark": "",
+         "competitionId": "7236399",
+         "eventId": "10229634",
+         "eventName": null
+        },
+        {
+         "__typename": "resultsByEventResult",
+         "date": "16 AUG 2026",
+         "competition": "European Athletics Championships, Alexander Stadium, Birmingham",
+         "venue": "Alexander Stadium, Birmingham (GBR)",
+         "country": "GBR",
+         "category": "GL",
+         "race": "F",
+         "place": "37.",
+         "mark": "2:18:56",
+         "wind": null,
+         "notLegal": false,
+         "resultScore": 974,
+         "remark": "",
+         "competitionId": "7192415",
+         "eventId": "10229634",
+         "eventName": null
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "championships": {
+    "__typename": "majorChampionshipType",
+    "parameters": {
+     "__typename": "majorChampionshipParamsType",
+     "majorChampionshipsByCategory": true
+    },
+    "results": [
+     {
+      "__typename": "majorChampionshipResult",
+      "category": "Area Championships",
+      "results": [
+       {
+        "__typename": "majorChampionshipsDetails",
+        "id": 300499220,
+        "discipline": "Marathon",
+        "competition": "European Athletics Championships",
+        "venue": "Alexander Stadium, Birmingham (GBR)",
+        "race": "F",
+        "place": "37.",
+        "result": "2:18:56",
+        "withWind": false,
+        "wind": null,
+        "withDrop": true,
+        "drop": "",
+        "date": "16 AUG 2026",
+        "eventId": "10229634",
+        "competitionId": "7192415"
+       }
+      ]
+     }
+    ]
+   },
+   "allTimePersonalTop10": {
+    "__typename": "allTimePersonalTop10Type",
+    "parameters": {
+     "__typename": "allTimePersonalTop10ParamsType",
+     "allTimePersonalTop10Discipline": null
+    },
+    "disciplines": [
+     {
+      "__typename": "allTimePersonalTop10Disciplines",
+      "id": null,
+      "name": "All disciplines"
+     },
+     {
+      "__typename": "allTimePersonalTop10Disciplines",
+      "id": 10229560,
+      "name": "3000 Metres Short Track"
+     },
+     {
+      "__typename": "allTimePersonalTop10Disciplines",
+      "id": 10229609,
+      "name": "5000 Metres"
+     },
+     {
+      "__typename": "allTimePersonalTop10Disciplines",
+      "id": 10229610,
+      "name": "10,000 Metres"
+     },
+     {
+      "__typename": "allTimePersonalTop10Disciplines",
+      "id": 204597,
+      "name": "5 Kilometres Road"
+     },
+     {
+      "__typename": "allTimePersonalTop10Disciplines",
+      "id": 10229507,
+      "name": "10 Kilometres Road"
+     },
+     {
+      "__typename": "allTimePersonalTop10Disciplines",
+      "id": 10229633,
+      "name": "Half Marathon"
+     },
+     {
+      "__typename": "allTimePersonalTop10Disciplines",
+      "id": 10229634,
+      "name": "Marathon"
+     }
+    ],
+    "results": [
+     {
+      "__typename": "allTimePersonalTop10Details",
+      "discipline": "Marathon",
+      "date": "12 APR 2026",
+      "competition": "Hannover Marathon, Friedrichswall, Hannover",
+      "country": "GER",
+      "category": "B",
+      "race": "F",
+      "place": "6.",
+      "result": "2:11:02",
+      "wind": null,
+      "drop": "",
+      "withWind": false,
+      "withDrop": true,
+      "score": 1112,
+      "records": [],
+      "remark": null,
+      "eventId": "10229634",
+      "competitionId": "7236399",
+      "listPosition": null
+     },
+     {
+      "__typename": "allTimePersonalTop10Details",
+      "discipline": "Marathon",
+      "date": "26 OCT 2025",
+      "competition": "Mainova Frankfurt Marathon, Frankfurt",
+      "country": "GER",
+      "category": "F",
+      "race": "F",
+      "place": "12.",
+      "result": "2:11:19",
+      "wind": null,
+      "drop": "",
+      "withWind": false,
+      "withDrop": true,
+      "score": 1106,
+      "records": [],
+      "remark": null,
+      "eventId": "10229634",
+      "competitionId": "7229997",
+      "listPosition": null
+     },
+     {
+      "__typename": "allTimePersonalTop10Details",
+      "discipline": "Marathon",
+      "date": "06 APR 2025",
+      "competition": "Hannover Marathon, Friedrichswall, Hannover",
+      "country": "GER",
+      "category": "B",
+      "race": "F",
+      "place": "3.",
+      "result": "2:12:45",
+      "wind": null,
+      "drop": "",
+      "withWind": false,
+      "withDrop": true,
+      "score": 1081,
+      "records": [],
+      "remark": null,
+      "eventId": "10229634",
+      "competitionId": "7215435",
+      "listPosition": null
+     },
+     {
+      "__typename": "allTimePersonalTop10Details",
+      "discipline": "Marathon",
+      "date": "14 APR 2024",
+      "competition": "ADAC Marathon Hannover, Hannover",
+      "country": "GER",
+      "category": "B",
+      "race": "F",
+      "place": "7.",
+      "result": "2:14:52",
+      "wind": null,
+      "drop": "",
+      "withWind": false,
+      "withDrop": true,
+      "score": 1044,
+      "records": [],
+      "remark": null,
+      "eventId": "10229634",
+      "competitionId": "7207469",
+      "listPosition": null
+     },
+     {
+      "__typename": "allTimePersonalTop10Details",
+      "discipline": "10km Road",
+      "date": "12 OCT 2025",
+      "competition": "The Great 10K, Berlin",
+      "country": "GER",
+      "category": "F",
+      "race": "F",
+      "place": "5.",
+      "result": "28:58",
+      "wind": null,
+      "drop": "",
+      "withWind": false,
+      "withDrop": true,
+      "score": 1044,
+      "records": [],
+      "remark": null,
+      "eventId": "10229507",
+      "competitionId": "7221562",
+      "listPosition": null
+     },
+     {
+      "__typename": "allTimePersonalTop10Details",
+      "discipline": "Half Marathon",
+      "date": "05 OCT 2025",
+      "competition": "Generali Köln Half Marathon, Köln",
+      "country": "GER",
+      "category": "E",
+      "race": "F",
+      "place": "3.",
+      "result": "1:03:56",
+      "wind": null,
+      "drop": "",
+      "withWind": false,
+      "withDrop": true,
+      "score": 1033,
+      "records": [],
+      "remark": null,
+      "eventId": "10229633",
+      "competitionId": "7224739",
+      "listPosition": null
+     },
+     {
+      "__typename": "allTimePersonalTop10Details",
+      "discipline": "Half Marathon",
+      "date": "10 MAY 2026",
+      "competition": "Gutenberg Halbmarathon Mainz, Mainz",
+      "country": "GER",
+      "category": "F",
+      "race": "F",
+      "place": "11.",
+      "result": "1:04:07",
+      "wind": null,
+      "drop": "",
+      "withWind": false,
+      "withDrop": true,
+      "score": 1026,
+      "records": [],
+      "remark": null,
+      "eventId": "10229633",
+      "competitionId": "7242791",
+      "listPosition": null
+     },
+     {
+      "__typename": "allTimePersonalTop10Details",
+      "discipline": "Half Marathon",
+      "date": "22 MAR 2026",
+      "competition": "Frankfurter Mainova Half Marathon, Frankfurt",
+      "country": "GER",
+      "category": "B",
+      "race": "F",
+      "place": "3.",
+      "result": "1:04:24",
+      "wind": null,
+      "drop": "",
+      "withWind": false,
+      "withDrop": true,
+      "score": 1016,
+      "records": [],
+      "remark": null,
+      "eventId": "10229633",
+      "competitionId": "7238034",
+      "listPosition": null
+     },
+     {
+      "__typename": "allTimePersonalTop10Details",
+      "discipline": "Half Marathon",
+      "date": "08 NOV 2020",
+      "competition": "Laufszene Invitational Run, Dresden",
+      "country": "GER",
+      "category": "E",
+      "race": "F",
+      "place": "9.",
+      "result": "1:04:30",
+      "wind": null,
+      "drop": "",
+      "withWind": false,
+      "withDrop": true,
+      "score": 1012,
+      "records": [],
+      "remark": null,
+      "eventId": "10229633",
+      "competitionId": "7157943",
+      "listPosition": null
+     },
+     {
+      "__typename": "allTimePersonalTop10Details",
+      "discipline": "Half Marathon",
+      "date": "05 MAY 2024",
+      "competition": "Gutenberg Halbmarathon Mainz, Mainz",
+      "country": "GER",
+      "category": "F",
+      "race": "F",
+      "place": "8.",
+      "result": "1:04:49",
+      "wind": null,
+      "drop": "",
+      "withWind": false,
+      "withDrop": true,
+      "score": 1000,
+      "records": [],
+      "remark": null,
+      "eventId": "10229633",
+      "competitionId": "7210307",
+      "listPosition": null
+     }
+    ]
+   },
+   "honourSummary": [],
+   "winningStreaks": {
+    "__typename": "winningStreaksType",
+    "parameters": null,
+    "disciplineOptions": null,
+    "streaks": null
+   },
+   "resultsByLimit": {
+    "__typename": "resultsByLimit",
+    "parameters": {
+     "__typename": "resultsByLimitParams",
+     "resultsByLimitsDiscipline": "e10229634",
+     "resultsByLimitsStartDate": "1996-01-01",
+     "resultsByLimitsEndDate": "2026-11-15",
+     "resultsByLimitsOnlyRegular": false
+    },
+    "disciplines": [
+     {
+      "__typename": "resultsByLimitDisciplines",
+      "id": "e10229507",
+      "name": "10 Kilometres Road"
+     },
+     {
+      "__typename": "resultsByLimitDisciplines",
+      "id": "e10229633",
+      "name": "Half Marathon"
+     },
+     {
+      "__typename": "resultsByLimitDisciplines",
+      "id": "e10229634",
+      "name": "Marathon"
+     }
+    ],
+    "results": [
+     {
+      "__typename": "byLimitResults",
+      "result": "2:12:00",
+      "count": 2,
+      "totalCount": 2
+     },
+     {
+      "__typename": "byLimitResults",
+      "result": "2:15:00",
+      "count": 2,
+      "totalCount": 4
+     }
+    ]
+   },
+   "initialSpikes": [],
+   "videos": [
+    {
+     "__typename": "VideoPublished",
+     "id": "6af6e230907f3f64a3d37eca",
+     "contentId": "6af6e22e907f3f64a3d37ec9",
+     "publishedById": "61051f57fc8312000972edea",
+     "publishedByName": "Josh Allen",
+     "published": "2026-11-15T00:46:35.770Z",
+     "language": "en",
+     "ebuCountries": [],
+     "vimeoCountries": [],
+     "ebuPlayerUrl": null,
+     "gatedContent": true,
+     "campaignId": "68a1d3d4765a0c5481d4d13b",
+     "tags": [
+      "playlist_68c932a1d61bce611429d9b5"
+     ],
+     "title": "Watch again | Bank of China Hong Kong-Zhuhai-Macao Bridge Half Marathon",
+     "thumbnailId": "6af6e0d8ba2fcfe0e05ee289",
+     "thumbnailEdited": "eyJrZXkiOiI2YWY2ZTBkM2JhMmZjZmUwZTA1ZWUyODguanBlZyIsImVkaXRzIjp7InJlc2l6ZSI6eyJ3aWR0aCI6MTYwMCwiaGVpZ2h0IjoxMDAwfX19",
+     "thumbnailTitle": "Bank of China HM",
+     "videoId": null,
+     "vimeoVideoId": "https://vimeo.com/event/6353651/embed/interaction",
+     "vimeoHash": "58479",
+     "playerId": null,
+     "brightcoveCountries": [],
+     "metatags": "World Athletics,Athletics Highlights, Watch Athletics, Athletics, Outdoor Athletics, Indoor Athletics, Bank of China Hong Kong-Zhuhai-Macao Bridge Half Marathon",
+     "standFirst": "We're live! If the stream isn't loading try refreshing the page. Persistent issues? This broadcast is geo-blocked in certain regions and may be televised locally.\n\nGeo-restrictions may apply.",
+     "signedInCTA": "Watch now",
+     "signedOutCTA": "Sign up to Watch"
+    },
+    {
+     "__typename": "VideoPublished",
+     "id": "6adb7fb80175a2efa664b030",
+     "contentId": "6adb7fb60175a2efa664b02f",
+     "publishedById": "686544f8f09084d28464c16a",
+     "publishedByName": "mcr mcr",
+     "published": "2026-10-25T11:25:05.213Z",
+     "language": "en",
+     "ebuCountries": [],
+     "vimeoCountries": [],
+     "ebuPlayerUrl": null,
+     "gatedContent": false,
+     "campaignId": null,
+     "tags": [],
+     "title": "Watch again | 40th Wizz Air Venice Marathon",
+     "thumbnailId": "6adb7b2ac13c8cf91c1625d0",
+     "thumbnailEdited": "eyJrZXkiOiI2YWRiN2IyNWMxM2M4Y2Y5MWMxNjI1Y2YuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjoxNjAwLCJoZWlnaHQiOjEwMDB9fX0=",
+     "thumbnailTitle": "Venice Marathon",
+     "videoId": null,
+     "vimeoVideoId": "https://vimeo.com/event/6298075/embed/interaction",
+     "vimeoHash": "58479",
+     "playerId": null,
+     "brightcoveCountries": [],
+     "metatags": "Venice Marathon",
+     "standFirst": "Relive the action from 40th Wizz Air Venice Marathon. Geo-restrictions may apply.",
+     "signedInCTA": "Watch now",
+     "signedOutCTA": "Watch now"
+    },
+    {
+     "__typename": "VideoPublished",
+     "id": "6ab11b7ea20e1c2a6e9662d1",
+     "contentId": "6ab11b7ca20e1c2a6e9662d0",
+     "publishedById": "664230609a9e375b249f121f",
+     "publishedByName": "Anne-Gaelle Sy",
+     "published": "2026-09-21T11:56:45.929Z",
+     "language": "en",
+     "ebuCountries": [],
+     "vimeoCountries": [],
+     "ebuPlayerUrl": null,
+     "gatedContent": true,
+     "campaignId": "649318bcb7562c543c72eb53",
+     "tags": [
+      "playlist_68c932a1d61bce611429d9b5"
+     ],
+     "title": "Day 2 Extended Highlights | World Road Running Championships Copenhagen 26",
+     "thumbnailId": "6ab11b28db6273f853c2af92",
+     "thumbnailEdited": "eyJrZXkiOiI2YWIxMWIyMmRiNjI3M2Y4NTNjMmFmOTEuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjoxNjAwLCJoZWlnaHQiOjEwMDB9fX0=",
+     "thumbnailTitle": "3",
+     "videoId": null,
+     "vimeoVideoId": "https://player.vimeo.com/video/1228558132",
+     "vimeoHash": "58479",
+     "playerId": null,
+     "brightcoveCountries": [],
+     "metatags": "World Road Running Championships, Copenhagen, 2026, half marathon",
+     "standFirst": "Watch the full extended highlights from day 1 at the World Road Running Championships Copenhagen 26, including both the men and women's mile and 5km. ",
+     "signedInCTA": "Watch now",
+     "signedOutCTA": "Sign up to Watch"
+    },
+    {
+     "__typename": "VideoPublished",
+     "id": "6aafb6e1bd7314e553de2c91",
+     "contentId": "6aafb6e0bd7314e553de2c90",
+     "publishedById": "664230609a9e375b249f121f",
+     "publishedByName": "Anne-Gaelle Sy",
+     "published": "2026-09-20T14:00:00.000Z",
+     "language": "en",
+     "ebuCountries": [],
+     "vimeoCountries": [],
+     "ebuPlayerUrl": null,
+     "gatedContent": true,
+     "campaignId": "649318bcb7562c543c72eb53",
+     "tags": [
+      "playlist_68c932a1d61bce611429d9b5"
+     ],
+     "title": "Day 1 Extended Highlights | World Road Running Championships Copenhagen 26",
+     "thumbnailId": "6aafb655b728ee42056b5a2c",
+     "thumbnailEdited": "eyJrZXkiOiI2YWFmYjY0ZmI3MjhlZTQyMDU2YjVhMmIuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjoxNjAwLCJoZWlnaHQiOjEwMDB9fX0=",
+     "thumbnailTitle": "12",
+     "videoId": null,
+     "vimeoVideoId": "https://player.vimeo.com/video/1228400493",
+     "vimeoHash": "58479",
+     "playerId": null,
+     "brightcoveCountries": [],
+     "metatags": "World Road Running Championships, Copenhagen, 2026, mile, 5km",
+     "standFirst": "Watch the full extended highlights from day 1 at the World Road Running Championships Copenhagen 26, including both the men and women's mile and 5km. ",
+     "signedInCTA": "Watch now",
+     "signedOutCTA": "Sign up to Watch"
+    },
+    {
+     "__typename": "VideoPublished",
+     "id": "6a76164d953bb92fc7da32d6",
+     "contentId": "6a76164b953bb92fc7da32d5",
+     "publishedById": "61051f57fc8312000972edea",
+     "publishedByName": "Josh Allen",
+     "published": "2026-09-20T11:14:52.122Z",
+     "language": "en",
+     "ebuCountries": [],
+     "vimeoCountries": [],
+     "ebuPlayerUrl": null,
+     "gatedContent": true,
+     "campaignId": "649318bcb7562c543c72eb53",
+     "tags": [
+      "playlist_66cc251f1f35860625dd76eb",
+      "playlist_6a75cd46a2a8211064c53550"
+     ],
+     "title": "Full Long Jump Women Final | World U20 Championships Oregon 26",
+     "thumbnailId": "6a761611953bb92fc7da32d3",
+     "thumbnailEdited": "eyJrZXkiOiI2YTc2MTYwYzk1M2JiOTJmYzdkYTMyZDIuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjoxNjAwLCJoZWlnaHQiOjEwMDB9fX0=",
+     "thumbnailTitle": "d",
+     "videoId": null,
+     "vimeoVideoId": "1216381095",
+     "vimeoHash": "58479",
+     "playerId": null,
+     "brightcoveCountries": [],
+     "metatags": "World Athletics U20 Championships Oregon 2026",
+     "standFirst": "Watch the full women's Long Jump final from the World Athletics U20 Championships Oregon 2026!",
+     "signedInCTA": "Watch now",
+     "signedOutCTA": "Sign up to Watch"
+    }
+   ],
+   "playlist": [
+    {
+     "__typename": "Playlist",
+     "id": "6481f06f2b752f6287624495",
+     "title": "40 Years of World Champs",
+     "slug": "40-years-of-world-champs"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6481f0962b752f6287624496",
+     "title": "The Best of Athletics in 2022",
+     "slug": "the-best-of-athletics-in-2022"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6481f0b42b752f6287624497",
+     "title": "Record breaking moments",
+     "slug": "record-breaking-moments"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6481f0cd2b752f6287624498",
+     "title": "Recommended for you",
+     "slug": "recommended-for-you"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "64db75dfe396e10c651eae8c",
+     "title": "World Athletics+ Exclusives",
+     "slug": "world-athletics-exclusives"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "64df783ee396e10c651eae92",
+     "title": "World Championships",
+     "slug": "world-championships"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "65df64086798017bd73b010b",
+     "title": "World Athletics Indoor Championships",
+     "slug": "world-athletics-indoor-championships"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6608436410629a528b47c67c",
+     "title": "World Athletics Cross Country Championships Belgrade 24",
+     "slug": "wxc-belgrade-24"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6627d2db10629a528b47c7bf",
+     "title": "World Race Walking Team Championships",
+     "slug": "world-race-walking-team-champs"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6627d2f910629a528b47c7c0",
+     "title": "World Athletics Relays Bahamas 24",
+     "slug": "wre-bahamas-24"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "66cc24f81f35860625dd76e9",
+     "title": "World Athletics U20 Championships Lima 24 | VOD",
+     "slug": "wu20-championships-lima-24-vod"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "66cc251f1f35860625dd76eb",
+     "title": "World Athletics U20 Championships",
+     "slug": "wu20-championships"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6799f4f952b3364854cffe17",
+     "title": "World Indoor Tour Gold",
+     "slug": "world-indoor-tour-gold"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "67ebb2489d90c57beea13e1c",
+     "title": "Continental Tour Gold",
+     "slug": "continental-tour-gold"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6811d57f03bc7334fe011650",
+     "title": "World Relays",
+     "slug": "world-relays"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "689eeb78b0699e4a756f538b",
+     "title": "World Road Running Champs Riga 23",
+     "slug": "world-road-running-champs-riga-23"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "68c932a1d61bce611429d9b5",
+     "title": "Latest videos",
+     "slug": "latest-videos"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "697b1afd7b98e1263301e380",
+     "title": "World Cross Country Championships Tallahassee 26",
+     "slug": "wxc-tallahassee-26"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "697b1b277b98e1263301e381",
+     "title": "World Indoor Tour 2026",
+     "slug": "world-indoor-tour-2026"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "69b0249a2075843ced39a862",
+     "title": "World Athletics Indoor Championships Highlights",
+     "slug": "world-athletics-indoor-championships-highlights"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6a75cd46a2a8211064c53550",
+     "title": "World Athletics U20 Championships Highlights",
+     "slug": "world-athletics-u20-championships-highlights"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6a8f0ffaa0a20517f583ddda",
+     "title": "World Athletics Ultimate Championship",
+     "slug": "world-athletics-ultimate-championship"
+    },
+    {
+     "__typename": "Playlist",
+     "id": "6aa2635604a86924f12b9202",
+     "title": "World Athletics Ultimate Championship Highlights",
+     "slug": "world-athletics-ultimate-championship-highlights"
+    }
+   ],
+   "query": {
+    "counrty": "germany",
+    "competitorId": "tom-thurley-14682657"
+   }
+  },
+  "user": null,
+  "isLooseAuthentication": false,
+  "device": {
+   "width": 1025
+  },
+  "apolloState": {
+   "data": {
+    "Playlist:6481f06f2b752f6287624495": {
+     "__typename": "Playlist",
+     "id": "6481f06f2b752f6287624495",
+     "title": "40 Years of World Champs",
+     "slug": "40-years-of-world-champs"
+    },
+    "Playlist:6481f0962b752f6287624496": {
+     "__typename": "Playlist",
+     "id": "6481f0962b752f6287624496",
+     "title": "The Best of Athletics in 2022",
+     "slug": "the-best-of-athletics-in-2022"
+    },
+    "Playlist:6481f0b42b752f6287624497": {
+     "__typename": "Playlist",
+     "id": "6481f0b42b752f6287624497",
+     "title": "Record breaking moments",
+     "slug": "record-breaking-moments"
+    },
+    "Playlist:6481f0cd2b752f6287624498": {
+     "__typename": "Playlist",
+     "id": "6481f0cd2b752f6287624498",
+     "title": "Recommended for you",
+     "slug": "recommended-for-you"
+    },
+    "Playlist:64db75dfe396e10c651eae8c": {
+     "__typename": "Playlist",
+     "id": "64db75dfe396e10c651eae8c",
+     "title": "World Athletics+ Exclusives",
+     "slug": "world-athletics-exclusives"
+    },
+    "Playlist:64df783ee396e10c651eae92": {
+     "__typename": "Playlist",
+     "id": "64df783ee396e10c651eae92",
+     "title": "World Championships",
+     "slug": "world-championships"
+    },
+    "Playlist:65df64086798017bd73b010b": {
+     "__typename": "Playlist",
+     "id": "65df64086798017bd73b010b",
+     "title": "World Athletics Indoor Championships",
+     "slug": "world-athletics-indoor-championships"
+    },
+    "Playlist:6608436410629a528b47c67c": {
+     "__typename": "Playlist",
+     "id": "6608436410629a528b47c67c",
+     "title": "World Athletics Cross Country Championships Belgrade 24",
+     "slug": "wxc-belgrade-24"
+    },
+    "Playlist:6627d2db10629a528b47c7bf": {
+     "__typename": "Playlist",
+     "id": "6627d2db10629a528b47c7bf",
+     "title": "World Race Walking Team Championships",
+     "slug": "world-race-walking-team-champs"
+    },
+    "Playlist:6627d2f910629a528b47c7c0": {
+     "__typename": "Playlist",
+     "id": "6627d2f910629a528b47c7c0",
+     "title": "World Athletics Relays Bahamas 24",
+     "slug": "wre-bahamas-24"
+    },
+    "Playlist:66cc24f81f35860625dd76e9": {
+     "__typename": "Playlist",
+     "id": "66cc24f81f35860625dd76e9",
+     "title": "World Athletics U20 Championships Lima 24 | VOD",
+     "slug": "wu20-championships-lima-24-vod"
+    },
+    "Playlist:66cc251f1f35860625dd76eb": {
+     "__typename": "Playlist",
+     "id": "66cc251f1f35860625dd76eb",
+     "title": "World Athletics U20 Championships",
+     "slug": "wu20-championships"
+    },
+    "Playlist:6799f4f952b3364854cffe17": {
+     "__typename": "Playlist",
+     "id": "6799f4f952b3364854cffe17",
+     "title": "World Indoor Tour Gold",
+     "slug": "world-indoor-tour-gold"
+    },
+    "Playlist:67ebb2489d90c57beea13e1c": {
+     "__typename": "Playlist",
+     "id": "67ebb2489d90c57beea13e1c",
+     "title": "Continental Tour Gold",
+     "slug": "continental-tour-gold"
+    },
+    "Playlist:6811d57f03bc7334fe011650": {
+     "__typename": "Playlist",
+     "id": "6811d57f03bc7334fe011650",
+     "title": "World Relays",
+     "slug": "world-relays"
+    },
+    "Playlist:689eeb78b0699e4a756f538b": {
+     "__typename": "Playlist",
+     "id": "689eeb78b0699e4a756f538b",
+     "title": "World Road Running Champs Riga 23",
+     "slug": "world-road-running-champs-riga-23"
+    },
+    "Playlist:68c932a1d61bce611429d9b5": {
+     "__typename": "Playlist",
+     "id": "68c932a1d61bce611429d9b5",
+     "title": "Latest videos",
+     "slug": "latest-videos"
+    },
+    "Playlist:697b1afd7b98e1263301e380": {
+     "__typename": "Playlist",
+     "id": "697b1afd7b98e1263301e380",
+     "title": "World Cross Country Championships Tallahassee 26",
+     "slug": "wxc-tallahassee-26"
+    },
+    "Playlist:697b1b277b98e1263301e381": {
+     "__typename": "Playlist",
+     "id": "697b1b277b98e1263301e381",
+     "title": "World Indoor Tour 2026",
+     "slug": "world-indoor-tour-2026"
+    },
+    "Playlist:69b0249a2075843ced39a862": {
+     "__typename": "Playlist",
+     "id": "69b0249a2075843ced39a862",
+     "title": "World Athletics Indoor Championships Highlights",
+     "slug": "world-athletics-indoor-championships-highlights"
+    },
+    "Playlist:6a75cd46a2a8211064c53550": {
+     "__typename": "Playlist",
+     "id": "6a75cd46a2a8211064c53550",
+     "title": "World Athletics U20 Championships Highlights",
+     "slug": "world-athletics-u20-championships-highlights"
+    },
+    "Playlist:6a8f0ffaa0a20517f583ddda": {
+     "__typename": "Playlist",
+     "id": "6a8f0ffaa0a20517f583ddda",
+     "title": "World Athletics Ultimate Championship",
+     "slug": "world-athletics-ultimate-championship"
+    },
+    "Playlist:6aa2635604a86924f12b9202": {
+     "__typename": "Playlist",
+     "id": "6aa2635604a86924f12b9202",
+     "title": "World Athletics Ultimate Championship Highlights",
+     "slug": "world-athletics-ultimate-championship-highlights"
+    },
+    "ROOT_QUERY": {
+     "__typename": "Query",
+     "getVideoPlaylist": [
+      {
+       "__ref": "Playlist:6481f06f2b752f6287624495"
+      },
+      {
+       "__ref": "Playlist:6481f0962b752f6287624496"
+      },
+      {
+       "__ref": "Playlist:6481f0b42b752f6287624497"
+      },
+      {
+       "__ref": "Playlist:6481f0cd2b752f6287624498"
+      },
+      {
+       "__ref": "Playlist:64db75dfe396e10c651eae8c"
+      },
+      {
+       "__ref": "Playlist:64df783ee396e10c651eae92"
+      },
+      {
+       "__ref": "Playlist:65df64086798017bd73b010b"
+      },
+      {
+       "__ref": "Playlist:6608436410629a528b47c67c"
+      },
+      {
+       "__ref": "Playlist:6627d2db10629a528b47c7bf"
+      },
+      {
+       "__ref": "Playlist:6627d2f910629a528b47c7c0"
+      },
+      {
+       "__ref": "Playlist:66cc24f81f35860625dd76e9"
+      },
+      {
+       "__ref": "Playlist:66cc251f1f35860625dd76eb"
+      },
+      {
+       "__ref": "Playlist:6799f4f952b3364854cffe17"
+      },
+      {
+       "__ref": "Playlist:67ebb2489d90c57beea13e1c"
+      },
+      {
+       "__ref": "Playlist:6811d57f03bc7334fe011650"
+      },
+      {
+       "__ref": "Playlist:689eeb78b0699e4a756f538b"
+      },
+      {
+       "__ref": "Playlist:68c932a1d61bce611429d9b5"
+      },
+      {
+       "__ref": "Playlist:697b1afd7b98e1263301e380"
+      },
+      {
+       "__ref": "Playlist:697b1b277b98e1263301e381"
+      },
+      {
+       "__ref": "Playlist:69b0249a2075843ced39a862"
+      },
+      {
+       "__ref": "Playlist:6a75cd46a2a8211064c53550"
+      },
+      {
+       "__ref": "Playlist:6a8f0ffaa0a20517f583ddda"
+      },
+      {
+       "__ref": "Playlist:6aa2635604a86924f12b9202"
+      }
+     ],
+     "getVideoList({\"isRelatedVideos\":false,\"language\":\"en\",\"limit\":5,\"offset\":0,\"slug\":\"latest-videos\"})": [
+      {
+       "__ref": "VideoPublished:6af6e230907f3f64a3d37eca"
+      },
+      {
+       "__ref": "VideoPublished:6adb7fb80175a2efa664b030"
+      },
+      {
+       "__ref": "VideoPublished:6ab11b7ea20e1c2a6e9662d1"
+      },
+      {
+       "__ref": "VideoPublished:6aafb6e1bd7314e553de2c91"
+      },
+      {
+       "__ref": "VideoPublished:6a76164d953bb92fc7da32d6"
+      }
+     ],
+     "getSingleCompetitorResultsByLimit({\"urlSlug\":\"tom-thurley-14682657\"})": {
+      "__typename": "resultsByLimit",
+      "parameters": {
+       "__typename": "resultsByLimitParams",
+       "resultsByLimitsDiscipline": "e10229634",
+       "resultsByLimitsStartDate": "1996-01-01",
+       "resultsByLimitsEndDate": "2026-11-15",
+       "resultsByLimitsOnlyRegular": false
+      },
+      "disciplines": [
+       {
+        "__ref": "resultsByLimitDisciplines:e10229507"
+       },
+       {
+        "__ref": "resultsByLimitDisciplines:e10229633"
+       },
+       {
+        "__ref": "resultsByLimitDisciplines:e10229634"
+       }
+      ],
+      "results": [
+       {
+        "__typename": "byLimitResults",
+        "result": "2:12:00",
+        "count": 2,
+        "totalCount": 2
+       },
+       {
+        "__typename": "byLimitResults",
+        "result": "2:15:00",
+        "count": 2,
+        "totalCount": 4
+       }
+      ]
+     },
+     "getSingleCompetitorMajorChampionships({\"urlSlug\":\"tom-thurley-14682657\"})": {
+      "__typename": "majorChampionshipType",
+      "parameters": {
+       "__typename": "majorChampionshipParamsType",
+       "majorChampionshipsByCategory": true
+      },
+      "results": [
+       {
+        "__typename": "majorChampionshipResult",
+        "category": "Area Championships",
+        "results": [
+         {
+          "__ref": "majorChampionshipsDetails:300499220"
+         }
+        ]
+       }
+      ]
+     },
+     "getSingleCompetitorHonourSummary({\"urlSlug\":\"tom-thurley-14682657\"})": [],
+     "getSpikes({\"RelatedCompetitorIds\":\"14682657\",\"limit\":3,\"offset\":0,\"orderBy\":\"LiveFrom\",\"orderDirection\":\"Descending\"})": [],
+     "getSingleCompetitorWinningStreak({\"urlSlug\":\"tom-thurley-14682657\"})": {
+      "__typename": "winningStreaksType",
+      "parameters": null,
+      "disciplineOptions": null,
+      "streaks": null
+     },
+     "getSingleCompetitorAllTimePersonalTop10({\"urlSlug\":\"tom-thurley-14682657\"})": {
+      "__typename": "allTimePersonalTop10Type",
+      "parameters": {
+       "__typename": "allTimePersonalTop10ParamsType",
+       "allTimePersonalTop10Discipline": null
+      },
+      "disciplines": [
+       {
+        "__typename": "allTimePersonalTop10Disciplines",
+        "id": null,
+        "name": "All disciplines"
+       },
+       {
+        "__ref": "allTimePersonalTop10Disciplines:10229560"
+       },
+       {
+        "__ref": "allTimePersonalTop10Disciplines:10229609"
+       },
+       {
+        "__ref": "allTimePersonalTop10Disciplines:10229610"
+       },
+       {
+        "__ref": "allTimePersonalTop10Disciplines:204597"
+       },
+       {
+        "__ref": "allTimePersonalTop10Disciplines:10229507"
+       },
+       {
+        "__ref": "allTimePersonalTop10Disciplines:10229633"
+       },
+       {
+        "__ref": "allTimePersonalTop10Disciplines:10229634"
+       }
+      ],
+      "results": [
+       {
+        "__typename": "allTimePersonalTop10Details",
+        "discipline": "Marathon",
+        "date": "12 APR 2026",
+        "competition": "Hannover Marathon, Friedrichswall, Hannover",
+        "country": "GER",
+        "category": "B",
+        "race": "F",
+        "place": "6.",
+        "result": "2:11:02",
+        "wind": null,
+        "drop": "",
+        "withWind": false,
+        "withDrop": true,
+        "score": 1112,
+        "records": [],
+        "remark": null,
+        "eventId": "10229634",
+        "competitionId": "7236399",
+        "listPosition": null
+       },
+       {
+        "__typename": "allTimePersonalTop10Details",
+        "discipline": "Marathon",
+        "date": "26 OCT 2025",
+        "competition": "Mainova Frankfurt Marathon, Frankfurt",
+        "country": "GER",
+        "category": "F",
+        "race": "F",
+        "place": "12.",
+        "result": "2:11:19",
+        "wind": null,
+        "drop": "",
+        "withWind": false,
+        "withDrop": true,
+        "score": 1106,
+        "records": [],
+        "remark": null,
+        "eventId": "10229634",
+        "competitionId": "7229997",
+        "listPosition": null
+       },
+       {
+        "__typename": "allTimePersonalTop10Details",
+        "discipline": "Marathon",
+        "date": "06 APR 2025",
+        "competition": "Hannover Marathon, Friedrichswall, Hannover",
+        "country": "GER",
+        "category": "B",
+        "race": "F",
+        "place": "3.",
+        "result": "2:12:45",
+        "wind": null,
+        "drop": "",
+        "withWind": false,
+        "withDrop": true,
+        "score": 1081,
+        "records": [],
+        "remark": null,
+        "eventId": "10229634",
+        "competitionId": "7215435",
+        "listPosition": null
+       },
+       {
+        "__typename": "allTimePersonalTop10Details",
+        "discipline": "Marathon",
+        "date": "14 APR 2024",
+        "competition": "ADAC Marathon Hannover, Hannover",
+        "country": "GER",
+        "category": "B",
+        "race": "F",
+        "place": "7.",
+        "result": "2:14:52",
+        "wind": null,
+        "drop": "",
+        "withWind": false,
+        "withDrop": true,
+        "score": 1044,
+        "records": [],
+        "remark": null,
+        "eventId": "10229634",
+        "competitionId": "7207469",
+        "listPosition": null
+       },
+       {
+        "__typename": "allTimePersonalTop10Details",
+        "discipline": "10km Road",
+        "date": "12 OCT 2025",
+        "competition": "The Great 10K, Berlin",
+        "country": "GER",
+        "category": "F",
+        "race": "F",
+        "place": "5.",
+        "result": "28:58",
+        "wind": null,
+        "drop": "",
+        "withWind": false,
+        "withDrop": true,
+        "score": 1044,
+        "records": [],
+        "remark": null,
+        "eventId": "10229507",
+        "competitionId": "7221562",
+        "listPosition": null
+       },
+       {
+        "__typename": "allTimePersonalTop10Details",
+        "discipline": "Half Marathon",
+        "date": "05 OCT 2025",
+        "competition": "Generali Köln Half Marathon, Köln",
+        "country": "GER",
+        "category": "E",
+        "race": "F",
+        "place": "3.",
+        "result": "1:03:56",
+        "wind": null,
+        "drop": "",
+        "withWind": false,
+        "withDrop": true,
+        "score": 1033,
+        "records": [],
+        "remark": null,
+        "eventId": "10229633",
+        "competitionId": "7224739",
+        "listPosition": null
+       },
+       {
+        "__typename": "allTimePersonalTop10Details",
+        "discipline": "Half Marathon",
+        "date": "10 MAY 2026",
+        "competition": "Gutenberg Halbmarathon Mainz, Mainz",
+        "country": "GER",
+        "category": "F",
+        "race": "F",
+        "place": "11.",
+        "result": "1:04:07",
+        "wind": null,
+        "drop": "",
+        "withWind": false,
+        "withDrop": true,
+        "score": 1026,
+        "records": [],
+        "remark": null,
+        "eventId": "10229633",
+        "competitionId": "7242791",
+        "listPosition": null
+       },
+       {
+        "__typename": "allTimePersonalTop10Details",
+        "discipline": "Half Marathon",
+        "date": "22 MAR 2026",
+        "competition": "Frankfurter Mainova Half Marathon, Frankfurt",
+        "country": "GER",
+        "category": "B",
+        "race": "F",
+        "place": "3.",
+        "result": "1:04:24",
+        "wind": null,
+        "drop": "",
+        "withWind": false,
+        "withDrop": true,
+        "score": 1016,
+        "records": [],
+        "remark": null,
+        "eventId": "10229633",
+        "competitionId": "7238034",
+        "listPosition": null
+       },
+       {
+        "__typename": "allTimePersonalTop10Details",
+        "discipline": "Half Marathon",
+        "date": "08 NOV 2020",
+        "competition": "Laufszene Invitational Run, Dresden",
+        "country": "GER",
+        "category": "E",
+        "race": "F",
+        "place": "9.",
+        "result": "1:04:30",
+        "wind": null,
+        "drop": "",
+        "withWind": false,
+        "withDrop": true,
+        "score": 1012,
+        "records": [],
+        "remark": null,
+        "eventId": "10229633",
+        "competitionId": "7157943",
+        "listPosition": null
+       },
+       {
+        "__typename": "allTimePersonalTop10Details",
+        "discipline": "Half Marathon",
+        "date": "05 MAY 2024",
+        "competition": "Gutenberg Halbmarathon Mainz, Mainz",
+        "country": "GER",
+        "category": "F",
+        "race": "F",
+        "place": "8.",
+        "result": "1:04:49",
+        "wind": null,
+        "drop": "",
+        "withWind": false,
+        "withDrop": true,
+        "score": 1000,
+        "records": [],
+        "remark": null,
+        "eventId": "10229633",
+        "competitionId": "7210307",
+        "listPosition": null
+       }
+      ]
+     },
+     "getSingleCompetitor({\"urlSlug\":\"tom-thurley-14682657\"})": {
+      "__ref": "singleCompetitor:14682657"
+     }
+    },
+    "VideoPublished:6af6e230907f3f64a3d37eca": {
+     "__typename": "VideoPublished",
+     "id": "6af6e230907f3f64a3d37eca",
+     "contentId": "6af6e22e907f3f64a3d37ec9",
+     "publishedById": "61051f57fc8312000972edea",
+     "publishedByName": "Josh Allen",
+     "published": "2026-11-15T00:46:35.770Z",
+     "language": "en",
+     "ebuCountries": [],
+     "vimeoCountries": [],
+     "ebuPlayerUrl": null,
+     "gatedContent": true,
+     "campaignId": "68a1d3d4765a0c5481d4d13b",
+     "tags": [
+      "playlist_68c932a1d61bce611429d9b5"
+     ],
+     "title": "Watch again | Bank of China Hong Kong-Zhuhai-Macao Bridge Half Marathon",
+     "thumbnailId": "6af6e0d8ba2fcfe0e05ee289",
+     "thumbnailEdited": "eyJrZXkiOiI2YWY2ZTBkM2JhMmZjZmUwZTA1ZWUyODguanBlZyIsImVkaXRzIjp7InJlc2l6ZSI6eyJ3aWR0aCI6MTYwMCwiaGVpZ2h0IjoxMDAwfX19",
+     "thumbnailTitle": "Bank of China HM",
+     "videoId": null,
+     "vimeoVideoId": "https://vimeo.com/event/6353651/embed/interaction",
+     "vimeoHash": "58479",
+     "playerId": null,
+     "brightcoveCountries": [],
+     "metatags": "World Athletics,Athletics Highlights, Watch Athletics, Athletics, Outdoor Athletics, Indoor Athletics, Bank of China Hong Kong-Zhuhai-Macao Bridge Half Marathon",
+     "standFirst": "We're live! If the stream isn't loading try refreshing the page. Persistent issues? This broadcast is geo-blocked in certain regions and may be televised locally.\n\nGeo-restrictions may apply.",
+     "signedInCTA": "Watch now",
+     "signedOutCTA": "Sign up to Watch"
+    },
+    "VideoPublished:6adb7fb80175a2efa664b030": {
+     "__typename": "VideoPublished",
+     "id": "6adb7fb80175a2efa664b030",
+     "contentId": "6adb7fb60175a2efa664b02f",
+     "publishedById": "686544f8f09084d28464c16a",
+     "publishedByName": "mcr mcr",
+     "published": "2026-10-25T11:25:05.213Z",
+     "language": "en",
+     "ebuCountries": [],
+     "vimeoCountries": [],
+     "ebuPlayerUrl": null,
+     "gatedContent": false,
+     "campaignId": null,
+     "tags": [],
+     "title": "Watch again | 40th Wizz Air Venice Marathon",
+     "thumbnailId": "6adb7b2ac13c8cf91c1625d0",
+     "thumbnailEdited": "eyJrZXkiOiI2YWRiN2IyNWMxM2M4Y2Y5MWMxNjI1Y2YuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjoxNjAwLCJoZWlnaHQiOjEwMDB9fX0=",
+     "thumbnailTitle": "Venice Marathon",
+     "videoId": null,
+     "vimeoVideoId": "https://vimeo.com/event/6298075/embed/interaction",
+     "vimeoHash": "58479",
+     "playerId": null,
+     "brightcoveCountries": [],
+     "metatags": "Venice Marathon",
+     "standFirst": "Relive the action from 40th Wizz Air Venice Marathon. Geo-restrictions may apply.",
+     "signedInCTA": "Watch now",
+     "signedOutCTA": "Watch now"
+    },
+    "VideoPublished:6ab11b7ea20e1c2a6e9662d1": {
+     "__typename": "VideoPublished",
+     "id": "6ab11b7ea20e1c2a6e9662d1",
+     "contentId": "6ab11b7ca20e1c2a6e9662d0",
+     "publishedById": "664230609a9e375b249f121f",
+     "publishedByName": "Anne-Gaelle Sy",
+     "published": "2026-09-21T11:56:45.929Z",
+     "language": "en",
+     "ebuCountries": [],
+     "vimeoCountries": [],
+     "ebuPlayerUrl": null,
+     "gatedContent": true,
+     "campaignId": "649318bcb7562c543c72eb53",
+     "tags": [
+      "playlist_68c932a1d61bce611429d9b5"
+     ],
+     "title": "Day 2 Extended Highlights | World Road Running Championships Copenhagen 26",
+     "thumbnailId": "6ab11b28db6273f853c2af92",
+     "thumbnailEdited": "eyJrZXkiOiI2YWIxMWIyMmRiNjI3M2Y4NTNjMmFmOTEuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjoxNjAwLCJoZWlnaHQiOjEwMDB9fX0=",
+     "thumbnailTitle": "3",
+     "videoId": null,
+     "vimeoVideoId": "https://player.vimeo.com/video/1228558132",
+     "vimeoHash": "58479",
+     "playerId": null,
+     "brightcoveCountries": [],
+     "metatags": "World Road Running Championships, Copenhagen, 2026, half marathon",
+     "standFirst": "Watch the full extended highlights from day 1 at the World Road Running Championships Copenhagen 26, including both the men and women's mile and 5km. ",
+     "signedInCTA": "Watch now",
+     "signedOutCTA": "Sign up to Watch"
+    },
+    "VideoPublished:6aafb6e1bd7314e553de2c91": {
+     "__typename": "VideoPublished",
+     "id": "6aafb6e1bd7314e553de2c91",
+     "contentId": "6aafb6e0bd7314e553de2c90",
+     "publishedById": "664230609a9e375b249f121f",
+     "publishedByName": "Anne-Gaelle Sy",
+     "published": "2026-09-20T14:00:00.000Z",
+     "language": "en",
+     "ebuCountries": [],
+     "vimeoCountries": [],
+     "ebuPlayerUrl": null,
+     "gatedContent": true,
+     "campaignId": "649318bcb7562c543c72eb53",
+     "tags": [
+      "playlist_68c932a1d61bce611429d9b5"
+     ],
+     "title": "Day 1 Extended Highlights | World Road Running Championships Copenhagen 26",
+     "thumbnailId": "6aafb655b728ee42056b5a2c",
+     "thumbnailEdited": "eyJrZXkiOiI2YWFmYjY0ZmI3MjhlZTQyMDU2YjVhMmIuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjoxNjAwLCJoZWlnaHQiOjEwMDB9fX0=",
+     "thumbnailTitle": "12",
+     "videoId": null,
+     "vimeoVideoId": "https://player.vimeo.com/video/1228400493",
+     "vimeoHash": "58479",
+     "playerId": null,
+     "brightcoveCountries": [],
+     "metatags": "World Road Running Championships, Copenhagen, 2026, mile, 5km",
+     "standFirst": "Watch the full extended highlights from day 1 at the World Road Running Championships Copenhagen 26, including both the men and women's mile and 5km. ",
+     "signedInCTA": "Watch now",
+     "signedOutCTA": "Sign up to Watch"
+    },
+    "VideoPublished:6a76164d953bb92fc7da32d6": {
+     "__typename": "VideoPublished",
+     "id": "6a76164d953bb92fc7da32d6",
+     "contentId": "6a76164b953bb92fc7da32d5",
+     "publishedById": "61051f57fc8312000972edea",
+     "publishedByName": "Josh Allen",
+     "published": "2026-09-20T11:14:52.122Z",
+     "language": "en",
+     "ebuCountries": [],
+     "vimeoCountries": [],
+     "ebuPlayerUrl": null,
+     "gatedContent": true,
+     "campaignId": "649318bcb7562c543c72eb53",
+     "tags": [
+      "playlist_66cc251f1f35860625dd76eb",
+      "playlist_6a75cd46a2a8211064c53550"
+     ],
+     "title": "Full Long Jump Women Final | World U20 Championships Oregon 26",
+     "thumbnailId": "6a761611953bb92fc7da32d3",
+     "thumbnailEdited": "eyJrZXkiOiI2YTc2MTYwYzk1M2JiOTJmYzdkYTMyZDIuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjoxNjAwLCJoZWlnaHQiOjEwMDB9fX0=",
+     "thumbnailTitle": "d",
+     "videoId": null,
+     "vimeoVideoId": "1216381095",
+     "vimeoHash": "58479",
+     "playerId": null,
+     "brightcoveCountries": [],
+     "metatags": "World Athletics U20 Championships Oregon 2026",
+     "standFirst": "Watch the full women's Long Jump final from the World Athletics U20 Championships Oregon 2026!",
+     "signedInCTA": "Watch now",
+     "signedOutCTA": "Sign up to Watch"
+    },
+    "resultsByLimitDisciplines:e10229507": {
+     "__typename": "resultsByLimitDisciplines",
+     "id": "e10229507",
+     "name": "10 Kilometres Road"
+    },
+    "resultsByLimitDisciplines:e10229633": {
+     "__typename": "resultsByLimitDisciplines",
+     "id": "e10229633",
+     "name": "Half Marathon"
+    },
+    "resultsByLimitDisciplines:e10229634": {
+     "__typename": "resultsByLimitDisciplines",
+     "id": "e10229634",
+     "name": "Marathon"
+    },
+    "majorChampionshipsDetails:300499220": {
+     "__typename": "majorChampionshipsDetails",
+     "id": 300499220,
+     "discipline": "Marathon",
+     "competition": "European Athletics Championships",
+     "venue": "Alexander Stadium, Birmingham (GBR)",
+     "race": "F",
+     "place": "37.",
+     "result": "2:18:56",
+     "withWind": false,
+     "wind": null,
+     "withDrop": true,
+     "drop": "",
+     "date": "16 AUG 2026",
+     "eventId": "10229634",
+     "competitionId": "7192415"
+    },
+    "allTimePersonalTop10Disciplines:10229560": {
+     "__typename": "allTimePersonalTop10Disciplines",
+     "id": 10229560,
+     "name": "3000 Metres Short Track"
+    },
+    "allTimePersonalTop10Disciplines:10229609": {
+     "__typename": "allTimePersonalTop10Disciplines",
+     "id": 10229609,
+     "name": "5000 Metres"
+    },
+    "allTimePersonalTop10Disciplines:10229610": {
+     "__typename": "allTimePersonalTop10Disciplines",
+     "id": 10229610,
+     "name": "10,000 Metres"
+    },
+    "allTimePersonalTop10Disciplines:204597": {
+     "__typename": "allTimePersonalTop10Disciplines",
+     "id": 204597,
+     "name": "5 Kilometres Road"
+    },
+    "allTimePersonalTop10Disciplines:10229507": {
+     "__typename": "allTimePersonalTop10Disciplines",
+     "id": 10229507,
+     "name": "10 Kilometres Road"
+    },
+    "allTimePersonalTop10Disciplines:10229633": {
+     "__typename": "allTimePersonalTop10Disciplines",
+     "id": 10229633,
+     "name": "Half Marathon"
+    },
+    "allTimePersonalTop10Disciplines:10229634": {
+     "__typename": "allTimePersonalTop10Disciplines",
+     "id": 10229634,
+     "name": "Marathon"
+    },
+    "representativeType:410645": {
+     "__typename": "representativeType",
+     "_id": 410645,
+     "name": "Philipp Kopp",
+     "countryCode": null,
+     "countryName": "Germany",
+     "email": "philipp@issberlin.de",
+     "telephone": null,
+     "mobile": "+49 1772971941",
+     "website": [
+      "https:// www.issberlin.de"
+     ]
+    },
+    "singleCompetitor:14682657": {
+     "__typename": "singleCompetitor",
+     "_id": 14682657,
+     "primaryMediaId": null,
+     "primaryMediaId2": null,
+     "primaryMedia": null,
+     "basicData": {
+      "__typename": "AthleteNewData",
+      "id": null,
+      "friendlyName": null,
+      "fullName": null,
+      "friendlyNameLetter": null,
+      "friendlyNameFirst3Letter": null,
+      "sexCode": null,
+      "birthPlace": null,
+      "birthPlaceCountryName": null,
+      "sexNameUrlSlug": null,
+      "birthPlaceCountryUrlSlug": null,
+      "birthCountryCode": null,
+      "primaryMediaId": null,
+      "facebookUsername": null,
+      "twitterUsername": null,
+      "instagramUsername": null,
+      "countryFullName": "Germany",
+      "familyName": "THURLEY",
+      "givenName": "Tom",
+      "firstName": null,
+      "lastName": null,
+      "countryName": null,
+      "countryCode": "GER",
+      "countryUrlSlug": null,
+      "birthDate": "13 SEP 1993",
+      "birthDateStr": null,
+      "urlSlug": null,
+      "representativeId": null,
+      "biography": null,
+      "twitterLink": null,
+      "instagramLink": null,
+      "facebookLink": null,
+      "transfersOfAllegiance": [],
+      "iaafId": 338341,
+      "aaId": 14682657,
+      "primaryMediaEdited": null,
+      "male": true,
+      "primaryMedia": null
+     },
+     "athleteRepresentative": {
+      "__ref": "representativeType:410645"
+     },
+     "personalBests": {
+      "__typename": "personalBestsType",
+      "withWind": false,
+      "withRecords": false,
+      "results": [
+       {
+        "__typename": "singleCompetitorResult",
+        "indoor": false,
+        "disciplineCode": null,
+        "disciplineNameUrlSlug": "3000-metres",
+        "typeNameUrlSlug": "middlelong",
+        "discipline": "3000 Metres",
+        "linkToList": true,
+        "mark": "8:39.24",
+        "combinedPerformances": null,
+        "wind": null,
+        "notLegal": false,
+        "venue": "Potsdam (GER) (i)",
+        "date": "13 JAN 2018",
+        "listPosition": null,
+        "resultScore": 856,
+        "records": [],
+        "competitionId": null,
+        "eventId": "10229607",
+        "eventName": null
+       },
+       {
+        "__typename": "singleCompetitorResult",
+        "indoor": false,
+        "disciplineCode": null,
+        "disciplineNameUrlSlug": "3000-metres-short-track",
+        "typeNameUrlSlug": "middlelong",
+        "discipline": "3000 Metres Short Track",
+        "linkToList": true,
+        "mark": "8:39.24",
+        "combinedPerformances": null,
+        "wind": null,
+        "notLegal": false,
+        "venue": "Potsdam (GER) (i)",
+        "date": "13 JAN 2018",
+        "listPosition": null,
+        "resultScore": 856,
+        "records": [],
+        "competitionId": null,
+        "eventId": "10229560",
+        "eventName": null
+       },
+       {
+        "__typename": "singleCompetitorResult",
+        "indoor": false,
+        "disciplineCode": null,
+        "disciplineNameUrlSlug": "5000-metres",
+        "typeNameUrlSlug": "middlelong",
+        "discipline": "5000 Metres",
+        "linkToList": true,
+        "mark": "14:53.95",
+        "combinedPerformances": null,
+        "wind": null,
+        "notLegal": false,
+        "venue": "Sportforum, Berlin (GER)",
+        "date": "23 AUG 2020",
+        "listPosition": null,
+        "resultScore": 828,
+        "records": [],
+        "competitionId": null,
+        "eventId": "10229609",
+        "eventName": null
+       },
+       {
+        "__typename": "singleCompetitorResult",
+        "indoor": false,
+        "disciplineCode": null,
+        "disciplineNameUrlSlug": "10000-metres",
+        "typeNameUrlSlug": "middlelong",
+        "discipline": "10,000 Metres",
+        "linkToList": true,
+        "mark": "31:49.80",
+        "combinedPerformances": null,
+        "wind": null,
+        "notLegal": false,
+        "venue": "Berlin (GER)",
+        "date": "16 APR 2016",
+        "listPosition": null,
+        "resultScore": 805,
+        "records": [],
+        "competitionId": null,
+        "eventId": "10229610",
+        "eventName": null
+       },
+       {
+        "__typename": "singleCompetitorResult",
+        "indoor": false,
+        "disciplineCode": null,
+        "disciplineNameUrlSlug": "5-kilometres",
+        "typeNameUrlSlug": "road-running",
+        "discipline": "5 Kilometres Road",
+        "linkToList": true,
+        "mark": "14:44",
+        "combinedPerformances": null,
+        "wind": null,
+        "notLegal": false,
+        "venue": "Berlin (GER)",
+        "date": "12 JUL 2020",
+        "listPosition": null,
+        "resultScore": 858,
+        "records": [],
+        "competitionId": "7149794",
+        "eventId": "204597",
+        "eventName": null
+       },
+       {
+        "__typename": "singleCompetitorResult",
+        "indoor": false,
+        "disciplineCode": null,
+        "disciplineNameUrlSlug": "10-kilometres",
+        "typeNameUrlSlug": "road-running",
+        "discipline": "10 Kilometres Road",
+        "linkToList": true,
+        "mark": "28:58",
+        "combinedPerformances": null,
+        "wind": null,
+        "notLegal": false,
+        "venue": "Berlin (GER)",
+        "date": "12 OCT 2025",
+        "listPosition": null,
+        "resultScore": 1044,
+        "records": [],
+        "competitionId": "7221562",
+        "eventId": "10229507",
+        "eventName": null
+       },
+       {
+        "__typename": "singleCompetitorResult",
+        "indoor": false,
+        "disciplineCode": null,
+        "disciplineNameUrlSlug": "half-marathon",
+        "typeNameUrlSlug": "road-running",
+        "discipline": "Half Marathon",
+        "linkToList": true,
+        "mark": "1:03:56",
+        "combinedPerformances": null,
+        "wind": null,
+        "notLegal": false,
+        "venue": "Köln (GER)",
+        "date": "05 OCT 2025",
+        "listPosition": null,
+        "resultScore": 1033,
+        "records": [],
+        "competitionId": "7224739",
+        "eventId": "10229633",
+        "eventName": null
+       },
+       {
+        "__typename": "singleCompetitorResult",
+        "indoor": false,
+        "disciplineCode": null,
+        "disciplineNameUrlSlug": "marathon",
+        "typeNameUrlSlug": "road-running",
+        "discipline": "Marathon",
+        "linkToList": true,
+        "mark": "2:11:02",
+        "combinedPerformances": null,
+        "wind": null,
+        "notLegal": false,
+        "venue": "Friedrichswall, Hannover (GER)",
+        "date": "12 APR 2026",
+        "listPosition": null,
+        "resultScore": 1112,
+        "records": [],
+        "competitionId": "7236399",
+        "eventId": "10229634",
+        "eventName": null
+       }
+      ]
+     },
+     "seasonsBests": {
+      "__typename": "seasonsBestsType",
+      "parameters": {
+       "__typename": "seasonsBestsParamsType",
+       "seasonsBestsSeason": 2026
+      },
+      "activeSeasons": [
+       "2026",
+       "2025",
+       "2024",
+       "2023",
+       "2022",
+       "2021",
+       "2020",
+       "2019",
+       "2018",
+       "2017",
+       "2016",
+       "2015"
+      ],
+      "withWind": false,
+      "withRecords": false,
+      "results": [
+       {
+        "__typename": "singleCompetitorResult",
+        "indoor": false,
+        "disciplineCode": null,
+        "disciplineNameUrlSlug": "10-kilometres",
+        "typeNameUrlSlug": "road-running",
+        "discipline": "10 Kilometres Road",
+        "linkToList": true,
+        "mark": "30:07",
+        "combinedPerformances": null,
+        "wind": null,
+        "notLegal": false,
+        "venue": "Würzburg (GER)",
+        "date": "26 APR 2026",
+        "listPosition": null,
+        "resultScore": 945,
+        "records": [],
+        "competitionId": "7238026",
+        "eventId": "10229507",
+        "competition": "36. Internationaler Würzburger Residenzlauf"
+       },
+       {
+        "__typename": "singleCompetitorResult",
+        "indoor": false,
+        "disciplineCode": null,
+        "disciplineNameUrlSlug": "half-marathon",
+        "typeNameUrlSlug": "road-running",
+        "discipline": "Half Marathon",
+        "linkToList": true,
+        "mark": "1:04:07",
+        "combinedPerformances": null,
+        "wind": null,
+        "notLegal": false,
+        "venue": "Mainz (GER)",
+        "date": "10 MAY 2026",
+        "listPosition": null,
+        "resultScore": 1026,
+        "records": [],
+        "competitionId": "7242791",
+        "eventId": "10229633",
+        "competition": "Gutenberg Halbmarathon Mainz"
+       },
+       {
+        "__typename": "singleCompetitorResult",
+        "indoor": false,
+        "disciplineCode": null,
+        "disciplineNameUrlSlug": "marathon",
+        "typeNameUrlSlug": "road-running",
+        "discipline": "Marathon",
+        "linkToList": true,
+        "mark": "2:11:02",
+        "combinedPerformances": null,
+        "wind": null,
+        "notLegal": false,
+        "venue": "Friedrichswall, Hannover (GER)",
+        "date": "12 APR 2026",
+        "listPosition": "534",
+        "resultScore": 1112,
+        "records": [],
+        "competitionId": "7236399",
+        "eventId": "10229634",
+        "competition": "Hannover Marathon"
+       }
+      ]
+     },
+     "progressionOfSeasonsBests": [
+      {
+       "__typename": "singleCompetitorProgression",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "3000-metres",
+       "typeNameUrlSlug": "middlelong",
+       "discipline": "3000 Metres",
+       "withWind": false,
+       "mainEvent": false,
+       "eventId": "10229607",
+       "results": [
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2015",
+         "numericResult": 531.17,
+         "mark": "8:51.17",
+         "wind": null,
+         "venue": "Berlin (GER) (i)",
+         "date": "25 JAN 2015",
+         "listPosition": null,
+         "resultScore": 793,
+         "competitionId": null,
+         "competition": "Berlin Regional Indoor Championships"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2016",
+         "numericResult": 556.36,
+         "mark": "9:16.36",
+         "wind": null,
+         "venue": "Potsdam (GER) (i)",
+         "date": "24 JAN 2016",
+         "listPosition": null,
+         "resultScore": 669,
+         "competitionId": null,
+         "competition": "Potsdam Regional Indoor Championships"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2017",
+         "numericResult": 538.31,
+         "mark": "8:58.31",
+         "wind": null,
+         "venue": "Berlin (GER) (i)",
+         "date": "22 JAN 2017",
+         "listPosition": null,
+         "resultScore": 757,
+         "competitionId": null,
+         "competition": "Berlin Regional Indoor Championships"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2018",
+         "numericResult": 519.24,
+         "mark": "8:39.24",
+         "wind": null,
+         "venue": "Potsdam (GER) (i)",
+         "date": "13 JAN 2018",
+         "listPosition": null,
+         "resultScore": 856,
+         "competitionId": null,
+         "competition": "Potsdam Regional Indoor Championships"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2019",
+         "numericResult": 519.25,
+         "mark": "8:39.25",
+         "wind": null,
+         "venue": "Neubrandenburg (GER) (i)",
+         "date": "03 FEB 2019",
+         "listPosition": null,
+         "resultScore": 856,
+         "competitionId": null,
+         "competition": "Regional Indoor Championships"
+        }
+       ]
+      },
+      {
+       "__typename": "singleCompetitorProgression",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "3000-metres-short-track",
+       "typeNameUrlSlug": "middlelong",
+       "discipline": "3000 Metres Short Track",
+       "withWind": false,
+       "mainEvent": false,
+       "eventId": "10229560",
+       "results": [
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2015",
+         "numericResult": 531.17,
+         "mark": "8:51.17",
+         "wind": null,
+         "venue": "Berlin (GER) (i)",
+         "date": "25 JAN 2015",
+         "listPosition": null,
+         "resultScore": 793,
+         "competitionId": null,
+         "competition": "Berlin Regional Indoor Championships"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2016",
+         "numericResult": 556.36,
+         "mark": "9:16.36",
+         "wind": null,
+         "venue": "Potsdam (GER) (i)",
+         "date": "24 JAN 2016",
+         "listPosition": null,
+         "resultScore": 669,
+         "competitionId": null,
+         "competition": "Potsdam Regional Indoor Championships"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2017",
+         "numericResult": 538.31,
+         "mark": "8:58.31",
+         "wind": null,
+         "venue": "Berlin (GER) (i)",
+         "date": "22 JAN 2017",
+         "listPosition": null,
+         "resultScore": 757,
+         "competitionId": null,
+         "competition": "Berlin Regional Indoor Championships"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2018",
+         "numericResult": 519.24,
+         "mark": "8:39.24",
+         "wind": null,
+         "venue": "Potsdam (GER) (i)",
+         "date": "13 JAN 2018",
+         "listPosition": null,
+         "resultScore": 856,
+         "competitionId": null,
+         "competition": "Potsdam Regional Indoor Championships"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2019",
+         "numericResult": 519.25,
+         "mark": "8:39.25",
+         "wind": null,
+         "venue": "Neubrandenburg (GER) (i)",
+         "date": "03 FEB 2019",
+         "listPosition": null,
+         "resultScore": 856,
+         "competitionId": null,
+         "competition": "Regional Indoor Championships"
+        }
+       ]
+      },
+      {
+       "__typename": "singleCompetitorProgression",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "5000-metres",
+       "typeNameUrlSlug": "middlelong",
+       "discipline": "5000 Metres",
+       "withWind": false,
+       "mainEvent": false,
+       "eventId": "10229609",
+       "results": [
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2016",
+         "numericResult": 939.1,
+         "mark": "15:39.10",
+         "wind": null,
+         "venue": "Paderborn (GER)",
+         "date": "26 MAY 2016",
+         "listPosition": null,
+         "resultScore": 697,
+         "competitionId": null,
+         "competition": "Paderborn German University Championships"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2019",
+         "numericResult": 909.69,
+         "mark": "15:09.69",
+         "wind": null,
+         "venue": "Hannover (GER)",
+         "date": "21 JUL 2019",
+         "listPosition": null,
+         "resultScore": 781,
+         "competitionId": null,
+         "competition": "Regional Championships"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2020",
+         "numericResult": 893.95,
+         "mark": "14:53.95",
+         "wind": null,
+         "venue": "Sportforum, Berlin (GER)",
+         "date": "23 AUG 2020",
+         "listPosition": null,
+         "resultScore": 828,
+         "competitionId": null,
+         "competition": "BBM Männer/Frauen/U20/U18"
+        }
+       ]
+      },
+      {
+       "__typename": "singleCompetitorProgression",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "10000-metres",
+       "typeNameUrlSlug": "middlelong",
+       "discipline": "10,000 Metres",
+       "withWind": false,
+       "mainEvent": false,
+       "eventId": "10229610",
+       "results": [
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2016",
+         "numericResult": 1909.8,
+         "mark": "31:49.80",
+         "wind": null,
+         "venue": "Berlin (GER)",
+         "date": "16 APR 2016",
+         "listPosition": null,
+         "resultScore": 805,
+         "competitionId": null,
+         "competition": "Berlin"
+        }
+       ]
+      },
+      {
+       "__typename": "singleCompetitorProgression",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "5-kilometres",
+       "typeNameUrlSlug": "road-running",
+       "discipline": "5 Kilometres Road",
+       "withWind": false,
+       "mainEvent": false,
+       "eventId": "204597",
+       "results": [
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2020",
+         "numericResult": 884,
+         "mark": "14:44",
+         "wind": null,
+         "venue": "Berlin (GER)",
+         "date": "12 JUL 2020",
+         "listPosition": 308,
+         "resultScore": 858,
+         "competitionId": "7149794",
+         "competition": "Berlin 5K Invitational"
+        }
+       ]
+      },
+      {
+       "__typename": "singleCompetitorProgression",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "10-kilometres",
+       "typeNameUrlSlug": "road-running",
+       "discipline": "10 Kilometres Road",
+       "withWind": false,
+       "mainEvent": false,
+       "eventId": "10229507",
+       "results": [
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2015",
+         "numericResult": 1883,
+         "mark": "31:23",
+         "wind": null,
+         "venue": "Bad Liebenzell (GER)",
+         "date": "06 SEP 2015",
+         "listPosition": null,
+         "resultScore": 841,
+         "competitionId": null,
+         "competition": "German 10km Championships"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2020",
+         "numericResult": 1838,
+         "mark": "30:38",
+         "wind": null,
+         "venue": "Berlin (GER)",
+         "date": "26 SEP 2020",
+         "listPosition": 690,
+         "resultScore": 901,
+         "competitionId": null,
+         "competition": "Berlin 10k Invitational II"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2021",
+         "numericResult": 1788,
+         "mark": "29:48",
+         "wind": null,
+         "venue": "Berlin (GER)",
+         "date": "08 AUG 2021",
+         "listPosition": 518,
+         "resultScore": 972,
+         "competitionId": null,
+         "competition": "The Great 10K Berlin"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2022",
+         "numericResult": 1828,
+         "mark": "30:28",
+         "wind": null,
+         "venue": "Berlin (GER)",
+         "date": "30 JUL 2022",
+         "listPosition": 905,
+         "resultScore": 915,
+         "competitionId": null,
+         "competition": "Adidas Runners City Night"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2023",
+         "numericResult": 1812,
+         "mark": "30:12",
+         "wind": null,
+         "venue": "Berlin (GER)",
+         "date": "29 JUL 2023",
+         "listPosition": 711,
+         "resultScore": 938,
+         "competitionId": "7197642",
+         "competition": "City-Nachtlauf"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2024",
+         "numericResult": 1777,
+         "mark": "29:37",
+         "wind": null,
+         "venue": "Dresden (GER)",
+         "date": "24 MAR 2024",
+         "listPosition": 551,
+         "resultScore": 987,
+         "competitionId": "7208490",
+         "competition": "NTT DATA Citylauf Dresden"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2025",
+         "numericResult": 1738,
+         "mark": "28:58",
+         "wind": null,
+         "venue": "Berlin (GER)",
+         "date": "12 OCT 2025",
+         "listPosition": 409,
+         "resultScore": 1044,
+         "competitionId": "7221562",
+         "competition": "The Great 10K"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2026",
+         "numericResult": 1807,
+         "mark": "30:07",
+         "wind": null,
+         "venue": "Würzburg (GER)",
+         "date": "26 APR 2026",
+         "listPosition": null,
+         "resultScore": 945,
+         "competitionId": "7238026",
+         "competition": "36. Internationaler Würzburger Residenzlauf"
+        }
+       ]
+      },
+      {
+       "__typename": "singleCompetitorProgression",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "half-marathon",
+       "typeNameUrlSlug": "road-running",
+       "discipline": "Half Marathon",
+       "withWind": false,
+       "mainEvent": false,
+       "eventId": "10229633",
+       "results": [
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2015",
+         "numericResult": 4188,
+         "mark": "1:09:48",
+         "wind": null,
+         "venue": "Berlin (GER)",
+         "date": "29 MAR 2015",
+         "listPosition": null,
+         "resultScore": 825,
+         "competitionId": null,
+         "competition": "Berlin Half Marathon"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2017",
+         "numericResult": 4179,
+         "mark": "1:09:39",
+         "wind": null,
+         "venue": "Hannover (GER)",
+         "date": "09 APR 2017",
+         "listPosition": null,
+         "resultScore": 830,
+         "competitionId": null,
+         "competition": "Hannover German Half Marathon Championships"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2018",
+         "numericResult": 4074,
+         "mark": "1:07:54",
+         "wind": null,
+         "venue": "Hannover (GER)",
+         "date": "08 APR 2018",
+         "listPosition": null,
+         "resultScore": 890,
+         "competitionId": "7117489",
+         "competition": "Hannover German Half Marathon Championships"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2019",
+         "numericResult": 4047,
+         "mark": "1:07:27",
+         "wind": null,
+         "venue": "Mainz (GER)",
+         "date": "05 MAY 2019",
+         "listPosition": null,
+         "resultScore": 905,
+         "competitionId": null,
+         "competition": "Gutenberg Half Marathon Mainz"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2020",
+         "numericResult": 3870,
+         "mark": "1:04:30",
+         "wind": null,
+         "venue": "Dresden (GER)",
+         "date": "08 NOV 2020",
+         "listPosition": 746,
+         "resultScore": 1012,
+         "competitionId": "7157943",
+         "competition": "Laufszene Invitational Run"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2021",
+         "numericResult": 3893,
+         "mark": "1:04:53",
+         "wind": null,
+         "venue": "Dresden (GER)",
+         "date": "21 MAR 2021",
+         "listPosition": 721,
+         "resultScore": 998,
+         "competitionId": "7163199",
+         "competition": "itelligence Citylauf Invitational"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2024",
+         "numericResult": 3889,
+         "mark": "1:04:49",
+         "wind": null,
+         "venue": "Mainz (GER)",
+         "date": "05 MAY 2024",
+         "listPosition": null,
+         "resultScore": 1000,
+         "competitionId": "7210307",
+         "competition": "Gutenberg Halbmarathon Mainz"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2025",
+         "numericResult": 3836,
+         "mark": "1:03:56",
+         "wind": null,
+         "venue": "Köln (GER)",
+         "date": "05 OCT 2025",
+         "listPosition": null,
+         "resultScore": 1033,
+         "competitionId": "7224739",
+         "competition": "Generali Köln Half Marathon"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2026",
+         "numericResult": 3847,
+         "mark": "1:04:07",
+         "wind": null,
+         "venue": "Mainz (GER)",
+         "date": "10 MAY 2026",
+         "listPosition": null,
+         "resultScore": 1026,
+         "competitionId": "7242791",
+         "competition": "Gutenberg Halbmarathon Mainz"
+        }
+       ]
+      },
+      {
+       "__typename": "singleCompetitorProgression",
+       "indoor": false,
+       "disciplineCode": null,
+       "disciplineNameUrlSlug": "marathon",
+       "typeNameUrlSlug": "road-running",
+       "discipline": "Marathon",
+       "withWind": false,
+       "mainEvent": true,
+       "eventId": "10229634",
+       "results": [
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2021",
+         "numericResult": 8635,
+         "mark": "2:23:55",
+         "wind": null,
+         "venue": "München (GER)",
+         "date": "10 OCT 2021",
+         "listPosition": null,
+         "resultScore": 892,
+         "competitionId": "7160165",
+         "competition": "Generali München Marathon"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2023",
+         "numericResult": 8348,
+         "mark": "2:19:08",
+         "wind": null,
+         "venue": "Köln (GER)",
+         "date": "01 OCT 2023",
+         "listPosition": null,
+         "resultScore": 971,
+         "competitionId": "7198918",
+         "competition": "Generali Köln Marathon"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2024",
+         "numericResult": 8092,
+         "mark": "2:14:52",
+         "wind": null,
+         "venue": "Hannover (GER)",
+         "date": "14 APR 2024",
+         "listPosition": 906,
+         "resultScore": 1044,
+         "competitionId": "7207469",
+         "competition": "ADAC Marathon Hannover"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2025",
+         "numericResult": 7879,
+         "mark": "2:11:19",
+         "wind": null,
+         "venue": "Frankfurt (GER)",
+         "date": "26 OCT 2025",
+         "listPosition": 501,
+         "resultScore": 1106,
+         "competitionId": "7229997",
+         "competition": "Mainova Frankfurt Marathon"
+        },
+        {
+         "__typename": "singleCompetitorProgressionResult",
+         "season": "2026",
+         "numericResult": 7862,
+         "mark": "2:11:02",
+         "wind": null,
+         "venue": "Friedrichswall, Hannover (GER)",
+         "date": "12 APR 2026",
+         "listPosition": 534,
+         "resultScore": 1112,
+         "competitionId": "7236399",
+         "competition": "Hannover Marathon"
+        }
+       ]
+      }
+     ],
+     "worldRankings": {
+      "__typename": "worldRankingsType",
+      "parameters": {
+       "__typename": "worldRankingsParamsType",
+       "worldRankingsProgressionYear": null
+      },
+      "current": [
+       {
+        "__typename": "worldRankingCurrent",
+        "rankingCalculationId": "146076947",
+        "eventGroup": "Men's Marathon",
+        "male": true,
+        "urlSlug": "marathon",
+        "place": 436,
+        "rankingScore": 1125
+       },
+       {
+        "__typename": "worldRankingCurrent",
+        "rankingCalculationId": "146074169",
+        "eventGroup": "Men's Road Running",
+        "male": true,
+        "urlSlug": "road-running",
+        "place": 602,
+        "rankingScore": 1040
+       },
+       {
+        "__typename": "worldRankingCurrent",
+        "rankingCalculationId": "146132749",
+        "eventGroup": "Men's Overall Ranking",
+        "male": true,
+        "urlSlug": "overall-ranking",
+        "place": 3011,
+        "rankingScore": 1125
+       }
+      ],
+      "best": [
+       {
+        "__typename": "worldRankingBest",
+        "eventGroup": "Men's Road Running",
+        "eventGroupId": 20,
+        "urlSlug": "road-running",
+        "place": "392",
+        "weeks": 1
+       },
+       {
+        "__typename": "worldRankingBest",
+        "eventGroup": "Men's Marathon",
+        "eventGroupId": 21,
+        "urlSlug": "marathon",
+        "place": "399",
+        "weeks": 2
+       },
+       {
+        "__typename": "worldRankingBest",
+        "eventGroup": "Men's Overall Ranking",
+        "eventGroupId": 46,
+        "urlSlug": "overall-ranking",
+        "place": "2983",
+        "weeks": 1
+       }
+      ]
+     },
+     "honours": [],
+     "resultsByYear": {
+      "__typename": "resultsByYearType",
+      "parameters": {
+       "__typename": "resultByYearParamsType",
+       "resultsByYear": 2026,
+       "resultsByYearOrderBy": "discipline"
+      },
+      "activeYears": [
+       "2026",
+       "2025",
+       "2024",
+       "2023",
+       "2022",
+       "2021",
+       "2020",
+       "2019",
+       "2018",
+       "2017",
+       "2016",
+       "2015"
+      ],
+      "resultsByEvent": [
+       {
+        "__typename": "resultsByEvent",
+        "indoor": null,
+        "disciplineCode": null,
+        "disciplineNameUrlSlug": null,
+        "typeNameUrlSlug": null,
+        "discipline": "10 Kilometres Road",
+        "withWind": null,
+        "results": [
+         {
+          "__typename": "resultsByEventResult",
+          "date": "26 APR 2026",
+          "competition": "36. Internationaler Würzburger Residenzlauf, Würzburg",
+          "venue": "Würzburg (GER)",
+          "country": "GER",
+          "category": "F",
+          "race": "F",
+          "place": "4.",
+          "mark": "30:07",
+          "wind": null,
+          "notLegal": false,
+          "resultScore": 945,
+          "remark": "",
+          "competitionId": "7238026",
+          "eventId": "10229507",
+          "eventName": null
+         }
+        ]
+       },
+       {
+        "__typename": "resultsByEvent",
+        "indoor": null,
+        "disciplineCode": null,
+        "disciplineNameUrlSlug": null,
+        "typeNameUrlSlug": null,
+        "discipline": "Half Marathon",
+        "withWind": null,
+        "results": [
+         {
+          "__typename": "resultsByEventResult",
+          "date": "22 MAR 2026",
+          "competition": "Frankfurter Mainova Half Marathon, Frankfurt - German Half Marathon Ch.",
+          "venue": "Frankfurt (GER)",
+          "country": "GER",
+          "category": "B",
+          "race": "F",
+          "place": "3.",
+          "mark": "1:04:24",
+          "wind": null,
+          "notLegal": false,
+          "resultScore": 1016,
+          "remark": "",
+          "competitionId": "7238034",
+          "eventId": "10229633",
+          "eventName": null
+         },
+         {
+          "__typename": "resultsByEventResult",
+          "date": "10 MAY 2026",
+          "competition": "Gutenberg Halbmarathon Mainz, Mainz",
+          "venue": "Mainz (GER)",
+          "country": "GER",
+          "category": "F",
+          "race": "F",
+          "place": "11.",
+          "mark": "1:04:07",
+          "wind": null,
+          "notLegal": false,
+          "resultScore": 1026,
+          "remark": "",
+          "competitionId": "7242791",
+          "eventId": "10229633",
+          "eventName": null
+         },
+         {
+          "__typename": "resultsByEventResult",
+          "date": "06 SEP 2026",
+          "competition": "Dresden HALF, Dresden",
+          "venue": "Dresden (GER)",
+          "country": "GER",
+          "category": "E",
+          "race": "F",
+          "place": "3.",
+          "mark": "1:06:37",
+          "wind": null,
+          "notLegal": false,
+          "resultScore": 935,
+          "remark": "",
+          "competitionId": "7245390",
+          "eventId": "10229633",
+          "eventName": null
+         },
+         {
+          "__typename": "resultsByEventResult",
+          "date": "11 OCT 2026",
+          "competition": "München Half Marathon & 10K, München",
+          "venue": "München (GER)",
+          "country": "GER",
+          "category": "F",
+          "race": "F",
+          "place": "3.",
+          "mark": "1:05:35",
+          "wind": null,
+          "notLegal": false,
+          "resultScore": 0,
+          "remark": "UNC",
+          "competitionId": "7247477",
+          "eventId": "10229633",
+          "eventName": null
+         }
+        ]
+       },
+       {
+        "__typename": "resultsByEvent",
+        "indoor": null,
+        "disciplineCode": null,
+        "disciplineNameUrlSlug": null,
+        "typeNameUrlSlug": null,
+        "discipline": "Marathon",
+        "withWind": null,
+        "results": [
+         {
+          "__typename": "resultsByEventResult",
+          "date": "12 APR 2026",
+          "competition": "Hannover Marathon, Friedrichswall, Hannover - German Marathon Ch.",
+          "venue": "Friedrichswall, Hannover (GER)",
+          "country": "GER",
+          "category": "B",
+          "race": "F",
+          "place": "6.",
+          "mark": "2:11:02",
+          "wind": null,
+          "notLegal": false,
+          "resultScore": 1112,
+          "remark": "",
+          "competitionId": "7236399",
+          "eventId": "10229634",
+          "eventName": null
+         },
+         {
+          "__typename": "resultsByEventResult",
+          "date": "16 AUG 2026",
+          "competition": "European Athletics Championships, Alexander Stadium, Birmingham",
+          "venue": "Alexander Stadium, Birmingham (GBR)",
+          "country": "GBR",
+          "category": "GL",
+          "race": "F",
+          "place": "37.",
+          "mark": "2:18:56",
+          "wind": null,
+          "notLegal": false,
+          "resultScore": 974,
+          "remark": "",
+          "competitionId": "7192415",
+          "eventId": "10229634",
+          "eventName": null
+         }
+        ]
+       }
+      ]
+     }
+    }
+   }
+  },
+  "apollo": null
+ },
+ "page": "/athletes/[counrty]/[competitorId]",
+ "query": {
+  "counrty": "germany",
+  "competitorId": "tom-thurley-14682657"
+ },
+ "buildId": "YVWn3rsemDR2HTvm1ThoZ",
+ "isFallback": false,
+ "gip": true,
+ "appGip": true,
+ "locale": "en",
+ "locales": [
+  "en",
+  "sr",
+  "hr",
+  "es",
+  "gd",
+  "IT",
+  "it",
+  "pl",
+  "da",
+  "hu",
+  "fr",
+  "zh",
+  "lv",
+  "jp",
+  "ru",
+  "pt",
+  "ar",
+  "tr"
+ ],
+ "defaultLocale": "en",
+ "head": [
+  [
+   "meta",
+   {
+    "name": "viewport",
+    "content": "width=device-width, initial-scale=1",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "charSet": "utf-8",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "title",
+   {
+    "className": "jsx-2451524013",
+    "children": "Tom THURLEY | Profile | World Athletics"
+   }
+  ],
+  [
+   "link",
+   {
+    "rel": "apple-touch-icon",
+    "href": "/static/icons/256x256.png",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "link",
+   {
+    "rel": "apple-touch-icon",
+    "sizes": "72x72",
+    "href": "/static/icons/72x72.png",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "link",
+   {
+    "rel": "apple-touch-icon",
+    "sizes": "114x114",
+    "href": "/static/icons/114x114.png",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "link",
+   {
+    "rel": "apple-touch-icon",
+    "sizes": "144x144",
+    "href": "/static/icons/144x144.png",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "link",
+   {
+    "rel": "canonical",
+    "href": "https://worldathletics.org/athletes/germany/tom-thurley-14682657",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "name": "apple-mobile-web-app-capable",
+    "content": "yes",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "name": "mobile-web-app-capable",
+    "content": "yes",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "name": "apple-mobile-web-app-status-bar-style",
+    "content": "#ff2534",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "name": "apple-itunes-app",
+    "content": "app-id=6764098476",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "property": "og:title",
+    "name": "title",
+    "content": "Tom THURLEY | Profile | World Athletics",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "property": "og:type",
+    "name": "type",
+    "content": "website",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "property": "og:url",
+    "name": "url",
+    "content": "https://worldathletics.org/athletes/germany/tom-thurley-14682657",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "property": "og:site_name",
+    "name": "site_name",
+    "content": "worldathletics.org",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "property": "og:image",
+    "name": "image",
+    "content": "/static/athlete-blank-hero-min.jpg",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "property": "og:description",
+    "name": "description",
+    "content": "Tom THURLEY, Germany - Marathon, 10 Kilometres Road, Half Marathon",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "name": "keywords",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "name": "twitter:card",
+    "content": "summary_large_image",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "name": "twitter:site",
+    "content": "@WorldAthletics",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "name": "twitter:title",
+    "content": "Tom THURLEY | Profile | World Athletics",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "name": "twitter:description",
+    "content": "Tom THURLEY, Germany - Marathon, 10 Kilometres Road, Half Marathon",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "name": "twitter:image",
+    "content": "/static/athlete-blank-hero-min.jpg",
+    "className": "jsx-2451524013"
+   }
+  ],
+  [
+   "meta",
+   {
+    "property": "thumbnail",
+    "content": "/static/athlete-blank-hero-min.jpg",
+    "className": "jsx-2451524013"
+   }
+  ]
+ ]
+}

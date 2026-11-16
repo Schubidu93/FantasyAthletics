@@ -1,0 +1,6 @@
+athlete-2026: 200, 2344 Zeichen, {"data":{"getSingleCompetitorResultsDate":{"resultsByDate":[{"date":"22 MAR 2026","competition":"Frankfurter Mainova Half Marathon, Frankfurt - German Half Marathon Ch.","venue":"Frankfurt (GER)","discipline":"Half Marathon","country":"GER","category":"B","race":"F","place":"3.","mark":"1:04:24","wi
+athlete-2026-min: 200, 1821 Zeichen, {"data":{"getSingleCompetitorResultsDate":{"resultsByDate":[{"date":"22 MAR 2026","competition":"Frankfurter Mainova Half Marathon, Frankfurt - German Half Marathon Ch.","discipline":"Half Marathon","category":"B","race":"F","place":"3.","mark":"1:04:24","resultScore":1016,"remark":"","competitionId
+event: 200, 277 Zeichen, {"data":null,"errors":[{"path":null,"locations":[{"line":2,"column":74,"sourceName":null}],"message":"Validation error of type FieldUndefined: Field 'competitions' in type 'CalendarResultsEvent' is undefined @ 'getCalendarCompetitionResults/eventTitles/events/competitions'"}]}
+event-min: 200, 277 Zeichen, {"data":null,"errors":[{"path":null,"locations":[{"line":2,"column":34,"sourceName":null}],"message":"Validation error of type FieldUndefined: Field 'competitions' in type 'CalendarResultsEvent' is undefined @ 'getCalendarCompetitionResults/eventTitles/events/competitions'"}]}
+Ergebnisseite: 200, 135611 Zeichen
+Athletenseite: 200, NEXT_DATA 82662
