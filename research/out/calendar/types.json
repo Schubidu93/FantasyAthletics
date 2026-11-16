@@ -1,0 +1,3258 @@
+{
+ "fields": {
+  "getCalendarEvents": {
+   "args": [
+    "startDate: String",
+    "endDate: String",
+    "query: String",
+    "regionType: String",
+    "regionId: Int",
+    "disciplineId: Int",
+    "rankingCategoryId: Int",
+    "permitLevelId: Int",
+    "currentSeason: Boolean",
+    "competitionGroupId: Int",
+    "competitionGroupSlug: String",
+    "competitionSubgroupId: Int",
+    "limit: Int",
+    "offset: Int",
+    "showOptionsWithNoHits: Boolean",
+    "hideCompetitionsWithNoResults: Boolean",
+    "orderDirection: OrderDirectionEnum"
+   ],
+   "returns": "CalendarEvents"
+  },
+  "getCalendarCompetitionResults": {
+   "args": [
+    "competitionId: Int",
+    "day: Int",
+    "eventId: Int"
+   ],
+   "returns": "CalendarCompetitionResults"
+  },
+  "resultsByAthlete": {
+   "args": [
+    "athleteIds: [String]",
+    "countryOfResidence: String",
+    "limit: Int",
+    "preferredCountry: String"
+   ],
+   "returns": "ResultsByAthleteResult"
+  },
+  "getSingleCompetitorResultsByLimit": {
+   "args": [
+    "id: Int",
+    "urlSlug: String",
+    "ids: [Int]",
+    "resultsByLimitsDiscipline: String",
+    "resultsByLimitsStartDate: String",
+    "resultsByLimitsEndDate: String",
+    "resultsByLimitsOnlyRegular: Boolean"
+   ],
+   "returns": "resultsByLimit"
+  },
+  "competitionsByCountry": {
+   "args": [
+    "countryOfResidence: String",
+    "limit: Int",
+    "preferredCountry: String"
+   ],
+   "returns": "CompetitionByCountryResult"
+  },
+  "getAthleteResults": {
+   "args": [
+    "competitionId: Int!",
+    "competitorId: Int!"
+   ],
+   "returns": "[LiveResult]"
+  },
+  "getResultInfo": {
+   "args": [
+    "competitionId: String",
+    "eventId: Int",
+    "isOther: Boolean"
+   ],
+   "returns": "[ResultInfo]"
+  },
+  "getSingleCompetitorResultsDate": {
+   "args": [
+    "id: Int",
+    "resultsByYear: Int",
+    "resultsByYearOrderBy: String"
+   ],
+   "returns": "resultsByDateType"
+  }
+ },
+ "types": {
+  "CalendarEvents": {
+   "name": "CalendarEvents",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "hits",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "defaultOffset",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "paginationPage",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "parameters",
+     "args": [],
+     "type": {
+      "name": "CalendarParams",
+      "kind": "OBJECT",
+      "ofType": null
+     }
+    },
+    {
+     "name": "results",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "CalendarEvent",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "options",
+     "args": [],
+     "type": {
+      "name": "CalendarOptions",
+      "kind": "OBJECT",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarParams": {
+   "name": "CalendarParams",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "startDate",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "endDate",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "query",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "regionType",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "regionId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "disciplineId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "rankingCategoryId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "permitLevelId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitionGroupId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitionSubgroupId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "limit",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "offset",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "showOptionsWithNoHits",
+     "args": [],
+     "type": {
+      "name": "Boolean",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "hideCompetitionsWithNoResults",
+     "args": [],
+     "type": {
+      "name": "Boolean",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "season",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarEvent": {
+   "name": "CalendarEvent",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "id",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "iaafId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "hasResults",
+     "args": [],
+     "type": {
+      "name": "Boolean",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "hasApiResults",
+     "args": [],
+     "type": {
+      "name": "Boolean",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "hasStartlist",
+     "args": [],
+     "type": {
+      "name": "Boolean",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "name",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "venue",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "area",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "country",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "rankingCategory",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "disciplines",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitionGroup",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitionSubgroup",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "startDate",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "endDate",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "dateRange",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "season",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "wasUrl",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "hasCompetitionInformation",
+     "args": [],
+     "type": {
+      "name": "Boolean",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "undeterminedCompetitionPeriod",
+     "args": [],
+     "type": {
+      "name": "UndeterminedCompetitionPeriod",
+      "kind": "OBJECT",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "UndeterminedCompetitionPeriod": {
+   "name": "UndeterminedCompetitionPeriod",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "status",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "label",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "remark",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarOptions": {
+   "name": "CalendarOptions",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "regions",
+     "args": [],
+     "type": {
+      "name": "CalendarRegions",
+      "kind": "OBJECT",
+      "ofType": null
+     }
+    },
+    {
+     "name": "seasons",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "SeasonsCalendarOption",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "disciplines",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "CalendarDisciplineOption",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "rankingCategories",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "CalendarRankingOption",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "permitLevels",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "CalendarPermitOption",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "competitionGroups",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "CalendarGroupOption",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "competitionSubgroups",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "CalendarSubgroupOption",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarRegions": {
+   "name": "CalendarRegions",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "world",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "CalendarOption",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "area",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "CalendarAreaOption",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "country",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "CalendarCountryOption",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarOption": {
+   "name": "CalendarOption",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "id",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "name",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "count",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarAreaOption": {
+   "name": "CalendarAreaOption",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "id",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "name",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "count",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarCountryOption": {
+   "name": "CalendarCountryOption",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "id",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "name",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "count",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "SeasonsCalendarOption": {
+   "name": "SeasonsCalendarOption",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "id",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "name",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarDisciplineOption": {
+   "name": "CalendarDisciplineOption",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "id",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "name",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "count",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarRankingOption": {
+   "name": "CalendarRankingOption",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "id",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "name",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "count",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarPermitOption": {
+   "name": "CalendarPermitOption",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "id",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "name",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "count",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarGroupOption": {
+   "name": "CalendarGroupOption",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "id",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "name",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "count",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarSubgroupOption": {
+   "name": "CalendarSubgroupOption",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "id",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "name",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "count",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "OrderDirectionEnum": {
+   "name": "OrderDirectionEnum",
+   "kind": "ENUM",
+   "fields": null,
+   "inputFields": null,
+   "enumValues": [
+    {
+     "name": "Ascending"
+    },
+    {
+     "name": "Descending"
+    }
+   ]
+  },
+  "CalendarCompetitionResults": {
+   "name": "CalendarCompetitionResults",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "competition",
+     "args": [],
+     "type": {
+      "name": "CalendarResultsCompetition",
+      "kind": "OBJECT",
+      "ofType": null
+     }
+    },
+    {
+     "name": "eventTitles",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "CalendarResultsEventTitle",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "options",
+     "args": [],
+     "type": {
+      "name": "CalendarResultsOptions",
+      "kind": "OBJECT",
+      "ofType": null
+     }
+    },
+    {
+     "name": "parameters",
+     "args": [],
+     "type": {
+      "name": "CalendarResultsParameters",
+      "kind": "OBJECT",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarResultsCompetition": {
+   "name": "CalendarResultsCompetition",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "dateRange",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "endDate",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "name",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "rankingCategory",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "startDate",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "venue",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarResultsEventTitle": {
+   "name": "CalendarResultsEventTitle",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "eventTitle",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "events",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "CalendarResultsEvent",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "rankingCategory",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarResultsEvent": {
+   "name": "CalendarResultsEvent",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "event",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "eventId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "gender",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "isRelay",
+     "args": [],
+     "type": {
+      "name": "Boolean",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "perResultWind",
+     "args": [],
+     "type": {
+      "name": "Boolean",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "races",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "CalendarResultsRace",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "summary",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "CalendarResultsSummary",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "withWind",
+     "args": [],
+     "type": {
+      "name": "Boolean",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarResultsRace": {
+   "name": "CalendarResultsRace",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "date",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "day",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "race",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "raceId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "raceNumber",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "wind",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "results",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "CalendarResultsRaceResult",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "startList",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "CalendarStartListRaceResult",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarResultsRaceResult": {
+   "name": "CalendarResultsRaceResult",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "id",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitor",
+     "args": [],
+     "type": {
+      "name": "CalendarResultsCompetitor",
+      "kind": "OBJECT",
+      "ofType": null
+     }
+    },
+    {
+     "name": "mark",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "nationality",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "place",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "points",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "qualified",
+     "args": [],
+     "type": {
+      "name": "Boolean",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "records",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "wind",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "remark",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "details",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "CalendarResultsRaceResultDetails",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarStartListRaceResult": {
+   "name": "CalendarStartListRaceResult",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "competitor",
+     "args": [],
+     "type": {
+      "name": "CalendarStartListCompetitor",
+      "kind": "OBJECT",
+      "ofType": null
+     }
+    },
+    {
+     "name": "order",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "pb",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "sb",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "bib",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarResultsSummary": {
+   "name": "CalendarResultsSummary",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "competitor",
+     "args": [],
+     "type": {
+      "name": "CalendarResultsCompetitor",
+      "kind": "OBJECT",
+      "ofType": null
+     }
+    },
+    {
+     "name": "mark",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "nationality",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "placeInRace",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "placeInRound",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "points",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "raceNumber",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "records",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "wind",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarResultsCompetitor": {
+   "name": "CalendarResultsCompetitor",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "name",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "urlSlug",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "id",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "iaafId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "birthDate",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "hasProfile",
+     "args": [],
+     "type": {
+      "name": "Boolean",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "teamMembers",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "TeamMembersResult",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarResultsOptions": {
+   "name": "CalendarResultsOptions",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "days",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "CalendarResultsOptionsDay",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "events",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "CalendarResultsOptionEvent",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarResultsOptionsDay": {
+   "name": "CalendarResultsOptionsDay",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "date",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "day",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarResultsOptionEvent": {
+   "name": "CalendarResultsOptionEvent",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "gender",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "id",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "name",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "combined",
+     "args": [],
+     "type": {
+      "name": "Boolean",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CalendarResultsParameters": {
+   "name": "CalendarResultsParameters",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "competitionId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "day",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "eventId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "ResultsByAthleteResult": {
+   "name": "ResultsByAthleteResult",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "results",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "AthleteResult",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "parameters",
+     "args": [],
+     "type": {
+      "name": "ParametersAthleteResult",
+      "kind": "OBJECT",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "AthleteResult": {
+   "name": "AthleteResult",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "athlete",
+     "args": [],
+     "type": {
+      "name": "AthleteData",
+      "kind": "OBJECT",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competition",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "date",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "discipline",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "mark",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "matchType",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "place",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "race",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "team",
+     "args": [],
+     "type": {
+      "name": "Team",
+      "kind": "OBJECT",
+      "ofType": null
+     }
+    },
+    {
+     "name": "venue",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "AthleteData": {
+   "name": "AthleteData",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "birthDate",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "country",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "iaafId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "id",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "name",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "urlSlug",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "Team": {
+   "name": "Team",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "name",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "country",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "teamMembers",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "AthleteData",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "ParametersAthleteResult": {
+   "name": "ParametersAthleteResult",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "athleteIds",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "Int",
+       "kind": "SCALAR",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "countryOfResidence",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "limit",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "preferredCountry",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "resultsByLimit": {
+   "name": "resultsByLimit",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "parameters",
+     "args": [],
+     "type": {
+      "name": "resultsByLimitParams",
+      "kind": "OBJECT",
+      "ofType": null
+     }
+    },
+    {
+     "name": "disciplines",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "resultsByLimitDisciplines",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "results",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "byLimitResults",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "resultsByLimitParams": {
+   "name": "resultsByLimitParams",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "resultsByLimitsDiscipline",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "resultsByLimitsStartDate",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "resultsByLimitsEndDate",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "resultsByLimitsOnlyRegular",
+     "args": [],
+     "type": {
+      "name": "Boolean",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "resultsByLimitDisciplines": {
+   "name": "resultsByLimitDisciplines",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "id",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "name",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "byLimitResults": {
+   "name": "byLimitResults",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "result",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "count",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "totalCount",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CompetitionByCountryResult": {
+   "name": "CompetitionByCountryResult",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "results",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "CompetitionByCountry",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "parameters",
+     "args": [],
+     "type": {
+      "name": "ParametersCompetitionByCountry",
+      "kind": "OBJECT",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "CompetitionByCountry": {
+   "name": "CompetitionByCountry",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "area",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitionGroup",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "dateRange",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "disciplines",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "endDate",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "hasResults",
+     "args": [],
+     "type": {
+      "name": "Boolean",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "hasStartlist",
+     "args": [],
+     "type": {
+      "name": "Boolean",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "id",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "matchType",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "name",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "rankingCategory",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "startDate",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "undeterminedCompetitionPeriod",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "venue",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "ParametersCompetitionByCountry": {
+   "name": "ParametersCompetitionByCountry",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "countryOfResidence",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "limit",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "preferredCountry",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "LiveResult": {
+   "name": "LiveResult",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "type",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "id",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "NON_NULL",
+      "ofType": {
+       "name": "ID",
+       "kind": "SCALAR",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "phaseId",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "NON_NULL",
+      "ofType": {
+       "name": "Int",
+       "kind": "SCALAR",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "unitId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "unitName",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "unitType",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "intermediateType",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "intermediateId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "splitName",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "intermediateIdType",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "intermediateResultOrder",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "intermediateOrder",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "standingPoints",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "gap",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "resultId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "noStart",
+     "args": [],
+     "type": {
+      "name": "Boolean",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "lane",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "seasonBestMark",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "personalBestMark",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "phaseSummaryOrder",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "resultRanks",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "summaryYank",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitorId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitorForename",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitorSurname",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitorTeamName",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitorCountryName",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitorCountryCode",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitorSex",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitorType",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "bib",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "rank",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "mark",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "combinedPoints",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "reactionTime",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "record",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "resultOrder",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "startOrder",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "qualified",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "next",
+     "args": [],
+     "type": {
+      "name": "Boolean",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "last",
+     "args": [],
+     "type": {
+      "name": "Boolean",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "updatedOn",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "wind",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "teamName",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "teamMembers",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "LiveResultTeamMember",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "eventStoreId",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitionId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "resultMilliseconds",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "worldRanking",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "LiveResultTeamMember": {
+   "name": "LiveResultTeamMember",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "phaseId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "unitId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "unitName",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "liveResultId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitorId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitorForename",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitorSurname",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitorCountryName",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitorCountryCode",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "ResultInfo": {
+   "name": "ResultInfo",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "id",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "title",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "fileName",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "infoType",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "eventId",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitionId",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "resultsByDateType": {
+   "name": "resultsByDateType",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "parameters",
+     "args": [],
+     "type": {
+      "name": "resultByYearParamsType",
+      "kind": "OBJECT",
+      "ofType": null
+     }
+    },
+    {
+     "name": "activeYears",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "String",
+       "kind": "SCALAR",
+       "ofType": null
+      }
+     }
+    },
+    {
+     "name": "resultsByDate",
+     "args": [],
+     "type": {
+      "name": null,
+      "kind": "LIST",
+      "ofType": {
+       "name": "resultsByDateResults",
+       "kind": "OBJECT",
+       "ofType": null
+      }
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "resultByYearParamsType": {
+   "name": "resultByYearParamsType",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "resultsByYear",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "resultsByYearOrderBy",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  },
+  "resultsByDateResults": {
+   "name": "resultsByDateResults",
+   "kind": "OBJECT",
+   "fields": [
+    {
+     "name": "date",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competition",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "venue",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "indoor",
+     "args": [],
+     "type": {
+      "name": "Boolean",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "disciplineCode",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "disciplineNameUrlSlug",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "typeNameUrlSlug",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "discipline",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "country",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "category",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "race",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "place",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "mark",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "wind",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "notLegal",
+     "args": [],
+     "type": {
+      "name": "Boolean",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "resultScore",
+     "args": [],
+     "type": {
+      "name": "Int",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "remark",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "competitionId",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    },
+    {
+     "name": "eventId",
+     "args": [],
+     "type": {
+      "name": "String",
+      "kind": "SCALAR",
+      "ofType": null
+     }
+    }
+   ],
+   "inputFields": null,
+   "enumValues": null
+  }
+ }
+}
