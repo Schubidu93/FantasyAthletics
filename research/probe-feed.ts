@@ -11,7 +11,7 @@ process.on("exit", () => writeFileSync(`${OUT}/feed-log.txt`, log.join("\n")));
 
 const api = await discoverApiConfig();
 const Q = `query($ids: [String], $limit: Int) { resultsByAthlete(athleteIds: $ids, limit: $limit) {
-  results { athlete { id name } competition date discipline mark place race venue team matchType } parameters { limit } } }`;
+  results { athlete { id name } competition date discipline mark place race venue matchType } parameters { limit } } }`;
 async function feed(ids: number[], limit: number) {
   await sleep(800);
   const res = await fetch(api.url, { method: "POST", headers: { "Content-Type": "application/json", "x-api-key": api.key },
