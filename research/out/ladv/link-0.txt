@@ -1,0 +1,619 @@
+200 https://ladv.de/ausschreibung/suche
+
+LADV
+ Ausschreibungen
+ Landesverbände
+ Baden
+ Bayern
+ Berlin
+ Brandenburg
+ Bremen
+ Hamburg
+ Hessen
+ Mecklenburg-Vorpommern
+ Niedersachsen
+ Nordrhein
+ Pfalz
+ Rheinhessen-Rheinland
+ Saarland
+ Sachsen
+ Sachsen-Anhalt
+ Schleswig-Holstein
+ Thüringen
+ Westfalen
+ Württemberg
+ Behindertensport
+ Rasenkraftsport
+ Suche
+ Aktuelle Ausschreibungen
+ Neue Ausschreibung erstellen
+ Ergebnisse
+ Landesverbände
+ Baden
+ Bayern
+ Berlin
+ Brandenburg
+ Bremen
+ Hamburg
+ Hessen
+ Mecklenburg-Vorpommern
+ Niedersachsen
+ Nordrhein
+ Pfalz
+ Rheinhessen-Rheinland
+ Saarland
+ Sachsen
+ Sachsen-Anhalt
+ Schleswig-Holstein
+ Thüringen
+ Westfalen
+ Württemberg
+ Neue Ergebnisse
+ Bearbeitungsstatus
+ Landesverbände
+ Baden
+ Bayern
+ Berlin
+ Brandenburg
+ Bremen
+ Hamburg
+ Hessen
+ Mecklenburg-Vorpommern
+ Niedersachsen
+ Nordrhein
+ Pfalz
+ Rheinhessen-Rheinland
+ Saarland
+ Sachsen
+ Sachsen-Anhalt
+ Schleswig-Holstein
+ Thüringen
+ Westfalen
+ Württemberg
+ Leistungsdatenbank
+ Überblick
+ Athletenprofile
+ Mehrkampfrechner
+ Trailer
+ vermessene Strecken
+  Login
+ LADVAusschreibungenSuche
+ Ausschreibungssuche
+ Altersklasse
+-- ohne Auswahl --
+Kinder M3
+Kinder M4
+Kinder M5
+Kinder M6
+Kinder M7
+Kinder M8
+Kinder M9
+Kinder M10
+Kinder M11
+Jugend M12
+Jugend M13
+Jugend M14
+Jugend M15
+Bambini m
+männliche Kinder U8
+männliche Kinder U10
+männliche Kinder U12
+männliche Jugend U14
+männliche Jugend U16
+männliche Jugend U18
+männliche Jugend U20
+Junioren U23
+Männer
+Jedermann m
+M30
+M35
+M40
+M45
+M50
+M55
+M60
+M65
+M70
+M75
+M80
+M85
+M90
+M95
+Kinder W3
+Kinder W4
+Kinder W5
+Kinder W6
+Kinder W7
+Kinder W8
+Kinder W9
+Kinder W10
+Kinder W11
+Jugend W12
+Jugend W13
+Jugend W14
+Jugend W15
+Bambini w
+weibliche Kinder U8
+weibliche Kinder U10
+weibliche Kinder U12
+weibliche Jugend U14
+weibliche Jugend U16
+weibliche Jugend U18
+weibliche Jugend U20
+Juniorinnen U23
+Frauen
+Jedermann w
+W30
+W35
+W40
+W45
+W50
+W55
+W60
+W65
+W70
+W75
+W80
+W85
+W90
+W95
+Kinder T6
+Kinder T7
+Kinder T8
+Kinder T9
+Kinder T10
+Kinder T11
+Bambini gemischt
+Team U8
+Team U10
+Team U12
+Jugend M/W 12
+Jugend M/W 13
+Jugend M/W 14
+Jugend M/W 15
+Jugend U14
+Jugend U16
+Jugend U18
+Jugend U20
+JuniorenInnen U23
+Männer/Frauen gemischt
+M/W 30
+M/W 35
+M/W 40
+M/W 45
+M/W 50
+M/W 55
+M/W 60
+M/W 65
+M/W 70
+M/W 75
+M/W 80
+M/W 85
+M/W 90
+M/W 95
+ Disziplin
+-- ohne Auswahl --
+DMM Gruppe 1
+DMM Gruppe 2
+DMM Gruppe 3
+DMM Gruppe 4
+Team DM
+30 m
+30 m fliegend
+35 m
+40 m
+50 m
+60 m
+75 m
+80 m
+100 m
+150 m
+200 m
+300 m
+400 m
+500 m
+600 m
+800 m
+1.000 m
+1.500 m
+1 Meile
+2.000 m
+3.000 m
+2 Meilen
+5.000 m
+10.000 m
+Meile
+Meile Mannschaft
+3 km Straße
+3 km Straße Mannschaft
+5 km Straße
+5 km Straße Mannschaft
+7,5 km Straße
+7,5 km Straße Mannschaft
+10 km Straße
+10 km Straße Mannschaft
+15 km Straße
+15 km Straße Mannschaft
+20 km Straße
+20 km Straße Mannschaft
+Halbmarathon
+Halbmarathon Mannschaft
+25 km Straße
+25 km Straße Mannschaft
+30 km Straße
+30 km Straße Mannschaft
+Marathon
+Marathon Mannschaft
+50 km Straße
+50 km Straße Mannschaft
+100 km Straße
+100 km Straße Mannschaft
+Volkslauf
+Volkslauf Mannschaft
+Berglauf
+Berglauf Mannschaft
+Traillauf
+Crosslauf
+Crosslauf kurz
+Crosslauf mittel
+Crosslauf lang
+Cross Sprint
+Crosslauf Mannschaft
+Straßenlauf
+Straßenlauf kurz
+Straßenlauf lang
+Waldlauf
+30 m Hürden
+35 m Hürden
+50 m Hürden
+60 m Hürden 0,600 m
+60 m Hürden 0,686 m
+60 m Hürden 0,762 m
+60 m Hürden 0,838 m
+60 m Hürden 0,914 m
+60 m Hürden 0,991 m
+60 m Hürden 1,067 m
+80 m Hürden 0,686 m
+80 m Hürden 0,762 m
+80 m Hürden 0,838 m
+100 m Hürden 0,686 m
+100 m Hürden 0,762 m
+100 m Hürden 0,838 m
+100 m Hürden 0,914 m
+110 m Hürden 0,686 m
+110 m Hürden 0,762 m
+110 m Hürden 0,838 m
+110 m Hürden 0,914 m
+110 m Hürden 0,991 m
+110 m Hürden 1,067 m
+200 m Hürden 0,686 m
+300 m Hürden 0,686 m
+300 m Hürden 0,762 m
+300 m Hürden 0,838 m
+300 m Hürden 0,914 m
+400 m Hürden 0,762 m
+400 m Hürden 0,838 m
+400 m Hürden 0,914 m
+1.500 m Hindernis 0,762 m
+2.000 m Hindernis 0,762 m
+2.000 m Hindernis 0,838 m
+2.000 m Hindernis 0,914 m
+3.000 m Hindernis 0,762 m
+3.000 m Hindernis 0,914 m
+4x50 m Staffel
+6x50 m Staffel
+8x50 m Staffel
+4x60 m Staffel
+4x75 m Staffel
+3x100 m Staffel
+4x100 m Staffel
+4x200 m Staffel
+4x400 m Staffel
+3x800 m Staffel
+4x800 m Staffel
+3x1.000 m Staffel
+4x1.500 m Staffel
+Olympische Staffel
+Marathonstaffel
+Pendelstaffel
+Schwedenstaffel
+4x110/100 m Hürden Staffel
+1.000 m Bahngehen
+2.000 m Bahngehen
+3.000 m Bahngehen
+5.000 m Bahngehen
+10.000 m Bahngehen
+20.000 m Bahngehen
+50.000 m Bahngehen
+1 km Straßengehen
+1 km Straßengehen Mannschaft
+2 km Straßengehen
+2 km Straßengehen Mannschaft
+3 km Straßengehen
+3 km Straßengehen Mannschaft
+5 km Straßengehen
+5 km Straßengehen Mannschaft
+10 km Straßengehen
+10 km Straßengehen Mannschaft
+20 km Straßengehen
+20 km Straßengehen Mannschaft
+Halbmarathon Straßengehen
+Halbmarathon Straßengehen Mannschaft
+30 km Straßengehen
+30 km Straßengehen Mannschaft
+35 km Straßengehen
+35 km Straßengehen Mannschaft
+Marathon Straßengehen
+Marathon Straßengehen Mannschaft
+50 km Straßengehen
+50 km Straßengehen Mannschaft
+Hochsprung
+Stabhochsprung
+Standweitsprung
+Weitsprung
+Weitsprungzone
+Dreisprung
+Kugelstoß 2 kg
+Kugelstoß 3 kg
+Kugelstoß 4 kg
+Kugelstoß 5 kg
+Kugelstoß 6 kg
+Kugelstoß 7,26 kg
+Steinstoß 2 kg
+Steinstoß 3 kg
+Steinstoß 5 kg
+Steinstoß 7,5 kg
+Steinstoß 10 kg
+Steinstoß 15 kg
+Diskuswurf 0,75 kg
+Diskuswurf 1 kg
+Diskuswurf 1,5 kg
+Diskuswurf 1,75 kg
+Diskuswurf 2 kg
+Hammerwurf 2 kg
+Hammerwurf 3 kg
+Hammerwurf 4 kg
+Hammerwurf 5 kg
+Hammerwurf 6 kg
+Hammerwurf 7,26 kg
+5er Sprunglauf
+Speerwurf 400 g
+Speerwurf 500 g
+Speerwurf 600 g
+Speerwurf 700 g
+Speerwurf 800 g
+Vortex (Heuler)
+Schlagball
+Ballwurf
+Schleuderball 0,8 kg
+Schleuderball 1 kg
+Schleuderball 1,5 kg
+Gewichtwurf 2 kg
+Gewichtwurf 3 kg
+Gewichtwurf 4 kg
+Gewichtwurf 5 kg
+Gewichtwurf 5,45 kg
+Gewichtwurf 7,26 kg
+Gewichtwurf 7,5 kg
+Gewichtwurf 9,08 kg
+Gewichtwurf 10 kg
+Gewichtwurf 11,34 kg
+Gewichtwurf 12,5 kg
+Gewichtwurf 15,88 kg
+Keule 250 g
+Keule 500 g
+2-Kampf
+2-Kampf Mannschaft
+3-Kampf
+3-Kampf Mannschaft
+4-Kampf
+4-Kampf Mannschaft
+5-Kampf
+5-Kampf Mannschaft
+6-Kampf
+6-Kampf Mannschaft
+7-Kampf
+7-Kampf Mannschaft
+8-Kampf
+8-Kampf Mannschaft
+9-Kampf
+9-Kampf Mannschaft
+10-Kampf
+10-Kampf Mannschaft
+Block Sprint/Sprung
+Block Lauf
+Block Wurf
+Block Mannschaft
+Block Einzel
+Block Basis
+Wurf 3-Kampf
+Wurf 4-Kampf
+Wurf 5-Kampf
+Wurf 5-Kampf Mannschaft
+Wurf 6-Kampf
+Viertelstundenlauf
+Halbstundenlauf
+Stundenlauf
+24 Stundenlauf
+ Landesverband
+-- alle --
+Baden
+Bayern
+Berlin
+Brandenburg
+Bremen
+Hamburg
+Hessen
+Mecklenburg-Vorpommern
+Niedersachsen
+Nordrhein
+Pfalz
+Rheinhessen
+Rheinhessen-Rheinland
+Saarland
+Sachsen
+Sachsen-Anhalt
+Schleswig-Holstein
+Thüringen
+Westfalen
+Württemberg
+ Kategorie
+-- ohne Auswahl --
+Kategorien: Aktive
+Kategorien: Bahn
+Kategorien: Behindertensport
+Kategorien: Berglauf
+Kategorien: Cross
+Kategorien: Extern
+Kategorien: Halle
+Kategorien: International
+Kategorien: Jugend
+Kategorien: Kinder
+Kategorien: Kinderleichtathletik
+Kategorien: Landesoffen
+Kategorien: Masters
+Kategorien: National
+Kategorien: Rasenkraftsport
+Kategorien: Schüler
+Kategorien: Strasse
+Kategorien: Vergleichskampf
+Kategorien: Volkslauf
+Kategorien: Waldlauf
+ WRC
+ Nur World Ranking Competitions
+ Datum
+ bis
+ LADV
+ Hilfe | Kontakt
+ Neues (Blog)
+ Über uns
+ Entwickler | API
+ Datenschutz
+ Nutzungsbedingungen
+ AGB
+ Impressum
+ KATEGORIEN
+ Kategorien
+ Kreise
+ Bezirke
+ Regionen
+ Meisterschaften
+ JTFO
+ INFORMATIONEN
+ Orte
+ Vereine
+ Stammdaten
+ LANDESVERBÄNDE
+ Baden
+ Bayern
+ Berlin
+ Brandenburg
+ Bremen
+ Hamburg
+ Hessen
+ Mecklenburg-Vorpommern
+ Niedersachsen
+ Nordrhein
+ Pfalz
+ Rheinhessen
+ Rheinhessen-Rheinland
+ Saarland
+ Sachsen
+ Sachsen-Anhalt
+ Schleswig-Holstein
+ Thüringen
+ Westfalen
+ Württemberg
+ ladv.de © 2007-2026 | build 1.20.42.2026-11-12c
+
+LINKS:
+https://ladv.de/
+https://ladv.de/ausschreibung/suche#
+https://ladv.de/baden/ausschreibungen
+https://ladv.de/bayern/ausschreibungen
+https://ladv.de/berlin/ausschreibungen
+https://ladv.de/brandenburg/ausschreibungen
+https://ladv.de/bremen/ausschreibungen
+https://ladv.de/hamburg/ausschreibungen
+https://ladv.de/hessen/ausschreibungen
+https://ladv.de/mecklenburg-vorpommern/ausschreibungen
+https://ladv.de/niedersachsen/ausschreibungen
+https://ladv.de/nordrhein/ausschreibungen
+https://ladv.de/pfalz/ausschreibungen
+https://ladv.de/rheinhessen-rheinland/ausschreibungen
+https://ladv.de/saarland/ausschreibungen
+https://ladv.de/sachsen/ausschreibungen
+https://ladv.de/sachsen-anhalt/ausschreibungen
+https://ladv.de/schleswig-holstein/ausschreibungen
+https://ladv.de/thueringen/ausschreibungen
+https://ladv.de/westfalen/ausschreibungen
+https://ladv.de/wuerttemberg/ausschreibungen
+https://ladv.de/behindertensport/ausschreibungen
+https://ladv.de/rasenkraftsport/ausschreibungen
+https://ladv.de/ausschreibung/suche
+https://ladv.de/ausschreibungen
+https://ladv.de/ausschreibung/anlegenauswahl
+https://ladv.de/baden/ergebnisse
+https://ladv.de/bayern/ergebnisse
+https://ladv.de/berlin/ergebnisse
+https://ladv.de/brandenburg/ergebnisse
+https://ladv.de/bremen/ergebnisse
+https://ladv.de/hamburg/ergebnisse
+https://ladv.de/hessen/ergebnisse
+https://ladv.de/mecklenburg-vorpommern/ergebnisse
+https://ladv.de/niedersachsen/ergebnisse
+https://ladv.de/nordrhein/ergebnisse
+https://ladv.de/pfalz/ergebnisse
+https://ladv.de/rheinhessen-rheinland/ergebnisse
+https://ladv.de/saarland/ergebnisse
+https://ladv.de/sachsen/ergebnisse
+https://ladv.de/sachsen-anhalt/ergebnisse
+https://ladv.de/schleswig-holstein/ergebnisse
+https://ladv.de/thueringen/ergebnisse
+https://ladv.de/westfalen/ergebnisse
+https://ladv.de/wuerttemberg/ergebnisse
+https://ladv.de/ergebnisse
+https://ladv.de/bearbeitungsStatus
+https://ladv.de/baden
+https://ladv.de/bayern
+https://ladv.de/berlin
+https://ladv.de/brandenburg
+https://ladv.de/bremen
+https://ladv.de/hamburg
+https://ladv.de/hessen
+https://ladv.de/mecklenburg-vorpommern
+https://ladv.de/niedersachsen
+https://ladv.de/nordrhein
+https://ladv.de/pfalz
+https://ladv.de/rheinhessen-rheinland
+https://ladv.de/saarland
+https://ladv.de/sachsen
+https://ladv.de/sachsen-anhalt
+https://ladv.de/schleswig-holstein
+https://ladv.de/thueringen
+https://ladv.de/westfalen
+https://ladv.de/wuerttemberg
+https://ladv.de/leistungsdatenbank
+https://ladv.de/leistungsdatenbank/athletenprofil
+https://ladv.de/mehrkampfrechner
+https://ladv.de/leistungsdatenbank/trailer
+https://ladv.de/leistungsdatenbank/strecken
+https://ladv.de/user/login
+https://ladv.de/hilfe
+https://blog.ladv.de/
+https://ladv.de/page/view/ueberuns.htm
+https://ladv.de/entwickler
+https://ladv.de/page/view/datenschutz.htm
+https://ladv.de/page/view/nutzungsbedingungen.htm
+https://ladv.de/page/view/agb.htm
+https://ladv.de/page/view/impressum.htm
+https://ladv.de/kategorien/kategorien
+https://ladv.de/kategorien/kreis
+https://ladv.de/kategorien/bezirk
+https://ladv.de/kategorien/region
+https://ladv.de/kategorien/meisterschaften
+https://ladv.de/jtfo/ausschreibungen
+https://ladv.de/ort
+https://ladv.de/verein
+https://ladv.de/stammdaten
+https://ladv.de/rheinhessen
