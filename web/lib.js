@@ -218,7 +218,7 @@ export function RiderCell({ r }) {
     <span class="rider-line">
       <button type="button" class="rider-name linkish" title="Ergebnisse anzeigen"
         onClick=${(e) => { e.stopPropagation(); openRider(r.id); }}>${r.name}</button>
-      ${r.pool_rank && html`<span class="rank-chip" title="Platz im Athletenpool (nach bester WA-Punktzahl)">#${r.pool_rank}</span>`}
+      ${r.pool_rank && html`<span class="rank-chip" title="Platz im Athletenpool (nach Punkten im Vorjahr der Saison)">#${r.pool_rank}</span>`}
       ${r.inactive && html`<span class="tag warn">inaktiv</span>`}
     </span>
     ${meta && html`<span class="rider-meta">${meta}</span>`}

@@ -100,6 +100,8 @@ alter table athletes add column if not exists birth_date date;
 alter table athletes add column if not exists wa_id bigint;
 alter table athletes add column if not exists event_group text;      -- 800, 1500, 5000, 10000, Marathon, Hindernis (aus der besten Toplistenleistung)
 alter table athletes add column if not exists group_override text;   -- vom Betreiber gesetzte Gruppe (hat Vorrang)
+alter table athletes add column if not exists group_points numeric;  -- Fantasy-Punkte im Bezugsjahr (Vorjahr des Spieljahrs), Grundlage für Gruppe und Pool-Rang
+alter table athletes add column if not exists group_basis text;      -- wie die Gruppe bestimmt wurde (für die Anzeige)
 alter table athletes add column if not exists best_discipline text;
 alter table athletes add column if not exists best_mark text;
 alter table athletes add column if not exists best_year int;
@@ -150,6 +152,8 @@ create table if not exists scoring_config (
 alter table scoring_config alter column perf_factor set default 0.1;
 alter table scoring_config alter column placing_factor set default 0.1;
 alter table scoring_config alter column cross_factor set default 0.1;
+alter table scoring_config add column if not exists game_year int;          -- Spieljahr von Hand (sonst ab 1.11. das Folgejahr)
+alter table scoring_config add column if not exists new_group_threshold int not null default 975;  -- neue Athleten: erste Leistung ab x WA-Punkten bestimmt die Gruppe
 insert into scoring_config (id) values (1) on conflict do nothing;
 
 -- Rohdaten der Ergebnisse von World Athletics (ein Eintrag pro Lauf eines Athleten)
@@ -242,7 +246,7 @@ create table if not exists sync_status (
 insert into sync_status (id) values (1) on conflict do nothing;
 
 -- Wettkampfkalender (kommende Wettkämpfe mit Laufdisziplinen, aus dem WA-Kalender; importer/sync-calendar.ts):
--- international ab Gold Label, Europa ab Kategorie A, Deutschland ab B (Straße/Cross ab E)
+-- international ab Gold Label, Europa ab Kategorie A, Deutschland ab Kategorie E
 create table if not exists calendar_events (
   id          bigint primary key,           -- WA-Wettkampf-ID
   name        text not null,
@@ -256,6 +260,8 @@ create table if not exists calendar_events (
   updated_at  timestamptz not null default now()
 );
 create index if not exists calendar_events_start on calendar_events (start_date);
+alter table calendar_events add column if not exists events jsonb;              -- Laufdisziplinen laut Programm: [{gender, events[]}]
+alter table calendar_events add column if not exists events_checked_at timestamptz;
 
 -- Ergebnisabruf: wann wurden die Ergebnisse eines Athleten für ein Jahr zuletzt komplett geladen?
 create table if not exists athlete_sync (
@@ -1794,24 +1800,65 @@ language sql immutable as $$
   select case when p_race is null or p_race in ('', 'F') then 'F' end;
 $$;
 
--- Pool neu bilden: beste Toplistenleistung je Athlet im Jahr p_year und Vorjahr (nur Laufdisziplinen mit
--- Gruppe), daraus Disziplingruppe und Bestleistung. Pool = mindestens pool_threshold WA-Punkte;
--- pool_rank = Platz im Pool nach Punkten (Draft-Reihenfolge, automatische Picks).
+-- Spieljahr: die Saison, für die gerade gedraftet bzw. gespielt wird. Ab 1. November zählt das Folgejahr
+-- (Draft für die neue Saison); von Hand festlegbar über scoring_config.game_year.
+create or replace function game_year() returns int
+language sql stable security definer set search_path = public as $$
+  select coalesce((select game_year from scoring_config where id = 1),
+                  extract(year from current_date)::int + case when extract(month from current_date) >= 11 then 1 else 0 end);
+$$;
+
+-- Pool neu bilden. Pool = mindestens pool_threshold WA-Punkte in der DE-Topliste (Jahr p_year oder Vorjahr).
+-- Disziplingruppe und Pool-Rang richten sich nach dem Bezugsjahr = Vorjahr des Spieljahrs (Saison 2027 → 2026):
+--   1. Gruppe mit den meisten Fantasy-Punkten im Bezugsjahr (Cross nach Distanz, siehe _result_group)
+--   2. Punkte im Bezugsjahr, aber 0 Punkte: Gruppe der höchsten WA-Leistung im Bezugsjahr
+--   3. keine Ergebnisse im Bezugsjahr (neu): erste Leistung im Spieljahr ab new_group_threshold WA-Punkten
+--   4. sonst: Gruppe der besten Toplistenleistung
+--   group_override (vom Admin) hat immer Vorrang. pool_rank = nach Punkten im Bezugsjahr, dann bester Toplistenleistung.
 create or replace function refresh_pool(p_year int default null) returns int
 language plpgsql security definer set search_path = public as $$
 declare y int := coalesce(p_year, extract(year from current_date)::int); c scoring_config; n int;
+        gy int := game_year(); ref int := game_year() - 1;
 begin
   select * into c from scoring_config where id = 1;
-  update athletes set ranking_points = null, pool_rank = null where ranking_points is not null or pool_rank is not null;
+  update athletes set ranking_points = null, pool_rank = null, group_points = null, group_basis = null
+   where ranking_points is not null or pool_rank is not null or group_points is not null;
+  -- 4. beste Toplistenleistung (Bestleistung, Pool-Zugehörigkeit, Gruppe als Rückfall)
   update athletes r set ranking_points = b.score, best_discipline = b.discipline, best_mark = b.mark,
-                      best_year = b.year, event_group = b.event_group, updated_at = now()
+                      best_year = b.year, event_group = b.event_group, group_basis = 'toplist', updated_at = now()
     from (select distinct on (t.athlete_id) t.athlete_id, t.discipline, t.mark, t.score, t.year, d.event_group
             from toplist_entries t join disciplines d on d.name = t.discipline
            where t.year in (y, y - 1) and d.event_group is not null
            order by t.athlete_id, t.score desc, t.year desc) b
    where b.athlete_id = r.id;
+  -- 3. neue Athleten: erste gute Leistung im Spieljahr
+  update athletes a set event_group = f.g, group_basis = 'first'
+    from (select distinct on (w.athlete_id) w.athlete_id, _result_group(w.discipline, w.competition) g
+            from wa_results w
+           where extract(year from w.date) = gy and w.result_score >= c.new_group_threshold
+             and _result_group(w.discipline, w.competition) is not null
+           order by w.athlete_id, w.date, w.result_score desc) f
+   where f.athlete_id = a.id
+     and not exists (select 1 from wa_results o where o.athlete_id = a.id and extract(year from o.date) = ref);
+  -- 2. Ergebnisse im Bezugsjahr, aber keine Punkte: höchste WA-Leistung
+  update athletes a set event_group = h.g, group_points = 0, group_basis = 'best'
+    from (select distinct on (w.athlete_id) w.athlete_id, _result_group(w.discipline, w.competition) g
+            from wa_results w
+           where extract(year from w.date) = ref and w.result_score > 0 and _result_group(w.discipline, w.competition) is not null
+           order by w.athlete_id, w.result_score desc, w.date desc) h
+   where h.athlete_id = a.id;
+  -- 1. meiste Fantasy-Punkte im Bezugsjahr (bei Gleichstand die höhere Einzelleistung)
+  update athletes a set event_group = p.g, group_points = p.total, group_basis = 'points'
+    from (select distinct on (athlete_id) athlete_id, g, sum(pts) over (partition by athlete_id) total
+            from (select r.athlete_id, _result_group(w.discipline, w.competition) g, sum(r.points) pts, max(w.result_score) best
+                    from results r join wa_results w on w.id = r.wa_result_id
+                   where extract(year from r.result_date) = ref
+                   group by 1, 2) x
+           where g is not null
+           order by athlete_id, pts desc, best desc nulls last) p
+   where p.athlete_id = a.id and p.total > 0;
   update athletes r set pool_rank = x.rk
-    from (select id, row_number() over (order by ranking_points desc, name) rk
+    from (select id, row_number() over (order by coalesce(group_points, 0) desc, ranking_points desc, name) rk
             from athletes where ranking_points >= c.pool_threshold) x
    where x.id = r.id;
   get diagnostics n = row_count;
@@ -1841,6 +1888,20 @@ on conflict (max_km) do nothing;
 create or replace function _cross_factor(p_km numeric) returns numeric
 language sql stable security definer set search_path = public as $$
   select factor from cross_distance_factors where p_km is not null and p_km <= max_km order by max_km limit 1;
+$$;
+
+-- Disziplingruppe eines Ergebnisses: aus disciplines; Cross nach Distanz im Wettkampfnamen
+-- (bis 3 km → 1500, bis 6 km → 5000, bis 12 km → 10000, darüber → Marathon, ohne Angabe → 10000)
+create or replace function _result_group(p_discipline text, p_competition text) returns text
+language sql stable security definer set search_path = public as $$
+  select case when d.cross_table is not null then
+                case when cross_km(p_competition) is null then '10000'
+                     when cross_km(p_competition) <= 3 then '1500'
+                     when cross_km(p_competition) <= 6 then '5000'
+                     when cross_km(p_competition) <= 12 then '10000'
+                     else 'Marathon' end
+              else d.event_group end
+    from disciplines d where d.name = p_discipline;
 $$;
 
 -- Punkte je Ergebnis (in results) aus den WA-Rohdaten neu berechnen:
@@ -1906,13 +1967,15 @@ begin
     perf_factor    = coalesce((s->>'perf_factor')::numeric, perf_factor),
     placing_factor = coalesce((s->>'placing_factor')::numeric, placing_factor),
     cross_factor   = coalesce((s->>'cross_factor')::numeric, cross_factor),
+    new_group_threshold = coalesce((s->>'new_group_threshold')::int, new_group_threshold),
+    game_year      = case when s ? 'game_year' then nullif(s->>'game_year', '')::int else game_year end,
     updated_at     = now()
   where id = 1;
   if exists (select 1 from scoring_config where perf_factor < 0 or placing_factor < 0 or cross_factor < 0) then
     raise exception 'Faktoren dürfen nicht negativ sein.';
   end if;
   perform rebuild_results(null);
-  if s ? 'pool_threshold' then perform refresh_pool(null); end if;
+  perform refresh_pool(null);   -- Gruppe und Pool-Rang hängen an Punkten, Spieljahr und Schwellen
   insert into admin_log (league_id, user_id, action, details)
     select id, auth.uid(), 'scoring_config', s from leagues where admin_user = auth.uid();
 end $$;

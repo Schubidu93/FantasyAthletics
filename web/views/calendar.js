@@ -1,5 +1,5 @@
 // Kalender: kommende Wettkämpfe mit Laufdisziplinen (aus dem WA-Kalender, täglich aktualisiert)
-// International ab Gold Label, Europa ab Kategorie A, Deutschland ab B (Straße/Cross ab E) – siehe importer/sync-calendar.ts
+// International ab Gold Label, Europa ab Kategorie A, Deutschland ab E – siehe importer/sync-calendar.ts
 import { html, useState } from '../vendor/preact-htm.js';
 import { sb, all, useLoad, Loading, normName, flag, nationCode, today } from '../lib.js';
 
@@ -17,7 +17,7 @@ const saved = { kind: '', area: '', term: '' };
 
 export function Calendar() {
   const events = useLoad(() => all(() => sb.from('calendar_events')
-    .select('id,name,venue,country,category,kinds,competition_group,start_date,end_date')
+    .select('id,name,venue,country,category,kinds,competition_group,start_date,end_date,events')
     .gte('start_date', new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10))
     .order('start_date').order('id')), []);
   const [kind, setKind] = useState(saved.kind);
@@ -43,7 +43,7 @@ export function Calendar() {
   return html`<section class="card">
     <div class="row between"><h2>Kalender</h2><span class="muted small">${list.length} Wettkämpfe</span></div>
     <p class="muted small">Kommende Wettkämpfe mit Laufdisziplinen ab 800 m: international ab Gold Label, in Europa ab Kategorie A,
-      in Deutschland ab Kategorie B (Straße und Cross ab E).</p>
+      in Deutschland ab Kategorie E. Das Programm stammt von World Athletics, sobald der Veranstalter es eingetragen hat.</p>
     <div class="filters">
       <input type="search" placeholder="Name oder Ort" value=${term} onInput=${set('term', setTerm)} />
       <select value=${kind} onChange=${set('kind', setKind)}>
@@ -63,6 +63,8 @@ export function Calendar() {
           <span class="race-name"><strong>${e.name}</strong>
             <small>${[e.country && `${flag(nationCode(e.country))} ${(e.venue || '').replace(/\s*\([A-Z]{3}\)\s*$/, '')}`,
               (e.kinds || []).map((k) => KIND_LABEL[k]).join(', ')].filter(Boolean).join(' · ')}</small>
+            ${(e.events || []).length > 0 && html`<small class="cal-events">${e.events.map((u) =>
+              `${u.gender === 'W' ? '♀' : u.gender === 'M' ? '♂' : u.gender} ${u.events.join(', ')}`).join(' · ')}</small>`}
             ${e.competition_group && html`<small class="muted">${e.competition_group}</small>`}</span></span>
           <span class=${`tag ${TOP.includes(e.category) ? 'ok' : ''}`}>${e.category || '–'}</span>
         </div></li>`)}</ul>`)}

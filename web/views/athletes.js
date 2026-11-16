@@ -44,7 +44,7 @@ export function Riders({ c }) {
       </select>
       <select value=${sel} onChange=${(e) => setSort(e.target.value)}>
         ${(years.data?.length ? years.data : [year]).map((yy) => html`<option value=${String(yy)}>Sortiert nach Punkten ${yy}</option>`)}
-        <option value="rank">Sortiert nach bester WA-Punktzahl</option>
+        <option value="rank">Sortiert nach Pool-Rang</option>
       </select>
     </div>
     <div class="scroll-x"><table class="tbl athletes-tbl">
