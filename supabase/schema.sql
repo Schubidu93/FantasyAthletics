@@ -1800,6 +1800,19 @@ language sql immutable as $$
   select case when p_race is null or p_race in ('', 'F') then 'F' end;
 $$;
 
+-- Toplisten eines Athleten mit Platz in der DE-Topliste (je Jahr, Disziplin und Geschlecht; gleiche Punkte = gleicher Platz).
+-- Gespeichert sind alle Einträge ab der Pool-Schwelle, also auch alle, die vor dem Athleten liegen.
+create or replace function athlete_toplists(p_athlete text)
+returns table (year int, discipline text, mark text, score int, rank int)
+language sql stable security definer set search_path = public as $$
+  select t.year, t.discipline, t.mark, t.score,
+         (select count(*) + 1 from toplist_entries o join athletes oa on oa.id = o.athlete_id
+           where o.year = t.year and o.discipline = t.discipline and oa.gender = a.gender and o.score > t.score)::int
+    from toplist_entries t join athletes a on a.id = t.athlete_id
+   where t.athlete_id = p_athlete
+   order by t.year desc, t.score desc;
+$$;
+
 -- Spieljahr: die Saison, für die gerade gedraftet bzw. gespielt wird. Ab 1. November zählt das Folgejahr
 -- (Draft für die neue Saison); von Hand festlegbar über scoring_config.game_year.
 create or replace function game_year() returns int

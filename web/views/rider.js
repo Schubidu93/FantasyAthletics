@@ -1,6 +1,9 @@
 // Athleten-Fenster: Stammdaten, Toplisten und alle Ergebnisse (Lauf, Zeit, WA-Punkte, Fantasy-Punkte)
 import { html, useState, useEffect } from '../vendor/preact-htm.js';
-import { sb, q, all, fmtPts, flag, riderGroup, GROUP_LABEL, discLabel, discWithKm, raceLabel } from '../lib.js';
+import { sb, q, all, rpc, flag, riderGroup, GROUP_LABEL, discLabel, discWithKm, raceLabel } from '../lib.js';
+
+// Punkte im Athletenfenster mit zwei Nachkommastellen
+const fmtPts = (n) => (Number(n) || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 // Ergebnisse werden ab dieser Saison gespeichert
 const FIRST_YEAR = 2025;
@@ -29,8 +32,7 @@ async function loadRider(slug) {
     .eq('athlete_id', slug).gte('date', `${FIRST_YEAR}-01-01`).order('date', { ascending: false }).order('id'));
   const pts = Object.fromEntries((await all(() => sb.from('results').select('wa_result_id,points,perf_points,placing_points')
     .eq('athlete_id', slug).order('id'))).map((r) => [r.wa_result_id, r]));
-  const toplists = await q(sb.from('toplist_entries').select('year,discipline,mark,score').eq('athlete_id', slug)
-    .order('year', { ascending: false }).order('score', { ascending: false }));
+  const toplists = await rpc('athlete_toplists', { p_athlete: slug });
   const season = Object.fromEntries((await q(sb.from('athlete_season_stats').select('year,season_rank,points,athletes').eq('athlete_id', slug)))
     .map((x) => [x.year, x]));
   const results = rows.map((r) => ({ ...r, pts: pts[r.id] || null }));
@@ -40,13 +42,13 @@ async function loadRider(slug) {
 export function RiderModal() {
   const [slug, setSlug] = useState(null);
   const [year, setYear] = useState(null);
-  const [allRuns, setAllRuns] = useState(false);
+  const [allRuns, setAllRuns] = useState(true);
   const [byPoints, setByPoints] = useState(false);
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const open = (e) => { setSlug(e.detail); setData(null); setError(null); setYear(null); setByPoints(false); };
+    const open = (e) => { setSlug(e.detail); setData(null); setError(null); setYear(null); setByPoints(false); setAllRuns(true); };
     const esc = (e) => { if (e.key === 'Escape') setSlug(null); };
     addEventListener('rider:open', open);
     addEventListener('keydown', esc);
@@ -68,9 +70,8 @@ export function RiderModal() {
   const y = year || (years.includes(thisYear) ? thisYear : years[years.length - 1]);
   const inYear = (data?.results || []).filter((x) => yearOf(x) === y);
   const total = inYear.reduce((s, x) => s + Number(x.pts?.points || 0), 0);
-  const shown = (allRuns || byPoints ? inYear : inYear.filter((x) => x.pts))
-    .filter((x) => !byPoints || x.pts)
-    .sort((a, b) => (byPoints ? Number(b.pts.points) - Number(a.pts.points) : 0) || b.date.localeCompare(a.date));
+  const shown = (allRuns ? inYear : inYear.filter((x) => x.pts))
+    .sort((a, b) => (byPoints ? Number(b.pts?.points ?? -1) - Number(a.pts?.points ?? -1) : 0) || b.date.localeCompare(a.date));
   const sr = data?.season?.[y];
   const g = riderGroup(r);
   const L = leagueId();
@@ -96,14 +97,14 @@ export function RiderModal() {
           <div><span class="big">${fmtPts(total)}</span> <span class="muted small">Punkte${y ? ` ${y}` : ''}</span></div>
         </div>
         <div class="row between">
-          <label class="sort-select small">Sortieren:
-            <select value=${byPoints ? 'points' : 'date'} onChange=${(e) => setByPoints(e.target.value === 'points')}>
-              <option value="date">nach Datum</option><option value="points">nach Punkten</option>
-            </select></label>
-          ${!byPoints && html`<label class="check small"><input type="checkbox" checked=${allRuns} onChange=${(e) => setAllRuns(e.target.checked)} /> ohne Punkte</label>`}
+          <span class="muted small">Sortieren: „Datum“ oder „Pkt.“ antippen</span>
+          <label class="check small"><input type="checkbox" checked=${allRuns} onChange=${(e) => setAllRuns(e.target.checked)} /> auch ohne Punkte</label>
         </div>
         ${shown.length === 0 ? html`<p class="muted">Keine Ergebnisse${y ? ` in ${y}` : ''}${!allRuns ? ' mit Punkten' : ''}.</p>` : html`<div class="modal-body">
-          <div class="res-row res-head"><span>Datum</span><span>Wettkampf · Lauf · Zeit</span><span class="res-place">Platz</span><span class="res-pts">Pkt.</span></div>
+          <div class="res-row res-head">
+            <button type="button" class=${`sort-head ${!byPoints ? 'active' : ''}`} onClick=${() => setByPoints(false)}>Datum${!byPoints ? ' ▾' : ''}</button>
+            <span>Wettkampf · Lauf · Zeit</span><span class="res-place">Platz</span>
+            <button type="button" class=${`sort-head res-pts ${byPoints ? 'active' : ''}`} onClick=${() => setByPoints(true)}>Pkt.${byPoints ? ' ▾' : ''}</button></div>
           <div class="res-table">${shown.map((x) => html`<div key=${x.id} class=${`res-row ${L && x.wa_competition_id ? 'clickable' : ''}`} onClick=${() => go(x)}>
             <span class="res-date">${shortDate(x.date)}</span>
             <span class="res-what"><b>${discWithKm(x.discipline, x.competition)}${x.race && x.race !== 'F' ? ` · ${raceLabel(x.race)}` : ''} · ${x.mark || '–'}</b>
@@ -118,7 +119,7 @@ export function RiderModal() {
         </div>`}
         ${data.toplists.length > 0 && html`<details class="toplists"><summary class="small">Toplisten (DE)</summary>
           <ul class="list compact">${data.toplists.map((t) => html`<li key=${t.year + t.discipline}>
-            <span>${t.year} · ${discLabel(t.discipline)}</span><span class="muted">${t.mark} · ${t.score} WA-P.</span></li>`)}</ul></details>`}`}
+            <span>${t.year} · ${discLabel(t.discipline)}</span><span class="muted"><strong>Platz ${t.rank}</strong> · ${t.mark} · ${t.score} WA-P.</span></li>`)}</ul></details>`}`}
       <p class="muted small">Quelle: World Athletics, Nachträge mit eigener Quelle. Antippen öffnet den Wettkampf.</p>
     </div>
   </div>`;
