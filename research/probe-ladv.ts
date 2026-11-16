@@ -32,17 +32,8 @@ async function page(url: string, name: string) {
   }
 }
 
-// 2. Lauf: Nutzungsbedingungen und Aufbau der Leistungsdatenbank
-for (const [name, url] of [
-  ["nutzungsbedingungen", "https://ladv.de/page/view/nutzungsbedingungen.htm"],
-  ["agb", "https://ladv.de/page/view/agb.htm"],
-  ["impressum", "https://ladv.de/page/view/impressum.htm"],
-  ["leistungsdatenbank", "https://ladv.de/leistungsdatenbank"],
-  ["athletenprofil", "https://ladv.de/leistungsdatenbank/athletenprofil"],
-  ["hilfe", "https://ladv.de/hilfe"],
-]) await page(url, name);
-// Sitemap der Athleten: nur Aufbau (erste Zeichen)
-await sleep(2000);
-const sm = await fetch("https://ladv.de/sitemap/athletindex", { headers: UA }).then((r) => r.text()).catch((e) => String(e));
-writeFileSync(`${OUT}/sitemap-athletindex.txt`, sm.slice(0, 20000));
-say(`sitemap/athletindex: ${sm.length} Zeichen; Anfang: ${sm.slice(0, 600)}`);
+// 3. Lauf: Entwickler-/API-Dokumentation (nur Dokumentationsseiten, nicht /api/ selbst)
+const dev = await page("https://ladv.de/entwickler", "entwickler");
+const docs = (dev?.links ?? []).filter((l) => /ladv\.de\/(entwickler|page|hilfe)/.test(l) && !/\/api\//.test(l));
+say(`Dokulinks: ${docs.join(" ")}`);
+for (const [i, l] of docs.slice(0, 10).entries()) await page(l, `entwickler-${i}`);
