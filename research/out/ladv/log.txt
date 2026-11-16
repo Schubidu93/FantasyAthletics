@@ -1,20 +1,12 @@
-nutzungsbedingungen: 200 https://ladv.de/page/view/nutzungsbedingungen.htm (26960 Zeichen, 101 Links)
-agb: 200 https://ladv.de/page/view/agb.htm (14310 Zeichen, 101 Links)
-impressum: 200 https://ladv.de/page/view/impressum.htm (2132 Zeichen, 92 Links)
-leistungsdatenbank: 200 https://ladv.de/leistungsdatenbank (2035 Zeichen, 90 Links)
-athletenprofil: 200 https://ladv.de/leistungsdatenbank/athletenprofil (1644 Zeichen, 91 Links)
-hilfe: 200 https://ladv.de/hilfe (2413 Zeichen, 105 Links)
-sitemap/athletindex: 16065 Zeichen; Anfang: <?xml version='1.0' encoding='UTF-8'?>
-<sitemapindex xmlns='http://www.sitemaps.org/schemas/sitemap/0.9' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/siteindex.xsd'>
-  <sitemap>
-    <loc>https://ladv.de/sitemap/athlet/0</loc>
-    <lastmod>2026-11-16</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://ladv.de/sitemap/athlet/5000</loc>
-    <lastmod>2026-11-16</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://ladv.de/sitemap/athlet/10000</loc>
-    <lastmod>2026-11-16</lastmod>
-  
+entwickler: 200 https://ladv.de/entwickler (3244 Zeichen, 113 Links)
+Dokulinks: https://ladv.de/entwickler# https://ladv.de/entwickler#datenformate https://ladv.de/entwickler#schnittstellen https://ladv.de/entwickler/ergebnisdatenvalidate https://ladv.de/entwickler/stammdatenformat https://ladv.de/entwickler/altersklassen https://ladv.de/entwickler/disziplinen https://ladv.de/entwickler/apikeys https://ladv.de/hilfe https://ladv.de/page/view/ueberuns.htm https://ladv.de/entwickler https://ladv.de/page/view/datenschutz.htm https://ladv.de/page/view/nutzungsbedingungen.htm https://ladv.de/page/view/agb.htm https://ladv.de/page/view/impressum.htm
+entwickler-0: 200 https://ladv.de/entwickler (3244 Zeichen, 113 Links)
+entwickler-1: 200 https://ladv.de/entwickler (3244 Zeichen, 113 Links)
+entwickler-2: 200 https://ladv.de/entwickler (3244 Zeichen, 113 Links)
+entwickler-3: 200 https://ladv.de/entwickler/ergebnisdatenvalidate (2011 Zeichen, 92 Links)
+entwickler-4: 200 https://ladv.de/entwickler/stammdatenformat (1750 Zeichen, 92 Links)
+entwickler-5: 200 https://ladv.de/entwickler/altersklassen (5742 Zeichen, 91 Links)
+entwickler-6: 200 https://ladv.de/entwickler/disziplinen (21960 Zeichen, 93 Links)
+entwickler-7: 200 https://ladv.de/entwickler/apikeys (2540 Zeichen, 92 Links)
+entwickler-8: 200 https://ladv.de/hilfe (2413 Zeichen, 105 Links)
+entwickler-9: 200 https://ladv.de/page/view/ueberuns.htm (2825 Zeichen, 90 Links)
