@@ -65,26 +65,26 @@ describe("Aufstellung und Wertung", () => {
     await db.query("select refresh_pool(null)");
     L = await league({ gender: "mixed", lineup_mode: "mf", roster_size: 14, wildcards: 2, draft_mode: "offline" });
     const rows = [
-      ...["wa-1", "wa-2", "wa-3", "wa-6"].map((r) => ({ manager_id: L.alice, rider_slug: r, price: 10 })),
-      ...["wa-4", "wa-5", "wa-7", "wa-8"].map((r) => ({ manager_id: L.bob, rider_slug: r, price: 10 })),
+      ...["wa-1", "wa-2", "wa-3", "wa-6"].map((r) => ({ manager_id: L.alice, athlete_id: r, price: 10 })),
+      ...["wa-4", "wa-5", "wa-7", "wa-8"].map((r) => ({ manager_id: L.bob, athlete_id: r, price: 10 })),
     ];
     // Offline-Import verlangt volle Kader – für den Test die Kadergröße kurz absenken geht nicht (Aufstellung 14),
     // daher Kader direkt eintragen
     for (const r of rows) {
-      await db.query("insert into roster_entries (league_id, manager_id, rider_slug, price, source, acquired_on) values ($1, $2, $3, $4, 'offline', $5)",
-        [L.id, r.manager_id, r.rider_slug, r.price, `${Y}-01-01`]);
+      await db.query("insert into roster_entries (league_id, manager_id, athlete_id, price, source, acquired_on) values ($1, $2, $3, $4, 'offline', $5)",
+        [L.id, r.manager_id, r.athlete_id, r.price, `${Y}-01-01`]);
     }
     await db.query("update leagues set status = 'active' where id = $1", [L.id]);
     md = (await db.one("select upsert_matchday($1, null, 'Spieltag 1', $2, $3) id", [L.id, day(2), day(20)])).id;
   });
 
   it("automatische Aufstellung besetzt passende Positionen", async () => {
-    const rows = await db.all("select slot, rider_slug from effective_lineup_slots($1, $2) order by slot", [md, L.alice]);
+    const rows = await db.all("select slot, athlete_id from effective_lineup_slots($1, $2) order by slot", [md, L.alice]);
     expect(rows).toEqual([
-      { slot: "1500:M", rider_slug: "wa-3" },
-      { slot: "5000:W", rider_slug: "wa-6" },
-      { slot: "800:M", rider_slug: "wa-1" },
-      { slot: "800:W", rider_slug: "wa-2" },
+      { slot: "1500:M", athlete_id: "wa-3" },
+      { slot: "5000:W", athlete_id: "wa-6" },
+      { slot: "800:M", athlete_id: "wa-1" },
+      { slot: "800:W", athlete_id: "wa-2" },
     ]);
   });
 
@@ -95,8 +95,8 @@ describe("Aufstellung und Wertung", () => {
     await expect(db.query("select set_lineup($1, $2)", [md, { "800:M": "wa-1", WC1: "wa-1" }])).rejects.toThrow(/nur einmal/);
     await expect(db.query("select set_lineup($1, $2)", [md, { "400:M": "wa-1" }])).rejects.toThrow(/Unbekannte Position/);
     await db.query("select set_lineup($1, $2)", [md, { "800:M": "wa-1", WC1: "wa-6", "5000:W": null }]);
-    expect(await db.all("select slot, rider_slug from effective_lineup_slots($1, $2) order by slot", [md, L.alice]))
-      .toEqual([{ slot: "800:M", rider_slug: "wa-1" }, { slot: "WC1", rider_slug: "wa-6" }]);
+    expect(await db.all("select slot, athlete_id from effective_lineup_slots($1, $2) order by slot", [md, L.alice]))
+      .toEqual([{ slot: "800:M", athlete_id: "wa-1" }, { slot: "WC1", athlete_id: "wa-6" }]);
   });
 
   it("nur Aufgestellte punkten; Wechsel rückt nur nach, wenn die Position passt", async () => {
@@ -104,7 +104,7 @@ describe("Aufstellung und Wertung", () => {
     // Spieltag läuft
     await db.query("update matchdays set starts_on = $2, deadline = now() - interval '1 hour' where id = $1", [md, day(-1)]);
     await db.query("update roster_entries set acquired_on = $2 where league_id = $1", [L.id, day(-30)]);
-    await db.query(`insert into wa_results (rider_slug, date, competition, discipline, category, race, wa_race, place, result_score, wa_competition_id)
+    await db.query(`insert into wa_results (athlete_id, date, competition, discipline, category, race, wa_race, place, result_score, wa_competition_id)
                     values ('wa-1', $1, 'M', '800 Metres', 'A', 'F', 'F', 1, 1100, 1),
                            ('wa-3', $1, 'M', '1500 Metres', 'A', 'F', 'F', 1, 1200, 1),
                            ('wa-6', $1, 'M', '5000 Metres', 'A', 'F', 'F', 2, 1000, 1)`, [day(0)]);
@@ -115,8 +115,8 @@ describe("Aufstellung und Wertung", () => {
 
     await db.query("select _lineup_swap($1, $2, 'wa-2', 'wa-4', $3)", [L.id, L.alice, day(-1)]);   // W 1500 passt nicht auf 800:W
     await db.query("select _lineup_swap($1, $2, 'wa-6', 'wa-8', $3)", [L.id, L.alice, day(-1)]);   // Wildcard nimmt jeden
-    expect(await db.all("select slot, rider_slug from lineups where manager_id = $1 order by slot", [L.alice]))
-      .toEqual([{ slot: "800:M", rider_slug: "wa-1" }, { slot: "WC1", rider_slug: "wa-8" }]);
+    expect(await db.all("select slot, athlete_id from lineups where manager_id = $1 order by slot", [L.alice]))
+      .toEqual([{ slot: "800:M", athlete_id: "wa-1" }, { slot: "WC1", athlete_id: "wa-8" }]);
   });
 });
 
@@ -129,7 +129,7 @@ describe("Draft", () => {
     await db.query("select start_draft($1)", [L.id]);
     await db.query("update draft_state set deadline = now() - interval '1 second' where league_id = $1", [L.id]);
     await db.query("select draft_tick($1)", [L.id]);
-    expect((await db.one("select rider_slug from draft_lots where league_id = $1 and lot_no = 1", [L.id])).rider_slug).toBe("wa-2");
+    expect((await db.one("select athlete_id from draft_lots where league_id = $1 and lot_no = 1", [L.id])).athlete_id).toBe("wa-2");
   });
 
   it("Männerliga bietet keine Frauen an", async () => {

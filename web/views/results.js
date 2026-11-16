@@ -81,11 +81,11 @@ function Schedule({ c, current }) {
 
 function TeamDetail({ c, rows, details }) {
   if (!rows.length) return html`<p class="muted small">Keine Punkte in diesem Spieltag.</p>`;
-  return html`<div class="detail">${rows.sort((a, b) => b.points - a.points).map((r) => html`<div key=${r.rider_slug} class="detail-rider">
-    <div class="row between"><strong>${c.riderMap[r.rider_slug]?.name || r.rider_slug}</strong>
+  return html`<div class="detail">${rows.sort((a, b) => b.points - a.points).map((r) => html`<div key=${r.athlete_id} class="detail-rider">
+    <div class="row between"><strong>${c.riderMap[r.athlete_id]?.name || r.athlete_id}</strong>
       <span>${fmtPts(r.points)}${r.overridden ? html` <span class="tag warn" title="vom Admin korrigiert">korrigiert</span>` : ''}</span></div>
-    <ul class="list compact">${details.filter((d) => d.rider_slug === r.rider_slug).map((d) => html`<li>
-      <span>${d.race_name || d.race_slug} – ${labelText(d.label)}</span>
+    <ul class="list compact">${details.filter((d) => d.athlete_id === r.athlete_id).map((d) => html`<li>
+      <span>${d.race_name || d.competition_id} – ${labelText(d.label)}</span>
       <span class="muted">${fmtDate(d.result_date)} · ${fmtPts(d.points)}</span></li>`)}</ul>
   </div>`)}</div>`;
 }

@@ -32,14 +32,14 @@ await run(db, async () => {
   const Y = currentYear();
 
   // Athleten: Pool + alle, die gerade in einem Kader stehen
-  const pool = await selectAll<{ pcs_slug: string; wa_id: number | null; name: string }>((a, b) =>
-    db.from("riders").select("pcs_slug, wa_id, name").not("uci_rank", "is", null).order("pcs_slug").range(a, b));
-  const rostered = await selectAll<{ rider_slug: string }>((a, b) =>
-    db.from("roster_entries").select("rider_slug").is("released_on", null).order("id").range(a, b));
-  const extra = [...new Set(rostered.map((r) => r.rider_slug))].filter((s) => !pool.some((p) => p.pcs_slug === s));
-  const more = extra.length ? (await db.from("riders").select("pcs_slug, wa_id, name").in("pcs_slug", extra)).data ?? [] : [];
-  const athletes: Athlete[] = [...pool, ...more].filter((a) => a.wa_id || /^wa-\d+$/.test(a.pcs_slug))
-    .map((a) => ({ slug: a.pcs_slug, id: Number(a.wa_id ?? a.pcs_slug.slice(3)), name: a.name }));
+  const pool = await selectAll<{ id: string; wa_id: number | null; name: string }>((a, b) =>
+    db.from("athletes").select("id, wa_id, name").not("pool_rank", "is", null).order("id").range(a, b));
+  const rostered = await selectAll<{ athlete_id: string }>((a, b) =>
+    db.from("roster_entries").select("athlete_id").is("released_on", null).order("id").range(a, b));
+  const extra = [...new Set(rostered.map((r) => r.athlete_id))].filter((s) => !pool.some((p) => p.id === s));
+  const more = extra.length ? (await db.from("athletes").select("id, wa_id, name").in("id", extra)).data ?? [] : [];
+  const athletes: Athlete[] = [...pool, ...more].filter((a) => a.wa_id || /^wa-\d+$/.test(a.id))
+    .map((a) => ({ slug: a.id, id: Number(a.wa_id ?? a.id.slice(3)), name: a.name }));
   if (!athletes.length) return "Keine Athleten im Pool – zuerst den Athletenpool laden";
   const names = new Map(athletes.map((a) => [a.slug, a.name]));
 
@@ -65,7 +65,7 @@ await run(db, async () => {
   const add = (a: Athlete, year: number) => {
     if (!jobs.some((j) => j.slug === a.slug && j.year === year)) jobs.push({ slug: a.slug, id: a.id, year });
   };
-  const feedUpdates: { rider_slug: string; keys: string[]; changed_at: string }[] = [];
+  const feedUpdates: { athlete_id: string; keys: string[]; changed_at: string }[] = [];
   let summary = "";
 
   if (MODE === "voll") {
@@ -73,9 +73,9 @@ await run(db, async () => {
     for (const a of athletes) for (const y of years) add(a, y);
     summary = `voll (${years.join(", ")})`;
   } else if (MODE === "nacht") {
-    const synced = await selectAll<{ rider_slug: string; year: number; checked_at: string }>((a, b) =>
-      db.from("athlete_sync").select("rider_slug, year, checked_at").in("year", [Y, Y - 1]).order("rider_slug").range(a, b));
-    const at = new Map(synced.map((s) => [`${s.rider_slug}|${s.year}`, s.checked_at]));
+    const synced = await selectAll<{ athlete_id: string; year: number; checked_at: string }>((a, b) =>
+      db.from("athlete_sync").select("athlete_id, year, checked_at").in("year", [Y, Y - 1]).order("athlete_id").range(a, b));
+    const at = new Map(synced.map((s) => [`${s.athlete_id}|${s.year}`, s.checked_at]));
     // neu im Pool: aktuelles Jahr und Vorjahr einmal komplett
     const fresh = athletes.filter((a) => !at.has(`${a.slug}|${Y}`) || !at.has(`${a.slug}|${Y - 1}`));
     for (const a of fresh) {
@@ -85,7 +85,7 @@ await run(db, async () => {
     // Kader-Athleten jede Nacht (ihre Punkte zählen), dazu ein Siebtel der übrigen, am längsten nicht
     // geprüften Athleten (= jeder einmal pro Woche); im Januar auch das Vorjahr
     const january = new Date().getMonth() === 0;
-    const inRoster = new Set(rostered.map((r) => r.rider_slug));
+    const inRoster = new Set(rostered.map((r) => r.athlete_id));
     const squad = athletes.filter((a) => inRoster.has(a.slug) && at.has(`${a.slug}|${Y}`));
     const rest = athletes.filter((a) => !inRoster.has(a.slug) && at.has(`${a.slug}|${Y}`));
     const oldest = rest.sort((a, b) => String(at.get(`${a.slug}|${Y}`)).localeCompare(String(at.get(`${b.slug}|${Y}`))))
@@ -102,8 +102,8 @@ await run(db, async () => {
       feed.push(...rows);
       await sleep(500 + Math.random() * 500);
     }
-    const known = new Map((await selectAll<{ rider_slug: string; keys: string[] }>((a, b) =>
-      db.from("athlete_feed").select("rider_slug, keys").order("rider_slug").range(a, b))).map((r) => [r.rider_slug, new Set(r.keys)]));
+    const known = new Map((await selectAll<{ athlete_id: string; keys: string[] }>((a, b) =>
+      db.from("athlete_feed").select("athlete_id, keys").order("athlete_id").range(a, b))).map((r) => [r.athlete_id, new Set(r.keys)]));
     const byId = new Map(athletes.map((a) => [a.id, a]));
     const grouped = new Map<string, FeedResult[]>();
     for (const r of feed) {
@@ -116,7 +116,7 @@ await run(db, async () => {
       if (seen && keys.every((k) => seen.has(k))) continue;          // nichts Neues
       const a = athletes.find((x) => x.slug === slug)!;
       for (const y of new Set(rows.map((r) => Number(r.date?.slice(0, 4) || Y)))) add(a, y);
-      feedUpdates.push({ rider_slug: slug, keys, changed_at: started });
+      feedUpdates.push({ athlete_id: slug, keys, changed_at: started });
     }
     summary = `Sammelabruf: ${feed.length} Ergebnisse der letzten Wochen, ${feedUpdates.length} Athleten mit Neuem`;
   }
@@ -138,7 +138,7 @@ await run(db, async () => {
         const results = await withApi((api) => fetchAthleteResults(api, job!.id, job!.year));
         for (const r of results) {
           rows.push({
-            rider_slug: job.slug, date: r.date, competition: r.competition, venue: r.venue,
+            athlete_id: job.slug, date: r.date, competition: r.competition, venue: r.venue,
             discipline: r.discipline, country: r.country, category: r.category,
             race: r.race, place: r.place, wa_race: r.race, wa_place: r.place,
             placing_round: null, placing_place: null,
@@ -165,54 +165,54 @@ await run(db, async () => {
   const years = [...new Set(loaded.map((j) => j.year))];
 
   // Doppelte Schlüssel innerhalb eines Batches würden den Upsert abbrechen.
-  const key = (r: Row) => [r.rider_slug, r.date, r.discipline, r.wa_race, r.competition].join("|");
+  const key = (r: Row) => [r.athlete_id, r.date, r.discipline, r.wa_race, r.competition].join("|");
   const unique = [...new Map(rows.map((r) => [key(r), r])).values()];
 
   const placings = years.length ? await resolveEventPlacings(unique, api, years, names) : "";
 
   await chunked(unique, 500, async (chunk) => {
-    const { error } = await db.from("wa_results").upsert(chunk, { onConflict: "rider_slug,date,discipline,wa_race,competition" });
+    const { error } = await db.from("wa_results").upsert(chunk, { onConflict: "athlete_id,date,discipline,wa_race,competition" });
     if (error) throw new Error(`wa_results: ${error.message}`);
   });
   // Ergebnisse, die WA nicht mehr führt (Korrekturen), für die erfolgreich geladenen Athleten entfernen
   for (const year of years) {
     const slugs = loaded.filter((l) => l.year === year).map((l) => l.slug);
     await chunked(slugs, 100, async (chunk) => {
-      const { error } = await db.from("wa_results").delete().in("rider_slug", chunk).eq("source", "wa")
+      const { error } = await db.from("wa_results").delete().in("athlete_id", chunk).eq("source", "wa")
         .gte("date", `${year}-01-01`).lte("date", `${year}-12-31`).lt("imported_at", started);
       if (error) throw new Error(`wa_results löschen: ${error.message}`);
     });
   }
   // Stand merken: vollständig geladene Athleten/Jahre und (bei Erfolg) den Sammelabruf
-  await chunked(loaded.map((l) => ({ rider_slug: l.slug, year: l.year, checked_at: started })), 500, async (chunk) => {
-    const { error } = await db.from("athlete_sync").upsert(chunk, { onConflict: "rider_slug,year" });
+  await chunked(loaded.map((l) => ({ athlete_id: l.slug, year: l.year, checked_at: started })), 500, async (chunk) => {
+    const { error } = await db.from("athlete_sync").upsert(chunk, { onConflict: "athlete_id,year" });
     if (error) throw new Error(`athlete_sync: ${error.message}`);
   });
   const ok = new Set(loaded.map((l) => l.slug));
   const failed = new Set(jobs.filter((j) => !loaded.includes(j)).map((j) => j.slug));
-  await chunked(feedUpdates.filter((f) => ok.has(f.rider_slug) && !failed.has(f.rider_slug)), 500, async (chunk) => {
-    const { error } = await db.from("athlete_feed").upsert(chunk, { onConflict: "rider_slug" });
+  await chunked(feedUpdates.filter((f) => ok.has(f.athlete_id) && !failed.has(f.athlete_id)), 500, async (chunk) => {
+    const { error } = await db.from("athlete_feed").upsert(chunk, { onConflict: "athlete_id" });
     if (error) throw new Error(`athlete_feed: ${error.message}`);
   });
 
   // Wettkämpfe
-  const races = new Map<string, Row>();
+  const competitions = new Map<string, Row>();
   for (const r of unique) {
     if (!r.wa_competition_id) continue;
     const slug = `wa-c${r.wa_competition_id}`;
-    const prev = races.get(slug);
+    const prev = competitions.get(slug);
     const d = String(r.date);
-    races.set(slug, {
+    competitions.set(slug, {
       // Cross: Distanzangabe ("- XC 7.5km") gehört zum Rennen, nicht zum Wettkampf
-      pcs_slug: slug, name: String(r.competition).replace(/\s*-\s*XC\s*[\d.,]+\s*km$/i, ""), venue: r.venue, country: r.country, uci_class: r.category,
+      id: slug, name: String(r.competition).replace(/\s*-\s*XC\s*[\d.,]+\s*km$/i, ""), venue: r.venue, country: r.country, category: r.category,
       start_date: prev && String(prev.start_date) < d ? prev.start_date : d,
       end_date: prev && String(prev.end_date) > d ? prev.end_date : d,
       loaded_at: started,
     });
   }
-  await chunked([...races.values()], 500, async (chunk) => {
-    const { error } = await db.from("races").upsert(chunk, { onConflict: "pcs_slug" });
-    if (error) throw new Error(`races: ${error.message}`);
+  await chunked([...competitions.values()], 500, async (chunk) => {
+    const { error } = await db.from("competitions").upsert(chunk, { onConflict: "id" });
+    if (error) throw new Error(`competitions: ${error.message}`);
   });
 
   // Punkte, Saisonwertung, Stichtage
@@ -242,17 +242,17 @@ async function resolveEventPlacings(rows: Row[], api: ApiConfig, years: number[]
   const prelims = rows.filter((r) => isPrelimRace(String(r.wa_race)) && PRELIM_CATEGORIES.includes(String(r.category)));
   if (!split.length && !prelims.length) return "keine Detailergebnisse nötig";
 
-  const key = (r: Row) => [r.rider_slug, r.date, r.discipline, r.wa_race, r.competition].join("|");
-  type Known = { rider_slug: string; date: string; discipline: string; wa_race: string; competition: string;
+  const key = (r: Row) => [r.athlete_id, r.date, r.discipline, r.wa_race, r.competition].join("|");
+  type Known = { athlete_id: string; date: string; discipline: string; wa_race: string; competition: string;
                  race: string; place: number | null; placing_round: string | null; placing_place: number | null };
   const known = new Map<string, Known>();
   const prev = await selectAll<Known>((a, b) => db.from("wa_results")
-    .select("rider_slug, date, discipline, wa_race, competition, race, place, placing_round, placing_place")
+    .select("athlete_id, date, discipline, wa_race, competition, race, place, placing_round, placing_place")
     .or("race.eq.F,placing_round.not.is.null").neq("wa_race", "F").neq("wa_race", "")
     .gte("date", `${Math.min(...years)}-01-01`).lte("date", `${Math.max(...years)}-12-31`)
     .order("id").range(a, b));
   for (const r of prev) known.set(key(r), r);
-  const who = (r: Row) => ({ id: Number(String(r.rider_slug).slice(3)), name: names.get(String(r.rider_slug)) });
+  const who = (r: Row) => ({ id: Number(String(r.athlete_id).slice(3)), name: names.get(String(r.athlete_id)) });
 
   const events = new Map<string, Promise<Race[]>>();
   const racesFor = (r: Row) => {

@@ -10,7 +10,7 @@ import { Results } from './views/results.js';
 import { Table } from './views/table.js';
 import { Admin } from './views/admin.js';
 import { RiderModal } from './views/rider.js';
-import { Riders } from './views/riders.js';
+import { Riders } from './views/athletes.js';
 import { Races } from './views/races.js';
 import { Rules } from './views/rules.js';
 import { More } from './views/more.js';
@@ -43,23 +43,23 @@ async function loadLeague(id, userId) {
   rpc('process_due', { p_league: id }).catch(() => {});   // fällige Stichtage abarbeiten
   const league = (await q(sb.from('leagues').select('*').eq('id', id)))[0];
   if (!league) throw new Error('Liga nicht gefunden oder kein Zugriff.');
-  const [managers, roster, matchdays, riders, sync] = await Promise.all([
+  const [managers, roster, matchdays, athletes, sync] = await Promise.all([
     q(sb.from('managers').select('*').eq('league_id', id).order('draft_position', { nullsFirst: false }).order('joined_at')),
     all(() => sb.from('roster_entries').select('*').eq('league_id', id).order('id')),
     q(sb.from('matchdays').select('*').eq('league_id', id).order('starts_on')),
-    all(() => { const x = sb.from('riders').select('*');
-      return (league.gender === 'mixed' ? x : x.eq('gender', league.gender)).order('uci_rank', { nullsFirst: false }).order('pcs_slug'); }),
+    all(() => { const x = sb.from('athletes').select('*');
+      return (league.gender === 'mixed' ? x : x.eq('gender', league.gender)).order('pool_rank', { nullsFirst: false }).order('id'); }),
     q(sb.from('sync_status').select('*')),
   ]);
-  const riderMap = Object.fromEntries(riders.map((r) => [r.pcs_slug, r]));
+  const riderMap = Object.fromEntries(athletes.map((r) => [r.id, r]));
   const active = roster.filter((r) => !r.released_on);
-  const owner = Object.fromEntries(active.map((r) => [r.rider_slug, r.manager_id]));
+  const owner = Object.fromEntries(active.map((r) => [r.athlete_id, r.manager_id]));
   const me = managers.find((m) => m.user_id === userId) || null;
   const managerMap = Object.fromEntries(managers.map((m) => [m.id, m]));
   const nextMatchday = matchdays.find((m) => new Date(m.deadline) > new Date()) || null;
   return {
     league, managers, managerMap, me, roster, active, owner, matchdays, nextMatchday,
-    riders, riderMap, sync: sync[0] || null,
+    athletes, riderMap, sync: sync[0] || null,
     isAdmin: league.admin_user === userId,
   };
 }
@@ -69,7 +69,7 @@ const ICONS = {
   liga: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
   team: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
   draft: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
-  riders: '<circle cx="14" cy="4" r="2"/><path d="M7 21l3-6 3 2v5M10 15l1-5 4 2 3-1M8 9l3-1"/>',
+  athletes: '<circle cx="14" cy="4" r="2"/><path d="M7 21l3-6 3 2v5M10 15l1-5 4 2 3-1M8 9l3-1"/>',
   races: '<path d="M4 22V4M4 4h13l-2 4 2 4H4"/>',
   more: '<path d="M3 6h18M3 12h18M3 18h18"/>',
 };
@@ -84,7 +84,7 @@ function sections(c) {
     beforeDraft
       ? { key: 'draft', label: 'Draft', tabs: [['draft', 'Draft']] }
       : { key: 'team', label: 'Team', tabs: [['team', 'Kader'], ...(afterDraft ? [['waiver', 'Waiver']] : [])] },
-    { key: 'riders', label: 'Athleten', tabs: [['riders', 'Athleten']] },
+    { key: 'athletes', label: 'Athleten', tabs: [['athletes', 'Athleten']] },
     { key: 'races', label: 'Wettkämpfe', tabs: [['races', 'Wettkämpfe']] },
     { key: 'more', label: 'Mehr', tabs: [['more', 'Menü'], ['rules', 'Regeln'],
       ...(!beforeDraft ? [['draft', 'Draft']] : []), ...(c.isAdmin ? [['admin', 'Admin']] : [])] },
@@ -97,7 +97,7 @@ function LeagueShell({ id, tab, sub, sub2, session }) {
   const c = { ...ctx.data, reload: ctx.reload, user: session.user };
   const defaultTab = c.league.status === 'drafting' ? 'draft' : 'home';
   const t = tab || defaultTab;
-  const View = { draft: Draft, team: Team, riders: Riders, races: Races, rules: Rules, waiver: Waiver, results: Results,
+  const View = { draft: Draft, team: Team, athletes: Riders, races: Races, rules: Rules, waiver: Waiver, results: Results,
     table: Table, admin: Admin, more: More, feedback: Feedback, home: Overview }[t] || Overview;
   const secs = sections(c);
   const current = secs.find((x) => x.tabs.some(([k]) => k === t))

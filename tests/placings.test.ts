@@ -39,23 +39,23 @@ describe("Hilfsfunktionen", () => {
 
 describe("geteilte Finals", () => {
   it("Beispiel: Platz 5 in F1, zwei Schnellere in F2 -> Platz 7", () => {
-    const races = [
+    const competitions = [
       race("Heat 1", [entry("13:20.00")]),
       race("Final 1", ["13:40.00", "13:41.00", "13:42.00", "13:43.00", "13:44.00", "13:50.00", "DNF"].map((m) => entry(m))),
       race("Final 2", ["13:38.00", "13:43.50", "13:46.00", "14:10.00"].map((m) => entry(m))),
     ];
-    expect(combinedPlace(races, "13:44.00")).toBe(7);
-    expect(combinedPlace([...races, race("Final 3", [entry("13:44.00")])], "13:44.00")).toBe(7); // gleiche Zeit
+    expect(combinedPlace(competitions, "13:44.00")).toBe(7);
+    expect(combinedPlace([...competitions, race("Final 3", [entry("13:44.00")])], "13:44.00")).toBe(7); // gleiche Zeit
   });
 
   it("findet den Athleten über ID oder Namen", () => {
-    const races = [
+    const competitions = [
       race("Final 1", [entry("3:40.00", "Hannes BURGER", { athleteId: 14000001 }), entry("3:41.00")]),
       race("Final 2", [entry("3:39.00"), entry("3:39.50")]),
     ];
-    expect(combinedPlace(races, "3:40.01", { name: "hannes  burger" })).toBe(3);
-    expect(combinedPlace(races, "3:40.01", { id: 14000001 })).toBe(3);
-    expect(combinedPlace(races, "3:40.01")).toBeNull();
+    expect(combinedPlace(competitions, "3:40.01", { name: "hannes  burger" })).toBe(3);
+    expect(combinedPlace(competitions, "3:40.01", { id: 14000001 })).toBe(3);
+    expect(combinedPlace(competitions, "3:40.01")).toBeNull();
   });
 
   it("nur ein Finallauf gelistet: Platz daraus", () => {
@@ -106,23 +106,23 @@ describe("letzte Runde vor dem Finale (echte Daten WM Tokio 2025)", () => {
 
 describe("Extraktion", () => {
   it("liest Rennen aus API-JSON inkl. WA-ID aus urlSlug", () => {
-    const races = extractRacesFromJson({
+    const competitions = extractRacesFromJson({
       eventId: 10229609,
-      races: [
+      competitions: [
         { race: "Final", raceNumber: 1, date: "2026-07-01", results: [{ competitor: { id: "abc123", name: "A", urlSlug: "germany/a-14650473" }, mark: "13:40.00", place: "1.", qualified: null }] },
         { race: "Final", raceNumber: 2, date: "2026-07-01", results: [{ competitor: { id: "xyz", name: "B" }, mark: "13:30.00", place: "1.", qualified: null }] },
       ],
     });
-    expect(races[0].entries[0]).toEqual({ athleteId: 14650473, name: "A", mark: "13:40.00", place: 1, qualified: false });
-    expect(races[1].entries[0].athleteId).toBeNull(); // opake IDs werden ignoriert
-    expect(combinedPlace(races, "13:40.00", { id: 14650473 })).toBe(2);
+    expect(competitions[0].entries[0]).toEqual({ athleteId: 14650473, name: "A", mark: "13:40.00", place: 1, qualified: false });
+    expect(competitions[1].entries[0].athleteId).toBeNull(); // opake IDs werden ignoriert
+    expect(combinedPlace(competitions, "13:40.00", { id: 14650473 })).toBe(2);
   });
 
   it("liest Rennen aus der HTML-Seite (eingebettete Daten, nur das gesuchte Event)", () => {
     const data = {
       props: { pageProps: { events: [
-        { eventId: 1, races: [{ race: "Final", results: [{ mark: "1:00.00", competitor: { name: "anderes Event" } }] }] },
-        { eventId: 2, races: [
+        { eventId: 1, competitions: [{ race: "Final", results: [{ mark: "1:00.00", competitor: { name: "anderes Event" } }] }] },
+        { eventId: 2, competitions: [
           { race: "Final 1", results: [{ mark: "8:00.00", competitor: { name: "X" } }] },
           { race: "Final 2", results: [{ mark: "7:59.00", competitor: { name: "Y" } }] },
         ] },
@@ -141,10 +141,10 @@ describe("Extraktion", () => {
       </table>
       <strong>Final<!-- --> 2</strong>
       <table><tr><td>1.</td><td>5</td><td class="EventResults_name__x"><a href="/athletes/kenya/c-14000001">C</a></td><td>KEN</td><td>13:39.00</td></tr></table>`;
-    const races = extractRacesFromHtml(html);
-    expect(races.map((r) => [r.name, r.entries.map((e) => e.mark)])).toEqual([
+    const competitions = extractRacesFromHtml(html);
+    expect(competitions.map((r) => [r.name, r.entries.map((e) => e.mark)])).toEqual([
       ["Final 1", ["13:40.10", "13:41.00"]], ["Final 2", ["13:39.00"]],
     ]);
-    expect(combinedPlace(races, "13:41.00", { name: "B" })).toBe(3);
+    expect(combinedPlace(competitions, "13:41.00", { name: "B" })).toBe(3);
   });
 });

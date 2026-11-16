@@ -55,8 +55,8 @@ async function importer(modus: string) {
   return stdout.trim();
 }
 const stored = async () => (await db.all(
-  "select rider_slug, date::text, discipline, mark, result_score from wa_results order by rider_slug, date, discipline"))
-  .map((r) => `${r.rider_slug} ${r.date} ${r.discipline} ${r.mark} ${r.result_score}`);
+  "select athlete_id, date::text, discipline, mark, result_score from wa_results order by athlete_id, date, discipline"))
+  .map((r) => `${r.athlete_id} ${r.date} ${r.discipline} ${r.mark} ${r.result_score}`);
 const res = (date: string, discipline: string, mark: string, score: number, comp = 7400100): Res =>
   ({ date, competition: `Meeting ${comp}`, discipline, race: "F", place: "1.", mark, resultScore: score, category: "F", competitionId: comp, eventId: 1 });
 
@@ -102,7 +102,7 @@ describe("Ergebnisabruf", () => {
     await as(db, u);
     const lg = (await db.one("select create_league('Liga', 'Team', '{}') id")).id;
     const mgr = (await db.one("select id from managers where league_id = $1", [lg])).id;
-    await db.query("insert into roster_entries (league_id, manager_id, rider_slug, price, source, acquired_on) values ($1, $2, 'wa-103', 1, 'offline', $3)", [lg, mgr, day(0)]);
+    await db.query("insert into roster_entries (league_id, manager_id, athlete_id, price, source, acquired_on) values ($1, $2, 'wa-103', 1, 'offline', $3)", [lg, mgr, day(0)]);
     await importer("nacht");
     expect(calls.single).toContain(`103/${Y}`);
     expect(calls.single).toHaveLength(2);   // wa-103 (Kader) + eines der beiden übrigen
@@ -137,12 +137,12 @@ describe("Ergebnisabruf", () => {
     // gelöschtes Ergebnis verschwindet beim nächsten Komplettabruf des Athleten
     wa.get(101)!.splice(1, 1);
     // Nachträge (z. B. RaceResult) überstehen den Komplettabruf
-    await db.query(`insert into wa_results (rider_slug, date, competition, discipline, race, wa_race, mark, result_score, source)
+    await db.query(`insert into wa_results (athlete_id, date, competition, discipline, race, wa_race, mark, result_score, source)
                     values ('wa-103', $1, 'Stadtlauf', '10 Kilometres Road', 'F', 'F', '29:00', 1200, 'manual')`, [day(-3)]);
     await importer("voll");
     expect((await db.one("select count(*)::int n from wa_results where source = 'manual'")).n).toBe(1);
     expect(calls.single).toHaveLength(3);
     expect((await stored()).filter((s) => s.startsWith("wa-101"))).toHaveLength(3);
-    expect(Number((await db.one("select count(*) n from results where rider_slug = 'wa-101'")).n)).toBe(3);
+    expect(Number((await db.one("select count(*) n from results where athlete_id = 'wa-101'")).n)).toBe(3);
   });
 });

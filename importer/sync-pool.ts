@@ -1,5 +1,5 @@
 // Athletenpool: lädt die DE-Toplisten (aktuelles Jahr + Vorjahr), speichert alle Athleten über der
-// Pool-Schwelle in riders/toplist_entries und berechnet danach Pool-Rang und Disziplingruppe (refresh_pool).
+// Pool-Schwelle in athletes/toplist_entries und berechnet danach Pool-Rang und Disziplingruppe (refresh_pool).
 import { COUNTRY, TOPLIST_DISCIPLINES } from "./disciplines";
 import { adminClient, chunked, currentYear, rpc, run } from "./supabase";
 import { fetchToplist, sleep, type Gender } from "./wa";
@@ -14,7 +14,7 @@ await run(db, async () => {
   const minScore = cfg.pool_threshold as number;
 
   const athletes = new Map<string, Record<string, unknown>>();
-  const entries = new Map<string, { rider_slug: string; year: number; discipline: string; mark: string; score: number }>();
+  const entries = new Map<string, { athlete_id: string; year: number; discipline: string; mark: string; score: number }>();
   const failures: string[] = [];
 
   for (const y of years) {
@@ -25,12 +25,12 @@ await run(db, async () => {
           for (const r of rows) {
             const slug = `wa-${r.athleteId}`;
             athletes.set(slug, {
-              pcs_slug: slug, wa_id: r.athleteId, name: r.name, gender: gender === "M" ? "men" : "women",
+              id: slug, wa_id: r.athleteId, name: r.name, gender: gender === "M" ? "men" : "women",
               nation: "GER", ...(r.birthDate ? { birth_date: r.birthDate } : {}),
             });
             const key = `${slug}|${y}|${d.name}`;
             const prev = entries.get(key);
-            if (!prev || prev.score < r.score) entries.set(key, { rider_slug: slug, year: y, discipline: d.name, mark: r.mark, score: r.score });
+            if (!prev || prev.score < r.score) entries.set(key, { athlete_id: slug, year: y, discipline: d.name, mark: r.mark, score: r.score });
           }
           console.log(`${y} ${d.name} ${gender}: ${rows.length}`);
         } catch (e) {
@@ -48,13 +48,13 @@ await run(db, async () => {
   const list = [...athletes.values()];
   for (const part of [list.filter((a) => a.birth_date), list.filter((a) => !a.birth_date)]) {
     await chunked(part, 500, async (chunk) => {
-      const { error } = await db.from("riders").upsert(chunk.map((a) => ({ ...a, updated_at: now })), { onConflict: "pcs_slug" });
-      if (error) throw new Error(`riders: ${error.message}`);
+      const { error } = await db.from("athletes").upsert(chunk.map((a) => ({ ...a, updated_at: now })), { onConflict: "id" });
+      if (error) throw new Error(`athletes: ${error.message}`);
     });
   }
   await chunked([...entries.values()], 500, async (chunk) => {
     const { error } = await db.from("toplist_entries").upsert(chunk.map((e) => ({ ...e, updated_at: now })),
-      { onConflict: "rider_slug,year,discipline" });
+      { onConflict: "athlete_id,year,discipline" });
     if (error) throw new Error(`toplist_entries: ${error.message}`);
   });
   const pool = await rpc<number>(db, "refresh_pool", { p_year: year });

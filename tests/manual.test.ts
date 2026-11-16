@@ -20,10 +20,10 @@ beforeEach(async () => {
   for (let i = 0; i < 60; i++) {
     const slug = await athlete(db, 1000 + i, `Läufer ${i}`, "men", "10 Kilometres Road", 1100);
     const t = 1620 + i * 10;
-    await db.query(`insert into wa_results (rider_slug, date, competition, discipline, race, wa_race, mark, result_score)
+    await db.query(`insert into wa_results (athlete_id, date, competition, discipline, race, wa_race, mark, result_score)
                     values ($1, $2, 'WA-Lauf', '10 Kilometres Road', 'F', 'F', $3, $4)`, [slug, `${Y}-01-10`, fmt(t), table(t)]);
   }
-  await db.query(`update wa_results set result_score = 900 where rider_slug in ('wa-1003', 'wa-1040')`);
+  await db.query(`update wa_results set result_score = 900 where athlete_id in ('wa-1003', 'wa-1040')`);
 });
 afterEach(async () => {
   await db.end();
@@ -57,8 +57,8 @@ describe("Ergebnisse nachtragen", () => {
     await athlete(db, 1, "Filimon ABRAHAM", "men", "Marathon", 1150);
   });
   const add = (p: Record<string, unknown>) => db.one("select add_manual_result($1) id",
-    [{ rider_slug: "wa-1", date: D, discipline: "10 Kilometres Road", competition: "Stadtlauf", source_url: "https://my.raceresult.com/123", ...p }]);
-  const points = async () => (await db.all("select label, perf_points from results where rider_slug = 'wa-1'"))
+    [{ athlete_id: "wa-1", date: D, discipline: "10 Kilometres Road", competition: "Stadtlauf", source_url: "https://my.raceresult.com/123", ...p }]);
+  const points = async () => (await db.all("select label, perf_points from results where athlete_id = 'wa-1'"))
     .map((r) => [r.label, Number(r.perf_points)]);
 
   it("berechnet WA-Punkte, zählt in der Wertung und ist als Nachtrag gekennzeichnet", async () => {
@@ -67,12 +67,12 @@ describe("Ergebnisse nachtragen", () => {
     const pts = check.c.wa_points;
     expect(Math.abs(pts - table(1680))).toBeLessThanOrEqual(1);
     await add({ mark: "28:00" });
-    const w = await db.one("select source, source_url, result_score, added_by from wa_results where rider_slug = 'wa-1'");
+    const w = await db.one("select source, source_url, result_score, added_by from wa_results where athlete_id = 'wa-1'");
     expect(w).toEqual({ source: "manual", source_url: "https://my.raceresult.com/123", result_score: pts, added_by: admin });
     // (WA-Punkte − 1000) × 0,1 × Disziplinfaktor
     const f = Number((await db.one("select factor from disciplines where name = '10 Kilometres Road'")).factor);
     expect(await points()).toEqual([["10 Kilometres Road", Math.round((pts - 1000) * 0.1 * f * 100) / 100]]);
-    expect((await db.one("select name from races r join results x on x.race_slug = r.pcs_slug where x.rider_slug = 'wa-1'")).name).toBe("Stadtlauf");
+    expect((await db.one("select name from competitions r join results x on x.competition_id = r.id where x.athlete_id = 'wa-1'")).name).toBe("Stadtlauf");
   });
 
   it("lehnt Doppelte, Unsinn und Nicht-Admins ab", async () => {
@@ -93,13 +93,13 @@ describe("Ergebnisse nachtragen", () => {
 
   it("entfällt, sobald World Athletics dasselbe Ergebnis führt; Löschen", async () => {
     const { id } = await add({ mark: "28:00" });
-    await db.query(`insert into wa_results (rider_slug, date, competition, discipline, race, wa_race, mark, result_score)
+    await db.query(`insert into wa_results (athlete_id, date, competition, discipline, race, wa_race, mark, result_score)
                     values ('wa-1', $1, 'Stadtlauf (WA)', '10 Kilometres Road', 'F', 'F', '28:01', 1345)`, [`${Y}-03-02`]);
     await db.query("select rebuild_results(null)");
     expect(await points()).toEqual([["10 Kilometres Road", Math.round(345 * 0.1 * Number((await db.one("select factor from disciplines where name = '10 Kilometres Road'")).factor) * 100) / 100]]);
     expect((await db.one("select count(*)::int n from results r join wa_results w on w.id = r.wa_result_id where w.source = 'manual'")).n).toBe(0);
     await db.query("select delete_manual_result($1)", [id]);
     expect((await db.one("select count(*)::int n from wa_results where source = 'manual'")).n).toBe(0);
-    await expect(db.query("select delete_manual_result((select id from wa_results where rider_slug = 'wa-1'))")).rejects.toThrow(/nicht gefunden/);
+    await expect(db.query("select delete_manual_result((select id from wa_results where athlete_id = 'wa-1'))")).rejects.toThrow(/nicht gefunden/);
   });
 });

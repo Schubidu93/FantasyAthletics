@@ -68,14 +68,14 @@ function findEntry(entries: RaceEntry[], athlete: Athlete) {
     ?? (target ? entries.find((e) => normalizeName(e.name) === target) : undefined);
 }
 
-const finalsOf = (races: Race[]) => races.filter((r) => isFinalRaceName(r.name));
+const finalsOf = (competitions: Race[]) => competitions.filter((r) => isFinalRaceName(r.name));
 
 /**
  * Kombinierter Finalplatz = 1 + Anzahl der Läufer aller Finalläufe mit schnellerer Zeit
  * (gleiche Zeit = gleicher Platz). Athlet über ID oder Namen, ersatzweise über seine Zeit.
  */
-export function combinedPlace(races: Race[], mark: string | null, athlete: Athlete = {}): number | null {
-  const finals = finalsOf(races);
+export function combinedPlace(competitions: Race[], mark: string | null, athlete: Athlete = {}): number | null {
+  const finals = finalsOf(competitions);
   const entries = finals.flatMap((r) => r.entries);
   const own = findEntry(entries, athlete);
   if (finals.length === 1) return own?.place ?? null; // nur ein Finallauf gelistet
@@ -93,14 +93,14 @@ export type PrelimPlacing = { round: "P9" | "P10"; place: number };
  * Wertung in der letzten Runde vor dem Finale. null, wenn der Athlet nicht in dieser Runde
  * lief (z. B. nur im Vorlauf vor einem Halbfinale) oder die Daten nicht passen.
  */
-export function prelimPlacing(races: Race[], athlete: Athlete): PrelimPlacing | null {
-  const finals = finalsOf(races);
+export function prelimPlacing(competitions: Race[], athlete: Athlete): PrelimPlacing | null {
+  const finals = finalsOf(competitions);
   const finalists = finals.flatMap((r) => r.entries);
   if (!finalists.length) return null;
 
   // Runden in Reihenfolge des letzten Datums; die späteste vor dem Finale zählt.
   const rounds = new Map<string, Race[]>();
-  for (const r of races.filter((r) => isPrelimRoundName(r.name))) {
+  for (const r of competitions.filter((r) => isPrelimRoundName(r.name))) {
     rounds.set(r.name, [...(rounds.get(r.name) ?? []), r]);
   }
   const lastDate = (rs: Race[]) => rs.map((r) => r.date ?? "").sort().at(-1) ?? "";
@@ -143,14 +143,14 @@ function idFrom(...candidates: unknown[]): number | null {
 
 /** Sucht in beliebigem JSON nach Rennen: Objekte mit einer `results`-Liste von Einträgen mit `mark`. */
 export function extractRacesFromJson(json: Json): Race[] {
-  const races: Race[] = [];
+  const competitions: Race[] = [];
   const walk = (node: Json) => {
     if (Array.isArray(node)) return node.forEach(walk);
     if (!node || typeof node !== "object") return;
     const obj = node as Record<string, Json>;
     const results = obj.results;
     if (Array.isArray(results) && results.some((r) => r && typeof r === "object" && "mark" in (r as object))) {
-      races.push({
+      competitions.push({
         name: String(obj.race ?? obj.raceName ?? obj.name ?? ""),
         number: obj.raceNumber == null ? null : Number(obj.raceNumber),
         date: obj.date ? String(obj.date) : null,
@@ -170,7 +170,7 @@ export function extractRacesFromJson(json: Json): Race[] {
     Object.values(obj).forEach(walk);
   };
   walk(json);
-  return races;
+  return competitions;
 }
 
 /** Teilbaum mit `eventId === id` (falls die Daten mehrere Events enthalten). */
@@ -199,14 +199,14 @@ export function extractRacesFromHtml(html: string, eventId?: number): Race[] {
   if (next) {
     try {
       const data = JSON.parse(next);
-      const races = extractRacesFromJson((eventId && findEventNode(data, eventId)) || data);
-      if (races.length) return races;
+      const competitions = extractRacesFromJson((eventId && findEventNode(data, eventId)) || data);
+      if (competitions.length) return competitions;
     } catch {
       // weiter mit dem HTML
     }
   }
 
-  const races: Race[] = [];
+  const competitions: Race[] = [];
   let current: Race | null = null;
   // Zeit mit Doppelpunkt oder Nachkommastellen, damit Bahn-/Startnummern nicht als Zeit gelten.
   const timeRe = /^\d{1,2}(:\d{2}){1,2}(\.\d+)?$|^\d{1,2}\.\d+$/;
@@ -216,7 +216,7 @@ export function extractRacesFromHtml(html: string, eventId?: number): Race[] {
       const text = node.text().replace(/\s+/g, " ").trim();
       if (/^(final|semi-?final|heat|race|quarter|round)/i.test(text) && text.length < 30) {
         current = { name: text, number: null, date: null, entries: [] };
-        races.push(current);
+        competitions.push(current);
       }
       return;
     }
@@ -240,7 +240,7 @@ export function extractRacesFromHtml(html: string, eventId?: number): Race[] {
       });
     });
   });
-  return races.filter((r) => r.entries.length > 0);
+  return competitions.filter((r) => r.entries.length > 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -250,7 +250,7 @@ export function extractRacesFromHtml(html: string, eventId?: number): Race[] {
 const COMPETITION_QUERY = `
   query getCalendarCompetitionResults($competitionId: Int, $day: Int, $eventId: Int) {
     getCalendarCompetitionResults(competitionId: $competitionId, day: $day, eventId: $eventId) {
-      eventTitles { events { eventId races { date race raceNumber
+      eventTitles { events { eventId competitions { date race raceNumber
         results { competitor { id name urlSlug } mark place qualified } } } }
     }
   }`;
@@ -273,8 +273,8 @@ export async function fetchEventRaces(api: ApiConfig, competitionId: number, eve
     // Nur das gesuchte Event (die API liefert u. U. mehrere Blöcke für dieselbe eventId).
     const events = (body.data?.getCalendarCompetitionResults?.eventTitles ?? []).flatMap((t) => t.events ?? [])
       .filter((e) => Number(e.eventId) === eventId);
-    const races = extractRacesFromJson(events);
-    if (races.length) return races;
+    const competitions = extractRacesFromJson(events);
+    if (competitions.length) return competitions;
     apiError = "keine Läufe";
   } catch (e) {
     apiError = (e as Error).message;
