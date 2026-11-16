@@ -1,6 +1,6 @@
 // Wettkämpfe: alle Wettkämpfe, bei denen Athleten aus dem Pool gestartet sind, mit deren Ergebnissen und Punkten
 import { html, useState, useMemo } from '../vendor/preact-htm.js';
-import { sb, q, all, useLoad, Loading, fmtDate, fmtPts, openRider, normName, flag, withFlag, nationCode, discWithKm, raceLabel , waResultUrl } from '../lib.js';
+import { sb, q, all, useLoad, Loading, fmtDate, fmtPts, openRider, normName, flag, withFlag, nationCode, discWithKm, raceLabel , waResultUrl , SexBadge } from '../lib.js';
 
 // WA-Wettkampfkategorien (World-Ranking-Regeln): OW = Olympia/WM … F = nationale Meetings
 const CATS = [['', 'Alle Kategorien'], ['top', 'OW, DF, GW, GL'], ['OW', 'OW – Olympia/WM'], ['DF', 'DF – DL-Finale'],
@@ -95,12 +95,17 @@ function RaceDetail({ c, slug }) {
   for (const r of rows) {
     // Cross: Rennen über verschiedene Distanzen (z. B. 1,5 und 7,5 km) getrennt
     const disc = discWithKm(r.discipline, r.competition);
-    const key = `${r.date}|${disc}|${r.wa_race}`;
+    // Männer und Frauen getrennt
+    const sex = c.riderMap[r.athlete_id]?.gender || '';
+    const key = `${r.date}|${disc}|${r.wa_race}|${sex}`;
     let g = groups.find((x) => x.key === key);
-    if (!g) groups.push(g = { key, date: r.date, disc, race: r.wa_race, event: r.wa_event_id, rows: [] });
+    if (!g) groups.push(g = { key, date: r.date, disc, sex, race: r.wa_race, event: r.wa_event_id, rows: [] });
     g.rows.push(r);
   }
   groups.forEach((g) => g.rows.sort((a, b) => (a.wa_place ?? 999) - (b.wa_place ?? 999)));
+  // gleiche Disziplin: Männer vor Frauen
+  groups.sort((a, b) => a.date.localeCompare(b.date) || a.disc.localeCompare(b.disc) || (a.race || '').localeCompare(b.race || '')
+    || (a.sex === 'women') - (b.sex === 'women'));
   const total = rows.reduce((s, r) => s + Number(r.pts || 0), 0);
   return html`<section class="card stack">
     ${back}
@@ -111,7 +116,8 @@ function RaceDetail({ c, slug }) {
       ${race.id?.startsWith('wa-c') && html`<a class="small" href=${waResultUrl(race.id.slice(4))} target="_blank" rel="noopener">Ergebnisse bei World Athletics ↗</a>`}
     </div>
     ${groups.length === 0 ? html`<p class="muted">Keine Ergebnisse von Pool-Athleten.</p>` : groups.map((g) => html`<div class="detail-rider" key=${g.key}>
-      <div class="row between"><strong>${g.disc}${g.race && g.race !== 'F' ? ` · ${raceLabel(g.race)}` : ''}</strong>
+      <div class="row between"><strong>${g.disc}${g.race && g.race !== 'F' ? ` · ${raceLabel(g.race)}` : ''}${g.sex
+        ? html` · ${g.sex === 'women' ? 'Frauen' : 'Männer'} <${SexBadge} g=${g.sex} />` : ''}</strong>
         <span class="muted small">${fmtDate(g.date)}${race.id?.startsWith('wa-c') && g.event ? html` · <a href=${waResultUrl(race.id.slice(4), g.event)} target="_blank" rel="noopener">WA ↗</a>` : ''}</span></div>
       <ul class="list compact">${g.rows.map((r) => {
         const owner = c.managerMap[c.owner[r.athlete_id]];
