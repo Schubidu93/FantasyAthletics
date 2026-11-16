@@ -19,8 +19,8 @@ function placeLabel(x) {
 // Zusatz zum Lauf: kombinierte Platzierung bzw. Wertung der Runde vor dem Finale
 // Wettkampf kurz: Name vor dem ersten Komma, dazu der Ort (letzter Teil), wenn er nicht schon im Namen steht
 function compShort(c) {
-  const [main, ...rest] = String(c || '').replace(/\s+-\s+(Diamond Discipline|Split times)$/i, '').split(', ');
-  const city = rest.length ? rest[rest.length - 1].replace(/\s*\(i\)$/, '') : '';
+  const [main, ...rest] = String(c || '').replace(/\s+-\s+[^,]*$/, '').split(', ');
+  const city = rest.length ? rest[rest.length - 1].replace(/\s*\(i\)\s*$/, '') : '';
   return city && !main.includes(city) ? `${main} · ${city}` : main;
 }
 // „18.07.26“
@@ -173,8 +173,10 @@ export function RiderModal() {
           </div>`)}</div>
         </div>`}
         ${data.toplists.length > 0 && html`<details class="toplists"><summary class="small">Toplisten (DE)</summary>
-          <ul class="list compact">${data.toplists.map((t) => html`<li key=${t.year + t.discipline} class=${L ? 'clickable' : ''} onClick=${() => toTop(t)}>
-            <span>${t.year} · ${discLabel(t.discipline)}</span><span><strong>${t.rank}.</strong> <span class="muted">${t.mark}</span></span></li>`)}</ul></details>`}`}
+          <table class="pb-tbl"><thead><tr><th>Jahr</th><th>Disziplin</th><th class="num">Platz</th><th class="num">Zeit</th></tr></thead>
+            <tbody>${data.toplists.map((t) => html`<tr key=${t.year + t.discipline} class=${L ? 'clickable' : ''} onClick=${() => toTop(t)}>
+              <td class="muted">${t.year}</td><td>${discLabel(t.discipline)}</td><td class="num"><strong>${t.rank}.</strong></td>
+              <td class="num">${t.mark}</td></tr>`)}</tbody></table></details>`}`}
       <p class="muted small">Quelle: World Athletics, Nachträge mit eigener Quelle. Antippen öffnet den Wettkampf bzw. die Topliste.
         ${data?.admin && html` <button type="button" class="linkish small" onClick=${() => setEditRec(!editRec)}>${editRec ? 'Fertig' : 'Rekord von Hand eintragen'}</button>`}</p>
     </div>

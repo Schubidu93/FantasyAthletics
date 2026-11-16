@@ -25,7 +25,9 @@ export function currentPbs(athleteId: string, raw: RawPb[], known: Set<string>) 
     out.set(discipline, { athlete_id: athleteId, discipline, mark: r.mark, date: parseWaDate(r.date ?? ""),
                           result_score: r.resultScore ?? null, venue: r.venue ?? null });
   }
-  return [...out.values()];
+  // WA führt alte Hallenzeiten teils zusätzlich als Bahn-Bestleistung → gleiche Zeit am gleichen Tag nur als Halle
+  const indoor = new Set([...out.values()].filter((p) => /short track/i.test(p.discipline)).map((p) => `${p.discipline.replace(/ Short Track$/i, "")}|${p.mark}|${p.date}`));
+  return [...out.values()].filter((p) => /short track/i.test(p.discipline) || !indoor.has(`${p.discipline}|${p.mark}|${p.date}`));
 }
 
 /** Beste Leistung vor `beforeYear` je Disziplin aus den Saisonbestleistungen (nur Laufzeiten). */
@@ -41,5 +43,7 @@ export function bestBefore(athleteId: string, progression: RawProgression[], bef
       if (!prev || s < prev.s) out.set(discipline, { athlete_id: athleteId, discipline, mark: r.mark, date: parseWaDate(r.date ?? ""), s });
     }
   }
-  return [...out.values()].map(({ s: _s, ...rest }) => rest);
+  const indoor = new Set([...out.values()].filter((p) => /short track/i.test(p.discipline)).map((p) => `${p.discipline.replace(/ Short Track$/i, "")}|${p.mark}|${p.date}`));
+  return [...out.values()].filter((p) => /short track/i.test(p.discipline) || !indoor.has(`${p.discipline}|${p.mark}|${p.date}`))
+    .map(({ s: _s, ...rest }) => rest);
 }

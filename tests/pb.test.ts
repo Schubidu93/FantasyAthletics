@@ -60,7 +60,11 @@ describe("Bestleistungen von World Athletics aufbereiten", () => {
     const pbs = currentPbs("wa-1", [
       { discipline: "Mile", mark: "3:46.82", date: "18 JUL 2026", resultScore: 1242, indoor: false },
       { discipline: "1500 Metres", mark: "3:29.00", date: "01 JUL 2026", notLegal: true },
-      { discipline: "1500 Metres", mark: "3:30.09", date: "18 JUL 2026", resultScore: 1243 }], known);
-    expect(pbs.map((p) => [p.discipline, p.mark, p.date])).toEqual([["Mile", "3:46.82", "2026-07-18"], ["1500 Metres", "3:30.09", "2026-07-18"]]);
+      { discipline: "1500 Metres", mark: "3:30.09", date: "18 JUL 2026", resultScore: 1243 },
+      // gleiche Hallenzeit doppelt (einmal ohne Hallen-Kennzeichen) → nur Halle
+      { discipline: "3000 Metres Short Track", mark: "7:51.42", date: "28 JAN 2022", indoor: true },
+      { discipline: "3000 Metres", mark: "7:51.42", date: "28 JAN 2022", indoor: false }], new Set([...known, "3000 Metres", "3000 Metres Short Track"]));
+    expect(pbs.map((p) => [p.discipline, p.mark, p.date])).toEqual([["Mile", "3:46.82", "2026-07-18"], ["1500 Metres", "3:30.09", "2026-07-18"],
+      ["3000 Metres Short Track", "7:51.42", "2022-01-28"]]);
   });
 });
