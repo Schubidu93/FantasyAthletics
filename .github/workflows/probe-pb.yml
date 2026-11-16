@@ -1,8 +1,12 @@
-name: WA-Bestleistungen erkunden
+name: WA erkunden (Erkundungs-Skripte)
 
-# Erkundung: wie liefert World Athletics persönliche Bestleistungen? Ergebnis in research/out/pb/.
+# Erkundungen bei World Athletics (z. B. Bestleistungen, Meisterschaften in offenen Rennen). Ergebnis in research/out/.
 on:
   workflow_dispatch:
+    inputs:
+      script:
+        description: "Erkundungs-Skript (research/…)"
+        default: research/probe-pb.ts
 
 permissions:
   contents: write
@@ -18,13 +22,18 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx tsx research/probe-pb.ts
+      - name: Skript ausführen
+        env:
+          SCRIPT: ${{ inputs.script || 'research/probe-pb.ts' }}
+        run: |
+          case "$SCRIPT" in research/probe-*.ts) ;; *) echo "::error::Nur research/probe-*.ts erlaubt"; exit 1;; esac
+          npx tsx "$SCRIPT"
       - name: Ergebnisse committen
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f research/out/pb
+          git add -f research/out
           git commit -m "WA-Bestleistungen: Erkundung" || exit 0
           git pull --rebase origin "$GITHUB_REF_NAME"
           git push origin HEAD:"$GITHUB_REF_NAME"
