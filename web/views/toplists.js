@@ -1,6 +1,6 @@
 // Toplisten (DE) von World Athletics: Jahr, Disziplin und Geschlecht wählen, die besten 20 sehen
 import { html } from '../vendor/preact-htm.js';
-import { rpc, useLoad, Loading, discLabel, discMeters, flag, openRider, SexBadge } from '../lib.js';
+import { rpc, useLoad, Loading, discLabel, discMeters, flag, openRider, SexBadge, BackToAthlete } from '../lib.js';
 
 export function Toplists({ c, sub, sub2, sub3 }) {
   const idx = useLoad(() => rpc('toplist_index'), []);
@@ -19,6 +19,7 @@ export function Toplists({ c, sub, sub2, sub3 }) {
   const owner = (id) => c.managerMap[c.owner[id]];
 
   return html`<section class="card">
+    <${BackToAthlete} />
     <h2>Toplisten</h2>
     <p class="muted small">Deutsche Bestenliste von World Athletics – die besten 20 je Disziplin.</p>
     ${!years.length ? html`<p class="muted">Noch keine Toplisten geladen.</p>` : html`

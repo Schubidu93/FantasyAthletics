@@ -1,6 +1,6 @@
 // Wettkämpfe: alle Wettkämpfe, bei denen Athleten aus dem Pool gestartet sind, mit deren Ergebnissen und Punkten
 import { html, useState, useMemo } from '../vendor/preact-htm.js';
-import { sb, q, all, useLoad, Loading, fmtDate, fmtPts, openRider, normName, flag, withFlag, nationCode, discWithKm, raceLabel , waResultUrl , SexBadge, CatBadge, discMeters, raceOrder } from '../lib.js';
+import { sb, q, all, useLoad, Loading, fmtDate, fmtPts, openRider, normName, flag, withFlag, nationCode, discWithKm, raceLabel , waResultUrl , SexBadge, CatBadge, discMeters, raceOrder, BackToAthlete } from '../lib.js';
 
 // WA-Wettkampfkategorien (World-Ranking-Regeln): OW = Olympia/WM … F = nationale Meetings
 const CATS = [['', 'Alle Kategorien'], ['top', 'OW, DF, GW, GL'], ['OW', 'OW – Olympia/WM'], ['DF', 'DF – DL-Finale'],
@@ -88,7 +88,7 @@ function RaceDetail({ c, slug }) {
   }, [slug]);
   if (!data.data) return html`<${Loading} error=${data.error} />`;
   const { race, rows } = data.data;
-  const back = html`<a href=${`#/league/${c.league.id}/races`} class="small-link">← Alle Wettkämpfe</a>`;
+  const back = html`<div class="row between"><a href=${`#/league/${c.league.id}/races`} class="small-link">← Alle Wettkämpfe</a><${BackToAthlete} /></div>`;
   if (!race) return html`<section class="card">${back}<p class="muted">Wettkampf nicht gefunden.</p></section>`;
   // nach Disziplin und Lauf gruppieren, innerhalb nach Platz
   const groups = [];

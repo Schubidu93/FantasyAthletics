@@ -248,6 +248,17 @@ export const Loading = ({ error }) =>
 
 // Athleten-Fenster öffnen (Ergebnisse und Punkte der Saison), siehe views/rider.js
 export const openRider = (slug) => dispatchEvent(new CustomEvent('rider:open', { detail: slug }));
+// Sprung aus dem Athletenfenster (Wettkampf, Topliste): Athlet merken, damit die Seite „Zurück zu …“ anbieten kann
+let cameFrom = null;
+export const rememberAthlete = (slug, name) => { cameFrom = { slug, name, hash: null }; };
+export function BackToAthlete() {
+  if (!cameFrom) return null;
+  // nur auf der ersten Seite nach dem Sprung anzeigen
+  if (cameFrom.hash === null) cameFrom.hash = location.hash;
+  if (cameFrom.hash !== location.hash) return null;
+  const { slug, name } = cameFrom;
+  return html`<a href="#" class="small-link" onClick=${(e) => { e.preventDefault(); cameFrom = null; openRider(slug); }}>← Zurück zu ${name}</a>`;
+}
 
 // Teamnamen lesbarer: "UAE TEAM EMIRATES XRG" → "UAE Team Emirates XRG" (bekannte Kürzel bleiben groß)
 const ACRONYMS = new Set(['UAE', 'XRG', 'CMA', 'CGM', 'EF', 'BMC', 'NSN', 'DSM', 'MBH', 'JCL', 'TDT', 'UNO', 'X', 'BB', 'SD',
