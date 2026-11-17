@@ -64,7 +64,7 @@ export function Riders({ c }) {
         ${showRank && html`<option value="rank">Sortiert nach Pool-Rang</option>`}
       </select>
     </div>
-    <div class="scroll-x"><table class="tbl athletes-tbl">
+    <div class="scroll-x"><table class="tbl people-tbl">
       <thead><tr><th class="num hide-sm col-no">#</th><th>Athlet</th><th class="col-owner">Kader</th><th class="num hide-sm col-res">Ergebnisse</th><th class="num col-pts" title=${recent ? 'Fantasy-Punkte der letzten 30 Tage' : `Fantasy-Punkte ${year}`}>Pkt.</th></tr></thead>
       <tbody>${list.slice(0, limit).map((r, i) => {
         const m = c.managerMap[c.owner[r.id]];
