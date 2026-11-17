@@ -6,6 +6,8 @@
 ## Arbeitsregeln
 
 - Sprache der App und der Antworten: Deutsch. Die Nutzer sind keine Entwickler – kurz, verständlich, ohne Fachjargon antworten.
+- **Beide Apps mitdenken:** Bei jeder Änderung prüfen, ob sie auch für UCI Fantasy (github.com/Schubidu93/UCI-Fantasy) sinnvoll ist,
+  und dem Nutzer dann kurz vorschlagen, sie dort zu übernehmen (ausdrücklicher Wunsch des Nutzers).
 - Wünsche kritisch prüfen: Ist eine Anforderung unsinnig, widersprüchlich oder schadet sie der App, das offen sagen und nicht
   umsetzen, sondern kurz begründen und eine bessere Lösung vorschlagen (ausdrücklicher Wunsch des Nutzers).
 - **Regeln mitziehen:** Bei jeder Änderung an Spielregeln, Wertung, Positionen, Draft, Waiver, Tausch, Spieltagen,

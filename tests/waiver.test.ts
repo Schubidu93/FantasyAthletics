@@ -92,4 +92,32 @@ describe("Waiver", () => {
     expect((await db.one("select transfer_phase($1) p", [L.id])).p.phase).toBe("waiver");
     await expect(db.query("select free_move($1, 'wa-6', 'wa-2')", [L.id])).rejects.toThrow(/keine freie Phase/);
   });
+
+  it("Tausch: Push an beide Seiten bei Angebot, Zusage und Ausführung", async () => {
+    const L = await league({});
+    for (const u of [alice, bob]) await db.query("insert into push_subscriptions (endpoint, user_id, p256dh, auth) values ($1, $2, 'k', 'a')", [String(u), u]);
+    const msgs = async (u: string) => (await db.all("select title, body from notifications where user_id = $1 order by id", [u])).map((m) => m.title);
+    const id = (await db.one("select propose_trade($1, $2, '{wa-1}', '{wa-3}') id", [L.id, L.bob])).id;
+    expect(await msgs(bob)).toEqual(["🔁 Neues Tauschangebot"]);
+    await as(db, bob);
+    await db.query("select respond_trade($1, true)", [id]);
+    expect(await msgs(alice)).toEqual(["✅ Tausch angenommen"]);
+    // Vetofrist vorbei, Stichtag erreicht → Tausch wird ausgeführt
+    await db.query("update trades set accepted_at = now() - interval '2 days' where id = $1", [id]);
+    await db.query("update matchdays set deadline = now(), waiver_deadline = now() where id = $1", [L.md]);
+    await db.query("select process_due(null)");
+    expect(await roster(L.alice)).toEqual(["wa-2", "wa-3"]);
+    expect((await msgs(alice)).at(-1)).toBe("✅ Tausch ausgeführt");
+    expect((await msgs(bob)).at(-1)).toBe("✅ Tausch ausgeführt");
+    const body = (await db.one("select body from notifications where user_id = $1 order by id desc limit 1", [bob])).body;
+    expect(body).toBe("Neu im Kader: Athlet 1 · abgegeben: Athlet 3");
+  });
+
+  it("Tausch zurückgezogen: Empfänger bekommt Push", async () => {
+    const L = await league({});
+    await db.query("insert into push_subscriptions (endpoint, user_id, p256dh, auth) values ('b', $1, 'k', 'a')", [bob]);
+    const id = (await db.one("select propose_trade($1, $2, '{wa-1}', '{wa-3}') id", [L.id, L.bob])).id;
+    await db.query("select cancel_trade($1)", [id]);
+    expect((await db.one("select title from notifications where user_id = $1 order by id desc limit 1", [bob])).title).toBe("↩️ Tauschangebot zurückgezogen");
+  });
 });
