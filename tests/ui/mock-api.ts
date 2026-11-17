@@ -108,6 +108,11 @@ async function selectTable(c: pg.PoolClient, table: string, q: URLSearchParams, 
       }).join(", ");
       continue;
     }
+    if (k === "or") {   // or=(spalte.op.wert,spalte.op.wert)
+      const parts = v.replace(/^\(|\)$/g, "").split(",").map((x) => { const d = x.indexOf("."); return filterSql(x.slice(0, d), x.slice(d + 1), params); });
+      where.push(`(${parts.join(" or ")})`);
+      continue;
+    }
     where.push(filterSql(k, v, params));
   }
   if (range) {
