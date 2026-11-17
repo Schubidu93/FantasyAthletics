@@ -184,6 +184,10 @@ alter table scoring_config alter column record_er set default 100;
 alter table scoring_config alter column record_wr set default 200;
 update scoring_config set record_er = 100, record_wr = 200 where record_dr = 50 and record_er = 80 and record_wr = 100;
 insert into scoring_config (id) values (1) on conflict do nothing;
+-- Pool ab 950 WA-Punkten (seit 17.11.2026); nur einmal umstellen, spätere Änderungen des Admins bleiben
+alter table scoring_config alter column pool_threshold set default 950;
+update scoring_config set pool_threshold = 950, updated_at = now()
+ where pool_threshold = 1000 and updated_at < timestamptz '2026-11-17 06:00+01';
 
 -- Rohdaten der Ergebnisse von World Athletics (ein Eintrag pro Lauf eines Athleten)
 create table if not exists wa_results (

@@ -80,7 +80,7 @@ export function Rules({ c }) {
       <summary><h3>Athletenpool und Aufstellung</h3></summary>
       <ul>
         <li><strong>Pool:</strong> deutsche Läuferinnen und Läufer, die in der DE-Topliste (Senioren) des aktuellen Jahres oder des Vorjahres
-          in einer Laufdisziplin ab 800 m (inkl. Halle, Hindernis und Straße) mindestens ${cfg ? cfg.pool_threshold : 1000} WA-Punkte erreicht haben.
+          in einer Laufdisziplin ab 800 m (inkl. Halle, Hindernis und Straße) mindestens ${cfg ? cfg.pool_threshold : 950} WA-Punkte erreicht haben.
           ${l.gender !== 'mixed' ? `In dieser Liga nur ${GENDER_LABEL[l.gender]}.` : ''} Der Pool wird täglich aktualisiert; neue Athleten sind automatisch frei.</li>
         <li><strong>Disziplingruppe:</strong> 800 m, 1500 m, 5000 m, 10.000 m, Marathon oder Hindernis. Maßgeblich sind die Punkte im Vorjahr
           der Saison (Saison ${gy} → Punkte ${gy - 1}): Die Gruppe, in der ein Athlet die meisten Punkte geholt hat, gilt die ganze Saison
@@ -115,7 +115,7 @@ export function Rules({ c }) {
           qualifiziert (Q oder q) = fester Wert, ausgeschieden = Gesamtplatz der Runde (erst alle Qualifizierten, dann die anderen nach Zeit).</li>
         <li><strong>Meisterschaft im offenen Rennen</strong> (z. B. Deutsche Marathon-Meisterschaft im Hannover-Marathon): World Athletics führt
           das offene Rennen und die Meisterschaft getrennt, jeweils mit eigener Kategorie und eigenem Platz. Die App übernimmt beides; es zählt der höhere
-          Wert aus Platz im Rennen und Meisterschaftsplatz (z. B. Kategorie B, Platz 1). Fehlt etwas, kann der Admin den Meisterschaftsplatz eintragen.</li>
+          Wert aus Platz im Rennen und Meisterschaftsplatz (z. B. Kategorie B, Platz 1). Fehlt etwas, kann der Admin den Meisterschaftsplatz eintragen. Angezeigt wird der Meisterschaftsplatz, der Platz im Gesamtfeld klein darunter; Meistertitel tragen einen 🏆.</li>
         <li><strong>Finals mit mehreren Läufen</strong> (z. B. 10.000 m in zwei Läufen): Platz über alle Läufe nach Zeit, gewertet wie ein Finale.</li>
         <li><strong>Cross:</strong> World Athletics vergibt hier statt WA-Punkten für die Zeit einen festen Wert je Platz und Kategorie
           (z. B. GL-Sieg 1200, GL-3. 1165). Gewertet wird wie eine Leistung: (Wert − ${cfg ? cfg.perf_threshold : 1000}, nur darüber)

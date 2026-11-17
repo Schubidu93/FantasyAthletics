@@ -11,11 +11,19 @@ const shortDate = (d) => (d ? `${d.slice(8, 10)}.${d.slice(5, 7)}.` : '');
 const leagueId = () => (location.hash.match(/^#\/league\/([^/]+)/) || [])[1];
 
 // Platz: gewerteter Platz (bei geteilten Finals kombiniert), Medaillen für 1–3 in Finals
+// Meisterschaft im offenen Rennen: Meisterschaftsplatz zählt, Platz im Gesamtfeld klein darunter
 function placeLabel(x) {
-  if (!x.place) return x.remark ? html`<span class="muted">${x.remark}</span>` : '';
+  const p = x.champ_place || x.place;
+  if (!p) return x.remark ? html`<span class="muted">${x.remark}</span>` : '';
   const final = (x.race || 'F') === 'F';
-  return final && x.place <= 3 ? html`<span class=${`medal m${x.place}`}>${x.place}.</span>` : `${x.place}.`;
+  const main = final && p <= 3 ? html`<span class=${`medal m${p}`}>${p}.</span>` : `${p}.`;
+  return x.champ_place && x.place && x.place !== x.champ_place
+    ? html`${main}<small class="muted place-sub">${x.place}. ges.</small>` : main;
 }
+// Sieg bei einer Meisterschaft (eigene Wertung im offenen Rennen oder Finale eines Meisterschafts-Wettkampfs)
+const isTitle = (x) => x.champ_place === 1
+  || (!x.champ_place && x.place === 1 && (x.race || 'F') === 'F' && /championships?\b|\bCh\.|meisterschaft/i.test(x.competition || '')
+      && !/split time/i.test(x.competition || '') && x.remark !== 'ST');
 // Zusatz zum Lauf: kombinierte Platzierung bzw. Wertung der Runde vor dem Finale
 // Wettkampf kurz: Name vor dem ersten Komma, dazu der Ort (letzter Teil), wenn er nicht schon im Namen steht
 function compShort(c) {
@@ -123,7 +131,7 @@ export function RiderModal() {
             r.birth_date && `Jg. ${r.birth_date.slice(0, 4)} (${Math.floor((Date.now() - new Date(r.birth_date)) / 31557600000)} J.)`].filter(Boolean).join(' · ')}</div>`}
           ${r && html`<div class="small"><strong>${r.pool_rank ? `Pool-Platz ${r.pool_rank}` : 'Nicht im aktuellen Pool'}</strong>${r.best_mark
             ? ` · Bestleistung ${discLabel(r.best_discipline)} ${r.best_mark} (${Math.round(r.ranking_points || 0)} WA-Punkte)` : ''}</div>`}
-          ${y && html`<div class="small">${y}: ${fmtPts(total)} Punkte${sr ? ` · Platz ${sr.season_rank} von ${sr.athletes}` : ''}</div>`}
+          ${y && html`<div class="small">${y}: ${fmtPts(total)} Punkte${sr ? ` · Platz ${sr.season_rank}` : ''}</div>`}
         </div>
         <button class="ghost small" onClick=${() => setSlug(null)} aria-label="Schließen">✕</button>
       </div>
@@ -154,13 +162,14 @@ export function RiderModal() {
             <button type="button" class=${`sort-head res-pts ${byPoints ? 'active' : ''}`} onClick=${() => setByPoints(true)}>Pkt.</button></div>
           <div class="res-table">${shown.map((x) => html`<div key=${x.id} class=${`res-row ${L && x.wa_competition_id ? 'clickable' : ''}`} onClick=${() => go(x)}>
             <span class="res-date">${shortDate(x.date)}</span>
-            <span class="res-what"><b>${x.relay ? `Staffel ${RELAYS[x.relay]?.label || x.relay}` : discWithKm(x.discipline, x.competition)}${x.race && x.race !== 'F' ? ` · ${raceLabel(x.race)}` : ''} · ${x.mark || '–'}</b>
-              ${(x.record || x.champ_place || Number(x.pts?.pb_points) > 0) && html`<span class="res-tags">
-                ${x.champ_place && html`<span>${x.champ_place === 1 ? '🏆 Meister' : `Meisterschaft: ${x.champ_place}. Platz`}</span>`}
+            <span class="res-what"><b>${x.relay ? `Staffel ${RELAYS[x.relay]?.label || x.relay}` : discWithKm(x.discipline, x.competition)}${x.race && x.race !== 'F' ? ` · ${raceLabel(x.race)}` : ''} · <span class="nowrap">${x.mark || '–'}</span></b>
+              ${(x.record || isTitle(x) || Number(x.pts?.pb_points) > 0) && html`<span class="res-tags">
+                ${isTitle(x) && html`<span>🏆 Meister</span>`}
                 ${x.record && html`<span><span class="badge b-rec">${x.record}</span> ${RECORD[x.record]}</span>`}
                 ${Number(x.pts?.pb_points) > 0 && html`<span>${Number(x.pts.pb_points) < Number(x.pbFull)
                   ? html`<span class="badge b-pb">=PB</span> Bestleistung eingestellt` : html`<span class="badge b-pb">PB</span> Bestleistung`}</span>`}</span>`}
-              <small title=${x.competition}>${x.country ? `${flag(x.country)} ` : ''}${compShort(x.competition)}${x.category ? html` <${CatBadge} cat=${x.category} />` : ''}</small>
+              <small title=${x.competition}>${x.country ? `${flag(x.country)} ` : ''}${compShort(x.competition)}${(x.champ_category || x.category) ? html` <${CatBadge} cat=${x.champ_category || x.category} />` : ''}</small>
+              ${x.champ_place && html`<small class="muted">Gesamtfeld: ${x.place ? `${x.place}. Platz` : '–'}${x.category ? ` (Kat. ${x.category})` : ''}</small>`}
               ${x.relay && html`<small class="muted">gewertet als ${discLabel(x.discipline)} (Durchschnitt je Läufer), 1/${RELAYS[x.relay]?.legs || 3} der Punkte</small>`}
               ${runNote(x) && html`<small class="muted">${runNote(x)}</small>`}
               ${(x.result_score || x.pts) && html`<small class="muted">${[x.result_score && `${x.result_score} WA-P.`, x.pts && [
