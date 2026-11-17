@@ -419,3 +419,11 @@ select.mini { font-size: .75rem; padding: 2px 6px; width: auto; min-height: 0; }
 .pb-tbl tr.clickable { cursor: pointer; }
 .mini-label { font-size: .75rem; display: inline-flex; gap: .3rem; align-items: center; }
 .place-sub { display: block; font-size: .68rem; line-height: 1.1; white-space: nowrap; }
+
+/* Team → Punkte */
+.pts-list .pts-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.pts-name { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.pts-name .linkish { text-align: left; font-weight: 600; }
+.pts-val { display: flex; flex-direction: column; align-items: flex-end; white-space: nowrap; min-width: 4.5em; }
+.pts-bar { display: block; height: 4px; background: var(--surface-2); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+.pts-bar > span { display: block; height: 100%; background: var(--accent); }
