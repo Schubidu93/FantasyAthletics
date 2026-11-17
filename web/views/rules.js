@@ -187,6 +187,8 @@ export function Rules({ c }) {
       <ul>
         <li><strong>Quelle:</strong> World Athletics – deutsche Toplisten und die Ergebnislisten der Athleten.</li>
         <li><strong>Athletenpool:</strong> täglich um 6 Uhr aus den Toplisten.</li>
+        <li><strong>Athleten hinzufügen:</strong> Der Admin kann einzelne Athleten per WA-ID oder Namen hinzufügen (z. B. unter der Pool-Grenze);
+          sie sind danach dauerhaft im Pool, ihre Ergebnisse und Bestleistungen werden wie bei allen anderen geladen.</li>
         <li><strong>Bestleistungen:</strong> täglich nach dem Athletenpool je Athlet von World Athletics (für Profil und PB-Bonus).</li>
         <li><strong>Rekorde:</strong> täglich nach dem Athletenpool aus den All-time-Listen von World Athletics für Deutschland, Europa und die Welt.</li>
         <li><strong>Kalender:</strong> täglich um 6 Uhr die kommenden Wettkämpfe mit Laufdisziplinen aus dem Kalender von World Athletics –

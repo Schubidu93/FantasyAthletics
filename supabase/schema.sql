@@ -118,6 +118,21 @@ create table if not exists toplist_entries (
   primary key (athlete_id, year, discipline)
 );
 
+-- Von Hand hinzugefügte Athleten (Admin): immer im Pool, auch ohne Toplisteneintrag über der Schwelle
+alter table athletes add column if not exists manual boolean not null default false;
+-- Aufträge „Athlet hinzufügen“ (Admin → Athleten): WA-ID, Profil-Link oder Name; erledigt der Ablauf add-athlete.yml
+create table if not exists athlete_requests (
+  id         bigint generated always as identity primary key,
+  query      text not null,
+  gender     text not null check (gender in ('men', 'women')),
+  status     text not null default 'offen' check (status in ('offen', 'läuft', 'fertig', 'mehrdeutig', 'fehler')),
+  message    text,
+  athlete_id text,
+  created_by uuid,
+  created_at timestamptz not null default now(),
+  done_at    timestamptz
+);
+
 -- Persönliche Bestleistungen laut World Athletics (Profil) und die beste Leistung vor 2025 je Disziplin
 -- (Grundlage für den PB-Bonus; ab 2025 kennt die App alle Ergebnisse selbst). Füllt importer/sync-pbs.ts.
 create table if not exists athlete_pbs (
@@ -1920,6 +1935,16 @@ begin
            where t.year in (y, y - 1) and d.event_group is not null
            order by t.athlete_id, t.score desc, t.year desc) b
    where b.athlete_id = r.id;
+  -- von Hand hinzugefügte Athleten ohne Toplisteneintrag: beste WA-Leistung der letzten zwei Jahre
+  update athletes r set ranking_points = b.score, best_discipline = b.discipline, best_mark = b.mark,
+                      best_year = b.yr, event_group = coalesce(r.event_group, b.g), group_basis = coalesce(r.group_basis, 'best')
+    from (select distinct on (w.athlete_id) w.athlete_id, w.discipline, w.mark, w.result_score score,
+                 extract(year from w.date)::int as yr, _result_group(w.discipline, w.competition) g
+            from wa_results w join athletes a on a.id = w.athlete_id
+           where a.manual and extract(year from w.date) in (y, y - 1) and w.result_score > 0
+             and _result_group(w.discipline, w.competition) is not null
+           order by w.athlete_id, w.result_score desc) b
+   where b.athlete_id = r.id and r.ranking_points is null;
   -- 3. neue Athleten: erste gute Leistung im Spieljahr
   update athletes a set event_group = f.g, group_basis = 'first'
     from (select distinct on (w.athlete_id) w.athlete_id, _result_group(w.discipline, w.competition) g
@@ -1947,8 +1972,8 @@ begin
            order by athlete_id, pts desc, best desc nulls last) p
    where p.athlete_id = a.id and p.total > 0;
   update athletes r set pool_rank = x.rk
-    from (select id, row_number() over (order by coalesce(group_points, 0) desc, ranking_points desc, name) rk
-            from athletes where ranking_points >= c.pool_threshold) x
+    from (select id, row_number() over (order by coalesce(group_points, 0) desc, ranking_points desc nulls last, name) rk
+            from athletes where ranking_points >= c.pool_threshold or manual) x
    where x.id = r.id;
   get diagnostics n = row_count;
   return n;
@@ -2902,6 +2927,23 @@ language sql stable security definer set search_path = public as $$
    order by c.start_date desc limit 200;
 $$;
 
+-- Athlet hinzufügen (Admin): Auftrag anlegen und den Ablauf „Athlet hinzufügen“ starten
+create or replace function request_athlete(p_query text, p_gender text) returns bigint
+language plpgsql security definer set search_path = public as $$
+declare v_id bigint;
+begin
+  perform _require_any_admin();
+  if coalesce(trim(p_query), '') = '' then raise exception 'Bitte WA-ID, Profil-Link oder Namen angeben.'; end if;
+  if p_gender not in ('men', 'women') then raise exception 'Bitte Männer oder Frauen wählen.'; end if;
+  insert into athlete_requests (query, gender, created_by) values (trim(p_query), p_gender, auth.uid()) returning id into v_id;
+  begin
+    perform dispatch_workflow('add-athlete.yml');
+  exception when others then
+    raise warning 'Ablauf „Athlet hinzufügen“ nicht gestartet: %', sqlerrm;   -- Auftrag bleibt offen (Start per Knopfdruck möglich)
+  end;
+  return v_id;
+end $$;
+
 create or replace function delete_manual_result(p_id bigint) returns void
 language plpgsql security definer set search_path = public as $$
 declare v_date date;
@@ -3193,6 +3235,7 @@ alter table admin_log       enable row level security;
 alter table toplist_entries enable row level security;
 alter table athlete_pbs enable row level security;
 alter table athlete_pb_before enable row level security;
+alter table athlete_requests enable row level security;
 alter table wa_results      enable row level security;
 alter table disciplines     enable row level security;
 alter table placing_scores  enable row level security;
@@ -3213,7 +3256,7 @@ begin
   -- öffentliche Stammdaten: lesbar für angemeldete Nutzer
   foreach t in array array['athletes', 'competitions', 'results', 'sync_status', 'athlete_season_stats', 'toplist_entries',
                            'wa_results', 'disciplines', 'placing_scores', 'scoring_config', 'cross_distance_factors', 'scoring_coefficients',
-                           'calendar_events', 'athlete_pbs', 'athlete_pb_before'] loop
+                           'calendar_events', 'athlete_pbs', 'athlete_pb_before', 'athlete_requests'] loop
     execute format('drop policy if exists read_all on %I', t);
     execute format('create policy read_all on %I for select to authenticated using (true)', t);
   end loop;

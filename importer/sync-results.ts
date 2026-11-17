@@ -38,7 +38,10 @@ await run(db, async () => {
     db.from("roster_entries").select("athlete_id").is("released_on", null).order("id").range(a, b));
   const extra = [...new Set(rostered.map((r) => r.athlete_id))].filter((s) => !pool.some((p) => p.id === s));
   const more = extra.length ? (await db.from("athletes").select("id, wa_id, name").in("id", extra)).data ?? [] : [];
-  const athletes: Athlete[] = [...pool, ...more].filter((a) => a.wa_id || /^wa-\d+$/.test(a.id))
+  // ATHLETE_IDS (z. B. „Athlet hinzufügen“): nur diese Athleten laden
+  const only = (process.env.ATHLETE_IDS || "").split(",").map((s) => s.trim()).filter(Boolean);
+  const chosen = only.length ? (await db.from("athletes").select("id, wa_id, name").in("id", only)).data ?? [] : [...pool, ...more];
+  const athletes: Athlete[] = chosen.filter((a) => a.wa_id || /^wa-\d+$/.test(a.id))
     .map((a) => ({ slug: a.id, id: Number(a.wa_id ?? a.id.slice(3)), name: a.name }));
   if (!athletes.length) return "Keine Athleten im Pool – zuerst den Athletenpool laden";
   const names = new Map(athletes.map((a) => [a.slug, a.name]));
