@@ -159,6 +159,7 @@ export function Rules({ c }) {
         <li>Alle Wechsel gelten ab dem nächsten Spieltag – im laufenden Spieltag bleibt dein Kader${lineup ? ' samt Aufstellung' : ''} unverändert. Später gestellte Anträge gelten für den folgenden Spieltag.
           Fristen mit Countdown siehst du unter Team und Waiver, alle Zeiträume im Spielplan.</li>
         <li>Jeden Montag um 9 Uhr gibt es eine <strong>Wochen-Zusammenfassung</strong> per Push: deine Punkte der letzten 7 Tage, Tabellenplatz und bester Athlet.</li>
+        <li>Holt einer deiner Athleten Punkte, die für einen Spieltag zählen${lineup ? ' (also wenn er aufgestellt ist)' : ''}, bekommst du kurz nach dem Ergebnisabruf eine Push-Nachricht <strong>„Neue Punkte“</strong>.</li>
         <li>Ein Spieltag schließt nach seinem Ende und wird 7 Tage später eingefroren; bis dahin werden Korrekturen automatisch übernommen.</li>
         <li>Gleichstand in der Tabelle: zuerst mehr Spieltagssiege, dann höchster Einzelspieltag${draftCosts(l) ? ', dann weniger ausgegebenes Budget' : ''}.</li>
       </ul>

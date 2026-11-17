@@ -680,6 +680,17 @@ create table if not exists notifications (
 alter table notifications add column if not exists expires_at timestamptz;   -- danach nicht mehr senden (z. B. „Du bist dran“)
 create index if not exists notifications_unsent on notifications (created_at) where sent_at is null;
 
+-- Schon gemeldete Punkte („Neue Punkte“-Push): je Manager, Athlet, Wettkampf und Lauf genau einmal
+create table if not exists point_pushes (
+  manager_id     uuid not null references managers (id) on delete cascade,
+  athlete_id     text not null,
+  competition_id text not null,
+  label          text not null,
+  created_at     timestamptz not null default now(),
+  primary key (manager_id, athlete_id, competition_id, label)
+);
+alter table point_pushes enable row level security;   -- keine Policies: nur intern
+
 -- =====================================================================
 -- Hilfsfunktionen
 -- =====================================================================
@@ -2232,6 +2243,17 @@ language sql stable security definer set search_path = public as $$
    order by r.athlete_id;
 $$;
 
+-- Punkte der letzten Tage (Standard 30) – für „heiße freie Athleten“
+create or replace function athlete_points_recent(p_gender text, p_days int default 30)
+returns table (athlete_id text, points numeric, results int)
+language sql stable security definer set search_path = public as $$
+  select r.athlete_id, sum(r.points), count(*)::int
+    from results r join athletes x on x.id = r.athlete_id
+   where _gender_ok(p_gender, x.gender) and r.result_date > current_date - p_days and r.points > 0
+   group by r.athlete_id
+   order by r.athlete_id;
+$$;
+
 -- Saisonwertung je Jahr fest gespeichert (Rang und Punkte je Athlet, getrennt nach Männern/Frauen),
 -- damit das Athletenfenster sie sofort zeigt. Wird nach jedem Ergebnisabruf neu berechnet.
 create table if not exists athlete_season_stats (
@@ -2681,6 +2703,45 @@ end $$;
 
 -- Täglich nach dem Ergebnisabruf (nur Service-Key): Spieltage abschließen und
 -- 7 Tage nach Abschluss einfrieren.
+-- Push „Neue Punkte“: neue Punkte von Athleten im eigenen Kader, die für einen Spieltag zählen
+-- (bei Aufstellungs-Ligen nur Aufgestellte), höchstens 14 Tage alt; eine Nachricht je Manager und Lauf
+create or replace function notify_new_points() returns int
+language plpgsql security definer set search_path = public as $$
+declare r record; n int := 0;
+begin
+  create temp table if not exists _np (league_id uuid, league_name text, manager_id uuid, athlete_id text,
+                                       competition_id text, label text, points numeric) on commit drop;
+  delete from _np;
+  insert into _np
+  select l.id, l.name, x.manager_id, x.athlete_id, x.competition_id, x.label, x.points
+    from leagues l cross join lateral _score_rows(l.id) x
+   where l.status = 'active' and x.points > 0 and x.result_date >= current_date - 14
+     and not exists (select 1 from point_pushes p where p.manager_id = x.manager_id and p.athlete_id = x.athlete_id
+                       and p.competition_id = x.competition_id and p.label = x.label);
+  for r in
+    with per as (   -- je Athlet und Wettkampf zusammenfassen (z. B. Vorlauf + Finale)
+      select league_id, league_name, manager_id, athlete_id, competition_id, sum(points) pts
+        from _np group by 1, 2, 3, 4, 5)
+    select per.league_id, per.league_name, per.manager_id,
+           string_agg(_rname(per.athlete_id) || ' +' || replace(round(per.pts, 2)::text, '.', ',')
+                      || coalesce(' (' || c.name || ')', ''), ' · ' order by per.pts desc) txt
+      from per left join competitions c on c.id = per.competition_id
+     group by 1, 2, 3
+  loop
+    perform _notify(r.manager_id, '📈 Neue Punkte', r.league_name || ': ' || r.txt, '#/league/' || r.league_id || '/points');
+    n := n + 1;
+  end loop;
+  insert into point_pushes (manager_id, athlete_id, competition_id, label)
+  select distinct manager_id, athlete_id, competition_id, label from _np on conflict do nothing;
+  if n > 0 and exists (select 1 from notifications where sent_at is null) then
+    begin
+      perform dispatch_workflow('push.yml');
+    exception when others then null;    -- ohne Token: Versand beim nächsten Zeitplaner-Lauf
+    end;
+  end if;
+  return n;
+end $$;
+
 create or replace function run_maintenance() returns void
 language plpgsql security definer set search_path = public as $$
 declare md matchdays;
@@ -2701,6 +2762,10 @@ begin
     update matchdays set frozen = true where id = md.id;
   end loop;
   update leagues set status = 'finished' where status = 'active' and season_end < current_date;
+  begin
+    perform notify_new_points();
+  exception when others then raise warning 'notify_new_points: %', sqlerrm;
+  end;
   update sync_status set last_run = now(), ok = true, message = null where id = 1;
 end $$;
 
@@ -3321,7 +3386,7 @@ begin
     'dispatch_workflow(text,jsonb)', 'refresh_season_stats(int)', '_lineup_swap(uuid,uuid,text,text,date)', 'weekly_summary()', 'scheduler_tick()', '_notify(uuid,text,text,text)', '_notify_turn(uuid,uuid,uuid,text,timestamptz)', '_check_trade_drops(uuid,text[],text[],int)', '_open_roster_slots(uuid)', '_reset_default_deadlines(uuid,text)', '_snake_pick(uuid,text)', '_score_rows(uuid)',
     '_claim_valid(waiver_claims,leagues)', '_execute_claim(waiver_claims,leagues,matchdays)',
     '_process_waivers(uuid)', '_process_trades(uuid)', '_league_points(uuid)', '_league_table(uuid)',
-    '_waiver_order(uuid)', 'run_maintenance()', 'fit_scoring_coefficients(int)', 'apply_records(jsonb)'] loop
+    '_waiver_order(uuid)', 'run_maintenance()', 'notify_new_points()', 'fit_scoring_coefficients(int)', 'apply_records(jsonb)'] loop
     execute format('revoke execute on function %s from public', f);
     begin
       execute format('revoke execute on function %s from anon, authenticated', f);
@@ -3353,5 +3418,13 @@ begin
   if exists (select 1 from results) and not exists (select 1 from schema_changes where name = 'placing_factor_0.2') then
     update scoring_config set placing_factor = 0.2, updated_at = now() where placing_factor = 0.1;
     insert into schema_changes (name) values ('placing_factor_0.2');
+  end if;
+  -- „Neue Punkte“-Push startet ab jetzt: bisherige Punkte als schon gemeldet eintragen (kein Schwall beim Einführen)
+  if not exists (select 1 from schema_changes where name = 'point_pushes_seed') then
+    insert into point_pushes (manager_id, athlete_id, competition_id, label)
+    select distinct x.manager_id, x.athlete_id, x.competition_id, x.label
+      from leagues l cross join lateral _score_rows(l.id) x where l.status = 'active' and x.points > 0
+    on conflict do nothing;
+    insert into schema_changes (name) values ('point_pushes_seed');
   end if;
 end $$;

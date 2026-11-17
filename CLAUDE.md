@@ -93,6 +93,13 @@
   wie bei UCI Fantasy `riders`/`pcs_slug`/`rider_slug`/`races`/`uci_*` – die Umbenennung steht oben in `schema.sql`.
   In App-Code heißen manche Variablen noch `rider…` (z. B. `RiderCell`, `riderMap`). Daten ab 2025.
 
+## Push „Neue Punkte“ und heiße freie Athleten
+
+- `notify_new_points()` (aus `run_maintenance` nach jedem Ergebnisabruf): neue Zeilen aus `_score_rows` (zählen für einen Spieltag,
+  bei Aufstellung nur Aufgestellte, höchstens 14 Tage alt) → eine Nachricht je Manager; gemeldet wird je Manager/Athlet/Wettkampf/Lauf
+  einmal (`point_pushes`). Beim Einführen wurden alle bisherigen Punkte als gemeldet eingetragen.
+- Athleten → „🔥 Heiße freie Athleten“: `athlete_points_recent(p_gender, p_days)`; 🔥 = die 10 freien mit den meisten Punkten der letzten 30 Tage.
+
 ## Feedback
 
 - App: Mehr → Feedback (`web/views/feedback.js`), Bilder werden im Browser verkleinert (JPEG, max. 1600 px).

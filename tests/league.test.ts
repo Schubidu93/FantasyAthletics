@@ -118,6 +118,24 @@ describe("Aufstellung und Wertung", () => {
     expect(await db.all("select slot, athlete_id from lineups where manager_id = $1 order by slot", [L.alice]))
       .toEqual([{ slot: "800:M", athlete_id: "wa-1" }, { slot: "WC1", athlete_id: "wa-8" }]);
   });
+
+  it("Push „Neue Punkte“: einmal je neuem Ergebnis, nur für Aufgestellte", async () => {
+    await db.query("insert into push_subscriptions (endpoint, user_id, p256dh, auth) values ('e1', $1, 'k', 'a')", [alice]);
+    await db.query("select set_lineup($1, $2)", [md, { "800:M": "wa-1" }]);
+    await db.query("update matchdays set starts_on = $2, deadline = now() - interval '1 hour' where id = $1", [md, day(-1)]);
+    await db.query("update roster_entries set acquired_on = $2 where league_id = $1", [L.id, day(-30)]);
+    await db.query(`insert into wa_results (athlete_id, date, competition, discipline, category, race, wa_race, place, result_score, wa_competition_id)
+                    values ('wa-1', $1, 'Meeting', '800 Metres', 'A', 'F', 'F', 1, 1100, 1),
+                           ('wa-3', $1, 'Meeting', '1500 Metres', 'A', 'F', 'F', 1, 1200, 1)`, [day(0)]);
+    await db.query("select rebuild_results(null)");
+    expect((await db.one("select notify_new_points() n")).n).toBe(1);
+    const msg = await db.all("select title, body, url from notifications where user_id = $1", [alice]);
+    expect(msg).toHaveLength(1);
+    expect(msg[0].title).toBe("📈 Neue Punkte");
+    expect(msg[0].body).toMatch(/^Liga: M 800 \+200,00/);   // wa-3 nicht aufgestellt → keine Meldung
+    expect(msg[0].url).toMatch(/\/points$/);
+    expect((await db.one("select notify_new_points() n")).n).toBe(0);   // nicht doppelt
+  });
 });
 
 describe("Draft", () => {
