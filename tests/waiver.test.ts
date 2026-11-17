@@ -1,0 +1,95 @@
+// Waiver (Rangfolge und FAAB) und freie Phase: Anträge, Auswertung am Stichtag, Kader danach
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { as, athlete, createUser, freshDb, type Db } from "./db";
+
+let db: Db;
+let alice: string, bob: string;
+const Y = new Date().getFullYear();
+const day = (n: number) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
+
+beforeEach(async () => {
+  db = await freshDb();
+  alice = await createUser(db, "alice");
+  bob = await createUser(db, "bob");
+  for (const [n, g, d, p] of [[1, "men", "800 Metres", 1150], [2, "men", "1500 Metres", 1140], [3, "men", "800 Metres", 1130],
+    [4, "men", "1500 Metres", 1120], [5, "men", "800 Metres", 1110], [6, "men", "5000 Metres", 1100]] as const) {
+    await athlete(db, n, `Athlet ${n}`, g, d, p);
+  }
+  await db.query("select refresh_pool(null)");
+});
+afterEach(async () => { await db.end(); });
+
+async function league(settings: Record<string, unknown>) {
+  await as(db, alice);
+  const id = (await db.one("select create_league('Liga', 'Team Alice', $1) id", [{ gender: "men", draft_mode: "offline", ...settings }])).id;
+  const code = (await db.one("select invite_code from leagues where id = $1", [id])).invite_code;
+  await as(db, bob);
+  await db.query("select join_league($1, 'Team Bob')", [code]);
+  await as(db, alice);
+  const m = await db.all("select id, team_name from managers where league_id = $1", [id]);
+  const L = { id, alice: m.find((x) => x.team_name === "Team Alice").id, bob: m.find((x) => x.team_name === "Team Bob").id };
+  for (const [mgr, a] of [[L.alice, "wa-1"], [L.alice, "wa-2"], [L.bob, "wa-3"], [L.bob, "wa-4"]]) {
+    await db.query("insert into roster_entries (league_id, manager_id, athlete_id, price, source, acquired_on) values ($1, $2, $3, 10, 'offline', $4)",
+      [id, mgr, a, `${Y}-01-01`]);
+  }
+  // Kader nur teilweise gefüllt – reicht für die Tests, Abgaben sind trotzdem angegeben
+  await db.query("update leagues set status = 'active' where id = $1", [id]);
+  const md = (await db.one("select upsert_matchday($1, null, 'Spieltag 1', $2, $3) id", [id, day(3), day(20)])).id;
+  return { ...L, md };
+}
+const roster = async (mgr: string) => (await db.all(
+  "select athlete_id from roster_entries where manager_id = $1 and released_on is null order by athlete_id", [mgr])).map((r) => r.athlete_id);
+// Waiver-Frist erreicht (Stichtag selbst noch offen) → Auswertung wie beim Öffnen der App
+const runWaivers = async (md: string) => {
+  await db.query("update matchdays set waiver_deadline = now() where id = $1", [md]);
+  await db.query("select process_due(null)");
+};
+
+describe("Waiver", () => {
+  it("Rangfolge: beide wollen denselben Athleten – einer bekommt ihn, der andere seinen zweiten Wunsch", async () => {
+    const L = await league({ waiver_mode: "priority" });
+    await db.query("select submit_waiver($1, 'wa-5', 'wa-1')", [L.id]);
+    await as(db, bob);
+    await db.query("select submit_waiver($1, 'wa-5', 'wa-3')", [L.id]);
+    await db.query("select submit_waiver($1, 'wa-6', 'wa-3')", [L.id]);
+    await runWaivers(L.md);
+    const claims = await db.all("select m.team_name, add_athlete, status from waiver_claims c join managers m on m.id = c.manager_id order by m.team_name, add_athlete");
+    const wonFive = claims.find((c) => c.add_athlete === "wa-5" && c.status === "won");
+    expect(wonFive).toBeTruthy();
+    expect(claims.filter((c) => c.status === "won")).toHaveLength(2);   // Verlierer bekommt seinen zweiten Wunsch
+    expect(await roster(L.alice)).toHaveLength(2);
+    expect(await roster(L.bob)).toHaveLength(2);
+    const all = [...await roster(L.alice), ...await roster(L.bob)];
+    expect(new Set(all).size).toBe(4);   // kein Athlet doppelt
+    expect((await db.one("select waivers_done from matchdays where id = $1", [L.md])).waivers_done).toBe(true);
+  });
+
+  it("FAAB: höheres Gebot gewinnt, Budget sinkt", async () => {
+    const L = await league({ waiver_mode: "faab" });
+    const before = (await db.one("select budget_left from managers where id = $1", [L.bob])).budget_left;
+    await db.query("select submit_waiver($1, 'wa-5', 'wa-1', 3)", [L.id]);
+    await as(db, bob);
+    await db.query("select submit_waiver($1, 'wa-5', 'wa-3', 7)", [L.id]);
+    await runWaivers(L.md);
+    expect(await roster(L.bob)).toEqual(["wa-4", "wa-5"]);
+    expect(await roster(L.alice)).toEqual(["wa-1", "wa-2"]);
+    expect((await db.one("select budget_left from managers where id = $1", [L.bob])).budget_left).toBe(before - 7);
+  });
+
+  it("freie Phase nach der Waiver-Runde: sofort tauschen, gilt ab dem Spieltag", async () => {
+    const L = await league({ transfer_mode: "waiver_free" });
+    await runWaivers(L.md);
+    expect((await db.one("select transfer_phase($1) p", [L.id])).p.phase).toBe("free");
+    await db.query("select free_move($1, 'wa-6', 'wa-2')", [L.id]);
+    expect(await roster(L.alice)).toEqual(["wa-1", "wa-6"]);
+    await as(db, bob);
+    await expect(db.query("select free_move($1, 'wa-6', 'wa-4')", [L.id])).rejects.toThrow(/schon vergeben/);
+  });
+
+  it("nur reine Waiver-Liga: keine freie Phase", async () => {
+    const L = await league({ transfer_mode: "waiver" });
+    await runWaivers(L.md);
+    expect((await db.one("select transfer_phase($1) p", [L.id])).p.phase).toBe("waiver");
+    await expect(db.query("select free_move($1, 'wa-6', 'wa-2')", [L.id])).rejects.toThrow(/keine freie Phase/);
+  });
+});

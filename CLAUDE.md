@@ -6,6 +6,8 @@
 ## Arbeitsregeln
 
 - Sprache der App und der Antworten: Deutsch. Die Nutzer sind keine Entwickler – kurz, verständlich, ohne Fachjargon antworten.
+- Wünsche kritisch prüfen: Ist eine Anforderung unsinnig, widersprüchlich oder schadet sie der App, das offen sagen und nicht
+  umsetzen, sondern kurz begründen und eine bessere Lösung vorschlagen (ausdrücklicher Wunsch des Nutzers).
 - **Regeln mitziehen:** Bei jeder Änderung an Spielregeln, Wertung, Positionen, Draft, Waiver, Tausch, Spieltagen,
   Datenabruf (Zeiten, Quellen, Umfang) oder Liga-Einstellungen immer auch `web/views/rules.js`
   (Reiter „Regeln“) aktualisieren. Die Regeln sind dynamisch: Texte hängen von den Liga-Einstellungen
