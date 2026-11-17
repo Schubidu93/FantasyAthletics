@@ -330,6 +330,23 @@ create index if not exists calendar_events_start on calendar_events (start_date)
 alter table calendar_events add column if not exists events jsonb;              -- Laufdisziplinen laut Programm: [{gender, events[]}]
 alter table calendar_events add column if not exists events_checked_at timestamptz;
 
+-- Termine aus anderen Quellen (z. B. DLV-Terminliste), solange sie nicht im WA-Kalender stehen.
+-- Einmalig von Hand recherchiert und hier eingetragen; steht der Wettkampf später bei WA, gilt WA.
+create table if not exists extra_calendar_events (
+  name       text not null,              -- wie im WA-Kalender, z. B. „Deutsche Meisterschaften“
+  start_date date not null,
+  end_date   date,
+  venue      text,
+  source_url text not null,
+  primary key (name, start_date)
+);
+insert into extra_calendar_events (name, start_date, end_date, venue, source_url) values
+  ('Deutsche Hallenmeisterschaften', '2027-02-19', '2027-02-21', null,
+   'https://www.leichtathletik.de/fileadmin/user_upload/002_Wettkaempfe/06_Service/04_DM-Bewerbung/Termine_Deutsche_Meisterschaften_2027.pdf'),
+  ('Deutsche Meisterschaften', '2027-07-31', '2027-08-01', null,
+   'https://www.leichtathletik.de/fileadmin/user_upload/002_Wettkaempfe/06_Service/04_DM-Bewerbung/Termine_Deutsche_Meisterschaften_2027.pdf')
+on conflict (name, start_date) do update set end_date = excluded.end_date, venue = excluded.venue, source_url = excluded.source_url;
+
 -- Ergebnisabruf: wann wurden die Ergebnisse eines Athleten für ein Jahr zuletzt komplett geladen?
 create table if not exists athlete_sync (
   athlete_id text not null references athletes (id) on delete cascade,
@@ -3245,6 +3262,7 @@ alter table keepers         enable row level security;
 alter table app_config      enable row level security;   -- keine Policies: nur Service-Key
 alter table scoring_coefficients enable row level security;
 alter table calendar_events enable row level security;
+alter table extra_calendar_events enable row level security;
 alter table athlete_sync    enable row level security;   -- keine Policies: nur Service-Key
 alter table athlete_feed    enable row level security;   -- keine Policies: nur Service-Key
 alter table push_subscriptions enable row level security;
@@ -3256,7 +3274,7 @@ begin
   -- öffentliche Stammdaten: lesbar für angemeldete Nutzer
   foreach t in array array['athletes', 'competitions', 'results', 'sync_status', 'athlete_season_stats', 'toplist_entries',
                            'wa_results', 'disciplines', 'placing_scores', 'scoring_config', 'cross_distance_factors', 'scoring_coefficients',
-                           'calendar_events', 'athlete_pbs', 'athlete_pb_before', 'athlete_requests'] loop
+                           'calendar_events', 'extra_calendar_events', 'athlete_pbs', 'athlete_pb_before', 'athlete_requests'] loop
     execute format('drop policy if exists read_all on %I', t);
     execute format('create policy read_all on %I for select to authenticated using (true)', t);
   end loop;
