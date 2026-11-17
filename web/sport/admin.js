@@ -1,6 +1,9 @@
 // Admin-Bereiche nur für Runner Fantasy: Wertungsparameter (unter Einstellungen), Athleten hinzufügen, Nachträge
 import { html, useState } from '../vendor/preact-htm.js';
-import { COUNTRY_CODES, CatBadge, Loading, Msg, RELAYS, RiderCell, RiderPicker, discLabel, flag, fmtDate, fmtDateTime, q, rpc, sb, today, useAction, useLoad, withFlag } from '../lib.js';
+import { COUNTRY_CODES, flag, fmtDate, fmtDateTime, Loading, Msg, q, rpc, sb, today, useAction, useLoad, withFlag } from '../lib.js';
+import { CatBadge, discLabel, RELAYS } from './lib.js';
+import { RiderCell } from './index.js';
+import { RiderPicker } from '../views/picker.js';
 
 /** Zusätzliche Bereiche im Admin (Reiter) und ihre Seiten */
 export const ADMIN_SECTIONS = [['athletes', 'Athleten'], ['results', 'Nachträge']];

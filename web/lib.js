@@ -1,6 +1,7 @@
 // Gemeinsame Helfer: Supabase-Zugang, Datenabruf, Formatierung
 import { html, useState, useEffect, useCallback, useRef } from './vendor/preact-htm.js';
 import cfg from './config.js';
+import { SPORT } from './sport/config.js';
 
 export const sb = window.supabase.createClient(cfg.url, cfg.anonKey);
 
@@ -29,7 +30,7 @@ export async function all(makeQuery) {
 // Funktion mit vielen Ergebniszeilen seitenweise abrufen (die API liefert max. 1000 Zeilen pro Abfrage)
 export const rpcAll = (fn, args = {}) => all(() => sb.rpc(fn, args));
 
-// Punkte aller Athleten im laufenden Jahr (einmal pro Wertung geladen und zwischengespeichert)
+// Punkte aller Personen (Athleten bzw. Fahrer) im laufenden Jahr (einmal pro Wertung geladen und zwischengespeichert)
 const pointsCache = {};
 export function useRiderPoints(gender) {
   const year = new Date().getFullYear();
@@ -37,8 +38,8 @@ export function useRiderPoints(gender) {
   const [map, setMap] = useState(pointsCache[key] || null);
   useEffect(() => {
     if (pointsCache[key]) return;
-    rpcAll('athlete_points', { p_gender: gender, p_year: year })
-      .then((rows) => { pointsCache[key] = Object.fromEntries(rows.map((r) => [r.athlete_id, Number(r.points)])); setMap(pointsCache[key]); })
+    rpcAll(SPORT.pointsRpc, { p_gender: gender, p_year: year })
+      .then((rows) => { pointsCache[key] = Object.fromEntries(rows.map((r) => [r[SPORT.fk], Number(r.points)])); setMap(pointsCache[key]); })
       .catch(() => setMap({}));
   }, [key]);
   return map || {};
@@ -51,8 +52,8 @@ export const fmtDate = (d) => (d ? new Date(d.length === 10 ? d + 'T00:00:00' : 
   .toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '–');
 export const fmtDateTime = (d) =>
   d ? new Date(d).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }) : '–';
-// Punkte einheitlich mit einer Nachkommastelle (468,1 · 307,0)
-export const fmtPts = (n) => (Number(n) || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+// Punkte im Format der Sportart (Runner Fantasy: zwei Nachkommastellen, UCI Fantasy: höchstens eine)
+export const fmtPts = (n) => (Number(n) || 0).toLocaleString('de-DE', SPORT.ptsFormat);
 // Fristende anzeigen: 0:00 Uhr heißt „bis Ende des Vortags“ → nur das Datum des Vortags; sonst Datum mit Uhrzeit
 export function fmtUntil(ts, { weekday = false } = {}) {
   if (!ts) return '–';
@@ -74,109 +75,16 @@ export function normName(s) {
     .split(/\s+/).filter(Boolean).sort().join(' ');
 }
 
-// Budget spielt nur eine Rolle, wenn Athleten im Draft etwas kosten (Auktion/Offline) oder Waiver per FAAB laufen
+// Budget spielt nur eine Rolle, wenn Personen im Draft etwas kosten (Auktion/Offline) oder Waiver per FAAB laufen
 export const draftCosts = (l) => l.draft_mode !== 'snake';
 export const budgetRelevant = (l) => draftCosts(l) || l.waiver_mode === 'faab';
 
 export const SOURCE_LABEL = { draft: 'Draft', offline: 'Offline-Draft', waiver: 'Waiver', trade: 'Tausch', admin: 'Admin', free: 'Freie Phase' };
 
-// ---- Leichtathletik: Disziplingruppen und Positionen ----------------------
-
-export const GROUPS = ['800', '1500', '5000', '10000', 'Marathon', 'Hindernis'];
-export const GROUP_LABEL = { 800: '800 m', 1500: '1500 m', 5000: '5000 m', 10000: '10.000 m', Marathon: 'Marathon', Hindernis: 'Hindernis' };
-export const riderGroup = (r) => (r ? r.group_override || r.event_group : null);
-export const GENDER_LABEL = { men: 'Männer', women: 'Frauen', mixed: 'Mixed' };
-
-// Positionen der Aufstellung (wie league_slots in der Datenbank): 800, 1500 … bzw. 800:M, 800:W …, dann WC1, WC2 …
-export function leagueSlots(l) {
-  const groups = l.lineup_groups || GROUPS;
-  const out = l.lineup_mode === 'mf' ? groups.flatMap((g) => [`${g}:M`, `${g}:W`]) : [...groups];
-  for (let i = 1; i <= (l.wildcards ?? 0); i++) out.push(`WC${i}`);
-  return out;
-}
-export function slotLabel(slot) {
-  const [g, sex] = slot.split(':');
-  const base = /^WC(\d+)$/.test(g) ? `Wildcard ${g.slice(2)}` : GROUP_LABEL[g] || g;
-  return sex ? `${base} ${sex === 'M' ? 'M' : 'F'}` : base;
-}
-// Links zu World Athletics: Athletenprofil (Pfad aus Land und Name, entscheidend ist die ID am Ende) und Ergebnisse
-const WA_COUNTRY = { GER: 'germany', AUT: 'austria', SUI: 'switzerland' };
-export function waAthleteUrl(r) {
-  const id = r.wa_id || String(r.id || '').replace(/^wa-/, '');
-  const slug = (r.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/ß/g, 'ss')
-    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  return `https://worldathletics.org/athletes/${WA_COUNTRY[r.nation] || 'germany'}/${slug}-${id}`;
-}
-export const waResultUrl = (competitionId, eventId) =>
-  `https://worldathletics.org/competition/calendar-results/results/${competitionId}${eventId ? `?eventId=${eventId}` : ''}`;
-// Geschlecht als kleines farbiges Abzeichen: blaues M, rosa F (g = 'men'/'women' oder 'M'/'W')
-export const SexBadge = ({ g }) => {
-  const f = g === 'women' || g === 'W' || g === 'F';
-  return html`<span class=${`badge ${f ? 'b-f' : 'b-m'}`} title=${f ? 'Frauen' : 'Männer'}>${f ? 'F' : 'M'}</span>`;
-};
-// WA-Wettkampfkategorie als farbiges Abzeichen (wie im Kalender-Widget): DL/OW/DF/GW lila, GL blau, A grün, sonst grau
-const CAT_CLASS = { OW: 'b-top', DF: 'b-top', GW: 'b-top', DL: 'b-top', GL: 'b-gl', A: 'b-a' };
-export const CatBadge = ({ cat }) => (cat ? html`<span class=${`badge ${CAT_CLASS[cat] || 'b-low'}`} title="Kategorie bei World Athletics">${cat}</span>` : '');
-// Sortierschlüssel für Disziplinen: Strecke in Metern (800 m < 1500 m < Meile < … < Marathon)
-export function discMeters(label) {
-  const s = String(label || '');
-  if (/Halbmarathon|Half Marathon/i.test(s)) return 21097;
-  if (/Marathon/i.test(s)) return 42195;
-  if (/Meile|Mile/i.test(s)) return 1609;
-  const km = s.match(/([\d.,]+)\s*km/i);
-  if (km) return parseFloat(km[1].replace(',', '.')) * 1000;
-  const m = s.match(/([\d.]+)\s*(m\b|Metres)/);
-  return m ? parseFloat(m[1].replace('.', '')) : 1e6;
-}
-// Reihenfolge der Läufe: Vorläufe, Viertel-, Halbfinale, Finale; jeweils 1, 2, 3 …
-export function raceOrder(r) {
-  const m = String(r || '').match(/^(R|H|QF|SF|F)(\d*)$/);
-  if (!m) return 500;
-  return { R: 0, H: 100, QF: 200, SF: 300, F: 400 }[m[1]] + (+m[2] || 0);
-}
-// Positionsname mit Geschlechts-Kennzeichen
-export function SlotLabel({ slot }) {
-  const [g, sex] = slot.split(':');
-  return html`${slotLabel(g)}${sex ? html` <${SexBadge} g=${sex} />` : ''}`;
-}
-// Darf der Athlet auf diese Position? (gleiche Regel wie _slot_ok in der Datenbank)
-export function slotOk(slot, r) {
-  if (!r) return false;
-  const [g, sex] = slot.split(':');
-  if (sex === 'M' && r.gender !== 'men') return false;
-  if (sex === 'W' && r.gender !== 'women') return false;
-  return g.startsWith('WC') || riderGroup(r) === g;
-}
-
-// Disziplinnamen von World Athletics kurz und deutsch: "1500 Metres Short Track" → "1500 m (Halle)"
-const DISC = [[/^10,000 Metres/, '10.000 m'], [/ Metres Steeplechase/, ' m Hindernis'], [/ Metres Hurdles/, ' m Hürden'],
-  [/ Metres/, ' m'], [/^Mile Road$/, 'Meile Straße'], [/^Mile/, 'Meile'], [/^2 Miles/, '2 Meilen'], [/^10 Miles Road/, '10 Meilen'],
-  [/^Half Marathon/, 'Halbmarathon'], [/ Kilometres Road/, ' km Straße'], [/^Cross Country Relay/, 'Cross-Staffel'],
-  [/^Cross Country/, 'Cross'], [/ Short Track$/, ' (Halle)'], [/ Relay/, ' Staffel'], [/ Race Walk/, ' Gehen'],
-  [/^Mountain Running /, 'Berglauf '], [/^Mountain Classic/, 'Berglauf']];
-export const discLabel = (d) => DISC.reduce((t, [re, rep]) => t.replace(re, rep), d || '');
-// Cross-Distanz aus dem Wettkampfnamen ("… - XC 7.5km") wie cross_km in der Datenbank
-export const crossKm = (competition) => {
-  const m = (competition || '').match(/XC\s*([0-9]+(?:[.,][0-9]+)?)\s*km/i);
-  return m ? Number(m[1].replace(',', '.')) : null;
-};
-// Disziplin mit Cross-Distanz, z. B. "Cross 7,5 km"
-export const discWithKm = (d, competition) => {
-  const km = /^Cross Country/.test(d || '') ? crossKm(competition) : null;
-  return discLabel(d) + (km ? ` ${km.toLocaleString('de-DE')} km` : '');
-};
-// Lauf laut WA: F, F1, SF2, H3, QF1 …
-export function raceLabel(r) {
-  const m = (r || '').match(/^(F|SF|QF|H|R)(\d*)$/);
-  if (!m) return r || '';
-  const name = { F: 'Finale', SF: 'Halbfinale', QF: 'Viertelfinale', H: 'Vorlauf', R: 'Lauf' }[m[1]];
-  return m[2] ? `${name} ${m[2]}` : name;
-}
-
 // ---- Flaggen ---------------------------------------------------------------
-// IOC-Codes (GER, NED …) und ISO-3-Codes (DEU …) werden beide erkannt.
+// Personen kommen mit IOC-Codes (SLO, GER, NED …), UCI-Rennen mit ISO-3-Codes (SVN, DEU …).
 const ISO2 = {ABW:'AW',AFG:'AF',AGO:'AO',ALB:'AL',ALG:'DZ',AND:'AD',ANG:'AO',ANT:'AG',ARE:'AE',ARG:'AR',ARM:'AM',ARU:'AW',ASA:'AS',ATG:'AG',AUS:'AU',AUT:'AT',AZE:'AZ',BAH:'BS',BAN:'BD',BAR:'BB',BDI:'BI',BEL:'BE',BEN:'BJ',BER:'BM',BFA:'BF',BGD:'BD',BGR:'BG',BHR:'BH',BHS:'BS',BHU:'BT',BIH:'BA',BIZ:'BZ',BLR:'BY',BOL:'BO',BOT:'BW',BRA:'BR',BRB:'BB',BRN:'BH',BRU:'BN',BUL:'BG',BUR:'BF',CAF:'CF',CAM:'KH',CAN:'CA',CAY:'KY',CGO:'CG',CHA:'TD',CHE:'CH',CHI:'CL',CHL:'CL',CHN:'CN',CIV:'CI',CMR:'CM',COD:'CD',COK:'CK',COL:'CO',COM:'KM',CPV:'CV',CRC:'CR',CRI:'CR',CRO:'HR',CUB:'CU',CUW:'CW',CYP:'CY',CZE:'CZ',DEN:'DK',DEU:'DE',DJI:'DJ',DMA:'DM',DNK:'DK',DOM:'DO',DZA:'DZ',ECU:'EC',EGY:'EG',ERI:'ER',ESA:'SV',ESP:'ES',EST:'EE',ETH:'ET',FIJ:'FJ',FIN:'FI',FJI:'FJ',FRA:'FR',FRO:'FO',FSM:'FM',GAB:'GA',GAM:'GM',GBR:'GB',GBS:'GW',GEO:'GE',GEQ:'GQ',GER:'DE',GHA:'GH',GIB:'GI',GLP:'GP',GMB:'GM',GNB:'GW',GRC:'GR',GRE:'GR',GRL:'GL',GRN:'GD',GTM:'GT',GUA:'GT',GUI:'GN',GUM:'GU',GUY:'GY',HAI:'HT',HKG:'HK',HND:'HN',HON:'HN',HRV:'HR',HUN:'HU',IDN:'ID',INA:'ID',IND:'IN',IRI:'IR',IRL:'IE',IRN:'IR',IRQ:'IQ',ISL:'IS',ISR:'IL',ISV:'VI',ITA:'IT',IVB:'VG',JAM:'JM',JOR:'JO',JPN:'JP',KAZ:'KZ',KEN:'KE',KGZ:'KG',KHM:'KH',KIR:'KI',KNA:'KN',KOR:'KR',KOS:'XK',KSA:'SA',KUW:'KW',KWT:'KW',LAO:'LA',LAT:'LV',LBA:'LY',LBN:'LB',LBR:'LR',LBY:'LY',LCA:'LC',LES:'LS',LIE:'LI',LKA:'LK',LSO:'LS',LTU:'LT',LUX:'LU',LVA:'LV',MAC:'MO',MAD:'MG',MAR:'MA',MAS:'MY',MAW:'MW',MCO:'MC',MDA:'MD',MDG:'MG',MDV:'MV',MEX:'MX',MGL:'MN',MHL:'MH',MKD:'MK',MLI:'ML',MLT:'MT',MMR:'MM',MNE:'ME',MNG:'MN',MON:'MC',MOZ:'MZ',MRI:'MU',MRT:'MR',MTN:'MR',MTQ:'MQ',MUS:'MU',MWI:'MW',MYA:'MM',MYS:'MY',NAM:'NA',NCA:'NI',NCL:'NC',NED:'NL',NEP:'NP',NER:'NE',NGA:'NG',NGR:'NG',NIC:'NI',NIG:'NE',NLD:'NL',NOR:'NO',NRU:'NR',NZL:'NZ',OMA:'OM',OMN:'OM',PAK:'PK',PAN:'PA',PAR:'PY',PER:'PE',PHI:'PH',PHL:'PH',PLE:'PS',PLW:'PW',PNG:'PG',POL:'PL',POR:'PT',PRI:'PR',PRK:'KP',PRT:'PT',PRY:'PY',PSE:'PS',PUR:'PR',PYF:'PF',QAT:'QA',REU:'RE',ROU:'RO',RSA:'ZA',RUS:'RU',RWA:'RW',SAM:'WS',SAU:'SA',SDN:'SD',SEN:'SN',SEY:'SC',SGP:'SG',SKN:'KN',SLB:'SB',SLE:'SL',SLO:'SI',SLV:'SV',SMR:'SM',SOL:'SB',SOM:'SO',SRB:'RS',SRI:'LK',SSD:'SS',STP:'ST',SUD:'SD',SUI:'CH',SUR:'SR',SVK:'SK',SVN:'SI',SWE:'SE',SWZ:'SZ',SXM:'SX',SYC:'SC',SYR:'SY',TAN:'TZ',TGA:'TO',THA:'TH',TJK:'TJ',TKM:'TM',TLS:'TL',TOG:'TG',TON:'TO',TPE:'TW',TTO:'TT',TUN:'TN',TUR:'TR',TUV:'TV',TWN:'TW',TZA:'TZ',UAE:'AE',UGA:'UG',UKR:'UA',URU:'UY',URY:'UY',USA:'US',UZB:'UZ',VAN:'VU',VCT:'VC',VEN:'VE',VGB:'VG',VIE:'VN',VIN:'VC',VIR:'VI',VNM:'VN',WSM:'WS',YEM:'YE',ZAF:'ZA',ZAM:'ZM',ZIM:'ZW',ZMB:'ZM',ZWE:'ZW'};
-// Einheitlich IOC-Codes anzeigen (ISO-3-Codes: DEU → GER, NLD → NED …)
+// Einheitlich IOC-Codes anzeigen (Rennen kommen mit ISO-3: DEU → GER, NLD → NED …)
 const IOC = {DEU:'GER',NLD:'NED',CHE:'SUI',DNK:'DEN',PRT:'POR',HRV:'CRO',SVN:'SLO',GRC:'GRE',ARE:'UAE',ZAF:'RSA',IRN:'IRI',
   BGR:'BUL',CHL:'CHI',CRI:'CRC',DZA:'ALG',IDN:'INA',KWT:'KUW',LVA:'LAT',MYS:'MAS',MNG:'MGL',NGA:'NGR',PHL:'PHI',PRY:'PAR',
   SAU:'KSA',URY:'URU',VNM:'VIE',SLV:'ESA',GTM:'GUA',HND:'HON',NIC:'NCA',TWN:'TPE',MDG:'MAD',BFA:'BUR',ZWE:'ZIM',ZMB:'ZAM',
@@ -189,16 +97,13 @@ export function flag(code) {
   if (!iso) return '';
   return String.fromCodePoint(...[...iso].map((ch) => 0x1f1e6 + ch.charCodeAt(0) - 65));
 }
+export const withFlag = (code) => (code ? `${flag(code)} ${nationCode(code)}`.trim() : '');
 // Länderauswahl (IOC-Codes), Deutschland und Nachbarn zuerst
 export const COUNTRY_CODES = (() => {
   const all = [...new Set(Object.keys(ISO2).map((c) => nationCode(c)))].filter((c) => ISO2[c]).sort();
   const top = ['GER', 'AUT', 'SUI', 'NED', 'BEL', 'FRA', 'ITA', 'ESP', 'GBR', 'USA'];
   return [...top, ...all.filter((c) => !top.includes(c))];
 })();
-// Staffel-Nachträge
-export const RELAYS = { '3x800': { label: '3 × 800 m', leg: '800 Metres', legs: 3 }, '3x1000': { label: '3 × 1000 m', leg: '1000 Metres', legs: 3 },
-  '4x400': { label: '4 × 400 m', leg: '400 Metres', legs: 4 } };
-export const withFlag = (code) => (code ? `${flag(code)} ${nationCode(code)}`.trim() : '');
 
 // ---- Hooks ---------------------------------------------------------------
 
@@ -246,19 +151,8 @@ export const Msg = ({ msg }) =>
 export const Loading = ({ error }) =>
   error ? html`<p class="note err">${error}</p>` : html`<p class="muted">Lädt …</p>`;
 
-// Athleten-Fenster öffnen (Ergebnisse und Punkte der Saison), siehe views/rider.js
+// Profil einer Person öffnen (Ergebnisse und Punkte der Saison), siehe sport/rider.js
 export const openRider = (slug) => dispatchEvent(new CustomEvent('rider:open', { detail: slug }));
-// Sprung aus dem Athletenfenster (Wettkampf, Topliste): Athlet merken, damit die Seite „Zurück zu …“ anbieten kann
-let cameFrom = null;
-export const rememberAthlete = (slug, name) => { cameFrom = { slug, name, hash: null }; };
-export function BackToAthlete() {
-  if (!cameFrom) return null;
-  // nur auf der ersten Seite nach dem Sprung anzeigen
-  if (cameFrom.hash === null) cameFrom.hash = location.hash;
-  if (cameFrom.hash !== location.hash) return null;
-  const { slug, name } = cameFrom;
-  return html`<a href="#" class="small-link" onClick=${(e) => { e.preventDefault(); cameFrom = null; openRider(slug); }}>← Zurück zu ${name}</a>`;
-}
 
 // Teamnamen lesbarer: "UAE TEAM EMIRATES XRG" → "UAE Team Emirates XRG" (bekannte Kürzel bleiben groß)
 const ACRONYMS = new Set(['UAE', 'XRG', 'CMA', 'CGM', 'EF', 'BMC', 'NSN', 'DSM', 'MBH', 'JCL', 'TDT', 'UNO', 'X', 'BB', 'SD',
@@ -266,25 +160,6 @@ const ACRONYMS = new Set(['UAE', 'XRG', 'CMA', 'CGM', 'EF', 'BMC', 'NSN', 'DSM',
 export function teamName(t) {
   if (!t || t !== t.toUpperCase()) return t || '';
   return t.replace(/[A-ZÀ-Ý0-9.]+/g, (w) => (ACRONYMS.has(w) || /\d/.test(w) ? w : w[0] + w.slice(1).toLowerCase()));
-}
-
-export function RiderCell({ r }) {
-  if (!r) return html`<span class="muted">unbekannt</span>`;
-  const g = riderGroup(r);
-  const meta = [g && (GROUP_LABEL[g] || g), r.birth_date && `Jg. ${r.birth_date.slice(0, 4)}`]
-    .filter(Boolean).join(' · ');
-  const best = r.best_mark && `${r.best_discipline?.replace(' Metres', ' m').replace('Short Track', '(Halle)') || ''} ${r.best_mark}`
-    + (r.ranking_points ? ` · ${Math.round(r.ranking_points)} P.` : '');
-  return html`<span class="rider">
-    <span class="rider-line">
-      <button type="button" class="rider-name linkish" title="Ergebnisse anzeigen"
-        onClick=${(e) => { e.stopPropagation(); openRider(r.id); }}>${r.name}</button>
-      ${r.pool_rank && html`<span class="rank-chip" title="Platz im Athletenpool (nach Punkten im Vorjahr der Saison)">#${r.pool_rank}</span>`}
-      ${r.inactive && html`<span class="tag warn">inaktiv</span>`}
-    </span>
-    <span class="rider-meta"><${SexBadge} g=${r.gender} />${meta ? ` ${meta}` : ''}</span>
-    ${best && html`<span class="rider-team" title="Beste Toplistenleistung">${best}</span>`}
-  </span>`;
 }
 
 // Suchfeld mit eigener Vorschlagsliste: tippen filtert die Liste, antippen übernimmt den Eintrag
@@ -298,25 +173,5 @@ export function SearchSelect({ value, onChange, options, placeholder, label = (x
       onBlur=${() => setTimeout(() => setOpen(false), 150)} />
     ${open && hits.length > 0 && html`<ul class="search-select-list">${hits.map((o) => html`<li key=${o}
       onMouseDown=${(e) => { e.preventDefault(); onChange(label(o)); setOpen(false); }}>${label(o)}</li>`)}</ul>`}
-  </div>`;
-}
-
-// Athletenauswahl mit Suche (Name oder Gruppe, z. B. „1500“)
-export function RiderPicker({ people, onPick, placeholder = 'Athlet suchen …', limit = 30, action = 'Wählen' }) {
-  const [term, setTerm] = useState('');
-  const t = normName(term);
-  const text = (r) => normName(r.name + ' ' + (riderGroup(r) || ''));
-  const list = people
-    .filter((r) => !t || t.split(' ').every((w) => text(r).includes(w)))
-    .slice(0, limit);
-  return html`<div class="picker">
-    <input type="search" placeholder=${placeholder} value=${term} onInput=${(e) => setTerm(e.target.value)} />
-    <ul class="list">
-      ${list.map((r) => html`<li key=${r.id}>
-        <${RiderCell} r=${r} />
-        <button class="small" onClick=${() => onPick(r)}>${action}</button>
-      </li>`)}
-      ${list.length === 0 ? html`<li class="muted">Keine Treffer</li>` : ''}
-    </ul>
   </div>`;
 }

@@ -1,7 +1,8 @@
 // Kalender: kommende Wettkämpfe mit Laufdisziplinen (aus dem WA-Kalender, täglich aktualisiert)
 // International ab Gold Label, Europa ab Kategorie A, Deutschland ab E – siehe importer/sync-calendar.ts
 import { html, useState } from '../vendor/preact-htm.js';
-import { sb, all, useLoad, Loading, normName, flag, nationCode, today, SexBadge, CatBadge } from '../lib.js';
+import { all, flag, Loading, nationCode, normName, sb, today, useLoad } from '../lib.js';
+import { CatBadge, SexBadge } from './lib.js';
 
 const KIND_LABEL = { track: 'Bahn', road: 'Straße', cross: 'Cross' };
 const TOP = ['OW', 'DF', 'GW', 'GL'];

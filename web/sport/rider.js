@@ -1,7 +1,7 @@
 // Athleten-Fenster: Stammdaten, Toplisten und alle Ergebnisse (Lauf, Zeit, WA-Punkte, Fantasy-Punkte)
 import { html, useState, useEffect } from '../vendor/preact-htm.js';
-import { sb, q, all, rpc, waAthleteUrl, waResultUrl, flag, riderGroup, GROUP_LABEL, discLabel, discWithKm, raceLabel,
-  fmtPts, CatBadge, discMeters, SexBadge, RELAYS, rememberAthlete } from '../lib.js';
+import { all, flag, fmtPts, q, rpc, sb } from '../lib.js';
+import { CatBadge, discLabel, discMeters, discWithKm, GROUP_LABEL, raceLabel, RELAYS, rememberAthlete, riderGroup, SexBadge, waAthleteUrl, waResultUrl } from './lib.js';
 
 // Ergebnisse werden ab dieser Saison gespeichert
 const FIRST_YEAR = 2025;

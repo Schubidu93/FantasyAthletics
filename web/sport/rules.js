@@ -1,6 +1,7 @@
 // Spielregeln – allgemeine Regeln plus die Einstellungen der aktuellen Liga
 import { html } from '../vendor/preact-htm.js';
-import { sb, q, useLoad, fmtDate, draftCosts, GENDER_LABEL, leagueSlots, slotLabel } from '../lib.js';
+import { draftCosts, fmtDate, q, sb, useLoad } from '../lib.js';
+import { GENDER_LABEL, leagueSlots, slotLabel } from './lib.js';
 
 const DRAFT = {
   live: 'Live-Auktion',

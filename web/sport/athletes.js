@@ -1,6 +1,8 @@
 // Athleten-Übersicht: alle Athleten der Wertung mit Punkten der Saison und Besitzer in der Liga
 import { html, useState, useMemo } from '../vendor/preact-htm.js';
-import { rpc, useLoad, Loading, RiderCell, normName, rpcAll, fmtPts, GROUPS, GROUP_LABEL, riderGroup } from '../lib.js';
+import { fmtPts, Loading, normName, rpc, rpcAll, useLoad } from '../lib.js';
+import { GROUP_LABEL, GROUPS, riderGroup } from './lib.js';
+import { rank, RiderCell } from './index.js';
 
 export function Riders({ c }) {
   const years = useLoad(() => rpc('result_years'), []);
