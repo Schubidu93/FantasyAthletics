@@ -1,19 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Runner Fantasy">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e5532d"/><stop offset="1" stop-color="#b23214"/></linearGradient>
-  </defs>
-  <rect width="128" height="128" rx="28" fill="url(#bg)"/>
-  <!-- Bahnlinien -->
-  <g fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3">
-    <path d="M10 104 Q64 86 118 104"/><path d="M10 116 Q64 98 118 116"/>
-  </g>
-  <!-- Läufer -->
-  <g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="8">
-    <circle cx="78" cy="22" r="9" fill="#fff" stroke="none"/>
-    <path d="M70 38 L58 62"/>
-    <path d="M70 40 L84 52 L96 48"/>
-    <path d="M68 42 L50 44 L42 56"/>
-    <path d="M58 62 L76 72 L72 92"/>
-    <path d="M58 62 L46 80 L30 82"/>
-  </g>
-</svg>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e5532d"/><stop offset="1" stop-color="#b23214"/></linearGradient></defs>
+<rect width="128" height="128" rx="28" fill="url(#bg)"/>
+<!-- Läufer -->
+<g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="5" transform="translate(-9,-14) scale(1.15)">
+ <circle cx="77" cy="28" r="8"/>
+ <path d="M71 41 L60 64"/>
+ <path d="M70 44 L82 56 L93 51"/>
+ <path d="M70 44 L55 49 L47 61"/>
+ <path d="M60 64 L79 74 L76 95 L83 95"/>
+ <path d="M60 64 L50 83 L33 86"/>
+</g>
+<!-- Streifen in Schwarz-Rot-Gold -->
+<clipPath id="band"><rect x="34" y="104" width="60" height="6" rx="3"/></clipPath>
+<g clip-path="url(#band)"><rect x="34" y="104" width="20" height="6" fill="#111"/><rect x="54" y="104" width="20" height="6" fill="#ff3b30"/><rect x="74" y="104" width="20" height="6" fill="#ffd60a"/></g></svg>
