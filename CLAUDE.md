@@ -45,6 +45,8 @@
 - `npm test`: Spiellogik gegen echtes PostgreSQL 16 (Schema wird zweimal eingespielt = Wiederholbarkeit), Punkte nach
   WA-Regeln, Positionen/Mixed, Draft; Parser- und Platzierungstests mit echten Daten der WM Tokio 2025 (`tests/fixtures/`).
   Lokal z. B. `initdb` + `pg_ctl` mit Socket in `/tmp/fa-pg`, Port 54329 (`TEST_DATABASE_URL` überschreibt).
+  SQL-Tests in `tests/sql/NN_*.sql` (pgTAP-Schreibweise `is`/`ok`/`throws_ok`, kleiner Ersatz in `tests/sql/_tap.sql`, Beispieldaten
+  `tests/sql/fixtures.sql`): Kader, Draft, Waiver, Tausch, Wertung/Einfrieren, Fristen, Berechtigungen – in beiden Apps gleich gehalten.
 - Syntax der App: `node --check web/views/<datei>.js`; TypeScript: `npm run lint`.
 - Oberfläche: `tests/ui/seed.ts` (Testliga) + `tests/ui/mock-api.ts` (Supabase-Schnittstelle auf lokalem Postgres, RLS aktiv),
   `web/config.js` mit `http://localhost:54321`, `python3 -m http.server -d web`, Playwright in iPhone-Ansicht
