@@ -19,8 +19,8 @@ describe("Athlet hinzufügen", () => {
   });
 
   it("legt einen Auftrag an und nimmt von Hand hinzugefügte Athleten in den Pool", async () => {
-    const id = (await db.one("select request_athlete('Tom Thurley', 'men') id")).id;
-    expect((await db.one("select status, gender from athlete_requests where id = $1", [id]))).toEqual({ status: "offen", gender: "men" });
+    const id = (await db.one("select request_athlete('Tom Thurley') id")).id;
+    expect((await db.one("select status, gender from athlete_requests where id = $1", [id]))).toEqual({ status: "offen", gender: null });
     await expect(db.query("select request_athlete('', 'men')")).rejects.toThrow(/WA-ID/);
     // unter der Grenze, kein Toplisteneintrag – aber von Hand hinzugefügt
     await athlete(db, 1, "Pool Athlet", "men", "Marathon", 1100);

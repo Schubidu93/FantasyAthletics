@@ -520,24 +520,21 @@ const REQ_STATUS = { offen: 'wartet', 'läuft': 'wird geladen', fertig: 'fertig'
 function AddAthlete({ c }) {
   const list = useLoad(() => q(sb.from('athlete_requests').select('*').order('id', { ascending: false }).limit(30)), []);
   const [query, setQuery] = useState('');
-  const [gender, setGender] = useState(c.league.gender === 'women' ? 'women' : 'men');
   const a = useAction();
   const add = (e) => {
     e.preventDefault();
-    a.run(async () => { await rpc('request_athlete', { p_query: query, p_gender: gender }); setQuery(''); list.reload(); },
+    a.run(async () => { await rpc('request_athlete', { p_query: query }); setQuery(''); list.reload(); },
       'Auftrag angelegt – in wenigen Minuten ist der Athlet mit Ergebnissen und Bestleistungen da (Liste unten aktualisieren).');
   };
   return html`<div class="stack">
     <section class="card stack">
       <h3>Athlet hinzufügen</h3>
       <p class="muted small">Für Athleten, die nicht automatisch im Pool sind (z. B. unter der Punkte-Grenze oder aus dem Ausland).
-        Am sichersten mit der WA-ID oder dem Link zum Profil bei World Athletics; bei Namen sucht die App und zeigt bei mehreren Treffern Vorschläge.
+        Am sichersten mit der WA-ID oder dem Link zum Profil bei World Athletics; bei Namen sucht die App und zeigt bei mehreren Treffern Vorschläge. Geschlecht, Land und Geburtsdatum kommen von World Athletics.
         Ergebnisse 2025/2026 und Bestleistungen werden geladen, der Athlet ist danach im Pool und draftbar.</p>
       <form class="stack" onSubmit=${add}>
         <label>WA-ID, Profil-Link oder Name<input value=${query} onInput=${(e) => setQuery(e.target.value)}
           placeholder="z. B. 14682657 oder Tom Thurley" required /></label>
-        <div class="seg small">${[['men', 'Männer'], ['women', 'Frauen']].map(([k, l]) =>
-          html`<button type="button" class=${gender === k ? 'active' : ''} onClick=${() => setGender(k)}>${l}</button>`)}</div>
         <div class="row"><button class="primary" disabled=${a.busy || !query.trim()}>Hinzufügen</button></div>
       </form>
       <${Msg} msg=${a.msg} />

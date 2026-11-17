@@ -132,6 +132,8 @@ create table if not exists athlete_requests (
   created_at timestamptz not null default now(),
   done_at    timestamptz
 );
+-- Geschlecht kommt von World Athletics (nicht mehr von Hand)
+alter table athlete_requests alter column gender drop not null;
 
 -- Persönliche Bestleistungen laut World Athletics (Profil) und die beste Leistung vor 2025 je Disziplin
 -- (Grundlage für den PB-Bonus; ab 2025 kennt die App alle Ergebnisse selbst). Füllt importer/sync-pbs.ts.
@@ -2945,13 +2947,13 @@ language sql stable security definer set search_path = public as $$
 $$;
 
 -- Athlet hinzufügen (Admin): Auftrag anlegen und den Ablauf „Athlet hinzufügen“ starten
-create or replace function request_athlete(p_query text, p_gender text) returns bigint
+create or replace function request_athlete(p_query text, p_gender text default null) returns bigint
 language plpgsql security definer set search_path = public as $$
 declare v_id bigint;
 begin
   perform _require_any_admin();
   if coalesce(trim(p_query), '') = '' then raise exception 'Bitte WA-ID, Profil-Link oder Namen angeben.'; end if;
-  if p_gender not in ('men', 'women') then raise exception 'Bitte Männer oder Frauen wählen.'; end if;
+  if p_gender is not null and p_gender not in ('men', 'women') then raise exception 'Bitte Männer oder Frauen wählen.'; end if;
   insert into athlete_requests (query, gender, created_by) values (trim(p_query), p_gender, auth.uid()) returning id into v_id;
   begin
     perform dispatch_workflow('add-athlete.yml');

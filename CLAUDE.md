@@ -74,7 +74,8 @@
   `set_result_champ`), `category` = Hauptwertung. Platzierung = höherer Wert. GraphQL-Feld heißt `races` (früher `competitions`).
   Zwischenzeiten (`_is_split`: „… - Split times“ / ST) geben nur Rekord- und PB-Bonus. „Datenbank einrichten“ rechnet danach alle Punkte neu.
 - Athlet hinzufügen (Admin → Athleten): `request_athlete` → `athlete_requests` → Ablauf `add-athlete.yml` (`importer/add-athlete.ts`:
-  WA-ID/Profil-Link/Name via `searchCompetitors`, Stammdaten `getSingleCompetitor.basicData`) → `athletes.manual = true` (immer im Pool,
+  WA-ID/Profil-Link/Name via `searchCompetitors`, Stammdaten `getSingleCompetitor.basicData`; Geschlecht aus `sexCode` bzw. dem
+  Suchtreffer mit gleicher ID, nicht von Hand; bei jedem Lauf werden alle `manual`-Athleten abgeglichen und ggf. korrigiert) → `athletes.manual = true` (immer im Pool,
   `ranking_points` aus bester WA-Leistung), dann Ergebnisse/Bestleistungen nur für diese Athleten (`ATHLETE_IDS`).
 - Kalender: `importer/sync-calendar.ts` → `calendar_events` (WA-Kalender: weltweit ab GL, Europa ab A, Deutschland ab E;
   Programm aus `getCompetitionOrganiserInfo`, Filter in `importer/calendar-filter.ts`).
