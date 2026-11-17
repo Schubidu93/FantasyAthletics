@@ -87,7 +87,7 @@ export function DraftReport({ c }) {
     let proj = rows.some((r) => Number(r.points) > 0) ? Object.fromEntries(rows.map((r) => [r.manager_id, Number(r.points)])) : null;
     // Ohne Vorjahresdaten: beste WA-Punktzahl der Toplisten als Maßstab
     if (!lots.some((l) => pts[l.athlete_id])) {
-      pts = Object.fromEntries(c.athletes.map((r) => [r.id, Number(r.ranking_points || 0)]));
+      pts = Object.fromEntries(c.people.map((r) => [r.id, Number(r.ranking_points || 0)]));
       basis = 'den WA-Punkten der Toplisten';
       proj = null;
     }

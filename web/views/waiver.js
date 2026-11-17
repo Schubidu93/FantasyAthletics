@@ -78,7 +78,7 @@ function FreeAgents({ c, onPick, free: freePhase }) {
   const lockedSince = c.league.last_waiver_run;
   const locked = useMemo(() => new Set(freePhase ? [] : c.roster.filter((r) => r.released_at && lockedSince && r.released_at >= lockedSince).map((r) => r.athlete_id)), [c.roster, freePhase]);
   const pts = useRiderPoints(c.league.gender);
-  const free = c.athletes.filter((r) => !c.owner[r.id] && r.pool_rank)
+  const free = c.people.filter((r) => !c.owner[r.id] && r.pool_rank)
     .sort((a, b) => (pts[b.id] || 0) - (pts[a.id] || 0) || (a.pool_rank ?? 1e9) - (b.pool_rank ?? 1e9));
   const t = normName(term);
   const list = free.filter((r) => (!group || riderGroup(r) === group) && (!gender || r.gender === gender)

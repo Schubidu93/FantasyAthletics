@@ -172,7 +172,7 @@ function OfflineImport({ c }) {
   if (c.league.status !== 'setup') return html`<p class="card muted">Die Kader sind bereits fixiert.</p>`;
 
   const byName = {};
-  c.athletes.forEach((r) => { byName[normName(r.name)] = r; });
+  c.people.forEach((r) => { byName[normName(r.name)] = r; });
   const taken = new Set(rows.map((r) => r.athlete_id));
 
   const parseCsv = (text) => {
@@ -211,7 +211,7 @@ function OfflineImport({ c }) {
       <select value=${mgr} onChange=${(e) => setMgr(e.target.value)}>${c.managers.map((m) => html`<option value=${m.id}>${m.team_name}</option>`)}</select>
       <input type="number" min="0" max="100" placeholder="Preis" value=${price} onInput=${(e) => setPrice(e.target.value)} />
     </div>
-    <${RiderPicker} athletes=${c.athletes.filter((r) => !taken.has(r.id))} limit=${8} action="Hinzufügen"
+    <${RiderPicker} athletes=${c.people.filter((r) => !taken.has(r.id))} limit=${8} action="Hinzufügen"
       onPick=${(r) => { setRows([...rows, { manager_id: mgr, athlete_id: r.id, price: price === '' ? null : +price }]); setErrors(null); }} />
 
     <div class="grid2">${c.managers.map((m) => {
@@ -635,7 +635,7 @@ function ManualResults({ c }) {
       </div>
       ${riders.map((r) => html`<div class="row between" key=${r.id}><${RiderCell} r=${r} />
         <button class="small ghost" onClick=${() => { setRiders(riders.filter((x) => x.id !== r.id)); setCheck(null); }}>Entfernen</button></div>`)}
-      ${riders.length < maxRiders && html`<${RiderPicker} athletes=${c.athletes} onPick=${pick} limit=${6}
+      ${riders.length < maxRiders && html`<${RiderPicker} athletes=${c.people} onPick=${pick} limit=${6}
         placeholder=${relay ? `Läufer ${riders.length + 1} von bis zu ${maxRiders} suchen …` : 'Athlet suchen …'} />`}
       <div class="grid2 compact">
         <label>Veranstaltung<select value=${f.competition_id} onChange=${(e) => pickComp(e.target.value)}>
@@ -751,7 +751,7 @@ function RosterFix({ c }) {
       <label class="span2">Grund<input value=${reason} onInput=${(e) => setReason(e.target.value)} /></label>
     </div>
     ${drop && html`<button disabled=${a.busy} onClick=${() => run(null)}>Nur abgeben</button>`}
-    <${RiderPicker} athletes=${c.athletes.filter((r) => !c.owner[r.id])} limit=${8} action="Aufnehmen" onPick=${(r) => run(r.id)} />
+    <${RiderPicker} athletes=${c.people.filter((r) => !c.owner[r.id])} limit=${8} action="Aufnehmen" onPick=${(r) => run(r.id)} />
     <${Msg} msg=${a.msg} />
   </section>`;
 }
