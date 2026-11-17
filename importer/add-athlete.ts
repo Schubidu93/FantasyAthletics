@@ -27,10 +27,11 @@ async function gql<T>(api: ApiConfig, query: string, variables: Record<string, u
 }
 
 async function search(api: ApiConfig, q: string, gender: string): Promise<Hit[]> {
+  // Hinweis: der gender-Parameter der Suche erwartet einen eigenen Enum-Wert – wir filtern selbst („Men“/„Women“)
   const data = await gql<{ searchCompetitors?: Record<string, unknown>[] }>(api,
-    `query($q: String, $g: GenderType) { searchCompetitors(query: $q, gender: $g) { aaAthleteId givenName familyName gender country birthDate } }`,
-    { q, g: gender === "women" ? "women" : "men" });
-  return (data.searchCompetitors ?? []).map((h) => ({
+    `query($q: String) { searchCompetitors(query: $q) { aaAthleteId givenName familyName gender country birthDate } }`, { q });
+  const want = gender === "women" ? "women" : "men";
+  return (data.searchCompetitors ?? []).filter((h) => !h.gender || String(h.gender).toLowerCase() === want).map((h) => ({
     id: Number(h.aaAthleteId), name: `${h.givenName ?? ""} ${h.familyName ?? ""}`.trim(),
     country: (h.country as string) ?? null, birth: (h.birthDate as string) ?? null, gender: (h.gender as string) ?? null,
   })).filter((h) => h.id);
@@ -67,7 +68,12 @@ const main = async () => {
       if (!id) {
         const hits = await search(api, r.query, r.gender);
         const exact = hits.filter((h) => normalizeName(h.name) === normalizeName(r.query));
-        const pick = hits.length === 1 ? hits[0] : exact.length === 1 ? exact[0] : null;
+        // Suche ist unscharf (findet auch „Hurley“ bei „Thurley“): alle Wörter der Eingabe müssen im Namen stehen
+        const words = normalizeName(r.query).split(" ");
+        const all = hits.filter((h) => words.every((w) => normalizeName(h.name).includes(w)));
+        const pick = exact.length === 1 ? exact[0] : all.length === 1 ? all[0] : hits.length === 1 ? hits[0] : null;
+        // Vorschläge: passende zuerst, deutsche Athleten vor anderen
+        hits.sort((a, b) => Number(all.includes(b)) - Number(all.includes(a)) || Number(b.country === "GER") - Number(a.country === "GER"));
         if (!pick) {
           const list = hits.slice(0, 6).map((h) => `${h.name} (${[h.country, h.birth?.slice(-4), `ID ${h.id}`].filter(Boolean).join(", ")})`);
           await set({ status: hits.length ? "mehrdeutig" : "fehler", done_at: new Date().toISOString(),
