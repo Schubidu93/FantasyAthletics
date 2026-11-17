@@ -12,8 +12,9 @@ create extension if not exists pgcrypto;
 create extension if not exists btree_gist;
 
 -- ---------------------------------------------------------------------
--- Umbenennung (November 2026): Namen aus UCI Fantasy (riders, races, uci_…) auf
--- Leichtathletik-Namen. Läuft nur, solange die alten Namen noch existieren; Daten bleiben erhalten.
+-- Umbenennung (November 2026): alte Namen aus UCI Fantasy (riders, races, pcs_slug, uci_…) auf die
+-- gemeinsamen Namen beider Apps (athletes, competitions, id, …). Läuft nur, solange die alten Namen
+-- noch existieren; Daten bleiben erhalten. In beiden Apps gleich.
 -- ---------------------------------------------------------------------
 do $$
 declare r record;
@@ -33,6 +34,7 @@ begin
       join (values ('athletes', 'pcs_slug', 'id'), ('athletes', 'uci_rank', 'pool_rank'),
                    ('competitions', 'pcs_slug', 'id'), ('competitions', 'uci_class', 'category'),
                    ('results', 'uci_points', 'points'), ('athlete_season_stats', 'riders', 'athletes'),
+                   ('event_results', 'uci_points', 'points'), ('event_results', 'rider_name', 'athlete_name'),
                    ('draft_state', 'current_rider', 'current_athlete'),
                    ('waiver_claims', 'add_rider', 'add_athlete'), ('waiver_claims', 'drop_rider', 'drop_athlete'),
                    ('trades', 'give_riders', 'give_athletes'), ('trades', 'take_riders', 'take_athletes'),
@@ -45,7 +47,9 @@ begin
     execute format('alter table public.%I rename column %I to %I', r.table_name, r.column_name, r.new_name);
   end loop;
   for r in select * from (values ('riders_gender_rank', 'athletes_gender_rank'), ('riders_norm_name', 'athletes_norm_name'),
-                                 ('results_rider_date', 'results_athlete_date'), ('roster_active_rider', 'roster_active_athlete')) v(o, n)
+                                 ('results_rider_date', 'results_athlete_date'), ('roster_active_rider', 'roster_active_athlete'),
+                                 ('races_dataride', 'competitions_dataride'), ('race_events_race', 'race_events_competition'),
+                                 ('event_results_rider', 'event_results_athlete')) v(o, n)
             where to_regclass('public.' || o) is not null and to_regclass('public.' || n) is null loop
     execute format('alter index public.%I rename to %I', r.o, r.n);
   end loop;
@@ -64,10 +68,10 @@ begin
   -- Funktionen mit alten Namen entfernen (die neuen werden unten angelegt)
   for r in select p.oid::regprocedure fn from pg_proc p
             where p.pronamespace = 'public'::regnamespace
-              and (p.proname in ('rider_points', 'rider_group', 'rider_season_rank', '_rider_free')
+              and (p.proname in ('rider_points', 'rider_group', 'rider_season_rank', '_rider_free', 'rider_points_recent')
                    -- Ergebnis-Spalten mit alten Namen lassen sich nicht per "create or replace" ändern
                    or p.proargnames && array['rider_slug', 'race_slug', 'uci_points', 'uci_rank', 'uci_class', 'pcs_slug',
-                                             'riders', 'current_rider', 'add_rider', 'drop_rider', 'give_riders', 'take_riders']) loop
+                                             'riders', 'current_rider', 'add_rider', 'drop_rider', 'give_riders', 'take_riders', 'rider_name']) loop
     execute format('drop function %s', r.fn);
   end loop;
 end $$;
