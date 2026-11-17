@@ -283,27 +283,34 @@ const CHAMPIONSHIPS = [
 const NOT_SENIOR_CHAMPS = /u\s?1[68]|u\s?2[03]|youth|junior|jugend|team|relays|staffel|masters|senioren|mountain|trail|10\s?km|half|marathon/i;
 export const championshipLabel = (e) => (NOT_SENIOR_CHAMPS.test(e.name) ? null : CHAMPIONSHIPS.find(([, re]) => re.test(e.name))?.[0] || null);
 
-// Letzter Samstag eines Monats (m = 1–12) als JJJJ-MM-TT
-const lastSaturday = (y, m) => { const d = new Date(Date.UTC(y, m, 0)); d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 1) % 7)); return iso(d); };
-// DM und Hallen-DM trägt der Veranstalter oft erst spät in den WA-Kalender ein → übliche Termine als „voraussichtlich“
-// (Hallen-DM: letztes Februar-Wochenende, DM: letztes Juli-Wochenende); Daten bei Bedarf beim Spieltag anpassen
-function withExpectedChampionships(start, end, events) {
+// DM und Hallen-DM stehen oft erst spät im WA-Kalender → Termine aus anderen Quellen (DLV-Terminliste,
+// Tabelle extra_calendar_events) ergänzen, solange WA für das Jahr keine hat. Geraten wird nichts.
+export function withExtraChampionships(events, extras = []) {
   const out = [...events];
-  for (let y = +start.slice(0, 4); y <= +end.slice(0, 4); y++) {
-    for (const [label, name, month] of [['Hallen-DM', 'Deutsche Hallenmeisterschaften', 2], ['DM', 'Deutsche Meisterschaften', 7]]) {
-      if (events.some((e) => championshipLabel(e) === label && e.start_date.startsWith(String(y)))) continue;
-      const s = lastSaturday(y, month);
-      if (s >= start && s <= end) out.push({ name, start_date: s, end_date: addDays(s, 1), guess: true });
-    }
+  for (const x of extras) {
+    const label = championshipLabel(x);
+    if (!label || events.some((e) => championshipLabel(e) === label && e.start_date.slice(0, 4) === x.start_date.slice(0, 4))) continue;
+    out.push({ ...x, extra: true });
   }
   return out;
+}
+// Jahre der Saison, für die weder WA noch eine andere Quelle einen DM-/Hallen-DM-Termin kennt
+export function missingChampionships(start, end, events) {
+  const miss = [];
+  for (let y = +start.slice(0, 4); y <= +end.slice(0, 4); y++) {
+    for (const [label, month] of [['Hallen-DM', '02'], ['DM', '07']]) {
+      if (`${y}-${month}-15` < start || `${y}-${month}-15` > end) continue;
+      if (!events.some((e) => championshipLabel(e) === label && e.start_date.startsWith(String(y)))) miss.push(`${label} ${y}`);
+    }
+  }
+  return miss;
 }
 
 export function monthlyProposal(start, end, events = []) {
   // 1. Meisterschaften → eigene Spieltage (zusammengelegt, wenn sie sich überschneiden)
   const champs = [];
-  for (const e of withExpectedChampionships(start, end, events)) {
-    const label = championshipLabel(e) && `${championshipLabel(e)}${e.guess ? ' (vorauss.)' : ''}`;
+  for (const e of events) {
+    const label = championshipLabel(e);
     if (!label) continue;
     const s = mondayOnOrBefore(e.start_date < start ? start : e.start_date);
     const t = sundayOnOrAfter((e.end_date || e.start_date) > end ? end : (e.end_date || e.start_date));
@@ -378,6 +385,10 @@ function Matchdays({ c }) {
   const big = useLoad(async () => (await q(sb.from('calendar_events').select('name,category,country,start_date,end_date')
     .gte('end_date', c.league.season_start).lte('start_date', c.league.season_end)))
     .filter((e) => ['OW', 'DF', 'GW', 'GL'].includes(e.category) || championshipLabel(e)), [c.league.id]);
+  const extra = useLoad(async () => await q(sb.from('extra_calendar_events').select('name,start_date,end_date,source_url')
+    .gte('start_date', c.league.season_start).lte('start_date', c.league.season_end)), [c.league.id]);
+  const events = withExtraChampionships(big.data || [], extra.data || []);
+  const missing = missingChampionships(c.league.season_start, c.league.season_end, events);
   const a = useAction();
   const locked = (m) => m.waivers_done || new Date(m.waiver_deadline || m.deadline) <= new Date();
   const toLocal = (ts) => { const d = new Date(ts); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); };
@@ -433,7 +444,7 @@ function Matchdays({ c }) {
 
     <details><summary>Spieltage automatisch vorschlagen</summary>
       <div class="row">
-        <button class="primary" onClick=${() => setGen(monthlyProposal(c.league.season_start, c.league.season_end, big.data || []))}>Monatlich (Mo–So)</button>
+        <button class="primary" onClick=${() => setGen(monthlyProposal(c.league.season_start, c.league.season_end, events))}>Monatlich (Mo–So)</button>
         <button onClick=${() => setGen(proposal('biweekly', c.league.season_start, c.league.season_end))}>Alle 2 Wochen</button>
         <button onClick=${() => setGen(seasonProposal(c.league.season_start, c.league.season_end))}>Saisonblöcke</button>
         <button onClick=${() => setGen(proposal('monthly', c.league.season_start, c.league.season_end))}>Kalendermonate</button>
@@ -441,7 +452,10 @@ function Matchdays({ c }) {
       </div>
       <p class="muted small">Empfohlen: „Monatlich (Mo–So)“ – Olympia, WM, EM, Hallen-WM/-EM, Cross- und Straßen-WM/-EM, DM und Hallen-DM
         bekommen eigene Spieltage (Montag bis Sonntag der Meisterschaftswoche), dazwischen Spieltage von etwa einem Monat (Montag bis Sonntag).
-        Andere Großereignisse werden nicht geteilt. Stehen DM oder Hallen-DM noch nicht im WA-Kalender, plant der Vorschlag sie zum üblichen Termin ein (letztes Juli- bzw. Februar-Wochenende, „vorauss.“) – Daten später beim Spieltag anpassen.</p>
+        Andere Großereignisse werden nicht geteilt. Stehen DM oder Hallen-DM noch nicht im WA-Kalender, gilt der Termin aus der DLV-Terminliste.</p>
+      ${events.some((e) => e.extra) && html`<p class="muted small">Aus der DLV-Terminliste (noch nicht bei WA):
+        ${events.filter((e) => e.extra).map((e, i) => html`${i ? ', ' : ''}<a href=${e.source_url} target="_blank" rel="noopener">${championshipLabel(e)} ${fmtDate(e.start_date)}</a>`)}</p>`}
+      ${big.data && extra.data && missing.length > 0 && html`<p class="muted small">Termin noch unbekannt: ${missing.join(', ')} – Claude kann ihn einmalig beim DLV nachschlagen und eintragen.</p>`}
       ${gen && html`<p class="muted small">Vorschlag für ${fmtDate(c.league.season_start)} – ${fmtDate(c.league.season_end)}.
           Nach dem Anlegen einzeln anpassbar. Spieltage in der Vergangenheit werden übersprungen.</p>
         <ul class="list compact">${gen.map((m) => html`<li><span>${m.name}</span><span class="muted">${fmtDate(m.starts_on)} – ${fmtDate(m.ends_on)}</span></li>`)}</ul>

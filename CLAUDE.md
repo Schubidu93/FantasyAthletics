@@ -78,6 +78,8 @@
   `ranking_points` aus bester WA-Leistung), dann Ergebnisse/Bestleistungen nur für diese Athleten (`ATHLETE_IDS`).
 - Kalender: `importer/sync-calendar.ts` → `calendar_events` (WA-Kalender: weltweit ab GL, Europa ab A, Deutschland ab E;
   Programm aus `getCompetitionOrganiserInfo`, Filter in `importer/calendar-filter.ts`).
+  Fehlen DM/Hallen-DM eines Jahres bei WA, nicht raten: einmalig in der DLV-Terminliste (leichtathletik.de) nachschlagen und in
+  `extra_calendar_events` (`schema.sql`, mit `source_url`) eintragen; der Spieltag-Vorschlag nimmt sie, solange WA keinen Termin hat.
 - Cross: Disziplin heißt nur „Cross Country“, die Distanz steht im Wettkampfnamen („… - XC 7.5km“) → `cross_km()` in der Datenbank,
   `crossKm()`/`discWithKm()` in `web/lib.js`; Distanzfaktor aus `cross_distance_factors`. Mehrere Rennen eines Wettkampfs
   (z. B. Pforzheim 1,5 und 7,5 km) haben dieselbe Wettkampf-ID und werden über die Distanz im Label getrennt.
