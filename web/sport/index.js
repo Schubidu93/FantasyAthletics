@@ -22,6 +22,7 @@ export const SPORT = {
   fallbackBasis: 'den WA-Punkten der Toplisten', fallbackShort: 'WA',   // Draft-Report ohne Vorjahrespunkte
   rankingOption: 'nach WA-Punkten (beste zuerst)', rankingPhrase: 'nach WA-Punkten',   // Draft-Reihenfolge
   bestBy: 'nach WA-Punkten', orderLabel: 'nach WA-Punkten',   // Draft: automatische Wahl, Reihenfolge
+  csvNameHint: 'Name wie bei World Athletics, z. B. „Robert FARKEN“', inPoolWord: 'im Pool',   // Offline-Draft (CSV)
   resultsSchedule: 'Ergebnisse werden stündlich von 8 bis 23 Uhr abgerufen.',
 };
 /** Schlüssel einer Person (Athlet bzw. Fahrer) */

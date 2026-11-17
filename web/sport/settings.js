@@ -23,8 +23,11 @@ export function adjustSettings(f, k, v) {
   return next;
 }
 
-/** Zusätzliche Werte für create_league / update_league_settings */
-export const settingsPayload = (f) => ({
+/** Formularwerte aus der gespeicherten Liga (Admin → Einstellungen) */
+export const settingsInit = (l) => ({ ...l });
+
+/** Zusätzliche Werte für create_league / update_league_settings (Positionen nur vor dem Draft änderbar) */
+export const settingsPayload = (f, { locked = false } = {}) => (locked ? {} : {
   lineup_mode: f.gender === 'mixed' ? f.lineup_mode : 'free', lineup_groups: f.lineup_groups, wildcards: +f.wildcards,
 });
 
