@@ -1,7 +1,7 @@
 // Athleten-Fenster: Stammdaten, Toplisten und alle Ergebnisse (Lauf, Zeit, WA-Punkte, Fantasy-Punkte)
 import { html, useState, useEffect } from '../vendor/preact-htm.js';
 import { sb, q, all, rpc, waAthleteUrl, waResultUrl, flag, riderGroup, GROUP_LABEL, discLabel, discWithKm, raceLabel,
-  fmtPts, CatBadge, discMeters, SexBadge, RELAYS } from '../lib.js';
+  fmtPts, CatBadge, discMeters, SexBadge, RELAYS, rememberAthlete } from '../lib.js';
 
 // Ergebnisse werden ab dieser Saison gespeichert
 const FIRST_YEAR = 2025;
@@ -110,8 +110,8 @@ export function RiderModal() {
     try { await rpc('set_result_champ', { p_id: x.id, p_place: v === '' ? null : +v, p_category: 'B' }); setData(await loadRider(slug, L)); }
     catch (e) { setError(e.message); }
   };
-  const toTop = (t) => { if (!L) return; setSlug(null); location.hash = `#/league/${L}/toplists/${t.year}/${encodeURIComponent(t.discipline)}/${r?.gender || 'men'}`; };
-  const go = (x) => { if (!L || !x.wa_competition_id) return; setSlug(null); location.hash = `#/league/${L}/races/wa-c${x.wa_competition_id}`; };
+  const toTop = (t) => { if (!L) return; rememberAthlete(slug, r?.name || ''); setSlug(null); location.hash = `#/league/${L}/toplists/${t.year}/${encodeURIComponent(t.discipline)}/${r?.gender || 'men'}`; };
+  const go = (x) => { if (!L || !x.wa_competition_id) return; rememberAthlete(slug, r?.name || ''); setSlug(null); location.hash = `#/league/${L}/races/wa-c${x.wa_competition_id}`; };
 
   return html`<div class="modal-back" onClick=${() => setSlug(null)}>
     <div class="modal card" role="dialog" aria-modal="true" aria-label="Athlet" onClick=${(e) => e.stopPropagation()}>
