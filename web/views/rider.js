@@ -154,7 +154,7 @@ export function RiderModal() {
             <button type="button" class=${`sort-head res-pts ${byPoints ? 'active' : ''}`} onClick=${() => setByPoints(true)}>Pkt.</button></div>
           <div class="res-table">${shown.map((x) => html`<div key=${x.id} class=${`res-row ${L && x.wa_competition_id ? 'clickable' : ''}`} onClick=${() => go(x)}>
             <span class="res-date">${shortDate(x.date)}</span>
-            <span class="res-what"><b>${x.relay ? `Staffel ${RELAYS[x.relay]?.label || x.relay}` : discWithKm(x.discipline, x.competition)}${x.race && x.race !== 'F' ? ` · ${raceLabel(x.race)}` : ''} · ${x.mark || '–'}</b>
+            <span class="res-what"><b>${x.relay ? `Staffel ${RELAYS[x.relay]?.label || x.relay}` : discWithKm(x.discipline, x.competition)}${x.race && x.race !== 'F' ? ` · ${raceLabel(x.race)}` : ''} · <span class="nowrap">${x.mark || '–'}</span></b>
               ${(x.record || x.champ_place || Number(x.pts?.pb_points) > 0) && html`<span class="res-tags">
                 ${x.champ_place && html`<span>${x.champ_place === 1 ? '🏆 Meister' : `Meisterschaft: ${x.champ_place}. Platz`}</span>`}
                 ${x.record && html`<span><span class="badge b-rec">${x.record}</span> ${RECORD[x.record]}</span>`}
