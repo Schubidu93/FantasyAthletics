@@ -1,6 +1,8 @@
 // Athleten-Übersicht: alle Athleten der Wertung mit Punkten der Saison und Besitzer in der Liga
 import { html, useState, useMemo } from '../vendor/preact-htm.js';
-import { rpc, useLoad, Loading, RiderCell, normName, rpcAll, fmtPts, GROUPS, GROUP_LABEL, riderGroup } from '../lib.js';
+import { fmtPts, Loading, normName, rpc, rpcAll, useLoad } from '../lib.js';
+import { GROUP_LABEL, GROUPS, riderGroup } from './lib.js';
+import { rank, RiderCell } from './index.js';
 
 export function Riders({ c }) {
   const years = useLoad(() => rpc('result_years'), []);
@@ -62,7 +64,7 @@ export function Riders({ c }) {
         ${showRank && html`<option value="rank">Sortiert nach Pool-Rang</option>`}
       </select>
     </div>
-    <div class="scroll-x"><table class="tbl athletes-tbl">
+    <div class="scroll-x"><table class="tbl people-tbl">
       <thead><tr><th class="num hide-sm col-no">#</th><th>Athlet</th><th class="col-owner">Kader</th><th class="num hide-sm col-res">Ergebnisse</th><th class="num col-pts" title=${recent ? 'Fantasy-Punkte der letzten 30 Tage' : `Fantasy-Punkte ${year}`}>Pkt.</th></tr></thead>
       <tbody>${list.slice(0, limit).map((r, i) => {
         const m = c.managerMap[c.owner[r.id]];

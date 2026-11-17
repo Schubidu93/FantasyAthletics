@@ -1,8 +1,8 @@
 // Spieltag-Vorschläge der Leichtathletik: Meisterschaften (aus dem WA-Kalender bzw. der DLV-Terminliste) bekommen
 // eigene Spieltage; Großereignisse werden nicht auf zwei Spieltage verteilt.
 import { html } from '../vendor/preact-htm.js';
-import { sb, q, useLoad, fmtDate } from '../lib.js';
 import { iso, addDays, proposal } from '../views/admin/proposal.js';
+import { fmtDate, q, sb, useLoad } from '../lib.js';
 
 export const EMPTY_HINT = 'Noch keine Spieltage. Am schnellsten: unten „Spieltage automatisch vorschlagen“ → „Alle 2 Wochen“ oder „Saisonblöcke“ → „Alle anlegen“.';
 export const NAME_PLACEHOLDER = 'z. B. Hallensaison';

@@ -1,6 +1,6 @@
 // Liga-Einstellungen der Leichtathletik: Startwerte, eigene Felder (Positionen je Disziplin), zusätzliche gespeicherte Werte.
 import { html } from '../vendor/preact-htm.js';
-import { GROUPS, GROUP_LABEL, GENDER_LABEL, leagueSlots } from '../lib.js';
+import { GENDER_LABEL, GROUP_LABEL, GROUPS, leagueSlots } from './lib.js';
 
 /** Startwerte beim Anlegen einer Liga (zusätzlich zu den gemeinsamen) */
 export const LEAGUE_DEFAULTS = {

@@ -1,6 +1,7 @@
 // Wettkämpfe: alle Wettkämpfe, bei denen Athleten aus dem Pool gestartet sind, mit deren Ergebnissen und Punkten
 import { html, useState, useMemo } from '../vendor/preact-htm.js';
-import { sb, q, all, useLoad, Loading, fmtDate, fmtPts, openRider, normName, flag, withFlag, nationCode, discWithKm, raceLabel , waResultUrl , SexBadge, CatBadge, discMeters, raceOrder, BackToAthlete } from '../lib.js';
+import { all, flag, fmtDate, fmtPts, Loading, nationCode, normName, openRider, q, sb, useLoad, withFlag } from '../lib.js';
+import { BackToAthlete, CatBadge, discMeters, discWithKm, raceLabel, raceOrder, SexBadge, waResultUrl } from './lib.js';
 
 // WA-Wettkampfkategorien (World-Ranking-Regeln): OW = Olympia/WM … F = nationale Meetings
 const CATS = [['', 'Alle Kategorien'], ['top', 'OW, DF, GW, GL'], ['OW', 'OW – Olympia/WM'], ['DF', 'DF – DL-Finale'],

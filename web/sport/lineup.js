@@ -1,7 +1,8 @@
 // Aufstellung für den nächsten Spieltag (Team → Kader): Leichtathletik mit festen Positionen je Disziplin
 import { html, useState, useEffect } from '../vendor/preact-htm.js';
-import { rpc, useAction, Msg, leagueSlots, slotOk, SlotLabel } from '../lib.js';
 import { fmtDeadline } from '../views/deadline.js';
+import { Msg, rpc, useAction } from '../lib.js';
+import { leagueSlots, SlotLabel, slotOk } from './lib.js';
 
 // Feste Positionen: je Disziplingruppe (ggf. getrennt nach Männern/Frauen) plus Wildcards
 export function Lineup({ c }) {

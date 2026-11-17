@@ -1,0 +1,61 @@
+/* Runner Fantasy: Farben und Gestaltung, die es nur in dieser App gibt (gemeinsame Gestaltung: style.css) */
+:root { --accent: #cf4424; --accent-text: #ffffff; --accent-soft: #fbe9e4; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --accent: #ff7a57; --accent-text: #1a0d08; --accent-soft: #3a2019; }
+}
+:root[data-theme="dark"] { --accent: #ff7a57; --accent-text: #1a0d08; --accent-soft: #3a2019; }
+
+/* ---- Runner Fantasy: Aufstellung mit Positionen, Disziplin-Auswahl, Wettkämpfe ---- */
+.lineup li { display: grid; grid-template-columns: 7.5rem 1fr; gap: .5rem; align-items: center; }
+.lineup .slot-name { font-weight: 600; font-size: .9rem; }
+.lineup select { width: 100%; min-width: 0; }
+.group-pick { display: flex; flex-direction: column; gap: .35rem; }
+.label-text { font-size: .85rem; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: .35rem .75rem; }
+.chip { display: inline-flex; align-items: center; gap: .3rem; font-size: .9rem; }
+.err-text { color: #c0392b; }
+.race-link .race-date { font-size: .8rem; color: var(--muted); }
+.race-link .race-name { display: flex; flex-direction: column; min-width: 0; }
+.race-link .race-name strong { overflow-wrap: anywhere; }
+.toplists summary { cursor: pointer; margin-top: .5rem; }
+
+/* Kalender */
+.cal-month { margin: 1rem 0 .25rem; font-size: .95rem; color: var(--muted); }
+.cal-item { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; width: 100%; min-width: 0; }
+.cal-text { display: flex; flex-direction: column; min-width: 0; }
+.cal-text .race-date { font-size: .8rem; color: var(--muted); }
+.cal-text .race-name { display: flex; flex-direction: column; min-width: 0; }
+.cal-text .race-name strong { overflow-wrap: anywhere; }
+.race-list li.cal-de { box-shadow: inset 3px 0 0 var(--accent); padding-left: .7rem; }
+.cal-events { overflow-wrap: anywhere; }
+.chips-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem .75rem; }
+/* Kleine Abzeichen (Geschlecht, WA-Kategorie) – im Stil des Kalender-Widgets: gefüllt, weiße Schrift */
+.badge { display: inline-block; min-width: 1.5em; padding: 0 .32em; border-radius: 4px; color: #fff;
+  font-size: .68rem; font-weight: 700; line-height: 1.5; text-align: center; vertical-align: .1em; letter-spacing: .02em; }
+.b-m { background: #3b82f6; }
+.b-f { background: #ec4899; }
+.b-top { background: #7c3aed; }
+.b-gl { background: #2f7bd8; }
+.b-a { background: #3f9d5a; }
+.b-low { background: #6b7280; }
+.cal-unit { display: block; }
+.sort-head { all: unset; cursor: pointer; font: inherit; color: inherit; }
+.sort-head.active { color: var(--accent); }
+.sort-head.res-pts { text-align: right; display: block; }
+.b-rec { background: #d97706; }
+select.mini { font-size: .75rem; padding: 2px 6px; width: auto; min-height: 0; }
+.manual-row { flex-wrap: wrap; gap: .4rem; }
+.row.nowrap { flex-wrap: nowrap; gap: .4rem; }
+.b-pb { background: #0d9488; }
+.pb-tbl { width: 100%; border-collapse: collapse; font-size: .9rem; margin-top: .3rem; }
+.pb-tbl th { font-size: .75rem; font-weight: 600; color: var(--muted); text-align: left; padding: .2rem .3rem; }
+.pb-tbl td { padding: .35rem .3rem; border-top: 1px solid var(--border); white-space: nowrap; }
+.pb-tbl td:first-child { white-space: normal; }
+.pb-tbl .num { text-align: right; }
+.pb-tbl tr.pb-new strong { color: var(--accent); }
+/* Rekord und PB direkt unter der Zeit, gut sichtbar */
+.res-tags { display: flex; flex-wrap: wrap; gap: .15rem .6rem; font-size: .8rem; font-weight: 600; color: var(--accent); margin: .1rem 0; }
+.res-tags .badge { margin-right: .15rem; }
+.pb-tbl tr.clickable { cursor: pointer; }
+.mini-label { font-size: .75rem; display: inline-flex; gap: .3rem; align-items: center; }
+.place-sub { display: block; font-size: .68rem; line-height: 1.1; white-space: nowrap; }

@@ -1,40 +1,15 @@
 // Sportart Leichtathletik: alles, worin sich Runner Fantasy von UCI Fantasy unterscheidet (Begriffe,
 // Spaltennamen, Texte). Der übrige App-Code ist in beiden Apps gleich und liest diese Werte hier.
 import { html, useState } from '../vendor/preact-htm.js';
-import { SexBadge, GROUPS, GROUP_LABEL, riderGroup, discLabel, raceLabel } from '../lib.js';
+export * from './config.js';
+import { SPORT, pid } from './config.js';
+import { normName, openRider } from '../lib.js';
+import { discLabel, GROUP_LABEL, GROUPS, raceLabel, riderGroup, SexBadge } from './lib.js';
 
-export const SPORT = {
-  app: 'Runner Fantasy', emoji: '🏃', source: 'World Athletics',
-  // Begriffe in den gebrauchten Fällen: ein Athlet, einen Athleten, die Athleten, den Athleten (Dativ Plural), des Athleten
-  one: 'Athlet', oneAcc: 'Athleten', many: 'Athleten', manyDat: 'Athleten', oneGen: 'Athleten',
-  // Spaltennamen in der Datenbank
-  pk: 'id',                   // Schlüssel der Personentabelle
-  fk: 'athlete_id',           // Verweis darauf (Kader, Aufstellung, Ergebnisse …)
-  add: 'add_athlete', drop: 'drop_athlete',          // Waiver-Anträge
-  give: 'give_athletes', take: 'take_athletes',      // Tausch
-  current: 'current_athlete',                        // Draft: aktuell versteigert
-  comp: 'competition_id', pts: 'points',             // Ergebnisse
-  pointsWord: 'Punkten',                       // „Sortiert nach …“
-  pointsRpc: 'athlete_points',
-  // Texte
-  dataLine: 'Daten: World Athletics (Toplisten und Ergebnisse). Keine offizielle App von World Athletics.',
-  matchdayExamples: 'alle 2 Wochen oder Hallensaison, Frühjahr, Bahnsaison',   // Beispiele für Spieltage
-  fallbackBasis: 'den WA-Punkten der Toplisten', fallbackShort: 'WA',   // Draft-Report ohne Vorjahrespunkte
-  rankingOption: 'nach WA-Punkten (beste zuerst)', rankingPhrase: 'nach WA-Punkten',   // Draft-Reihenfolge
-  bestBy: 'nach WA-Punkten', orderLabel: 'nach WA-Punkten',   // Draft: automatische Wahl, Reihenfolge
-  csvNameHint: 'Name wie bei World Athletics, z. B. „Robert FARKEN“', inPoolWord: 'im Pool',   // Offline-Draft (CSV)
-  resultsSchedule: 'Ergebnisse werden stündlich von 8 bis 23 Uhr abgerufen.',
-};
-/** Schlüssel einer Person (Athlet bzw. Fahrer) */
-export const pid = (r) => r?.id;
 
 /** Zeile unter dem Namen in Listen (Teampunkte): Sportart-Info und Zusatztext */
 export const PersonLine = ({ r, sub }) => html`<${SexBadge} g=${r?.gender} /> ${sub}`;
 
-/** Platz der Person in der Auswahl (Pool-Rang) – für Sortierungen */
-export const rank = (r) => r?.pool_rank;
-/** Darf geholt werden (Waiver, Draft): nur Athleten im aktuellen Pool */
-export const selectable = (r) => r?.pool_rank != null;
 
 /** Filter für Personenlisten (freie Athleten): Disziplin, in Mixed-Ligen auch Geschlecht. Liefert [Eingaben, Prüfung]. */
 export function usePeopleFilter(c) {
@@ -55,3 +30,26 @@ export const labelText = (l) => {
   const disc = discLabel(parts[0]) + (km ? ` ${Number(km.slice(0, -2)).toLocaleString('de-DE')} km` : '');
   return run ? `${disc} · ${raceLabel(run)}` : disc;
 };
+
+/** Name mit Kurzinfo (Gruppe/Jahrgang bzw. Nation/Team), antippen öffnet das Profil */
+export function RiderCell({ r }) {
+  if (!r) return html`<span class="muted">unbekannt</span>`;
+  const g = riderGroup(r);
+  const meta = [g && (GROUP_LABEL[g] || g), r.birth_date && `Jg. ${r.birth_date.slice(0, 4)}`]
+    .filter(Boolean).join(' · ');
+  const best = r.best_mark && `${r.best_discipline?.replace(' Metres', ' m').replace('Short Track', '(Halle)') || ''} ${r.best_mark}`
+    + (r.ranking_points ? ` · ${Math.round(r.ranking_points)} P.` : '');
+  return html`<span class="rider">
+    <span class="rider-line">
+      <button type="button" class="rider-name linkish" title="Ergebnisse anzeigen"
+        onClick=${(e) => { e.stopPropagation(); openRider(r.id); }}>${r.name}</button>
+      ${r.pool_rank && html`<span class="rank-chip" title="Platz im Athletenpool (nach Punkten im Vorjahr der Saison)">#${r.pool_rank}</span>`}
+      ${r.inactive && html`<span class="tag warn">inaktiv</span>`}
+    </span>
+    <span class="rider-meta"><${SexBadge} g=${r.gender} />${meta ? ` ${meta}` : ''}</span>
+    ${best && html`<span class="rider-team" title="Beste Toplistenleistung">${best}</span>`}
+  </span>`;
+}
+
+/** Suchtext für die Personenauswahl (Name plus Disziplingruppe bzw. Team) */
+export const searchText = (r) => normName(r.name + ' ' + (riderGroup(r) || ''));
