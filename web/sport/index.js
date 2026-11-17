@@ -21,6 +21,7 @@ export const SPORT = {
   matchdayExamples: 'alle 2 Wochen oder Hallensaison, Frühjahr, Bahnsaison',   // Beispiele für Spieltage
   fallbackBasis: 'den WA-Punkten der Toplisten', fallbackShort: 'WA',   // Draft-Report ohne Vorjahrespunkte
   rankingOption: 'nach WA-Punkten (beste zuerst)', rankingPhrase: 'nach WA-Punkten',   // Draft-Reihenfolge
+  bestBy: 'nach WA-Punkten', orderLabel: 'nach WA-Punkten',   // Draft: automatische Wahl, Reihenfolge
   resultsSchedule: 'Ergebnisse werden stündlich von 8 bis 23 Uhr abgerufen.',
 };
 /** Schlüssel einer Person (Athlet bzw. Fahrer) */

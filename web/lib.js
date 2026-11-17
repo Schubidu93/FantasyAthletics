@@ -302,11 +302,11 @@ export function SearchSelect({ value, onChange, options, placeholder, label = (x
 }
 
 // Athletenauswahl mit Suche (Name oder Gruppe, z. B. „1500“)
-export function RiderPicker({ athletes, onPick, placeholder = 'Athlet suchen …', limit = 30, action = 'Wählen' }) {
+export function RiderPicker({ people, onPick, placeholder = 'Athlet suchen …', limit = 30, action = 'Wählen' }) {
   const [term, setTerm] = useState('');
   const t = normName(term);
   const text = (r) => normName(r.name + ' ' + (riderGroup(r) || ''));
-  const list = athletes
+  const list = people
     .filter((r) => !t || t.split(' ').every((w) => text(r).includes(w)))
     .slice(0, limit);
   return html`<div class="picker">
