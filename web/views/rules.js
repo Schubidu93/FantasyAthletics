@@ -80,7 +80,7 @@ export function Rules({ c }) {
       <summary><h3>Athletenpool und Aufstellung</h3></summary>
       <ul>
         <li><strong>Pool:</strong> deutsche Läuferinnen und Läufer, die in der DE-Topliste (Senioren) des aktuellen Jahres oder des Vorjahres
-          in einer Laufdisziplin ab 800 m (inkl. Halle, Hindernis und Straße) mindestens ${cfg ? cfg.pool_threshold : 1000} WA-Punkte erreicht haben.
+          in einer Laufdisziplin ab 800 m (inkl. Halle, Hindernis und Straße) mindestens ${cfg ? cfg.pool_threshold : 950} WA-Punkte erreicht haben.
           ${l.gender !== 'mixed' ? `In dieser Liga nur ${GENDER_LABEL[l.gender]}.` : ''} Der Pool wird täglich aktualisiert; neue Athleten sind automatisch frei.</li>
         <li><strong>Disziplingruppe:</strong> 800 m, 1500 m, 5000 m, 10.000 m, Marathon oder Hindernis. Maßgeblich sind die Punkte im Vorjahr
           der Saison (Saison ${gy} → Punkte ${gy - 1}): Die Gruppe, in der ein Athlet die meisten Punkte geholt hat, gilt die ganze Saison
