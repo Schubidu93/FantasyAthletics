@@ -306,8 +306,8 @@ export function missingChampionships(start, end, events) {
   return miss;
 }
 
-export function monthlyProposal(start, end, events = []) {
-  // 1. Meisterschaften → eigene Spieltage (zusammengelegt, wenn sie sich überschneiden)
+// Meisterschaften → Blöcke Montag bis Sonntag der Meisterschaftswoche (überschneidende zusammengelegt)
+function championshipBlocks(start, end, events) {
   const champs = [];
   for (const e of events) {
     const label = championshipLabel(e);
@@ -318,9 +318,55 @@ export function monthlyProposal(start, end, events = []) {
     if (prev) {
       if (!prev.name.split(' + ').includes(label)) prev.name += ` + ${label}`;
       prev.starts_on = s < prev.starts_on ? s : prev.starts_on; prev.ends_on = t > prev.ends_on ? t : prev.ends_on;
-    } else champs.push({ name: label, starts_on: s < start ? start : s, ends_on: t > end ? end : t, champ: true });
+      prev.ev_start = e.start_date < prev.ev_start ? e.start_date : prev.ev_start;
+      prev.ev_end = (e.end_date || e.start_date) > prev.ev_end ? (e.end_date || e.start_date) : prev.ev_end;
+    } else champs.push({ name: label, starts_on: s < start ? start : s, ends_on: t > end ? end : t, champ: true,
+      ev_start: e.start_date, ev_end: e.end_date || e.start_date });
   }
-  champs.sort((a, b) => a.starts_on.localeCompare(b.starts_on));
+  return champs.sort((a, b) => a.starts_on.localeCompare(b.starts_on));
+}
+
+// Meisterschaften in einen anderen Vorschlag einbauen: eigener Spieltag, die übrigen Spieltage werden drumherum gekürzt.
+// onlyIfSplit: nur, wenn die Meisterschaft sonst auf zwei Spieltage fiele (Wöchentlich).
+export function withChampionshipMatchdays(list, start, end, events, { onlyIfSplit = false, renumber = null } = {}) {
+  let champs = championshipBlocks(start, end, events);
+  const over = (a, b) => a.starts_on <= b.ends_on && a.ends_on >= b.starts_on;
+  if (onlyIfSplit) champs = champs.filter((c) => {
+    const ev = { starts_on: c.ev_start, ends_on: c.ev_end };
+    return list.filter((m) => over(m, ev)).length > 1;
+  });
+  let out = list.map((m) => ({ ...m }));
+  for (const c of champs) {
+    out = out.flatMap((m) => {
+      if (m.champ || !over(m, c)) return [m];
+      const parts = [];
+      if (m.starts_on < c.starts_on) parts.push({ ...m, ends_on: addDays(c.starts_on, -1) });
+      if (m.ends_on > c.ends_on) parts.push({ ...m, starts_on: addDays(c.ends_on, 1) });
+      return parts;
+    });
+    out.push(c);
+    out.sort((a, b) => a.starts_on.localeCompare(b.starts_on));
+  }
+  // Reste unter 4 Tagen dem angrenzenden normalen Spieltag zuschlagen
+  for (let i = 0; i < out.length; i++) {
+    const m = out[i];
+    if (m.champ || days(m.starts_on, m.ends_on) >= 4) continue;
+    const prev = out[i - 1], next = out[i + 1];
+    if (prev && !prev.champ && addDays(prev.ends_on, 1) === m.starts_on) { prev.ends_on = m.ends_on; out.splice(i--, 1); }
+    else if (next && !next.champ && addDays(m.ends_on, 1) === next.starts_on) { next.starts_on = m.starts_on; out.splice(i--, 1); }
+  }
+  if (renumber) { let n = 0; for (const m of out) if (!m.champ) m.name = `${renumber} ${++n}`; }
+  // gleicher Name zweimal (z. B. „Juli“ vor und nach der DM) → „Juli I“, „Juli II“
+  const count = {};
+  for (const m of out) if (!m.champ) count[m.name] = (count[m.name] || 0) + 1;
+  const seen = {};
+  for (const m of out) if (!m.champ && count[m.name] > 1) m.name = `${m.name} ${['I', 'II', 'III', 'IV'][seen[m.name] = (seen[m.name] || 0) + 1, seen[m.name] - 1]}`;
+  return out.map(({ champ, ev_start, ev_end, ...m }) => m);
+}
+
+export function monthlyProposal(start, end, events = []) {
+  // 1. Meisterschaften → eigene Spieltage (zusammengelegt, wenn sie sich überschneiden)
+  const champs = championshipBlocks(start, end, events);
   const big = events.filter((e) => ['OW', 'DF', 'GW', 'GL'].includes(e.category));
   // 2. Lücken dazwischen in Abschnitte von etwa einem Monat teilen
   const fill = (from, to) => {
@@ -362,7 +408,7 @@ export function monthlyProposal(start, end, events = []) {
   for (const m of out) if (!m.champ) count[m.name] = (count[m.name] || 0) + 1;
   const seen = {};
   for (const m of out) if (!m.champ && count[m.name] > 1) m.name = `${m.name} ${['I', 'II', 'III'][seen[m.name] = (seen[m.name] || 0) + 1, seen[m.name] - 1]}`;
-  return out.map(({ champ, ...m }) => m);
+  return out.map(({ champ, ev_start, ev_end, ...m }) => m);
 }
 
 // Saisonblöcke der Leichtathletik: Halle, Straße/Cross im Frühjahr, Bahnsaison in Monatsblöcken
@@ -445,14 +491,15 @@ function Matchdays({ c }) {
     <details><summary>Spieltage automatisch vorschlagen</summary>
       <div class="row">
         <button class="primary" onClick=${() => setGen(monthlyProposal(c.league.season_start, c.league.season_end, events))}>Monatlich (Mo–So)</button>
-        <button onClick=${() => setGen(proposal('biweekly', c.league.season_start, c.league.season_end))}>Alle 2 Wochen</button>
-        <button onClick=${() => setGen(seasonProposal(c.league.season_start, c.league.season_end))}>Saisonblöcke</button>
-        <button onClick=${() => setGen(proposal('monthly', c.league.season_start, c.league.season_end))}>Kalendermonate</button>
-        <button onClick=${() => setGen(proposal('weekly', c.league.season_start, c.league.season_end))}>Wöchentlich</button>
+        <button onClick=${() => setGen(withChampionshipMatchdays(proposal('biweekly', c.league.season_start, c.league.season_end), c.league.season_start, c.league.season_end, events, { renumber: 'Spieltag' }))}>Alle 2 Wochen</button>
+        <button onClick=${() => setGen(withChampionshipMatchdays(seasonProposal(c.league.season_start, c.league.season_end), c.league.season_start, c.league.season_end, events))}>Saisonblöcke</button>
+        <button onClick=${() => setGen(withChampionshipMatchdays(proposal('monthly', c.league.season_start, c.league.season_end), c.league.season_start, c.league.season_end, events))}>Kalendermonate</button>
+        <button onClick=${() => setGen(withChampionshipMatchdays(proposal('weekly', c.league.season_start, c.league.season_end), c.league.season_start, c.league.season_end, events, { onlyIfSplit: true, renumber: 'Woche' }))}>Wöchentlich</button>
       </div>
       <p class="muted small">Empfohlen: „Monatlich (Mo–So)“ – Olympia, WM, EM, Hallen-WM/-EM, Cross- und Straßen-WM/-EM, DM und Hallen-DM
         bekommen eigene Spieltage (Montag bis Sonntag der Meisterschaftswoche), dazwischen Spieltage von etwa einem Monat (Montag bis Sonntag).
-        Andere Großereignisse werden nicht geteilt. Stehen DM oder Hallen-DM noch nicht im WA-Kalender, gilt der Termin aus der DLV-Terminliste.</p>
+        Andere Großereignisse werden nicht geteilt. Auch bei den anderen Vorschlägen bekommen diese Meisterschaften einen eigenen Spieltag
+        (bei „Wöchentlich“ nur, wenn sie sonst auf zwei Wochen fielen). Stehen DM oder Hallen-DM noch nicht im WA-Kalender, gilt der Termin aus der DLV-Terminliste.</p>
       ${events.some((e) => e.extra) && html`<p class="muted small">Aus der DLV-Terminliste (noch nicht bei WA):
         ${events.filter((e) => e.extra).map((e, i) => html`${i ? ', ' : ''}<a href=${e.source_url} target="_blank" rel="noopener">${championshipLabel(e)} ${fmtDate(e.start_date)}</a>`)}</p>`}
       ${big.data && extra.data && missing.length > 0 && html`<p class="muted small">Termin noch unbekannt: ${missing.join(', ')} – Claude kann ihn einmalig beim DLV nachschlagen und eintragen.</p>`}
