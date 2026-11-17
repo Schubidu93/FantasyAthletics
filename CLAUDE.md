@@ -118,8 +118,8 @@ richtet `.claude/hooks/session-start.sh` Pakete und das Test-PostgreSQL ein.
 - Q/q: im GraphQL-Feld `qualified` steht für Q und q `false`, für Ausgeschiedene `null` (geprüft an WM 2025, Hallen-WM 2026, EM 2026).
 - worldathletics.org ist aus der Claude-Umgebung meist gesperrt; Rohdaten dann per Workflow „WA-Regeln und Beispieldaten laden“ holen.
 - Namen: `athletes.id` = `wa-<WA-ID>` (Fremdschlüssel überall `athlete_id`), `competitions.id` = `wa-c<Wettkampf-ID>`
-  (`results.competition_id`), Fantasy-Punkte `results.points`, Pool-Rang `athletes.pool_rank`. Bis November 2026 hießen sie
-  wie bei UCI Fantasy `riders`/`pcs_slug`/`rider_slug`/`races`/`uci_*` – die Umbenennung steht oben in `supabase/schema/01_tabellen.sql`.
+  (`results.competition_id`), Fantasy-Punkte `results.points`, Pool-Rang `athletes.pool_rank` – seit November 2026 in beiden Apps
+  dieselben Namen (vorher `riders`/`pcs_slug`/`rider_slug`/`races`/`uci_*`; die Umbenennung steht oben in `supabase/schema/01_tabellen.sql`).
   In App-Code heißen manche Variablen noch `rider…` (z. B. `RiderCell`, `riderMap`). Daten ab 2025.
 
 ## Push „Neue Punkte“ und heiße freie Athleten
