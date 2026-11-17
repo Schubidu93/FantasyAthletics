@@ -29,7 +29,11 @@ const main = async () => {
   const api: ApiConfig = process.env.WA_API_URL && process.env.WA_API_KEY
     ? { url: process.env.WA_API_URL, key: process.env.WA_API_KEY } : await discoverApiConfig();
   const known = new Set((await selectAll<{ name: string }>((a, b) => db.from("disciplines").select("name").order("name").range(a, b))).map((d) => d.name));
-  const athletes = await selectAll<{ id: string; wa_id: number }>((a, b) => db.from("athletes").select("id, wa_id").order("id").range(a, b));
+  // ATHLETE_IDS (z. B. „Athlet hinzufügen“): nur diese Athleten
+  const only = (process.env.ATHLETE_IDS || "").split(",").map((s) => s.trim()).filter(Boolean);
+  const athletes = only.length
+    ? ((await db.from("athletes").select("id, wa_id").in("id", only)).data ?? []) as { id: string; wa_id: number }[]
+    : await selectAll<{ id: string; wa_id: number }>((a, b) => db.from("athletes").select("id, wa_id").order("id").range(a, b));
   const pbs: ReturnType<typeof currentPbs> = [];
   const before: ReturnType<typeof bestBefore> = [];
   const done: string[] = [];

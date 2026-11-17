@@ -5,12 +5,12 @@ import { fmtUntil } from '../lib.js';
 import { LeagueSettingsFields } from './home.js';
 
 const SECTIONS = [['settings', 'Einstellungen'], ['members', 'Mitglieder'], ['import', 'Offline-Draft'],
-  ['matchdays', 'Spieltage'], ['results', 'Nachträge'], ['fix', 'Korrekturen'], ['log', 'Protokoll']];
+  ['matchdays', 'Spieltage'], ['athletes', 'Athleten'], ['results', 'Nachträge'], ['fix', 'Korrekturen'], ['log', 'Protokoll']];
 
 export function Admin({ c, sub }) {
   if (!c.isAdmin) return html`<p class="card muted">Nur für den Liga-Admin.</p>`;
   const s = sub || 'settings';
-  const View = { settings: Settings, members: Members, import: OfflineImport, matchdays: Matchdays, results: ManualResults, fix: Fixes, log: Log }[s];
+  const View = { settings: Settings, members: Members, import: OfflineImport, matchdays: Matchdays, athletes: AddAthlete, results: ManualResults, fix: Fixes, log: Log }[s];
   return html`<div class="stack">
     <nav class="seg wrap-seg">${SECTIONS.filter(([k]) => k !== 'import' || c.league.draft_mode === 'offline').map(([k, l]) =>
       html`<a href=${`#/league/${c.league.id}/admin/${k}`} class=${k === s ? 'active' : ''}>${l}</a>`)}</nav>
@@ -438,6 +438,43 @@ function Matchdays({ c }) {
 }
 
 // ---- Korrekturen ---------------------------------------------------------
+
+// ---- Athlet hinzufügen: per WA-ID, Profil-Link oder Name; der Ablauf „Athlet hinzufügen“ lädt alles ------
+const REQ_STATUS = { offen: 'wartet', 'läuft': 'wird geladen', fertig: 'fertig', mehrdeutig: 'mehrere Treffer', fehler: 'Fehler' };
+function AddAthlete({ c }) {
+  const list = useLoad(() => q(sb.from('athlete_requests').select('*').order('id', { ascending: false }).limit(30)), []);
+  const [query, setQuery] = useState('');
+  const [gender, setGender] = useState(c.league.gender === 'women' ? 'women' : 'men');
+  const a = useAction();
+  const add = (e) => {
+    e.preventDefault();
+    a.run(async () => { await rpc('request_athlete', { p_query: query, p_gender: gender }); setQuery(''); list.reload(); },
+      'Auftrag angelegt – in wenigen Minuten ist der Athlet mit Ergebnissen und Bestleistungen da (Liste unten aktualisieren).');
+  };
+  return html`<div class="stack">
+    <section class="card stack">
+      <h3>Athlet hinzufügen</h3>
+      <p class="muted small">Für Athleten, die nicht automatisch im Pool sind (z. B. unter der Punkte-Grenze oder aus dem Ausland).
+        Am sichersten mit der WA-ID oder dem Link zum Profil bei World Athletics; bei Namen sucht die App und zeigt bei mehreren Treffern Vorschläge.
+        Ergebnisse 2025/2026 und Bestleistungen werden geladen, der Athlet ist danach im Pool und draftbar.</p>
+      <form class="stack" onSubmit=${add}>
+        <label>WA-ID, Profil-Link oder Name<input value=${query} onInput=${(e) => setQuery(e.target.value)}
+          placeholder="z. B. 14682657 oder Tom Thurley" required /></label>
+        <div class="seg small">${[['men', 'Männer'], ['women', 'Frauen']].map(([k, l]) =>
+          html`<button type="button" class=${gender === k ? 'active' : ''} onClick=${() => setGender(k)}>${l}</button>`)}</div>
+        <div class="row"><button class="primary" disabled=${a.busy || !query.trim()}>Hinzufügen</button></div>
+      </form>
+      <${Msg} msg=${a.msg} />
+    </section>
+    <section class="card stack">
+      <div class="row between"><h3>Aufträge</h3><button class="small ghost" onClick=${() => list.reload()}>Aktualisieren</button></div>
+      ${!list.data ? html`<${Loading} error=${list.error} />` : list.data.length === 0 ? html`<p class="muted small">Noch keine.</p>` : html`<ul class="list compact">
+        ${list.data.map((r) => html`<li key=${r.id} class="manual-row">
+          <span><strong>${r.query}</strong> <span class=${`tag ${r.status === 'fertig' ? 'ok' : r.status === 'fehler' || r.status === 'mehrdeutig' ? 'warn' : ''}`}>${REQ_STATUS[r.status] || r.status}</span>
+            <br /><small class="muted">${fmtDateTime(r.created_at)}${r.message ? ` · ${r.message}` : ''}</small></span></li>`)}</ul>`}
+    </section>
+  </div>`;
+}
 
 // ---- Nachträge: Ergebnisse, die World Athletics nicht führt (z. B. RaceResult) ------
 

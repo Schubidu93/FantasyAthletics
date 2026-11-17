@@ -73,6 +73,9 @@
   „German Marathon Ch.“, Kategorie B); `championshipPlacing()` → `wa_results.champ_place/champ_category` (separates Update, Admin per
   `set_result_champ`), `category` = Hauptwertung. Platzierung = höherer Wert. GraphQL-Feld heißt `races` (früher `competitions`).
   Zwischenzeiten (`_is_split`: „… - Split times“ / ST) geben nur Rekord- und PB-Bonus. „Datenbank einrichten“ rechnet danach alle Punkte neu.
+- Athlet hinzufügen (Admin → Athleten): `request_athlete` → `athlete_requests` → Ablauf `add-athlete.yml` (`importer/add-athlete.ts`:
+  WA-ID/Profil-Link/Name via `searchCompetitors`, Stammdaten `getSingleCompetitor.basicData`) → `athletes.manual = true` (immer im Pool,
+  `ranking_points` aus bester WA-Leistung), dann Ergebnisse/Bestleistungen nur für diese Athleten (`ATHLETE_IDS`).
 - Kalender: `importer/sync-calendar.ts` → `calendar_events` (WA-Kalender: weltweit ab GL, Europa ab A, Deutschland ab E;
   Programm aus `getCompetitionOrganiserInfo`, Filter in `importer/calendar-filter.ts`).
 - Cross: Disziplin heißt nur „Cross Country“, die Distanz steht im Wettkampfnamen („… - XC 7.5km“) → `cross_km()` in der Datenbank,

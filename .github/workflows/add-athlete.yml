@@ -1,0 +1,42 @@
+name: Athlet hinzufügen
+
+# Offene Aufträge aus Admin → Athleten („Athlet hinzufügen“): Athlet bei World Athletics suchen und anlegen,
+# Ergebnisse (laufendes Jahr + Vorjahr) und Bestleistungen laden, Pool neu bilden.
+# Gestartet von der Datenbank (request_athlete), zusätzlich per Knopfdruck.
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: wa-import
+  cancel-in-progress: false
+
+jobs:
+  add:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      WA_API_URL: ${{ secrets.WA_API_URL }}
+      WA_API_KEY: ${{ secrets.WA_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Athleten suchen und anlegen
+        run: npx tsx importer/add-athlete.ts
+      - name: Ergebnisse laden
+        if: env.ATHLETE_IDS != ''
+        run: |
+          Y=$(TZ=Europe/Berlin date +%Y)
+          MODUS=voll RESULT_YEARS="$Y,$((Y-1))" npm run import:results
+      - name: Bestleistungen laden
+        if: env.ATHLETE_IDS != ''
+        run: npm run import:pbs
+      - name: Abschließen
+        if: always()
+        run: npx tsx importer/add-athlete.ts --finish
