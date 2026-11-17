@@ -188,6 +188,9 @@ insert into scoring_config (id) values (1) on conflict do nothing;
 alter table scoring_config alter column pool_threshold set default 950;
 update scoring_config set pool_threshold = 950, updated_at = now()
  where pool_threshold = 1000 and updated_at < timestamptz '2026-11-17 06:00+01';
+-- Platzierungsfaktor 0,2 (seit 17.11.2026, einmalig; spätere Änderungen des Admins bleiben)
+update scoring_config set placing_factor = 0.2, updated_at = now()
+ where placing_factor = 0.1 and updated_at < timestamptz '2026-11-17 06:35+01';
 
 -- Rohdaten der Ergebnisse von World Athletics (ein Eintrag pro Lauf eines Athleten)
 create table if not exists wa_results (
