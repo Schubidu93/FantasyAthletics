@@ -1,7 +1,7 @@
 // Sportart Leichtathletik: alles, worin sich Runner Fantasy von UCI Fantasy unterscheidet (Begriffe,
 // Spaltennamen, Texte). Der übrige App-Code ist in beiden Apps gleich und liest diese Werte hier.
-import { html } from './vendor/preact-htm.js';
-import { SexBadge } from './lib.js';
+import { html } from '../vendor/preact-htm.js';
+import { SexBadge } from '../lib.js';
 
 export const SPORT = {
   app: 'Runner Fantasy', emoji: '🏃', source: 'World Athletics',

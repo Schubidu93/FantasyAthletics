@@ -1,9 +1,9 @@
 // Sportart Leichtathletik: eigene Seiten, Navigation und Laden der Athleten (von app.js eingebunden).
-import { all, sb } from './lib.js';
-import { Riders } from './views/athletes.js';
-import { Races } from './views/races.js';
-import { Calendar } from './views/calendar.js';
-import { Toplists } from './views/toplists.js';
+import { all, sb } from '../lib.js';
+import { Riders } from './athletes.js';
+import { Races } from './races.js';
+import { Calendar } from './calendar.js';
+import { Toplists } from './toplists.js';
 
 /** Alle Athleten der Liga (Mixed: beide Geschlechter), sortiert nach Pool-Rang */
 export const loadPeople = (league) => all(() => {
