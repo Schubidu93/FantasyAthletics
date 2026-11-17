@@ -782,6 +782,10 @@ language sql stable security definer set search_path = public as $$
   select coalesce((select name from athletes where id = p_slug), p_slug);
 $$;
 
+-- Punkte wie in der App: zwei Nachkommastellen mit Komma (z. B. 30,00)
+create or replace function _fmt_pts(p numeric) returns text
+language sql immutable as $$ select replace(to_char(round(coalesce(p, 0), 2), 'FM999999990.00'), '.', ',') $$;
+
 create or replace function vapid_public_key() returns text
 language sql stable security definer set search_path = public as $$
   select value from app_config where key = 'vapid_public';
@@ -1557,6 +1561,7 @@ begin
   select * into l from leagues where id = p_league for update;
   if l.status <> 'setup' then return array['Die Kader sind bereits fixiert.']; end if;
 
+  drop table if exists _imp;   -- Prüfen und Übernehmen können in derselben Transaktion laufen
   create temp table _imp on commit drop as
     select (e->>'manager_id')::uuid manager_id, e->>'athlete_id' athlete_id,
            coalesce(nullif(e->>'price', '')::int, 0) price
@@ -2757,7 +2762,7 @@ begin
       select league_id, league_name, manager_id, athlete_id, competition_id, sum(points) pts
         from _np group by 1, 2, 3, 4, 5)
     select per.league_id, per.league_name, per.manager_id,
-           string_agg(_rname(per.athlete_id) || ' +' || replace(round(per.pts, 2)::text, '.', ',')
+           string_agg(_rname(per.athlete_id) || ' +' || _fmt_pts(per.pts)
                       || coalesce(' (' || c.name || ')', ''), ' · ' order by per.pts desc) txt
       from per left join competitions c on c.id = per.competition_id
      group by 1, 2, 3
@@ -2784,8 +2789,8 @@ begin
   for md in update matchdays set status = 'closed', closed_at = now() where status = 'running' and ends_on < current_date
              returning * loop
     perform _notify(t.manager_id, '🏁 ' || md.name || ' abgeschlossen',
-        coalesce((select round(sum(p.points), 1)::text from _league_points(md.league_id) p
-                   where p.matchday_id = md.id and p.manager_id = t.manager_id), '0')
+        coalesce((select _fmt_pts(sum(p.points)) from _league_points(md.league_id) p
+                   where p.matchday_id = md.id and p.manager_id = t.manager_id), '0,00')
         || ' Punkte · Gesamt Platz ' || t."position", '#/league/' || md.league_id || '/table')
        from _league_table(md.league_id) t;
   end loop;
@@ -3280,9 +3285,9 @@ begin
         from week group by 1)
     insert into notifications (user_id, title, body, url)
     select m.user_id,
-           '📊 Deine Woche: +' || round(coalesce(p.total, 0), 1)::text || ' Punkte',
+           '📊 Deine Woche: +' || _fmt_pts(p.total) || ' Punkte',
            lg.name || ': Platz ' || t."position" || ' von ' || (select count(*) from managers where league_id = lg.id)
-             || coalesce(' · bester Athlet ' || _rname(p.best_rider) || ' (+' || round(p.best_pts, 1)::text || ')', ' · diese Woche keine Punkte'),
+             || coalesce(' · bester Athlet ' || _rname(p.best_rider) || ' (+' || _fmt_pts(p.best_pts) || ')', ' · diese Woche keine Punkte'),
            '#/league/' || lg.id || '/home'
       from managers m
       join _league_table(lg.id) t on t.manager_id = m.id
@@ -3420,7 +3425,12 @@ begin
     'dispatch_workflow(text,jsonb)', 'refresh_season_stats(int)', '_lineup_swap(uuid,uuid,text,text,date)', 'weekly_summary()', 'scheduler_tick()', '_notify(uuid,text,text,text)', '_push_soon()', '_notify_turn(uuid,uuid,uuid,text,timestamptz)', '_check_trade_drops(uuid,text[],text[],int)', '_open_roster_slots(uuid)', '_reset_default_deadlines(uuid,text)', '_snake_pick(uuid,text)', '_score_rows(uuid)',
     '_claim_valid(waiver_claims,leagues)', '_execute_claim(waiver_claims,leagues,matchdays)',
     '_process_waivers(uuid)', '_process_trades(uuid)', '_league_points(uuid)', '_league_table(uuid)',
-    '_waiver_order(uuid)', 'run_maintenance()', 'notify_new_points()', 'fit_scoring_coefficients(int)', 'apply_records(jsonb)'] loop
+    '_waiver_order(uuid)', 'run_maintenance()', 'notify_new_points()', 'fit_scoring_coefficients(int)', 'apply_records(jsonb)',
+    -- reine Hilfsfunktionen: nur innerhalb anderer Datenbankfunktionen genutzt
+    '_auto_lineup(uuid,uuid)', '_cross_factor(numeric)', '_default_deadline(uuid,date)', '_default_waiver_deadline(uuid,date,uuid)',
+    '_fmt_seconds(numeric)', '_gender_ok(text,text)', '_is_service()', '_is_split(text,text)', '_league_defaults()',
+    '_pb_factor(text,text,date,text)', '_race_type(text)', '_record_rank(text)', '_relay_leg(text)', '_require_any_admin()',
+    '_result_group(text,text)', '_rname(text)', '_slot_ok(text,text)', '_fmt_pts(numeric)'] loop
     execute format('revoke execute on function %s from public', f);
     begin
       execute format('revoke execute on function %s from anon, authenticated', f);
