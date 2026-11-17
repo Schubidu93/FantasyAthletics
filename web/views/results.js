@@ -1,19 +1,9 @@
 import { html, useState } from '../vendor/preact-htm.js';
-import { rpc, useLoad, Loading, fmtDate, fmtDateTime, fmtPts, discLabel, raceLabel } from '../lib.js';
-import { fmtUntil } from '../lib.js';
+import { rpc, useLoad, Loading, fmtDate, fmtDateTime, fmtPts, fmtUntil } from '../lib.js';
+import { SPORT, labelText } from '../sport/index.js';
 import { NextDeadline, windowStart } from './deadline.js';
 
 const MD_STATUS = (md) => (md.frozen ? 'eingefroren' : md.status === 'closed' ? 'abgeschlossen (Korrekturen 7 Tage)' : md.status === 'running' ? 'läuft' : 'geplant');
-
-// Bezeichnung eines gewerteten Ergebnisses: "1500 Metres · SF1" → "1500 m · Halbfinale 1"
-export const labelText = (l) => {
-  if (!l) return 'Ergebnis';
-  const parts = l.split(' · ');
-  const km = parts.find((x) => /^[\d.]+km$/.test(x));
-  const run = parts.slice(1).find((x) => x !== km);
-  const disc = discLabel(parts[0]) + (km ? ` ${Number(km.slice(0, -2)).toLocaleString('de-DE')} km` : '');
-  return run ? `${disc} · ${raceLabel(run)}` : disc;
-};
 
 export function Results({ c }) {
   const started = c.matchdays.filter((m) => m.status !== 'planned' || m.starts_on <= new Date().toISOString().slice(0, 10));
@@ -61,7 +51,7 @@ export function Results({ c }) {
 function Schedule({ c, current }) {
   const today = new Date().toISOString().slice(0, 10);
   if (!c.matchdays.length) return html`<section class="card"><h3>Spielplan</h3>
-    <p class="muted small">${c.isAdmin ? 'Lege die Spieltage unter Mehr → Admin an (z. B. alle 2 Wochen oder Hallensaison, Frühjahr, Bahnsaison).' : 'Der Admin hat noch keine Spieltage festgelegt.'}</p></section>`;
+    <p class="muted small">${c.isAdmin ? `Lege die Spieltage unter Mehr → Admin an (z. B. ${SPORT.matchdayExamples}).` : 'Der Admin hat noch keine Spieltage festgelegt.'}</p></section>`;
   const next = c.matchdays.find((m) => m.ends_on >= today);
   const tag = (m) => m.frozen ? html`<span class="tag">eingefroren</span>`
     : m.status === 'closed' ? html`<span class="tag">abgeschlossen</span>`
@@ -81,11 +71,11 @@ function Schedule({ c, current }) {
 
 function TeamDetail({ c, rows, details }) {
   if (!rows.length) return html`<p class="muted small">Keine Punkte in diesem Spieltag.</p>`;
-  return html`<div class="detail">${rows.sort((a, b) => b.points - a.points).map((r) => html`<div key=${r.athlete_id} class="detail-rider">
-    <div class="row between"><strong>${c.riderMap[r.athlete_id]?.name || r.athlete_id}</strong>
+  return html`<div class="detail">${rows.sort((a, b) => b.points - a.points).map((r) => html`<div key=${r[SPORT.fk]} class="detail-rider">
+    <div class="row between"><strong>${c.riderMap[r[SPORT.fk]]?.name || r[SPORT.fk]}</strong>
       <span>${fmtPts(r.points)}${r.overridden ? html` <span class="tag warn" title="vom Admin korrigiert">korrigiert</span>` : ''}</span></div>
-    <ul class="list compact">${details.filter((d) => d.athlete_id === r.athlete_id).map((d) => html`<li>
-      <span>${d.race_name || d.competition_id} – ${labelText(d.label)}</span>
+    <ul class="list compact">${details.filter((d) => d[SPORT.fk] === r[SPORT.fk]).map((d) => html`<li>
+      <span>${d.race_name || d[SPORT.comp]} – ${labelText(d.label)}</span>
       <span class="muted">${fmtDate(d.result_date)} · ${fmtPts(d.points)}</span></li>`)}</ul>
   </div>`)}</div>`;
 }

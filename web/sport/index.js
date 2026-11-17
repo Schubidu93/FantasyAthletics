@@ -1,7 +1,7 @@
 // Sportart Leichtathletik: alles, worin sich Runner Fantasy von UCI Fantasy unterscheidet (Begriffe,
 // Spaltennamen, Texte). Der übrige App-Code ist in beiden Apps gleich und liest diese Werte hier.
 import { html, useState } from '../vendor/preact-htm.js';
-import { SexBadge, GROUPS, GROUP_LABEL, riderGroup } from '../lib.js';
+import { SexBadge, GROUPS, GROUP_LABEL, riderGroup, discLabel, raceLabel } from '../lib.js';
 
 export const SPORT = {
   app: 'Runner Fantasy', emoji: '🏃', source: 'World Athletics',
@@ -18,6 +18,8 @@ export const SPORT = {
   pointsRpc: 'athlete_points',
   // Texte
   dataLine: 'Daten: World Athletics (Toplisten und Ergebnisse). Keine offizielle App von World Athletics.',
+  matchdayExamples: 'alle 2 Wochen oder Hallensaison, Frühjahr, Bahnsaison',   // Beispiele für Spieltage
+  fallbackBasis: 'den WA-Punkten der Toplisten', fallbackShort: 'WA',   // Draft-Report ohne Vorjahrespunkte
   resultsSchedule: 'Ergebnisse werden stündlich von 8 bis 23 Uhr abgerufen.',
 };
 /** Schlüssel einer Person (Athlet bzw. Fahrer) */
@@ -40,3 +42,13 @@ export function usePeopleFilter(c) {
         <option value="">Männer und Frauen</option><option value="men">Männer</option><option value="women">Frauen</option></select>`}`;
   return [ui, (r) => (!group || riderGroup(r) === group) && (!gender || r.gender === gender)];
 }
+
+// Bezeichnung eines gewerteten Ergebnisses: "1500 Metres · SF1" → "1500 m · Halbfinale 1"
+export const labelText = (l) => {
+  if (!l) return 'Ergebnis';
+  const parts = l.split(' · ');
+  const km = parts.find((x) => /^[\d.]+km$/.test(x));
+  const run = parts.slice(1).find((x) => x !== km);
+  const disc = discLabel(parts[0]) + (km ? ` ${Number(km.slice(0, -2)).toLocaleString('de-DE')} km` : '');
+  return run ? `${disc} · ${raceLabel(run)}` : disc;
+};
