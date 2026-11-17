@@ -124,12 +124,12 @@ export function Rules({ c }) {
           Die Distanz steht bei World Athletics im Wettkampfnamen; ohne Angabe gilt 1,6. Rennen über verschiedene Distanzen werden getrennt gewertet.
           Berg- und Traillauf nutzen die Tabelle für 10 km Straße.</li>
         <li><strong>Zwischenzeiten</strong> (z. B. die 1500 m in einem Meilenrennen) geben keine Leistungs- und Platzierungspunkte. Sie stehen
-          mit ihren WA-Punkten in den Ergebnissen; Punkte gibt es nur, wenn die Zwischenzeit ein Rekord ist (Rekord-Bonus).</li>
+          mit ihren WA-Punkten in den Ergebnissen; Punkte gibt es nur als Rekord- oder PB-Bonus.</li>
         <li><strong>PB-Bonus:</strong> +${cfg?.pb_points ?? 10} Punkte für jede persönliche Bestleistung – schneller als alle früheren
           Leistungen des Athleten in dieser Disziplin (laut World Athletics, auch vor 2025). Halle, Bahn und Straße zählen getrennt.
           Nur mit vorheriger Leistung in der Disziplin (das erste Rennen zählt nicht), nur ab ${cfg ? cfg.perf_threshold : 1000} WA-Punkten,
-          eine gleiche Zeit (=PB) bringt den halben Bonus. Vorlauf und Finale können beide PB sein. Zwischenzeiten und Staffeln bekommen keinen PB-Bonus;
-          eine Zwischenzeit zählt aber als Bestleistung, die danach übertroffen werden muss.</li>
+          eine gleiche Zeit (=PB) bringt den halben Bonus. Vorlauf und Finale können beide PB sein. Staffeln bekommen keinen PB-Bonus, Zwischenzeiten schon
+          (z. B. die 1500 m im Meilenrennen).</li>
         <li><strong>Rekord-Bonus:</strong> deutscher Rekord +${cfg?.record_dr ?? 50}, Europarekord +${cfg?.record_er ?? 100},
           Weltrekord +${cfg?.record_wr ?? 200} Punkte – zusätzlich zu den normalen Punkten; es zählt nur der höchste Rekord.
           Ein eingestellter Rekord (gleiche Zeit, z. B. =DR) bringt die Hälfte.

@@ -26,14 +26,14 @@ const pts = async () => (await db.all("select label, points, record_points from 
   .map((r) => [r.label, Number(r.points), Number(r.record_points)]);
 
 describe("Zwischenzeiten und Rekorde", () => {
-  it("wertet Zwischenzeiten nicht – außer als Rekord", async () => {
-    const rows = await pts();
-    expect(rows).toHaveLength(1);
-    expect(rows[0][0]).toBe("Mile");
+  it("wertet Zwischenzeiten nur mit Rekord- und PB-Bonus", async () => {
+    // London-Zwischenzeit 3:30.09 ist schneller als die frühere Zwischenzeit 3:32.46 → nur PB-Bonus
     const split = (await db.one("select id from wa_results where remark = 'ST'")).id;
+    const pb = await db.one("select points, perf_points, placing_points, pb_points from results where wa_result_id = $1", [split]);
+    expect([pb.points, pb.perf_points, pb.placing_points, pb.pb_points].map(Number)).toEqual([10, 0, 0, 10]);
     await db.query("select set_result_record($1, 'DR')", [split]);
     const r = await db.one("select points, perf_points, placing_points, record_points from results where wa_result_id = $1", [split]);
-    expect([r.points, r.perf_points, r.placing_points, r.record_points].map(Number)).toEqual([50, 0, 0, 50]);
+    expect([r.points, r.perf_points, r.placing_points, r.record_points].map(Number)).toEqual([60, 0, 0, 50]);
   });
 
   it("gibt den Bonus für den höchsten Rekord und nimmt ihn wieder weg", async () => {

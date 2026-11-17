@@ -66,13 +66,13 @@
   ohne Punkte beste Leistung, neue Athleten erste Leistung ab `new_group_threshold` (975) im Spieljahr, sonst Toplisten.
 - Bestleistungen: `importer/sync-pbs.ts` (getSingleCompetitor: personalBests, progressionOfSeasonsBests) → `athlete_pbs` (Profil)
   und `athlete_pb_before` (beste Leistung vor 2025). PB-Bonus `scoring_config.pb_points` über `_pb_factor()` in `rebuild_results`
-  (schneller als alles davor = 1, gleich = 0,5 „=PB“; eingestellte Rekorde `=DR/=ER/=WR` halb; ab Schwelle, keine Zwischenzeiten/Staffeln; Halle = „… Short Track“).
+  (schneller als alles davor = 1, gleich = 0,5 „=PB“; eingestellte Rekorde `=DR/=ER/=WR` halb; ab Schwelle, auch Zwischenzeiten, keine Staffeln; Halle = „… Short Track“).
 - Rekorde: `importer/sync-records.ts` liest die All-time-Listen (alle Leistungen) DE/Europa/Welt, `recordMarks()` erkennt Rekorde ab 2025
   (auch inzwischen verbesserte) → `apply_records` setzt `wa_results.record` (DR/ER/WR, nur hochstufen) → Bonus aus `scoring_config.record_*`.
   Meisterschaft im offenen Rennen: Event-Ergebnisse haben mehrere `eventTitles` (offenes Rennen ohne Titel, z. B. Kategorie E, und
   „German Marathon Ch.“, Kategorie B); `championshipPlacing()` → `wa_results.champ_place/champ_category` (separates Update, Admin per
   `set_result_champ`), `category` = Hauptwertung. Platzierung = höherer Wert. GraphQL-Feld heißt `races` (früher `competitions`).
-  Zwischenzeiten (`_is_split`: „… - Split times“ / ST) geben nur den Rekord-Bonus. „Datenbank einrichten“ rechnet danach alle Punkte neu.
+  Zwischenzeiten (`_is_split`: „… - Split times“ / ST) geben nur Rekord- und PB-Bonus. „Datenbank einrichten“ rechnet danach alle Punkte neu.
 - Kalender: `importer/sync-calendar.ts` → `calendar_events` (WA-Kalender: weltweit ab GL, Europa ab A, Deutschland ab E;
   Programm aus `getCompetitionOrganiserInfo`, Filter in `importer/calendar-filter.ts`).
 - Cross: Disziplin heißt nur „Cross Country“, die Distanz steht im Wettkampfnamen („… - XC 7.5km“) → `cross_km()` in der Datenbank,
