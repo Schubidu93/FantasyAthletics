@@ -55,9 +55,9 @@ async function loadRider(slug, league) {
     .eq('athlete_id', slug).gte('date', `${FIRST_YEAR}-01-01`).order('date', { ascending: false }).order('id'));
   const pts = Object.fromEntries((await all(() => sb.from('results').select('wa_result_id,points,perf_points,placing_points,record_points,pb_points')
     .eq('athlete_id', slug).order('id'))).map((r) => [r.wa_result_id, r]));
-  // Toplisten nach Distanz aufsteigend, je Distanz neuestes Jahr zuerst
+  // Toplisten: neuestes Jahr zuerst, im Jahr nach Distanz aufsteigend (Freiluft vor Halle)
   const toplists = (await rpc('athlete_toplists', { p_athlete: slug }) || []).sort((a, b) =>
-    discMeters(discLabel(a.discipline)) - discMeters(discLabel(b.discipline)) || b.year - a.year
+    b.year - a.year || discMeters(discLabel(a.discipline)) - discMeters(discLabel(b.discipline))
     || discLabel(a.discipline).localeCompare(discLabel(b.discipline)));
   const pbs = (await q(sb.from('athlete_pbs').select('discipline,mark,date,result_score').eq('athlete_id', slug)))
     .sort((a, b) => discMeters(discLabel(a.discipline)) - discMeters(discLabel(b.discipline)) || a.discipline.localeCompare(b.discipline));
