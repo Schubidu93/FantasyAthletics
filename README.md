@@ -23,7 +23,7 @@ Datenquelle, Wertung und Aufstellung sind auf Leichtathletik umgebaut.
 | Ordner | Inhalt |
 |---|---|
 | `web/` | Die App: `app.js` (Rahmen, Navigation), `lib.js` (Helfer, Disziplinen, Positionen), `views/` (Bereiche), `sw.js` (Push) |
-| `supabase/schema.sql` | Datenbank komplett und idempotent: Tabellen, Rechte und die gesamte Spiellogik (Draft, Waiver, freie Phase, Tausch, Aufstellung, Wertung, Zeitplaner) |
+| `supabase/schema/NN_*.sql` | Datenbank nach Themen (Tabellen, Hilfsfunktionen, Liga, Draft, Spieltage, Punkte, Waiver, Tausch, Stichtage, Admin, Zeitplaner, Rechte), in Dateireihenfolge eingespielt, komplett und idempotent: Tabellen, Rechte und die gesamte Spiellogik (Draft, Waiver, freie Phase, Tausch, Aufstellung, Wertung, Zeitplaner) |
 | `supabase/reference_data.sql` | Disziplinen (Faktor, Gruppe) und WA-Platzierungstabellen 2026 – erzeugt von `research/build_placing_sql.py` |
 | `importer/` | Datenabruf von World Athletics (TypeScript): Athletenpool aus den DE-Toplisten, Ergebnisse inkl. Q/q und kombinierter Finals |
 | `datasync/` | Python-Skripte für Push-Versand und Feedback-Mails |
