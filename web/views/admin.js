@@ -284,11 +284,27 @@ const CHAMPIONSHIPS = [
 const NOT_SENIOR_CHAMPS = /u\s?1[68]|u\s?2[03]|youth|junior|jugend|team|relays|staffel|masters|senioren|mountain|trail|10\s?km|half|marathon/i;
 export const championshipLabel = (e) => (NOT_SENIOR_CHAMPS.test(e.name) ? null : CHAMPIONSHIPS.find(([, re]) => re.test(e.name))?.[0] || null);
 
+// Letzter Samstag eines Monats (m = 1–12) als JJJJ-MM-TT
+const lastSaturday = (y, m) => { const d = new Date(Date.UTC(y, m, 0)); d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 1) % 7)); return iso(d); };
+// DM und Hallen-DM trägt der Veranstalter oft erst spät in den WA-Kalender ein → übliche Termine als „voraussichtlich“
+// (Hallen-DM: letztes Februar-Wochenende, DM: letztes Juli-Wochenende); Daten bei Bedarf beim Spieltag anpassen
+function withExpectedChampionships(start, end, events) {
+  const out = [...events];
+  for (let y = +start.slice(0, 4); y <= +end.slice(0, 4); y++) {
+    for (const [label, name, month] of [['Hallen-DM', 'Deutsche Hallenmeisterschaften', 2], ['DM', 'Deutsche Meisterschaften', 7]]) {
+      if (events.some((e) => championshipLabel(e) === label && e.start_date.startsWith(String(y)))) continue;
+      const s = lastSaturday(y, month);
+      if (s >= start && s <= end) out.push({ name, start_date: s, end_date: addDays(s, 1), guess: true });
+    }
+  }
+  return out;
+}
+
 export function monthlyProposal(start, end, events = []) {
   // 1. Meisterschaften → eigene Spieltage (zusammengelegt, wenn sie sich überschneiden)
   const champs = [];
-  for (const e of events) {
-    const label = championshipLabel(e);
+  for (const e of withExpectedChampionships(start, end, events)) {
+    const label = championshipLabel(e) && `${championshipLabel(e)}${e.guess ? ' (vorauss.)' : ''}`;
     if (!label) continue;
     const s = mondayOnOrBefore(e.start_date < start ? start : e.start_date);
     const t = sundayOnOrAfter((e.end_date || e.start_date) > end ? end : (e.end_date || e.start_date));
@@ -426,7 +442,7 @@ function Matchdays({ c }) {
       </div>
       <p class="muted small">Empfohlen: „Monatlich (Mo–So)“ – Olympia, WM, EM, Hallen-WM/-EM, Cross- und Straßen-WM/-EM, DM und Hallen-DM
         bekommen eigene Spieltage (Montag bis Sonntag der Meisterschaftswoche), dazwischen Spieltage von etwa einem Monat (Montag bis Sonntag).
-        Andere Großereignisse werden nicht geteilt. Meisterschaften, die noch nicht im WA-Kalender stehen, später von Hand anlegen.</p>
+        Andere Großereignisse werden nicht geteilt. Stehen DM oder Hallen-DM noch nicht im WA-Kalender, plant der Vorschlag sie zum üblichen Termin ein (letztes Juli- bzw. Februar-Wochenende, „vorauss.“) – Daten später beim Spieltag anpassen.</p>
       ${gen && html`<p class="muted small">Vorschlag für ${fmtDate(c.league.season_start)} – ${fmtDate(c.league.season_end)}.
           Nach dem Anlegen einzeln anpassbar. Spieltage in der Vergangenheit werden übersprungen.</p>
         <ul class="list compact">${gen.map((m) => html`<li><span>${m.name}</span><span class="muted">${fmtDate(m.starts_on)} – ${fmtDate(m.ends_on)}</span></li>`)}</ul>
