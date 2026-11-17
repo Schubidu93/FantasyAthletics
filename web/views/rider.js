@@ -142,6 +142,11 @@ export function RiderModal() {
               <td>${discLabel(p.discipline)}</td><td class="num"><strong>${p.mark}</strong></td>
               <td class="num muted">${dateShort(p.date)}</td><td class="num muted">${p.result_score || ''}</td></tr>`)}</tbody></table>
           <p class="muted small">Farbig: Bestleistung aus ${thisYear}.</p></details>`}
+        ${data.toplists.length > 0 && html`<details class="toplists"><summary class="small">Toplisten (DE)</summary>
+          <table class="pb-tbl"><thead><tr><th>Jahr</th><th>Disziplin</th><th class="num">Platz</th><th class="num">Zeit</th></tr></thead>
+            <tbody>${data.toplists.map((t) => html`<tr key=${t.year + t.discipline} class=${L ? 'clickable' : ''} onClick=${() => toTop(t)}>
+              <td class="muted">${t.year}</td><td>${discLabel(t.discipline)}</td><td class="num"><strong>${t.rank}.</strong></td>
+              <td class="num">${t.mark}</td></tr>`)}</tbody></table></details>`}
         <div class="row between">
           ${years.length > 1 ? html`<div class="seg small">${years.map((yy) =>
             html`<button class=${yy === y ? 'active' : ''} onClick=${() => setYear(yy)}>${yy}</button>`)}</div>` : html`<span class="muted small">${y || ''}</span>`}
@@ -188,12 +193,7 @@ export function RiderModal() {
             <span class="res-place">${placeLabel(x)}</span>
             <span class="res-pts">${x.pts ? fmtPts(x.pts.points) : ''}</span>
           </div>`)}</div>
-        </div>`}
-        ${data.toplists.length > 0 && html`<details class="toplists"><summary class="small">Toplisten (DE)</summary>
-          <table class="pb-tbl"><thead><tr><th>Jahr</th><th>Disziplin</th><th class="num">Platz</th><th class="num">Zeit</th></tr></thead>
-            <tbody>${data.toplists.map((t) => html`<tr key=${t.year + t.discipline} class=${L ? 'clickable' : ''} onClick=${() => toTop(t)}>
-              <td class="muted">${t.year}</td><td>${discLabel(t.discipline)}</td><td class="num"><strong>${t.rank}.</strong></td>
-              <td class="num">${t.mark}</td></tr>`)}</tbody></table></details>`}`}
+        </div>`}`}
       <p class="muted small">Quelle: World Athletics, Nachträge mit eigener Quelle. Antippen öffnet den Wettkampf bzw. die Topliste.</p>
     </div>
   </div>`;
