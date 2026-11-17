@@ -115,7 +115,7 @@ export function Rules({ c }) {
           qualifiziert (Q oder q) = fester Wert, ausgeschieden = Gesamtplatz der Runde (erst alle Qualifizierten, dann die anderen nach Zeit).</li>
         <li><strong>Meisterschaft im offenen Rennen</strong> (z. B. Deutsche Marathon-Meisterschaft im Hannover-Marathon): World Athletics führt
           das offene Rennen und die Meisterschaft getrennt, jeweils mit eigener Kategorie und eigenem Platz. Die App übernimmt beides; es zählt der höhere
-          Wert aus Platz im Rennen und Meisterschaftsplatz (z. B. Kategorie B, Platz 1). Fehlt etwas, kann der Admin den Meisterschaftsplatz eintragen. Angezeigt wird der Meisterschaftsplatz, der Platz im Gesamtfeld klein darunter; Meistertitel tragen einen 🏆.</li>
+          Wert aus Platz im Rennen und Meisterschaftsplatz (z. B. Kategorie B, Platz 1). Angezeigt wird der Meisterschaftsplatz, der Platz im Gesamtfeld klein darunter; Meistertitel tragen einen 🏆.</li>
         <li><strong>Finals mit mehreren Läufen</strong> (z. B. 10.000 m in zwei Läufen): Platz über alle Läufe nach Zeit, gewertet wie ein Finale.</li>
         <li><strong>Cross:</strong> World Athletics vergibt hier statt WA-Punkten für die Zeit einen festen Wert je Platz und Kategorie
           (z. B. GL-Sieg 1200, GL-3. 1165). Gewertet wird wie eine Leistung: (Wert − ${cfg ? cfg.perf_threshold : 1000}, nur darüber)
@@ -134,7 +134,7 @@ export function Rules({ c }) {
           Weltrekord +${cfg?.record_wr ?? 200} Punkte – zusätzlich zu den normalen Punkten; es zählt nur der höchste Rekord.
           Ein eingestellter Rekord (gleiche Zeit, z. B. =DR) bringt die Hälfte.
           Gilt für alle Laufdisziplinen inkl. Halle und Straße. Rekorde erkennt die App täglich an den All-time-Listen von World Athletics
-          (alle Leistungen) – auch solche, die inzwischen wieder verbessert wurden. Der Admin kann zusätzlich Rekorde von Hand eintragen.</li>
+          (alle Leistungen) – auch solche, die inzwischen wieder verbessert wurden.</li>
         <li>Punkte zählen nur innerhalb eines Spieltags – für die Spieltage, in denen der Athlet in deinem Kader steht${lineup ? ' und aufgestellt ist' : ''}.</li>
         <li>Korrigiert World Athletics ein Ergebnis, wird das automatisch übernommen, solange der Spieltag nicht eingefroren ist.</li>
       </ul>

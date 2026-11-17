@@ -194,8 +194,7 @@ export function RiderModal() {
             <tbody>${data.toplists.map((t) => html`<tr key=${t.year + t.discipline} class=${L ? 'clickable' : ''} onClick=${() => toTop(t)}>
               <td class="muted">${t.year}</td><td>${discLabel(t.discipline)}</td><td class="num"><strong>${t.rank}.</strong></td>
               <td class="num">${t.mark}</td></tr>`)}</tbody></table></details>`}`}
-      <p class="muted small">Quelle: World Athletics, Nachträge mit eigener Quelle. Antippen öffnet den Wettkampf bzw. die Topliste.
-        ${data?.admin && html` <button type="button" class="linkish small" onClick=${() => setEditRec(!editRec)}>${editRec ? 'Fertig' : 'Rekord/Meisterschaft von Hand eintragen'}</button>`}</p>
+      <p class="muted small">Quelle: World Athletics, Nachträge mit eigener Quelle. Antippen öffnet den Wettkampf bzw. die Topliste.</p>
     </div>
   </div>`;
 }
