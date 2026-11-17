@@ -79,7 +79,7 @@ for line in open("research/disciplines.txt", encoding="utf-8"):
     disc.append(f"  ({q(name)}, {factor}, {q(group)}, {arr}, {q(cross)})")
 
 out = f"""-- =====================================================================
--- Fantasy Athletics – Referenzdaten (wird nach schema.sql eingespielt)
+-- Fantasy Athletics – Referenzdaten (wird nach supabase/schema/ eingespielt)
 -- Automatisch erzeugt von research/build_placing_sql.py – nicht von Hand ändern.
 --
 -- disciplines: Disziplinfaktor (eigene Spielregel), Gruppe für die Aufstellungspositionen,

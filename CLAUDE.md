@@ -6,6 +6,8 @@
 ## Arbeitsregeln
 
 - Sprache der App und der Antworten: Deutsch. Die Nutzer sind keine Entwickler – kurz, verständlich, ohne Fachjargon antworten.
+- **Architektur:** stabil, nachhaltig, gut gegliedert, nach aktuellem Stand – nicht nur „läuft“. Jede Regel an genau einer Stelle,
+  keine doppelte Logik, Änderungen mit Tests absichern, beide Apps gleich aufgebaut (ausdrücklicher Wunsch des Nutzers).
 - **Beide Apps mitdenken:** Bei jeder Änderung prüfen, ob sie auch für UCI Fantasy (github.com/Schubidu93/UCI-Fantasy) sinnvoll ist,
   und dem Nutzer dann kurz vorschlagen, sie dort zu übernehmen (ausdrücklicher Wunsch des Nutzers).
 - Wünsche kritisch prüfen: Ist eine Anforderung unsinnig, widersprüchlich oder schadet sie der App, das offen sagen und nicht
@@ -15,7 +17,7 @@
   (Reiter „Regeln“) aktualisieren. Die Regeln sind dynamisch: Texte hängen von den Liga-Einstellungen
   (`gender`, `lineup_mode`, `wildcards`, `scoring_mode`, `transfer_mode`, `waiver_mode`, `draft_mode`) und von `scoring_config` ab.
 - Der Draft-Report (Noten, „beste Aufstellung“) ist bewusst **nicht** in den Regeln beschrieben – Überraschung für die Mitspieler.
-- Datenbankänderungen nur über `supabase/schema.sql`, und zwar **idempotent** (`create or replace`, `add column if not exists`,
+- Datenbankänderungen nur über `supabase/schema/NN_*.sql` (nach Themen, Einspielen in Dateireihenfolge), und zwar **idempotent** (`create or replace`, `add column if not exists`,
   `drop function if exists` bei geänderter Signatur). Referenzdaten (Disziplinen, WA-Platzierungstabellen) nur über
   `research/build_placing_sql.py` → `supabase/reference_data.sql`. Nach dem Merge spielt „Datenbank einrichten“ beides ein.
 - Spielregeln werden in der Datenbank erzwungen (security-definer-Funktionen), nicht in der App. Positionsregeln gibt es doppelt:
@@ -86,7 +88,7 @@
 - Kalender: `importer/sync-calendar.ts` → `calendar_events` (WA-Kalender: weltweit ab GL, Europa ab A, Deutschland ab E;
   Programm aus `getCompetitionOrganiserInfo`, Filter in `importer/calendar-filter.ts`).
   Fehlen DM/Hallen-DM eines Jahres bei WA, nicht raten: einmalig in der DLV-Terminliste (leichtathletik.de) nachschlagen und in
-  `extra_calendar_events` (`schema.sql`, mit `source_url`) eintragen; der Spieltag-Vorschlag nimmt sie, solange WA keinen Termin hat.
+  `extra_calendar_events` (`supabase/schema/01_tabellen.sql`, mit `source_url`) eintragen; der Spieltag-Vorschlag nimmt sie, solange WA keinen Termin hat.
 - Cross: Disziplin heißt nur „Cross Country“, die Distanz steht im Wettkampfnamen („… - XC 7.5km“) → `cross_km()` in der Datenbank,
   `crossKm()`/`discWithKm()` in `web/lib.js`; Distanzfaktor aus `cross_distance_factors`. Mehrere Rennen eines Wettkampfs
   (z. B. Pforzheim 1,5 und 7,5 km) haben dieselbe Wettkampf-ID und werden über die Distanz im Label getrennt.
@@ -94,7 +96,7 @@
 - worldathletics.org ist aus der Claude-Umgebung meist gesperrt; Rohdaten dann per Workflow „WA-Regeln und Beispieldaten laden“ holen.
 - Namen: `athletes.id` = `wa-<WA-ID>` (Fremdschlüssel überall `athlete_id`), `competitions.id` = `wa-c<Wettkampf-ID>`
   (`results.competition_id`), Fantasy-Punkte `results.points`, Pool-Rang `athletes.pool_rank`. Bis November 2026 hießen sie
-  wie bei UCI Fantasy `riders`/`pcs_slug`/`rider_slug`/`races`/`uci_*` – die Umbenennung steht oben in `schema.sql`.
+  wie bei UCI Fantasy `riders`/`pcs_slug`/`rider_slug`/`races`/`uci_*` – die Umbenennung steht oben in `supabase/schema/01_tabellen.sql`.
   In App-Code heißen manche Variablen noch `rider…` (z. B. `RiderCell`, `riderMap`). Daten ab 2025.
 
 ## Push „Neue Punkte“ und heiße freie Athleten
