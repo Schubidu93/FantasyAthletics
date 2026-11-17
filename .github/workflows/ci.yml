@@ -24,6 +24,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Browser für den Oberflächentest
+        run: npx playwright install --with-deps chromium
       - name: TypeScript prüfen
         run: npm run lint
       - name: App-Dateien prüfen
