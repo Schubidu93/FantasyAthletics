@@ -13,7 +13,7 @@
 - Wünsche kritisch prüfen: Ist eine Anforderung unsinnig, widersprüchlich oder schadet sie der App, das offen sagen und nicht
   umsetzen, sondern kurz begründen und eine bessere Lösung vorschlagen (ausdrücklicher Wunsch des Nutzers).
 - **Regeln mitziehen:** Bei jeder Änderung an Spielregeln, Wertung, Positionen, Draft, Waiver, Tausch, Spieltagen,
-  Datenabruf (Zeiten, Quellen, Umfang) oder Liga-Einstellungen immer auch `web/views/rules.js`
+  Datenabruf (Zeiten, Quellen, Umfang) oder Liga-Einstellungen immer auch `web/sport/rules.js`
   (Reiter „Regeln“) aktualisieren. Die Regeln sind dynamisch: Texte hängen von den Liga-Einstellungen
   (`gender`, `lineup_mode`, `wildcards`, `scoring_mode`, `transfer_mode`, `waiver_mode`, `draft_mode`) und von `scoring_config` ab.
 - Der Draft-Report (Noten, „beste Aufstellung“) ist bewusst **nicht** in den Regeln beschrieben – Überraschung für die Mitspieler.
@@ -47,10 +47,15 @@
   `tests/shared.test.ts` scheitert, wenn eine davon nur in einer App geändert wurde: Änderung in die andere App kopieren und in beiden
   `node scripts/shared.mjs update` ausführen. `web/lib.js` und `web/style.css` sind gemeinsam; Leichtathletik-Helfer stehen in `web/sport/lib.js`, Farben und
   sportartspezifische Gestaltung in `web/sport/style.css`.
+  Gemeinsam sind auch `datasync/db.py`, `send_push.py`, `send_feedback.py` (App-Name aus `datasync/app_info.py`), `web/vendor/`,
+  `tsconfig.json` und der Testablauf `ci.yml`; ihre Tests stehen in `tests/datasync/test_common.py`.
 - Tests: `tests/sql/NN_*.sql` (Spiellogik, in beiden Apps gleich), `tests/*.test.ts`, Oberflächentest `tests/ui/smoke.test.ts`
   (öffnet alle Seiten in der iPhone-Ansicht und scheitert bei jedem Fehler; beide Apps gleich).
 
 ## Ablauf einer Änderung
+
+Schritt für Schritt: Skill `aenderung` (`.claude/skills/aenderung/SKILL.md`, in beiden Apps gleich). Beim Start einer Cloud-Sitzung
+richtet `.claude/hooks/session-start.sh` Pakete und das Test-PostgreSQL ein.
 
 1. Auf einem Arbeitszweig ändern, lokal prüfen (siehe unten).
 2. Pull Request auf `main` erstellen und mergen (Squash). Danach laufen automatisch:
@@ -67,6 +72,7 @@
   SQL-Tests in `tests/sql/NN_*.sql` (pgTAP-Schreibweise `is`/`ok`/`throws_ok`, kleiner Ersatz in `tests/sql/_tap.sql`, Beispieldaten
   `tests/sql/fixtures.sql`): Kader, Draft, Waiver, Tausch, Wertung/Einfrieren, Fristen, Berechtigungen – in beiden Apps gleich gehalten.
 - Syntax der App: `node --check web/views/<datei>.js`; TypeScript: `npm run lint`.
+- Python-Skripte (Push, Feedback): `tests/datasync/test_*.py` (unittest, ohne Netz, `FakeDb` statt `db.py`), laufen in `npm test` mit.
 - Oberfläche: `tests/ui/seed.ts` (Testliga) + `tests/ui/mock-api.ts` (Supabase-Schnittstelle auf lokalem Postgres, RLS aktiv),
   `web/config.js` mit `http://localhost:54321`, `python3 -m http.server -d web`, Playwright in iPhone-Ansicht
   (Sitzung als `sb-localhost-auth-token` in localStorage). Die App scrollt innen (`.scroll`) – für ganze Seiten das Fenster hochstellen.

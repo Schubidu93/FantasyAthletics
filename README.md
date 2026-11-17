@@ -22,12 +22,12 @@ Datenquelle, Wertung und Aufstellung sind auf Leichtathletik umgebaut.
 
 | Ordner | Inhalt |
 |---|---|
-| `web/` | Die App: `app.js` (Rahmen, Navigation), `lib.js` (Helfer, Disziplinen, Positionen), `views/` (Bereiche), `sw.js` (Push) |
+| `web/` | Die App, in beiden Apps gleich aufgebaut: `app.js` (Rahmen, Navigation), `lib.js` und `style.css` (gemeinsame Helfer und Gestaltung), `views/` (Bereiche, in beiden Apps wortgleich), `sport/` (alles Leichtathletik-Spezifische: Begriffe, Athletenliste, Wettkämpfe, Kalender, Toplisten, Positionen, Einstellungen, Regeln, Farben), `sw.js` (Push) |
 | `supabase/schema/NN_*.sql` | Datenbank nach Themen (Tabellen, Hilfsfunktionen, Liga, Draft, Spieltage, Punkte, Waiver, Tausch, Stichtage, Admin, Zeitplaner, Rechte), in Dateireihenfolge eingespielt, komplett und idempotent: Tabellen, Rechte und die gesamte Spiellogik (Draft, Waiver, freie Phase, Tausch, Aufstellung, Wertung, Zeitplaner) |
 | `supabase/reference_data.sql` | Disziplinen (Faktor, Gruppe) und WA-Platzierungstabellen 2026 – erzeugt von `research/build_placing_sql.py` |
 | `importer/` | Datenabruf von World Athletics (TypeScript): Athletenpool aus den DE-Toplisten, Ergebnisse inkl. Q/q und kombinierter Finals |
 | `datasync/` | Python-Skripte für Push-Versand und Feedback-Mails |
-| `tests/` | Tests der Spiellogik gegen echtes PostgreSQL, Parser-Tests mit echten WM-Daten, Oberflächentest-Werkzeuge (`tests/ui/`) |
+| `tests/` | Spiellogik (`sql/`, gegen echtes PostgreSQL), Datenabruf mit echten WM-Daten (`fixtures/`), Python-Skripte (`datasync/`), Oberflächentest (`ui/`) |
 | `research/` | Gesicherte WA-Regeltexte und das Skript, das daraus die Platzierungstabellen erzeugt |
 
 Die Spielregeln werden in der Datenbank geprüft (Positionen, Uhr, Kadergröße, Fristen, Waiver-Reihenfolge …), nicht in der App.
@@ -87,15 +87,16 @@ Der Zeitplaner läuft in der Datenbank (pg_cron, alle 15 Minuten, `scheduler_tic
 
 ## Lokal testen
 
-- **Logik:** `npm install`, dann `npm test`. Braucht ein PostgreSQL 16, in dem Datenbanken angelegt werden dürfen
-  (`TEST_DATABASE_URL`, Standard: lokale Instanz auf Port 54329, Socket in `/tmp/fa-pg`).
-- **Oberfläche:** `npx tsx tests/ui/seed.ts` legt eine Testdatenbank mit Liga an, `npx tsx tests/ui/mock-api.ts` bildet die
-  Supabase-Schnittstelle darauf nach (RLS aktiv). `web/config.example.js` als `web/config.js` kopieren (URL `http://localhost:54321`),
-  `python3 -m http.server -d web` starten und mit Playwright in der iPhone-Ansicht durchklicken (Sitzung per localStorage setzen).
+- **Alles:** `npm install`, dann `npm test` (Spiellogik gegen echtes PostgreSQL 16, Python-Skripte, Oberflächentest in der
+  iPhone-Ansicht mit Playwright) und `npm run lint` (TypeScript). PostgreSQL: `TEST_DATABASE_URL`, Standard: lokale Instanz auf
+  Port 54329, Socket in `/tmp/fa-pg`.
+- **Oberfläche von Hand:** `npx tsx tests/ui/seed.ts` legt eine Testdatenbank mit Liga an, `npx tsx tests/ui/mock-api.ts` bildet die
+  Supabase-Schnittstelle darauf nach (RLS aktiv). `web/config.example.js` als `web/config.js` kopieren (URL `http://localhost:54321`,
+  nicht einchecken), `python3 -m http.server -d web` starten und im Browser in der iPhone-Ansicht öffnen.
+- **Gemeinsame Dateien:** stehen in `scripts/shared.mjs`; nach einer Änderung in beide Apps kopieren und `node scripts/shared.mjs update`.
 
 ## Hinweise
 
 - World Athletics hat keine offizielle öffentliche API; der Abruf nutzt die Toplisten-Seiten und die GraphQL-Schnittstelle der
   Website mit Pausen zwischen den Abfragen.
-- Athleten heißen intern weiter `athletes` mit der ID `id` (Format `wa-<World-Athletics-ID>`), damit die Spiellogik von
-  UCI Fantasy unverändert nutzbar bleibt.
+- Athleten-ID: `athletes.id` im Format `wa-<World-Athletics-ID>`, Wettkämpfe `wa-c<Wettkampf-ID>`.
