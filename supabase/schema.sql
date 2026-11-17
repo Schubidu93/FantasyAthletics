@@ -186,8 +186,7 @@ update scoring_config set record_er = 100, record_wr = 200 where record_dr = 50 
 insert into scoring_config (id) values (1) on conflict do nothing;
 -- Pool ab 950 WA-Punkten (seit 17.11.2026); nur einmal umstellen, spätere Änderungen des Admins bleiben
 alter table scoring_config alter column pool_threshold set default 950;
-update scoring_config set pool_threshold = 950, updated_at = now()
- where pool_threshold = 1000 and updated_at < timestamptz '2026-11-17 06:00+01';
+
 
 -- Rohdaten der Ergebnisse von World Athletics (ein Eintrag pro Lauf eines Athleten)
 create table if not exists wa_results (
@@ -3277,3 +3276,19 @@ end $$;
 
 -- Saisonwertungen beim Einspielen aufbauen (bzw. aktualisieren)
 select refresh_season_stats(y) from generate_series(2025, extract(year from current_date)::int) y;
+
+-- Einmalige Umstellungen der Live-Werte (nur in einer Datenbank mit Ergebnissen, jede genau einmal;
+-- spätere Änderungen des Admins bleiben). Neue Datenbanken nutzen die Standardwerte.
+create table if not exists schema_changes (name text primary key, applied_at timestamptz not null default now());
+alter table schema_changes enable row level security;
+do $$
+begin
+  if exists (select 1 from results) and not exists (select 1 from schema_changes where name = 'pool_950') then
+    update scoring_config set pool_threshold = 950, updated_at = now() where pool_threshold = 1000;
+    insert into schema_changes (name) values ('pool_950');
+  end if;
+  if exists (select 1 from results) and not exists (select 1 from schema_changes where name = 'placing_factor_0.2') then
+    update scoring_config set placing_factor = 0.2, updated_at = now() where placing_factor = 0.1;
+    insert into schema_changes (name) values ('placing_factor_0.2');
+  end if;
+end $$;
