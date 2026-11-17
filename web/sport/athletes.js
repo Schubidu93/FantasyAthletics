@@ -31,7 +31,7 @@ export function Riders({ c }) {
   if (!pts.data) return html`<${Loading} error=${pts.error} />`;
 
   const t = normName(term);
-  const list = c.athletes
+  const list = c.people
     .filter((r) => recent ? pmap[r.id] : r.pool_rank || pmap[r.id] || c.owner[r.id])   // 30 Tage: nur wer gepunktet hat
     .filter((r) => (!group || riderGroup(r) === group) && (!gender || r.gender === gender))
     .filter((r) => !owner || (owner === 'free' ? !c.owner[r.id] : owner === 'mine' ? c.owner[r.id] === c.me?.id : c.owner[r.id] === owner))
