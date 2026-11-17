@@ -37,7 +37,7 @@ const isSplit = (x) => /split time/i.test(x.competition || '') || x.remark === '
 const RECORD = { DR: 'Deutscher Rekord', ER: 'Europarekord', WR: 'Weltrekord',
   '=DR': 'Deutscher Rekord eingestellt', '=ER': 'Europarekord eingestellt', '=WR': 'Weltrekord eingestellt' };
 function runNote(x) {
-  if (isSplit(x)) return 'Zwischenzeit – gibt nur bei einem Rekord Punkte';
+  if (isSplit(x)) return 'Zwischenzeit – Punkte nur bei Rekord oder PB';
   if (x.wa_race && x.wa_race !== x.race) return `${raceLabel(x.wa_race)}: ${x.wa_place ?? '–'}. · kombiniert`;
   if (x.placing_round && x.placing_round !== 'F') return x.placing_place === 0 ? 'fürs Finale qualifiziert (Q/q)' : `Gesamtplatz der Runde: ${x.placing_place}.`;
   return '';

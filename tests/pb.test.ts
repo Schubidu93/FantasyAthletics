@@ -27,12 +27,12 @@ describe("PB-Bonus", () => {
     await add(`${Y}-07-01`, "3:31.50", 1225);                       // gleiche Zeit → =PB, halber Bonus
     await add(`${Y}-08-01`, "3:31.00", 1230, { wa_race: "H1" });    // Vorlauf PB
     await add(`${Y}-08-03`, "3:30.50", 1235);                       // Finale PB
-    await add(`${Y}-08-10`, "3:29.00", 1250, { competition: "London - Split times", remark: "ST" });   // Zwischenzeit: kein Bonus, ohne Rekord gar keine Punkte
+    await add(`${Y}-08-10`, "3:29.00", 1250, { competition: "London - Split times", remark: "ST" });   // Zwischenzeit: PB-Bonus (sonst keine Punkte)
     await add(`${Y}-08-20`, "3:29.50", 1245);                       // langsamer als die Zwischenzeit → keine PB
     await add(`${Y}-09-01`, "13:10.00", 1200, { discipline: "5000 Metres" });   // erste Leistung → keine PB
     await db.query("select rebuild_results(null)");
     expect(await pb()).toEqual([[`${Y}-05-01`, 0], [`${Y}-06-01`, 10], [`${Y}-06-01`, 10], [`${Y}-07-01`, 5],
-      [`${Y}-08-01`, 10], [`${Y}-08-03`, 10], [`${Y}-08-20`, 0], [`${Y}-09-01`, 0]]);
+      [`${Y}-08-01`, 10], [`${Y}-08-03`, 10], [`${Y}-08-10`, 10], [`${Y}-08-20`, 0], [`${Y}-09-01`, 0]]);
   });
 
   it("nur ab der Schwelle; Wert einstellbar", async () => {

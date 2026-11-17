@@ -2036,14 +2036,14 @@ begin
              -- Staffel: Leistungs- und Platzierungspunkte nur anteilig (1/3 bzw. 1/4)
              case w.record when 'WR' then c.record_wr when 'ER' then c.record_er when 'DR' then c.record_dr
                            when '=WR' then c.record_wr / 2.0 when '=ER' then c.record_er / 2.0 when '=DR' then c.record_dr / 2.0 else 0 end rec,
-             -- PB-Bonus: nur für Leistungen ab der Schwelle, nicht für Zwischenzeiten und Staffeln
-             case when w.relay is null and not _is_split(w.competition, w.remark) and coalesce(w.result_score, 0) >= c.perf_threshold
+             -- PB-Bonus: nur für Leistungen ab der Schwelle, auch für Zwischenzeiten, nicht für Staffeln
+             case when w.relay is null and coalesce(w.result_score, 0) >= c.perf_threshold
                   then c.pb_points * _pb_factor(w.athlete_id, w.discipline, w.date, w.mark) else 0 end pb,
              coalesce('wa-c' || w.wa_competition_id, 'wa-' || md5(w.competition || w.date::text)) competition_id,
              w.discipline || case when d.cross_table is not null and cross_km(w.competition) is not null
                                   then ' · ' || cross_km(w.competition) || 'km' else '' end
                || case when w.wa_race in ('', 'F') then '' else ' · ' || w.wa_race end label,
-             -- Zwischenzeiten (z. B. 1500 m im Meilenrennen): keine Leistungs- und Platzierungspunkte, nur ein Rekord-Bonus
+             -- Zwischenzeiten (z. B. 1500 m im Meilenrennen): keine Leistungs- und Platzierungspunkte, nur Rekord- und PB-Bonus
              case when _is_split(w.competition, w.remark) then 0
                   when d.cross_table is not null then
                     round(greatest(0, coalesce((select ps.points from placing_scores ps
