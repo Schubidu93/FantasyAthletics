@@ -77,7 +77,7 @@ function RaceDetail({ c, slug }) {
     const [race] = await q(sb.from('competitions').select('*').eq('id', slug));
     const id = slug.startsWith('wa-c') ? +slug.slice(4) : null;
     const rows = id ? await all(() => sb.from('wa_results')
-      .select('id,athlete_id,date,competition,discipline,category,race,place,wa_race,wa_place,placing_round,placing_place,mark,result_score,remark,wa_event_id')
+      .select('id,athlete_id,date,competition,discipline,category,race,place,wa_race,wa_place,placing_round,placing_place,mark,result_score,remark,wa_event_id,champ_place')
       .eq('wa_competition_id', id).order('date').order('id')) : [];
     const pts = {};
     const ids = rows.map((r) => r.id);
@@ -126,7 +126,7 @@ function RaceDetail({ c, slug }) {
         return html`<li key=${r.id} class=${owner && owner.id === c.me?.id ? 'me' : ''}>
           <span><span class="res-place">${r.wa_place ? `${r.wa_place}.` : r.remark || '–'}</span>${' '}
             <button type="button" class="linkish" onClick=${() => openRider(r.athlete_id)}>${name}</button>
-            <small class="muted"> ${r.mark || ''}${owner ? ` · ${owner.team_name}` : ''}</small></span>
+            <small class="muted"> ${r.mark || ''}${r.champ_place ? ` · ${r.champ_place === 1 ? '🏆 ' : ''}Meisterschaft ${r.champ_place}.` : ''}${owner ? ` · ${owner.team_name}` : ''}</small></span>
           <span>${r.pts ? html`<strong>${fmtPts(r.pts)}</strong>` : ''}</span></li>`;
       })}</ul></div>`)}
   </section>`;
