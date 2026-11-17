@@ -71,7 +71,7 @@ const ICONS = {
   liga: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
   team: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
   draft: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
-  athletes: '<circle cx="14" cy="4" r="2"/><path d="M7 21l3-6 3 2v5M10 15l1-5 4 2 3-1M8 9l3-1"/>',
+  athletes: '<circle cx="15" cy="4.5" r="2"/><path d="M13.5 8.5 11 14M13.5 9l3 2.5 3-1M13.5 9 9.5 10.5 8 13.5M11 14l4 2.5-1 4.5h2M11 14l-2 4-4 .5"/>',
   races: '<path d="M4 22V4M4 4h13l-2 4 2 4H4"/>',
   more: '<path d="M3 6h18M3 12h18M3 18h18"/>',
 };
