@@ -118,7 +118,10 @@ richtet `.claude/hooks/session-start.sh` Pakete und das Test-PostgreSQL ein.
   Suchtreffer mit gleicher ID, nicht von Hand; bei jedem Lauf werden alle `manual`-Athleten abgeglichen und ggf. korrigiert) → `athletes.manual = true` (immer im Pool,
   `ranking_points` aus bester WA-Leistung), dann Ergebnisse/Bestleistungen nur für diese Athleten (`ATHLETE_IDS`).
 - Kalender: `importer/sync-calendar.ts` → `calendar_events` (WA-Kalender: weltweit ab GL, Europa ab A, Deutschland ab E;
-  Programm aus `getCompetitionOrganiserInfo`, Filter in `importer/calendar-filter.ts`).
+  Programm aus `getCompetitionOrganiserInfo`, Bereiche je Wettkampf in `calendar_events.areas` aus `importer/calendar-filter.ts`).
+  Kalender-Seite und Spieltag-Vorschläge (`web/sport/matchday-plan.js`, Tests `tests/matchdays.test.ts`) richten sich nach den
+  Bereichen der Liga: Fachmeisterschaften (Cross/Straße, Winterwurf, Mehrkampf) nur in Ligen, die nur diesen Bereich spielen;
+  ohne Lauf ab Oktober „Saisonpause“.
   Fehlen DM/Hallen-DM eines Jahres bei WA, nicht raten: einmalig in der DLV-Terminliste (leichtathletik.de) nachschlagen und in
   `extra_calendar_events` (`supabase/schema/01_tabellen.sql`, mit `source_url`) eintragen; der Spieltag-Vorschlag nimmt sie, solange WA keinen Termin hat.
 - Cross: Disziplin heißt nur „Cross Country“, die Distanz steht im Wettkampfnamen („… - XC 7.5km“) → `cross_km()` in der Datenbank,
@@ -148,7 +151,6 @@ richtet `.claude/hooks/session-start.sh` Pakete und das Test-PostgreSQL ein.
 
 - Einrichtung (Supabase-Projekt, Secrets, GitHub Pages) steht noch aus – siehe README „Einrichtung“.
 - Der Importer ist mit echten Daten nur über die Erkundungs-Workflows geprüft; der erste echte Lauf sollte im Log kontrolliert werden.
-- Kalender (`calendar-filter.ts`) nimmt bisher nur Wettkämpfe mit Laufdisziplinen – für alle Disziplinen noch erweitern.
 - Ideen für später: Startlisten, Verletzungen/Pausen markieren.
 - LADV als Zusatzquelle: automatisches Auslesen laut Nutzungsbedingungen verboten, API-Keys derzeit nicht vergeben
   (siehe `research/fremdquellen-notizen.md`). Erst wieder angehen, wenn ein Key vorliegt.

@@ -205,8 +205,9 @@ export function Rules({ c }) {
           sie sind danach dauerhaft im Pool, ihre Ergebnisse und Bestleistungen werden wie bei allen anderen geladen.</li>
         <li><strong>Bestleistungen:</strong> täglich nach dem Athletenpool je Athlet von World Athletics (für Profil und PB-Bonus).</li>
         <li><strong>Rekorde:</strong> täglich nach dem Athletenpool aus den All-time-Listen von World Athletics für Deutschland, Europa und die Welt.</li>
-        <li><strong>Kalender:</strong> täglich um 6 Uhr die kommenden Wettkämpfe mit Laufdisziplinen aus dem Kalender von World Athletics –
-          international ab Gold Label, in Europa ab Kategorie A, in Deutschland ab Kategorie E; nur Wettkämpfe, deren Programm Laufdisziplinen ab 800 m enthält.</li>
+        <li><strong>Kalender:</strong> täglich um 6 Uhr die kommenden Wettkämpfe aus dem Kalender von World Athletics –
+          international ab Gold Label, in Europa ab Kategorie A, in Deutschland ab Kategorie E. Angezeigt werden Wettkämpfe mit Disziplinen
+          dieser Liga (laut Programm, sonst laut Name).</li>
         <li><strong>Ergebnisse:</strong> stündlich von 8 bis 23 Uhr für alle Athleten im Pool und in den Kadern. Erscheinen, sobald World Athletics sie veröffentlicht –
           bei großen Meisterschaften meist am selben Tag, bei kleinen Wettkämpfen manchmal Tage später. Werden die Ergebnisse eines Wettkampfs nach und nach
           hochgeladen (z. B. erst 800 m, Stunden später 5000 m), kommen sie auch nach und nach in die Wertung.</li>

@@ -329,7 +329,8 @@ create table if not exists calendar_events (
   updated_at  timestamptz not null default now()
 );
 create index if not exists calendar_events_start on calendar_events (start_date);
-alter table calendar_events add column if not exists events jsonb;              -- Laufdisziplinen laut Programm: [{gender, events[]}]
+alter table calendar_events add column if not exists events jsonb;              -- Disziplinen für Erwachsene laut Programm: [{gender, events[]}]
+alter table calendar_events add column if not exists areas text[];             -- Bereiche (Lauf, Sprint, …); null = unbekannt
 alter table calendar_events add column if not exists events_checked_at timestamptz;
 
 -- Termine aus anderen Quellen (z. B. DLV-Terminliste), solange sie nicht im WA-Kalender stehen.
