@@ -21,10 +21,11 @@ language sql immutable as $$ select replace(to_char(round(coalesce(p, 0), 2), 'F
 create or replace function _selectable(p_pool_rank int) returns boolean
 language sql immutable as $$ select p_pool_rank is not null $$;
 
--- App: GitHub-Repository (Zeitplaner startet dort die Abläufe), Kurzname (Zeitplan, Kennung)
+-- App: GitHub-Repository (Zeitplaner startet dort die Abläufe), Kurzname (Zeitplan, Kennung), längste Pause des Datenabrufs in Stunden
 create or replace function _app(p_key text) returns text
 language sql immutable as $$
-  select case p_key when 'repo' then 'Schubidu93/FantasyAthletics' when 'slug' then 'fantasy-athletics' end;
+  select case p_key when 'repo' then 'Schubidu93/FantasyAthletics' when 'slug' then 'fantasy-athletics'
+                    when 'sync_hours' then '8' end;   -- Datenabruf stündlich 8–23 und 3 Uhr
 $$;
 
 -- Nachkommastellen der Punkte (Anzeige, Draft-Prognose)
