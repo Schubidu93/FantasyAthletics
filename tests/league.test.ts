@@ -177,15 +177,19 @@ describe("Bereiche (alle Disziplinen oder nur Lauf)", () => {
 
   it("Gruppen der neuen Disziplinen; Mittel/Lang fassen Laufgruppen zusammen", async () => {
     expect(await db.all("select id, event_group from athletes order by id")).toEqual([
-      { id: "wa-1", event_group: "800" }, { id: "wa-2", event_group: "Sprint" }, { id: "wa-3", event_group: "Sprung" },
+      { id: "wa-1", event_group: "800" }, { id: "wa-2", event_group: "100" }, { id: "wa-3", event_group: "Weitsprung" },
       { id: "wa-4", event_group: "Gehen" }, { id: "wa-5", event_group: "Hindernis" },
     ]);
     const ok = async (slot: string, id: string) => (await db.one("select _slot_ok($1, $2) ok", [slot, id])).ok;
     expect(await ok("Mittel", "wa-1")).toBe(true);
     expect(await ok("Lang", "wa-5")).toBe(true);
     expect(await ok("Lang", "wa-1")).toBe(false);
-    expect(await ok("Sprung", "wa-3")).toBe(true);
+    expect(await ok("Sprung", "wa-3")).toBe(true);        // Block: alle Sprungdisziplinen
+    expect(await ok("Weitsprung", "wa-3")).toBe(true);
+    expect(await ok("Hochsprung", "wa-3")).toBe(false);
     expect(await ok("Sprint", "wa-3")).toBe(false);
+    expect(await ok("Sprint", "wa-2")).toBe(true);
+    expect(await ok("100", "wa-2")).toBe(true);
   });
 
   it("Einstellungen: Positionen müssen zu den Bereichen passen", async () => {
@@ -199,6 +203,10 @@ describe("Bereiche (alle Disziplinen oder nur Lauf)", () => {
     const all = await league({ gender: "men", areas: ALL, roster_size: 12,
       lineup_groups: ["Sprint", "Hürden", "Mittel", "Lang", "Marathon", "Sprung", "Wurf", "Mehrkampf"] });
     expect((await db.one("select lineup_size from leagues where id = $1", [all.id])).lineup_size).toBe(10);
+    // Sprungliga: je Sprungdisziplin eine Position; Laufpositionen passen nicht
+    const jump = await league({ gender: "men", areas: ["Sprung"], lineup_groups: ["Hochsprung", "Stabhochsprung", "Weitsprung", "Dreisprung"] });
+    expect((await db.one("select league_slots($1) s", [jump.id])).s).toEqual(["Hochsprung", "Stabhochsprung", "Weitsprung", "Dreisprung", "WC1", "WC2"]);
+    await expect(db.query("select create_league('X', 'T', $1)", [{ areas: ["Sprung"], lineup_groups: ["800"] }])).rejects.toThrow(/Bereich der Liga/);
   });
 
   it("nur Athleten aus den Bereichen der Liga sind frei", async () => {

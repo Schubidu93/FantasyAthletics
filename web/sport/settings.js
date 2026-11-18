@@ -19,7 +19,12 @@ export function adjustSettings(f, k, v) {
     ...(k === 'draft_mode' && v === 'live' && +f.bid_seconds === 30 ? { bid_seconds: 15 } : {}),
     ...(k === 'draft_mode' && v === 'blind' && +f.bid_seconds === 30 ? { bid_seconds: 20 } : {}) };
   // Bereiche geändert: Positionen passend vorschlagen (Voreinstellung bzw. nur noch gültige plus neue Bereiche)
-  if (k === 'areas') next.lineup_groups = areaPositions(f, v);
+  if (k === 'areas') {
+    next.lineup_groups = areaPositions(f, v);
+    // passende Ligagröße des Spiels vorschlagen (nur verkleinern)
+    const sug = AREA_PRESETS[presetOf(v)]?.suggest || {};
+    for (const [key, val] of Object.entries(sug)) if (+next[key] > val) next[key] = val;
+  }
   const slots = leagueSlots(next).length;
   if (['lineup_mode', 'gender', 'wildcards', 'lineup_groups', 'areas'].includes(k) && +next.roster_size < slots) next.roster_size = slots + 3;
   return next;
@@ -34,7 +39,7 @@ function areaPositions(f, areas) {
   if (preset !== 'custom') return [...AREA_PRESETS[preset].lineup_groups];
   const old = (f.lineup_groups || []).filter((p) => areas.includes(posArea(p)));
   const added = areas.filter((a) => !(f.areas || []).includes(a) && a !== 'Gehen');
-  const add = added.flatMap((a) => (a === 'Lauf' ? ['Mittel', 'Lang', 'Marathon'] : [a]));
+  const add = added.flatMap((a) => (a === 'Lauf' ? ['Mittel', 'Lang', 'Marathon'] : [a]));   // neuer Bereich: als Block
   return positionsFor(areas).filter((p) => old.includes(p) || add.includes(p));
 }
 
@@ -60,8 +65,9 @@ export function SquadFields({ f, set, locked }) {
   return html`<label>Disziplinen
       <select value=${preset} disabled=${locked}
         onChange=${(e) => { setCustom(e.target.value === 'custom'); if (e.target.value !== 'custom') setAreas(AREA_PRESETS[e.target.value].areas); }}>
-        <option value="run">Nur Lauf (ab 800 m)</option><option value="all">Alle Disziplinen</option><option value="custom">Eigene Auswahl</option>
+        ${Object.entries(AREA_PRESETS).map(([k, p]) => html`<option value=${k}>${p.label}</option>`)}<option value="custom">Eigene Auswahl</option>
       </select></label>
+    ${AREA_PRESETS[preset]?.hint && html`<p class="muted small span2">${AREA_PRESETS[preset].hint}</p>`}
     ${preset === 'custom' && html`<div class="span2 group-pick">
       <span class="label-text">Bereiche der Liga</span>
       <div class="chips chips-grid">${AREAS.map((a) => html`<label class="check chip" key=${a}>

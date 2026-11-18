@@ -23,8 +23,10 @@
 - Spielregeln werden in der Datenbank erzwungen (security-definer-Funktionen), nicht in der App. Positionsregeln gibt es doppelt:
   `_slot_ok`/`league_slots`/`_position_groups`/`_group_area`/`_eligible` in der Datenbank und `slotOk`/`leagueSlots`/`positionGroups`/`groupArea`/`eligible`
   in `web/sport/lib.js` – immer beide ändern. Bereiche je Liga: `leagues.areas` (Lauf, Sprint, Hürden, Sprung, Wurf, Mehrkampf, Gehen);
-  geholt werden und zählen (`results.area`, Filter in `_score_rows`) nur Athleten/Ergebnisse dieser Bereiche. Positionen „Mittel“ (800/1500)
-  und „Lang“ (5000/10.000/Hindernis) fassen Laufgruppen zusammen. Sprung/Wurf/Mehrkampf: mehr ist besser (`disciplines.higher_better`,
+  geholt werden und zählen (`results.area`, Filter in `_score_rows`) nur Athleten/Ergebnisse dieser Bereiche. Gruppen (Schwerpunkt-Disziplin,
+  `disciplines.event_group`): Lauf 800…Hindernis, Sprint 100/200/400, Hürden Kurz-/Langhürden, Sprung 4, Wurf 4, Mehrkampf, Gehen.
+  Blöcke als Positionen: „Mittel“, „Lang“, „Sprint“, „Hürden“, „Sprung“, „Wurf“. Spiele (Voreinstellungen `AREA_PRESETS` in
+  `web/sport/lib.js`): nur Lauf, Sprint und Hürden, nur Sprung, nur Wurf (kleine Ligen empfohlen), alle (Blöcke) oder eigene Auswahl. Sprung/Wurf/Mehrkampf: mehr ist besser (`disciplines.higher_better`,
   `_mark_cost` in der Datenbank, `markCost`/`higherBetter` in `importer/disciplines.ts`; Test prüft Gleichstand mit `research/disciplines.txt`).
 - `web/config.js` ist nur für lokale Tests und darf nicht eingecheckt werden. Keine Secrets in Code oder Chat.
 - Mobile first: Die App wird fast nur auf dem iPhone (installiert als Web-App) genutzt. Nichts darf rechts

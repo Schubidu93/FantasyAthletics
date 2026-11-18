@@ -56,18 +56,27 @@ language sql stable as $$
               then -mark_seconds(p_mark) else mark_seconds(p_mark) end;
 $$;
 
--- Bereich einer Disziplingruppe: die sechs Laufgruppen bilden „Lauf“, die übrigen Gruppen sind eigene Bereiche
+-- Bereich einer Disziplingruppe (Schwerpunkt-Disziplin eines Athleten):
+--   Lauf: 800, 1500, 5000, 10000, Marathon, Hindernis · Sprint: 100, 200, 400 · Hürden: Kurzhürden, Langhürden
+--   Sprung: Hochsprung, Stabhochsprung, Weitsprung, Dreisprung · Wurf: Kugel, Diskus, Hammer, Speer · Mehrkampf · Gehen
 create or replace function _group_area(p_group text) returns text
 language sql immutable as $$
   select case when p_group in ('800', '1500', '5000', '10000', 'Marathon', 'Hindernis') then 'Lauf'
-              when p_group in ('Sprint', 'Hürden', 'Sprung', 'Wurf', 'Mehrkampf', 'Gehen') then p_group end;
+              when p_group in ('100', '200', '400') then 'Sprint'
+              when p_group in ('Kurzhürden', 'Langhürden') then 'Hürden'
+              when p_group in ('Hochsprung', 'Stabhochsprung', 'Weitsprung', 'Dreisprung') then 'Sprung'
+              when p_group in ('Kugel', 'Diskus', 'Hammer', 'Speer') then 'Wurf'
+              when p_group in ('Mehrkampf', 'Gehen') then p_group end;
 $$;
 
--- Positionen der Aufstellung → erlaubte Disziplingruppen. Neben den Gruppen selbst fassen „Mittel“ (800/1500)
--- und „Lang“ (5000/10.000/Hindernis) die Laufgruppen für Ligen mit allen Disziplinen zusammen.
+-- Positionen der Aufstellung → erlaubte Disziplingruppen. Neben den Gruppen selbst fassen Blöcke mehrere zusammen:
+-- „Mittel“ (800/1500), „Lang“ (5000/10.000/Hindernis) und je Bereich Sprint, Hürden, Sprung, Wurf (alle Gruppen des Bereichs).
 create or replace function _position_groups(p_position text) returns text[]
 language sql immutable as $$
   select case p_position when 'Mittel' then array['800', '1500'] when 'Lang' then array['5000', '10000', 'Hindernis']
+              when 'Sprint' then array['100', '200', '400'] when 'Hürden' then array['Kurzhürden', 'Langhürden']
+              when 'Sprung' then array['Hochsprung', 'Stabhochsprung', 'Weitsprung', 'Dreisprung']
+              when 'Wurf' then array['Kugel', 'Diskus', 'Hammer', 'Speer']
               else array[p_position] end;
 $$;
 
@@ -80,7 +89,7 @@ language sql stable as $$
      and coalesce(_group_area(coalesce(a.group_override, a.event_group)) = any (l.areas), true);
 $$;
 
--- Disziplingruppe eines Athleten (800 … Hindernis, Sprint, Hürden, Sprung, Wurf, Mehrkampf, Gehen)
+-- Disziplingruppe (Schwerpunkt-Disziplin) eines Athleten, siehe _group_area
 create or replace function athlete_group(p_slug text) returns text
 language sql stable security definer set search_path = public as $$
   select coalesce(group_override, event_group) from athletes where id = p_slug;

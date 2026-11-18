@@ -1,7 +1,7 @@
 // Spielregeln – allgemeine Regeln plus die Einstellungen der aktuellen Liga
 import { html } from '../vendor/preact-htm.js';
 import { draftCosts, fmtDate, q, sb, useLoad } from '../lib.js';
-import { AREAS, GENDER_LABEL, leagueAreas, leagueSlots, slotLabel } from './lib.js';
+import { AREAS, GENDER_LABEL, GROUP_LABEL, leagueAreas, leagueSlots, positionGroups, slotLabel } from './lib.js';
 
 const DRAFT = {
   live: 'Live-Auktion',
@@ -11,6 +11,9 @@ const DRAFT = {
 };
 
 const fmtNum = (n) => Number(n).toLocaleString('de-DE');
+// Erklärung der Blöcke, die die Liga als Positionen nutzt (z. B. „Wurf = Kugel, Diskus, Hammer oder Speer“)
+const blockText = (groups) => groups.filter((g) => positionGroups(g).length > 1)
+  .map((g) => `${GROUP_LABEL[g]} = ${positionGroups(g).map((x) => GROUP_LABEL[x]).join(', ').replace(/, ([^,]+)$/, ' oder $1')}.`).join(' ');
 
 export function Rules({ c }) {
   const l = c.league;
@@ -90,8 +93,9 @@ export function Rules({ c }) {
           ${runOnly ? 'Diese Liga spielt nur Lauf: Holen kann man nur Athleten aus den Laufgruppen, und es zählen nur Ergebnisse im Lauf (keine Sprints, Sprintstaffeln oder Gehen).'
             : `Diese Liga spielt ${areaText}: Holen kann man nur Athleten aus diesen Bereichen, und es zählen nur Ergebnisse darin.`}
           ${l.gender !== 'mixed' ? `In dieser Liga nur ${GENDER_LABEL[l.gender]}.` : ''} Der Pool wird täglich aktualisiert; neue Athleten sind automatisch frei.</li>
-        <li><strong>Disziplingruppe:</strong> im Lauf 800 m, 1500 m, 5000 m, 10.000 m, Marathon oder Hindernis, sonst Sprint, Hürden, Sprung, Wurf,
-          Mehrkampf oder Gehen. Maßgeblich sind die Punkte im Vorjahr
+        <li><strong>Schwerpunkt-Disziplin:</strong> Lauf 800 m, 1500 m, 5000 m, 10.000 m, Marathon oder Hindernis · Sprint 100 m (inkl. 60 m),
+          200 m oder 400 m · Hürden Kurzhürden (60/100/110 m) oder 400 m Hürden · Sprung Hoch, Stab, Weit oder Drei · Wurf Kugel, Diskus,
+          Hammer oder Speer · Mehrkampf · Gehen. Maßgeblich sind die Punkte im Vorjahr
           der Saison (Saison ${gy} → Punkte ${gy - 1}): Die Gruppe, in der ein Athlet die meisten Punkte geholt hat, gilt die ganze Saison
           (z. B. Meile → 1500 m, 3000 m → 5000 m, Halbmarathon → Marathon; Cross nach Länge: bis 3 km 1500 m, bis 6 km 5000 m, bis 12 km 10.000 m,
           darüber Marathon). Ohne Punkte zählt die beste Leistung im Vorjahr; neue Athleten ohne Vorjahresergebnisse kommen in die Gruppe ihrer
@@ -101,7 +105,7 @@ export function Rules({ c }) {
           <li>Für jeden Spieltag stellst du bis zu ${slots.length} Athleten auf: ${l.lineup_mode === 'mf'
             ? 'je Disziplin einen Mann und eine Frau' : 'je Disziplin einen Athleten dieser Gruppe'}${l.wildcards > 0
             ? `, dazu ${l.wildcards} Wildcard${l.wildcards > 1 ? 's' : ''} mit Athleten jeder Disziplin der Liga` : ''}.
-            ${(l.lineup_groups || []).some((g) => g === 'Mittel' || g === 'Lang') ? 'Mittelstrecke = 800 m oder 1500 m, Langstrecke = 5000 m, 10.000 m oder Hindernis.' : ''}
+            ${blockText(l.lineup_groups || [])}
             ${areas.includes('Gehen') && !(l.lineup_groups || []).includes('Gehen') ? 'Geher können nur auf eine Wildcard.' : ''}</li>
           <li>Positionen ohne passenden Athleten bleiben leer. Bis zum Stichtag änderbar, danach ist die Aufstellung für diesen Spieltag fest.
             Stellst du nicht neu auf, gilt die Aufstellung vom vorigen Spieltag (beim ersten Spieltag: automatisch deine teuersten bzw. besten passenden Athleten).</li>

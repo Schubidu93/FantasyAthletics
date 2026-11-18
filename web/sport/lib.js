@@ -3,15 +3,25 @@
 import { html } from '../vendor/preact-htm.js';
 import { openRider } from '../lib.js';
 
-// Disziplingruppen der Athleten; die sechs Laufgruppen bilden den Bereich „Lauf“, die übrigen sind eigene Bereiche
-// (wie _group_area in der Datenbank)
-export const RUN_GROUPS = ['800', '1500', '5000', '10000', 'Marathon', 'Hindernis'];
-export const AREAS = ['Lauf', 'Sprint', 'Hürden', 'Sprung', 'Wurf', 'Mehrkampf', 'Gehen'];
-export const GROUPS = [...RUN_GROUPS, ...AREAS.slice(1)];
+// Disziplingruppen (Schwerpunkt-Disziplin eines Athleten) je Bereich – wie _group_area in der Datenbank
+export const AREA_GROUPS = {
+  Lauf: ['800', '1500', '5000', '10000', 'Marathon', 'Hindernis'],
+  Sprint: ['100', '200', '400'],
+  Hürden: ['Kurzhürden', 'Langhürden'],
+  Sprung: ['Hochsprung', 'Stabhochsprung', 'Weitsprung', 'Dreisprung'],
+  Wurf: ['Kugel', 'Diskus', 'Hammer', 'Speer'],
+  Mehrkampf: ['Mehrkampf'],
+  Gehen: ['Gehen'],
+};
+export const AREAS = Object.keys(AREA_GROUPS);
+export const RUN_GROUPS = AREA_GROUPS.Lauf;
+export const GROUPS = AREAS.flatMap((a) => AREA_GROUPS[a]);
 export const GROUP_LABEL = { 800: '800 m', 1500: '1500 m', 5000: '5000 m', 10000: '10.000 m', Marathon: 'Marathon', Hindernis: 'Hindernis',
-  Sprint: 'Sprint', Hürden: 'Hürden', Sprung: 'Sprung', Wurf: 'Wurf', Mehrkampf: 'Mehrkampf', Gehen: 'Gehen',
-  Mittel: 'Mittelstrecke', Lang: 'Langstrecke' };
-export const groupArea = (g) => (RUN_GROUPS.includes(g) ? 'Lauf' : AREAS.includes(g) ? g : null);
+  100: '100 m', 200: '200 m', 400: '400 m', Kurzhürden: 'Kurzhürden', Langhürden: '400 m Hürden',
+  Hochsprung: 'Hochsprung', Stabhochsprung: 'Stabhochsprung', Weitsprung: 'Weitsprung', Dreisprung: 'Dreisprung',
+  Kugel: 'Kugelstoßen', Diskus: 'Diskuswurf', Hammer: 'Hammerwurf', Speer: 'Speerwurf', Mehrkampf: 'Mehrkampf', Gehen: 'Gehen',
+  Mittel: 'Mittelstrecke', Lang: 'Langstrecke', Sprint: 'Sprint', Hürden: 'Hürden', Sprung: 'Sprung', Wurf: 'Wurf' };
+export const groupArea = (g) => AREAS.find((a) => AREA_GROUPS[a].includes(g)) || null;
 export const riderGroup = (r) => (r ? r.group_override || r.event_group : null);
 export const leagueAreas = (l) => l?.areas || ['Lauf'];
 /** Gruppen, die die Liga spielt (Filter, Auswahl) */
@@ -19,16 +29,24 @@ export const leagueGroups = (l) => GROUPS.filter((g) => leagueAreas(l).includes(
 /** Darf in dieser Liga geholt werden? Im Pool und in einem Bereich der Liga (wie _eligible in der Datenbank) */
 export const eligible = (r, l) => r?.pool_rank != null && (!groupArea(riderGroup(r)) || leagueAreas(l).includes(groupArea(riderGroup(r))));
 
-// Positionen: jede Gruppe für sich, dazu „Mittel“ (800/1500) und „Lang“ (5000/10.000/Hindernis) – wie _position_groups
-const POSITION_GROUPS = { Mittel: ['800', '1500'], Lang: ['5000', '10000', 'Hindernis'] };
-export const positionGroups = (p) => POSITION_GROUPS[p] || [p];
-/** Wählbare Positionen für diese Bereiche (Lauf: einzeln oder zusammengefasst) */
-export const positionsFor = (areas) => [...(areas.includes('Lauf') ? ['800', '1500', 'Mittel', '5000', '10000', 'Hindernis', 'Lang', 'Marathon'] : []),
-  ...AREAS.slice(1).filter((a) => areas.includes(a))];
-/** Voreinstellungen: nur Lauf = je Laufgruppe; alle Disziplinen = Laufen zusammengefasst, Gehen nur über Wildcards */
+// Positionen: jede Gruppe für sich oder ein Block mehrerer Gruppen – wie _position_groups in der Datenbank:
+// „Mittel“ (800/1500), „Lang“ (5000/10.000/Hindernis) und Sprint, Hürden, Sprung, Wurf (alle Gruppen des Bereichs)
+const BLOCKS = { Mittel: ['800', '1500'], Lang: ['5000', '10000', 'Hindernis'],
+  Sprint: AREA_GROUPS.Sprint, Hürden: AREA_GROUPS.Hürden, Sprung: AREA_GROUPS.Sprung, Wurf: AREA_GROUPS.Wurf };
+export const positionGroups = (p) => BLOCKS[p] || [p];
+/** Wählbare Positionen für diese Bereiche: einzelne Disziplinen und Blöcke */
+export const positionsFor = (areas) => AREAS.filter((a) => areas.includes(a)).flatMap((a) =>
+  a === 'Lauf' ? ['800', '1500', 'Mittel', '5000', '10000', 'Hindernis', 'Lang', 'Marathon']
+    : AREA_GROUPS[a].length > 1 ? [...AREA_GROUPS[a], a] : [a]);
+/** Spiele: Bereiche und vorgeschlagene Positionen. Ein Bereich allein = je Disziplin eine Position; alle = Blöcke
+ *  (Gehen nur über Wildcards). suggest: passende Ligagröße (im Wurf gibt es nur wenige Athleten) */
 export const AREA_PRESETS = {
-  run: { areas: ['Lauf'], lineup_groups: [...RUN_GROUPS] },
-  all: { areas: [...AREAS], lineup_groups: ['Sprint', 'Hürden', 'Mittel', 'Lang', 'Marathon', 'Sprung', 'Wurf', 'Mehrkampf'] },
+  run: { label: 'Nur Lauf (ab 800 m)', areas: ['Lauf'], lineup_groups: [...AREA_GROUPS.Lauf] },
+  sprint: { label: 'Sprint und Hürden', areas: ['Sprint', 'Hürden'], lineup_groups: [...AREA_GROUPS.Sprint, ...AREA_GROUPS.Hürden] },
+  jump: { label: 'Nur Sprung', areas: ['Sprung'], lineup_groups: [...AREA_GROUPS.Sprung] },
+  throw: { label: 'Nur Wurf', areas: ['Wurf'], lineup_groups: [...AREA_GROUPS.Wurf], suggest: { max_managers: 6, roster_size: 7 },
+    hint: 'Im Wurf gibt es nur wenige deutsche Spitzenathleten (z. B. etwa 8 Hammerwerfer je Geschlecht) – empfohlen: höchstens 6 Mitspieler und kleine Kader.' },
+  all: { label: 'Alle Disziplinen', areas: [...AREAS], lineup_groups: ['Sprint', 'Hürden', 'Mittel', 'Lang', 'Marathon', 'Sprung', 'Wurf', 'Mehrkampf'] },
 };
 export const GENDER_LABEL = { men: 'Männer', women: 'Frauen', mixed: 'Mixed' };
 
