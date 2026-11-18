@@ -20,8 +20,6 @@ language sql stable security definer set search_path = public as $$
                   and r.result_date >= re.acquired_on
                   and (re.released_on is null or r.result_date < re.released_on)
    where m.league_id = p_league and not m.frozen and m.starts_on <= current_date
-     -- nur Ergebnisse aus Bereichen, die die Liga spielt (z. B. kein Sprint in reinen Laufligen)
-     and (r.area is null or r.area = any (l.areas))
      and (coalesce(m.scoring_mode, l.scoring_mode) = 'full'
           or re.athlete_id in (select effective_lineup(m.id, re.manager_id)));
 $$;

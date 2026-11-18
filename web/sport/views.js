@@ -4,12 +4,22 @@ import { Races } from './races.js';
 import { Calendar } from './calendar.js';
 import { Toplists } from './toplists.js';
 import { all, sb } from '../lib.js';
+import { groupArea, leagueAreas, riderGroup } from './lib.js';
 
-/** Alle Athleten der Liga (Mixed: beide Geschlechter), sortiert nach Pool-Rang */
-export const loadPeople = (league) => all(() => {
-  const x = sb.from('athletes').select('*');
-  return (league.gender === 'mixed' ? x : x.eq('gender', league.gender)).order('pool_rank', { nullsFirst: false }).order('id');
-});
+/** Athleten der Liga (Mixed: beide Geschlechter), sortiert nach Pool-Rang: nur mit Schwerpunkt-Disziplin in den
+ *  Bereichen der Liga – dazu alle, die in der Liga je in einem Kader standen (auch wenn sich ihr Schwerpunkt geändert hat) */
+export async function loadPeople(league) {
+  const [people, rostered] = await Promise.all([
+    all(() => {
+      const x = sb.from('athletes').select('*');
+      return (league.gender === 'mixed' ? x : x.eq('gender', league.gender)).order('pool_rank', { nullsFirst: false }).order('id');
+    }),
+    all(() => sb.from('roster_entries').select('athlete_id').eq('league_id', league.id).order('id')),
+  ]);
+  const keep = new Set(rostered.map((r) => r.athlete_id));
+  const areas = leagueAreas(league);
+  return people.filter((r) => keep.has(r.id) || !groupArea(riderGroup(r)) || areas.includes(groupArea(riderGroup(r))));
+}
 
 /** Bereiche der Navigation für Personen und Wettkämpfe */
 export const SPORT_SECTIONS = [

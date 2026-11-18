@@ -218,7 +218,7 @@ describe("Bereiche (alle Disziplinen oder nur Lauf)", () => {
     expect([await free(all.id, "wa-1"), await free(all.id, "wa-2"), await free(all.id, "wa-4")]).toEqual([true, true, true]);
   });
 
-  it("Ergebnisse zählen nur in Bereichen der Liga (Sprint des Läufers nicht in reinen Laufligen)", async () => {
+  it("von Athleten der Liga zählen alle Ergebnisse (auch 400 m und Gehen eines Läufers in der Laufliga)", async () => {
     const lauf = await league({ gender: "men", scoring_mode: "full", draft_mode: "offline" });
     const all = await league({ gender: "men", scoring_mode: "full", draft_mode: "offline", areas: ALL });
     for (const L of [lauf, all]) {
@@ -230,13 +230,11 @@ describe("Bereiche (alle Disziplinen oder nur Lauf)", () => {
     }
     await db.query(`insert into wa_results (athlete_id, date, competition, discipline, category, race, wa_race, place, result_score, wa_competition_id)
                     values ('wa-1', $1, 'M', '800 Metres', 'F', 'F', 'F', 9, 1100, 1),
-                           ('wa-1', $1, 'M', '400 Metres', 'F', 'F', 'F', 9, 1050, 1)`, [day(0)]);
+                           ('wa-1', $1, 'M', '400 Metres', 'F', 'F', 'F', 9, 1050, 1),
+                           ('wa-1', $1, 'M', '20 Kilometres Race Walk', 'F', 'F', 'F', 9, 1020, 1)`, [day(0)]);
     await db.query("select rebuild_results(null)");
-    expect(await db.all("select label, area from results order by label")).toEqual([
-      { label: "400 Metres", area: "Sprint" }, { label: "800 Metres", area: "Lauf" },
-    ]);
     const total = async (l: string) => Number((await db.one("select total from league_table($1) where team_name = 'Team Alice'", [l])).total);
-    expect(await total(lauf.id)).toBe(100);
-    expect(await total(all.id)).toBe(150);
+    expect(await total(lauf.id)).toBe(170);   // 100 + 50 + 20
+    expect(await total(all.id)).toBe(170);
   });
 });

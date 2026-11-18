@@ -302,8 +302,7 @@ alter table results add column if not exists perf_points numeric not null defaul
 alter table results add column if not exists placing_points numeric not null default 0;  -- Platzierungsanteil
 alter table results add column if not exists wa_result_id bigint;
 alter table results add column if not exists record_points numeric not null default 0;
-alter table results add column if not exists pb_points numeric not null default 0;
-alter table results add column if not exists area text;   -- Bereich der Disziplin (zählt nur in Ligen mit diesem Bereich)          -- PB-Bonus          -- Rekord-Bonus                        -- Quelle in wa_results
+alter table results add column if not exists pb_points numeric not null default 0;          -- PB-Bonus          -- Rekord-Bonus                        -- Quelle in wa_results
 create index if not exists results_athlete_date on results (athlete_id, result_date);
 
 create table if not exists sync_status (
@@ -417,7 +416,8 @@ exception when duplicate_object then null; end $$;
 alter table leagues add column if not exists lineup_mode text not null default 'free';
 alter table leagues add column if not exists lineup_groups text[] not null default array['800', '1500', '5000', '10000', 'Marathon', 'Hindernis'];
 alter table leagues add column if not exists wildcards int not null default 2;
--- Bereiche, die die Liga spielt (Lauf, Sprint, Hürden, Sprung, Wurf, Mehrkampf, Gehen): wer geholt werden kann und was zählt
+-- Bereiche, die die Liga spielt (Lauf, Sprint, Hürden, Sprung, Wurf, Mehrkampf, Gehen): nur Athleten mit Schwerpunkt-Disziplin
+-- darin können geholt werden; von ihnen zählen alle Ergebnisse
 alter table leagues add column if not exists areas text[] not null default array['Lauf'];
 do $$ begin
   alter table leagues drop constraint if exists leagues_gender_check;

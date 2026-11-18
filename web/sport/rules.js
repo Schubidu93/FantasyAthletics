@@ -90,8 +90,8 @@ export function Rules({ c }) {
         <li><strong>Pool:</strong> deutsche Athletinnen und Athleten, die in der DE-Topliste (Senioren) des aktuellen Jahres oder des Vorjahres
           mindestens ${cfg ? cfg.pool_threshold : 975} WA-Punkte erreicht haben – im Lauf ab 800 m (inkl. Halle, Hindernis und Straße), Sprint (60–400 m),
           Hürden, Sprung, Wurf, Mehrkampf und Gehen.
-          ${runOnly ? 'Diese Liga spielt nur Lauf: Holen kann man nur Athleten aus den Laufgruppen, und es zählen nur Ergebnisse im Lauf (keine Sprints, Sprintstaffeln oder Gehen).'
-            : `Diese Liga spielt ${areaText}: Holen kann man nur Athleten aus diesen Bereichen, und es zählen nur Ergebnisse darin.`}
+          Diese Liga spielt ${areaText}: Es gibt nur Athleten, deren Schwerpunkt-Disziplin dazu gehört (die übrigen sind ausgeblendet).
+          Von ihnen zählen alle Ergebnisse${runOnly ? ', auch z. B. die 400 m eines 800-m-Läufers oder ein Gehen-Rennen' : ''}.
           ${l.gender !== 'mixed' ? `In dieser Liga nur ${GENDER_LABEL[l.gender]}.` : ''} Der Pool wird täglich aktualisiert; neue Athleten sind automatisch frei.</li>
         <li><strong>Schwerpunkt-Disziplin:</strong> Lauf 800 m, 1500 m, 5000 m, 10.000 m, Marathon oder Hindernis · Sprint 100 m (inkl. 60 m),
           200 m oder 400 m · Hürden Kurzhürden (60/100/110 m) oder 400 m Hürden · Sprung Hoch, Stab, Weit oder Drei · Wurf Kugel, Diskus,

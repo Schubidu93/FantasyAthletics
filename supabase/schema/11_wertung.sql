@@ -212,12 +212,10 @@ declare c scoring_config; n int;
 begin
   select * into c from scoring_config where id = 1;
   delete from results where p_from is null or result_date >= p_from;
-  insert into results (athlete_id, competition_id, label, result_date, rank, points, perf_points, placing_points, record_points, pb_points, wa_result_id, area)
-  select athlete_id, competition_id, label, date, place, perf + plc + rec + pb, perf, plc, rec, pb, id, area
+  insert into results (athlete_id, competition_id, label, result_date, rank, points, perf_points, placing_points, record_points, pb_points, wa_result_id)
+  select athlete_id, competition_id, label, date, place, perf + plc + rec + pb, perf, plc, rec, pb, id
     from (
       select w.id, w.athlete_id, w.date, w.place,
-             -- Bereich (Lauf, Sprint, …): zählt nur in Ligen, die diesen Bereich spielen
-             _group_area(_result_group(w.discipline, w.competition)) area,
              -- Staffel: Leistungs- und Platzierungspunkte nur anteilig (1/3 bzw. 1/4)
              case w.record when 'WR' then c.record_wr when 'ER' then c.record_er when 'DR' then c.record_dr
                            when '=WR' then c.record_wr / 2.0 when '=ER' then c.record_er / 2.0 when '=DR' then c.record_dr / 2.0 else 0 end rec,
@@ -362,27 +360,26 @@ begin
 end $$;
 
 -- Punkte pro Athlet in einem Jahr (für die Athletenliste der App); p_gender 'mixed' = alle
--- p_areas: nur Ergebnisse dieser Bereiche (z. B. {Lauf} in reinen Laufligen); ohne Angabe alle
-drop function if exists athlete_points(text, int);
-create or replace function athlete_points(p_gender text, p_year int, p_areas text[] default null)
+drop function if exists athlete_points(text, int, text[]);
+create or replace function athlete_points(p_gender text, p_year int)
 returns table (athlete_id text, points numeric, results int)
 language sql stable security definer set search_path = public as $$
   select r.athlete_id, sum(r.points), count(*)::int
     from results r join athletes x on x.id = r.athlete_id
-   where _gender_ok(p_gender, x.gender) and (p_areas is null or r.area is null or r.area = any (p_areas))
+   where _gender_ok(p_gender, x.gender)
      and r.result_date >= make_date(p_year, 1, 1) and r.result_date <= make_date(p_year, 12, 31)
    group by r.athlete_id
    order by r.athlete_id;
 $$;
 
 -- Punkte der letzten Tage (Standard 30) – für „heiße freie Athleten“
-drop function if exists athlete_points_recent(text, int);
-create or replace function athlete_points_recent(p_gender text, p_days int default 30, p_areas text[] default null)
+drop function if exists athlete_points_recent(text, int, text[]);
+create or replace function athlete_points_recent(p_gender text, p_days int default 30)
 returns table (athlete_id text, points numeric, results int)
 language sql stable security definer set search_path = public as $$
   select r.athlete_id, sum(r.points), count(*)::int
     from results r join athletes x on x.id = r.athlete_id
-   where _gender_ok(p_gender, x.gender) and (p_areas is null or r.area is null or r.area = any (p_areas)) and r.result_date > current_date - p_days and r.points > 0
+   where _gender_ok(p_gender, x.gender) and r.result_date > current_date - p_days and r.points > 0
    group by r.athlete_id
    order by r.athlete_id;
 $$;

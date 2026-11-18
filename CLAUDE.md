@@ -23,7 +23,8 @@
 - Spielregeln werden in der Datenbank erzwungen (security-definer-Funktionen), nicht in der App. Positionsregeln gibt es doppelt:
   `_slot_ok`/`league_slots`/`_position_groups`/`_group_area`/`_eligible` in der Datenbank und `slotOk`/`leagueSlots`/`positionGroups`/`groupArea`/`eligible`
   in `web/sport/lib.js` – immer beide ändern. Bereiche je Liga: `leagues.areas` (Lauf, Sprint, Hürden, Sprung, Wurf, Mehrkampf, Gehen);
-  geholt werden und zählen (`results.area`, Filter in `_score_rows`) nur Athleten/Ergebnisse dieser Bereiche. Gruppen (Schwerpunkt-Disziplin,
+  es gibt nur Athleten mit Schwerpunkt-Disziplin darin (`_eligible`; in der App blendet `loadPeople` die übrigen aus, außer sie standen
+  in der Liga je im Kader); von ihnen zählen alle Ergebnisse, auch in anderen Bereichen. Gruppen (Schwerpunkt-Disziplin,
   `disciplines.event_group`): Lauf 800…Hindernis, Sprint 100/200/400, Hürden Kurz-/Langhürden, Sprung 4, Wurf 4, Mehrkampf, Gehen.
   Blöcke als Positionen: „Mittel“, „Lang“, „Sprint“, „Hürden“, „Sprung“, „Wurf“. Spiele (Voreinstellungen `AREA_PRESETS` in
   `web/sport/lib.js`): nur Lauf, Sprint und Hürden, nur Sprung, nur Wurf (kleine Ligen empfohlen), alle (Blöcke) oder eigene Auswahl. Sprung/Wurf/Mehrkampf: mehr ist besser (`disciplines.higher_better`,

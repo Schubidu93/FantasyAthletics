@@ -1,7 +1,7 @@
 // Athleten-Übersicht: alle Athleten der Wertung mit Punkten der Saison und Besitzer in der Liga
 import { html, useState, useMemo } from '../vendor/preact-htm.js';
 import { fmtPts, Loading, normName, rpc, rpcAll, useLoad } from '../lib.js';
-import { GROUP_LABEL, leagueAreas, leagueGroups, riderGroup } from './lib.js';
+import { GROUP_LABEL, leagueGroups, riderGroup } from './lib.js';
 import { rank, RiderCell } from './index.js';
 
 export function Riders({ c }) {
@@ -17,12 +17,10 @@ export function Riders({ c }) {
   const recent = sort === 'recent';
   const sel = recent ? 'recent' : sel0;
   const year = sel === 'rank' || recent ? +(ys[0] || new Date().getFullYear()) : +sel;
-  // nur Punkte aus Bereichen, die die Liga spielt (z. B. kein Sprint in reinen Laufligen)
-  const areas = leagueAreas(c.league);
-  const pts = useLoad(() => recent ? rpcAll('athlete_points_recent', { p_gender: c.league.gender, p_days: 30, p_areas: areas })
-    : rpcAll('athlete_points', { p_gender: c.league.gender, p_year: year, p_areas: areas }), [c.league.gender, year, recent]);
+  const pts = useLoad(() => recent ? rpcAll('athlete_points_recent', { p_gender: c.league.gender, p_days: 30 })
+    : rpcAll('athlete_points', { p_gender: c.league.gender, p_year: year }), [c.league.gender, year, recent]);
   // Heiße freie Athleten: die 10 freien mit den meisten Punkten der letzten 30 Tage (🔥 in der Liste)
-  const hot = useLoad(() => rpcAll('athlete_points_recent', { p_gender: c.league.gender, p_days: 30, p_areas: areas }), [c.league.gender]);
+  const hot = useLoad(() => rpcAll('athlete_points_recent', { p_gender: c.league.gender, p_days: 30 }), [c.league.gender]);
   const hotSet = useMemo(() => new Set((hot.data || []).filter((p) => !c.owner[p.athlete_id] && c.riderMap[p.athlete_id])
     .sort((a, b) => b.points - a.points).slice(0, 10).map((p) => p.athlete_id)), [hot.data]);
   const [term, setTerm] = useState('');
