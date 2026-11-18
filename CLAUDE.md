@@ -1,4 +1,4 @@
-# Runner Fantasy – Hinweise für Claude
+# Athletics Fantasy – Hinweise für Claude
 
 Überblick über Aufbau, Hosting, Abläufe und Secrets: siehe `README.md`. Grundlage ist UCI Fantasy
 (github.com/Schubidu93/UCI-Fantasy); Verbesserungen dort lassen sich meist direkt übernehmen.
@@ -42,7 +42,7 @@
 
 ## Aufbau der App (in beiden Apps gleich)
 
-- `web/app.js`, `web/views/*.js`, `web/views/admin/*.js`: **in Runner Fantasy und UCI Fantasy wortgleich**. Änderungen dort immer in
+- `web/app.js`, `web/views/*.js`, `web/views/admin/*.js`: **in Athletics Fantasy und UCI Fantasy wortgleich**. Änderungen dort immer in
   beiden Apps vornehmen (Datei kopieren). Alles, worin sich die Sportarten unterscheiden, steht in `web/sport/`:
   - `sport/index.js`: `SPORT` (Begriffe Athlet/Fahrer in allen Fällen, Texte; Datenbank-Namen sind in beiden Apps gleich), `pid()`, `rank()`,
     `selectable()`, `usePeopleFilter()`, `PersonLine`, `labelText()`

@@ -1,6 +1,6 @@
 {
-  "name": "Runner Fantasy",
-  "short_name": "Runner Fantasy",
+  "name": "Athletics Fantasy",
+  "short_name": "Athletics Fantasy",
   "description": "Fantasy-Leichtathletik mit Ergebnissen von World Athletics",
   "start_url": "./",
   "scope": "./",

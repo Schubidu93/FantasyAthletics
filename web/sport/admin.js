@@ -1,4 +1,4 @@
-// Admin-Bereiche nur für Runner Fantasy: Wertungsparameter (unter Einstellungen), Athleten hinzufügen, Nachträge
+// Admin-Bereiche nur für Athletics Fantasy: Wertungsparameter (unter Einstellungen), Athleten hinzufügen, Nachträge
 import { html, useState } from '../vendor/preact-htm.js';
 import { COUNTRY_CODES, flag, fmtDate, fmtDateTime, Loading, Msg, q, rpc, sb, today, useAction, useLoad, withFlag } from '../lib.js';
 import { CatBadge, discLabel, RELAYS } from './lib.js';

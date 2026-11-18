@@ -1,4 +1,4 @@
-// Sportart Leichtathletik: alles, worin sich Runner Fantasy von UCI Fantasy unterscheidet (Begriffe,
+// Sportart Leichtathletik: alles, worin sich Athletics Fantasy von UCI Fantasy unterscheidet (Begriffe,
 // Spaltennamen, Texte). Der übrige App-Code ist in beiden Apps gleich und liest diese Werte hier.
 import { html, useState } from '../vendor/preact-htm.js';
 export * from './config.js';

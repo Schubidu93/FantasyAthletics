@@ -1,10 +1,10 @@
-// Sportart Leichtathletik: alles, worin sich Runner Fantasy von UCI Fantasy unterscheidet (Begriffe,
+// Sportart Leichtathletik: alles, worin sich Athletics Fantasy von UCI Fantasy unterscheidet (Begriffe,
 // Texte). Die Datenbank-Namen sind in beiden Apps gleich (athletes, athlete_id, competitions …).
 // Der übrige App-Code ist in beiden Apps gleich und liest diese Werte hier.
 // Reine Daten ohne Abhängigkeiten – auch von web/lib.js genutzt.
 
 export const SPORT = {
-  app: 'Runner Fantasy', emoji: '🏃', source: 'World Athletics',
+  app: 'Athletics Fantasy', emoji: '🏃', source: 'World Athletics',
   // Begriffe in den gebrauchten Fällen: ein Athlet, einen Athleten, die Athleten, den Athleten (Dativ Plural), des Athleten
   one: 'Athlet', oneAcc: 'Athleten', many: 'Athleten', manyDat: 'Athleten', oneGen: 'Athleten',
   pointsWord: 'Punkten',                       // „Sortiert nach …“

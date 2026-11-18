@@ -1,11 +1,11 @@
-/* Runner Fantasy: Farben und Gestaltung, die es nur in dieser App gibt (gemeinsame Gestaltung: style.css) */
+/* Athletics Fantasy: Farben und Gestaltung, die es nur in dieser App gibt (gemeinsame Gestaltung: style.css) */
 :root { --accent: #cf4424; --accent-text: #ffffff; --accent-soft: #fbe9e4; }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) { --accent: #ff7a57; --accent-text: #1a0d08; --accent-soft: #3a2019; }
 }
 :root[data-theme="dark"] { --accent: #ff7a57; --accent-text: #1a0d08; --accent-soft: #3a2019; }
 
-/* ---- Runner Fantasy: Aufstellung mit Positionen, Disziplin-Auswahl, Wettkämpfe ---- */
+/* ---- Athletics Fantasy: Aufstellung mit Positionen, Disziplin-Auswahl, Wettkämpfe ---- */
 .lineup li { display: grid; grid-template-columns: 7.5rem 1fr; gap: .5rem; align-items: center; }
 .lineup .slot-name { font-weight: 600; font-size: .9rem; }
 .lineup select { width: 100%; min-width: 0; }
