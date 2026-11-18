@@ -110,7 +110,7 @@ for (const n of ["alice", "bob", "carol"]) {
 const as = (u: string) => db.query("select set_config('request.jwt.claim.sub', $1, false)", [u]);
 await as(users.alice);
 const league = (await db.query("select create_league($1, 'Spikes & Splits', $2) id",
-  [`Runner Fantasy ${Y}`, { gender: "mixed", lineup_mode: "mf", roster_size: 16, wildcards: 2, draft_mode: "snake",
+  [`Athletics Fantasy ${Y}`, { gender: "mixed", lineup_mode: "mf", roster_size: 16, wildcards: 2, draft_mode: "snake",
     season_start: `${Y}-01-01`, season_end: `${Y}-12-31` }])).rows[0].id;
 const code = (await db.query("select invite_code from leagues where id = $1", [league])).rows[0].invite_code;
 await as(users.bob);

@@ -105,7 +105,7 @@ alter table athletes add column if not exists best_mark text;
 alter table athletes add column if not exists best_year int;
 create index if not exists athletes_gender_rank on athletes (gender, pool_rank);
 
--- Toplisten-Einträge (DE, Senioren, Laufdisziplinen ab 800 m) – Grundlage für den Pool
+-- Toplisten-Einträge (DE, Senioren, alle Disziplinen) – Grundlage für den Pool
 create table if not exists toplist_entries (
   athlete_id text not null references athletes (id) on delete cascade,
   year       int  not null,

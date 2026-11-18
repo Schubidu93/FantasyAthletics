@@ -31,7 +31,7 @@ export function Rules({ c }) {
   const row = (k, v) => html`<tr><td>${k}</td><td><strong>${v}</strong></td></tr>`;
   return html`<div class="stack rules">
     <section class="card">
-      <h2>So funktioniert Runner Fantasy</h2>
+      <h2>So funktioniert Athletics Fantasy</h2>
       <p>Jeder Manager stellt ein Team aus deutschen ${runOnly ? 'Läuferinnen und Läufern' : 'Leichtathletinnen und Leichtathleten'} zusammen. Für jedes Ergebnis seiner
         ${l.scoring_mode === 'lineup' ? 'aufgestellten ' : ''}Athleten gibt es Punkte – aus der Leistung (WA-Punkte) und der Platzierung.
         Wer am Saisonende die meisten Punkte hat, gewinnt die Liga.</p>
