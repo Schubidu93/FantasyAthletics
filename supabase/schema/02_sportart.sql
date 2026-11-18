@@ -21,6 +21,25 @@ language sql immutable as $$ select replace(to_char(round(coalesce(p, 0), 2), 'F
 create or replace function _selectable(p_pool_rank int) returns boolean
 language sql immutable as $$ select p_pool_rank is not null $$;
 
+-- App: GitHub-Repository (Zeitplaner startet dort die Abläufe), Kurzname (Zeitplan, Kennung)
+create or replace function _app(p_key text) returns text
+language sql immutable as $$
+  select case p_key when 'repo' then 'Schubidu93/FantasyAthletics' when 'slug' then 'fantasy-athletics' end;
+$$;
+
+-- Nachkommastellen der Punkte (Anzeige, Draft-Prognose)
+create or replace function _pts_digits() returns int language sql immutable as $$ select 2 $$;
+
+-- Datenabruf zur vollen Stunde (deutsche Zeit), aufgerufen vom Zeitplaner
+create or replace function _sport_tick(h int) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if h = 6 then perform dispatch_workflow('import-athletes.yml'); end if;          -- Athletenpool aus den DE-Toplisten
+  -- Ergebnisse: stündlich neue Ergebnisse (Sammelabruf), nachts neue Athleten, Kader und ein Siebtel des Pools komplett
+  if h between 8 and 23 then perform dispatch_workflow('import-results.yml', '{"modus": "neu"}'); end if;
+  if h = 3 then perform dispatch_workflow('import-results.yml', '{"modus": "nacht"}'); end if;
+end $$;
+
 -- Disziplingruppe eines Athleten (800, 1500, 5000, 10000, Marathon, Hindernis)
 create or replace function athlete_group(p_slug text) returns text
 language sql stable security definer set search_path = public as $$
