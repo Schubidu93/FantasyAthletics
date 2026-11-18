@@ -88,7 +88,7 @@ export function Rules({ c }) {
       <summary><h3>Athletenpool und Aufstellung</h3></summary>
       <ul>
         <li><strong>Pool:</strong> deutsche Athletinnen und Athleten, die in der DE-Topliste (Senioren) des aktuellen Jahres oder des Vorjahres
-          mindestens ${cfg ? cfg.pool_threshold : 950} WA-Punkte erreicht haben – im Lauf ab 800 m (inkl. Halle, Hindernis und Straße), Sprint (60–400 m),
+          mindestens ${cfg ? cfg.pool_threshold : 975} WA-Punkte erreicht haben – im Lauf ab 800 m (inkl. Halle, Hindernis und Straße), Sprint (60–400 m),
           Hürden, Sprung, Wurf, Mehrkampf und Gehen.
           ${runOnly ? 'Diese Liga spielt nur Lauf: Holen kann man nur Athleten aus den Laufgruppen, und es zählen nur Ergebnisse im Lauf (keine Sprints, Sprintstaffeln oder Gehen).'
             : `Diese Liga spielt ${areaText}: Holen kann man nur Athleten aus diesen Bereichen, und es zählen nur Ergebnisse darin.`}

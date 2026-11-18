@@ -90,7 +90,7 @@ begin
        and (p.proname like '\_%' or p.proname in (
             'dispatch_workflow', 'scheduler_tick', 'run_maintenance', 'notify_new_points', 'weekly_summary',
             'refresh_season_stats', 'refresh_pool', 'rebuild_results', 'fit_scoring_coefficients', 'apply_records',
-            'relink_event_riders', 'results_from_events', 'ranking_mismatch'))
+            'relink_event_riders', 'results_from_events', 'ranking_mismatch', 'prune_athletes'))
   loop
     execute format('revoke execute on function %s from public', f);
     begin

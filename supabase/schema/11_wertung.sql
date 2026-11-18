@@ -120,6 +120,24 @@ begin
   return n;
 end $$;
 
+-- Athleten außerhalb des Pools löschen, die keine Liga braucht (nicht manuell hinzugefügt, in keinem Kader, Draft, Waiver,
+-- Tausch, keiner Aufstellung und keinem eingefrorenen Spieltag). „Gebraucht“ = jede Tabelle, die per Fremdschlüssel ohne
+-- „on delete cascade“ auf athletes zeigt (neue Tabellen zählen automatisch mit), dazu score_snapshot.
+-- Ergebnisse, Bestleistungen und Toplisteneinträge der gelöschten Athleten fallen mit weg.
+create or replace function prune_athletes() returns int
+language plpgsql security definer set search_path = public as $$
+declare cond text := ' and not exists (select 1 from score_snapshot x where x.athlete_id = a.id)'; r record; n int;
+begin
+  for r in select c.conrelid::regclass tbl, att.attname col
+             from pg_constraint c join pg_attribute att on att.attrelid = c.conrelid and att.attnum = c.conkey[1]
+            where c.contype = 'f' and c.confrelid = 'athletes'::regclass and c.confdeltype <> 'c' loop
+    cond := cond || format(' and not exists (select 1 from %s x where x.%I = a.id)', r.tbl, r.col);
+  end loop;
+  execute 'delete from athletes a where a.pool_rank is null and not a.manual' || cond;
+  get diagnostics n = row_count;
+  return n;
+end $$;
+
 -- Cross: Distanz steht nur im Wettkampfnamen, z. B. "Sparkassen Cross Pforzheim, Pforzheim - XC 7.5km"
 create or replace function cross_km(p_competition text) returns numeric
 language sql immutable as $$

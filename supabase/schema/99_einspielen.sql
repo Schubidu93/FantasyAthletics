@@ -15,6 +15,13 @@ begin
     update scoring_config set placing_factor = 0.2, updated_at = now() where placing_factor = 0.1;
     insert into schema_changes (name) values ('placing_factor_0.2');
   end if;
+  -- Alle Disziplinen: Pool ab 975 WA-Punkten; Athleten darunter, die keine Liga braucht, werden gelöscht
+  if exists (select 1 from results) and not exists (select 1 from schema_changes where name = 'pool_975') then
+    update scoring_config set pool_threshold = 975, updated_at = now() where pool_threshold = 950;
+    perform refresh_pool();
+    perform prune_athletes();
+    insert into schema_changes (name) values ('pool_975');
+  end if;
   -- „Neue Punkte“-Push startet ab jetzt: bisherige Punkte als schon gemeldet eintragen (kein Schwall beim Einführen)
   if not exists (select 1 from schema_changes where name = 'point_pushes_seed') then
     insert into point_pushes (manager_id, athlete_id, competition_id, label)
