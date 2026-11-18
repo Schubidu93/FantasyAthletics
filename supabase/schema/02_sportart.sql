@@ -1,6 +1,25 @@
 -- =====================================================================
--- Leichtathletik: Geschlecht, Disziplingruppen, Positionen
+-- Sportart Leichtathletik: alles, worin sich die Datenbank von UCI Fantasy unterscheidet
+-- (Begriffe in Meldungen, Punkteformat, Pool, Disziplingruppen, Positionen). Die übrigen
+-- Dateien sind in beiden Apps gleich und nutzen nur diese Funktionen.
 -- =====================================================================
+
+-- Begriffe in Meldungen – wie SPORT in web/sport/config.js
+create or replace function _word(p_key text) returns text
+language sql immutable as $$
+  select case p_key when 'one' then 'Athlet' when 'oneAcc' then 'Athleten' when 'many' then 'Athleten'
+                    when 'manyDat' then 'Athleten' when 'team' then 'Team' when 'teamGen' then 'Teams'
+                    when 'pool' then 'im Athletenpool' when 'importHint' then 'Workflow "Athletenpool laden"'
+                    when 'emoji' then '🏃' end;
+$$;
+
+-- Punkte in Nachrichten wie in der App: zwei Nachkommastellen mit Komma (z. B. 30,00)
+create or replace function _fmt_pts(p numeric) returns text
+language sql immutable as $$ select replace(to_char(round(coalesce(p, 0), 2), 'FM999999990.00'), '.', ',') $$;
+
+-- Darf geholt werden (Draft, Waiver, freie Phase)? Nur Athleten im aktuellen Pool
+create or replace function _selectable(p_pool_rank int) returns boolean
+language sql immutable as $$ select p_pool_rank is not null $$;
 
 -- Disziplingruppe eines Athleten (800, 1500, 5000, 10000, Marathon, Hindernis)
 create or replace function athlete_group(p_slug text) returns text

@@ -2,7 +2,7 @@
 -- Hilfsfunktionen
 -- =====================================================================
 
--- Passt das Geschlecht des Athleten zur Wertung der Liga (men, women, mixed)?
+-- Passt das Geschlecht des Sportlers zur Wertung der Liga (men, women, mixed)?
 create or replace function _gender_ok(p_league_gender text, p_rider_gender text) returns boolean
 language sql immutable as $$
   select p_league_gender = 'mixed' or p_league_gender = p_rider_gender;
@@ -89,10 +89,6 @@ language sql stable security definer set search_path = public as $$
   select coalesce((select name from athletes where id = p_slug), p_slug);
 $$;
 
--- Punkte wie in der App: zwei Nachkommastellen mit Komma (z. B. 30,00)
-create or replace function _fmt_pts(p numeric) returns text
-language sql immutable as $$ select replace(to_char(round(coalesce(p, 0), 2), 'FM999999990.00'), '.', ',') $$;
-
 create or replace function vapid_public_key() returns text
 language sql stable security definer set search_path = public as $$
   select value from app_config where key = 'vapid_public';
@@ -147,7 +143,7 @@ $$;
 create or replace function _athlete_free(p_league uuid, p_rider text, p_locked_since timestamptz) returns boolean
 language sql stable security definer set search_path = public as $$
   select exists (select 1 from athletes r join leagues l on l.id = p_league
-                 where r.id = p_rider and _gender_ok(l.gender, r.gender) and r.pool_rank is not null)
+                 where r.id = p_rider and _gender_ok(l.gender, r.gender) and _selectable(r.pool_rank))
      and not exists (select 1 from roster_entries
                      where league_id = p_league and athlete_id = p_rider
                        and (released_on is null or released_at >= p_locked_since));
