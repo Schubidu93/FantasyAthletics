@@ -23,5 +23,3 @@ export const pid = (r) => r?.id;
 
 /** Platz der Person in der Auswahl (Pool-Rang) – für Sortierungen */
 export const rank = (r) => r?.pool_rank;
-/** Darf geholt werden (Waiver, Draft): nur Athleten im aktuellen Pool */
-export const selectable = (r) => r?.pool_rank != null;

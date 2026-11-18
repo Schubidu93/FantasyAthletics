@@ -1,7 +1,7 @@
 // Athleten-Übersicht: alle Athleten der Wertung mit Punkten der Saison und Besitzer in der Liga
 import { html, useState, useMemo } from '../vendor/preact-htm.js';
 import { fmtPts, Loading, normName, rpc, rpcAll, useLoad } from '../lib.js';
-import { GROUP_LABEL, GROUPS, riderGroup } from './lib.js';
+import { GROUP_LABEL, leagueGroups, riderGroup } from './lib.js';
 import { rank, RiderCell } from './index.js';
 
 export function Riders({ c }) {
@@ -50,7 +50,7 @@ export function Riders({ c }) {
       <span class="muted small">frei, meiste Punkte der letzten 30 Tage</span></div>`}
     <div class="filters">
       <input type="search" placeholder="Name" value=${term} onInput=${(e) => { setTerm(e.target.value); setLimit(100); }} />
-      <select value=${group} onChange=${(e) => setGroup(e.target.value)}><option value="">Alle Disziplinen</option>${GROUPS.map((g) => html`<option value=${g}>${GROUP_LABEL[g]}</option>`)}</select>
+      <select value=${group} onChange=${(e) => setGroup(e.target.value)}><option value="">Alle Disziplinen</option>${leagueGroups(c.league).map((g) => html`<option value=${g}>${GROUP_LABEL[g]}</option>`)}</select>
       ${c.league.gender === 'mixed' && html`<select value=${gender} onChange=${(e) => setGender(e.target.value)}>
         <option value="">Männer und Frauen</option><option value="men">Männer</option><option value="women">Frauen</option></select>`}
       <select value=${owner} onChange=${(e) => setOwner(e.target.value)}>

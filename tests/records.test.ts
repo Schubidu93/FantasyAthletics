@@ -65,13 +65,27 @@ describe("Rekorde aus All-time-Listen", () => {
       row(3, "3:30.50", "2014-07-01"),   // alter Rekord
       row(4, "3:31.00", `${Y}-07-01`),   // schlechter als der alte Rekord
     ];
-    expect(recordMarks(rows, "2025-01-01").map((r) => [r.athleteId, r.tied])).toEqual([[1, false], [2, false]]);
+    expect(recordMarks(rows, "2025-01-01", "1500 Metres").map((r) => [r.athleteId, r.tied])).toEqual([[1, false], [2, false]]);
     // gleiche Zeit wie der alte Rekord → eingestellt (zählt halb)
-    expect(recordMarks([row(5, "3:30.50", `${Y}-05-01`), row(3, "3:30.50", "2014-07-01")], "2025-01-01")
+    expect(recordMarks([row(5, "3:30.50", `${Y}-05-01`), row(3, "3:30.50", "2014-07-01")], "2025-01-01", "1500 Metres")
       .map((r) => [r.athleteId, r.tied])).toEqual([[5, true]]);
     // gleiches Rennen: nur der Schnellere hält den Rekord
-    expect(recordMarks([row(1, "3:29.0", "2026-05-01"), row(2, "3:29.5", "2026-05-01"), row(3, "3:30.5", "2014-07-01")], "2025-01-01")
+    expect(recordMarks([row(1, "3:29.0", "2026-05-01"), row(2, "3:29.5", "2026-05-01"), row(3, "3:30.5", "2014-07-01")], "2025-01-01", "1500 Metres")
       .map((r) => r.athleteId)).toEqual([1]);
+    // Sprung: weiter ist besser
+    expect(recordMarks([row(1, "8.30", `${Y}-06-01`), row(2, "8.20", `${Y}-07-01`), row(3, "8.25", "2014-07-01")], "2025-01-01", "Long Jump")
+      .map((r) => r.athleteId)).toEqual([1]);
+  });
+
+  it("Richtung der Disziplinen stimmt mit der Datenbank überein (research/disciplines.txt)", async () => {
+    const { higherBetter, TOPLIST_DISCIPLINES } = await import("../importer/disciplines");
+    const { readFileSync } = await import("node:fs");
+    const rows = readFileSync("research/disciplines.txt", "utf8").split("\n").filter((l) => l && !l.startsWith("#"))
+      .map((l) => l.split("|"));
+    const names = new Set(rows.map((r) => r[0]));
+    for (const [name, , , , , higher] of rows) expect([name, higherBetter(name)]).toEqual([name, higher === "1"]);
+    // jede Topliste gehört zu einer bekannten Disziplin
+    for (const d of TOPLIST_DISCIPLINES) expect(names.has(d.name), d.name).toBe(true);
   });
 
   it("kennzeichnet passende Ergebnisse, der höhere Rekord gewinnt", async () => {

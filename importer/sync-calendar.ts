@@ -1,13 +1,14 @@
-// Wettkampfkalender: kommende Wettkämpfe mit Laufdisziplinen aus dem öffentlichen WA-Kalender (GraphQL getCalendarEvents).
+// Wettkampfkalender: kommende Wettkämpfe aus dem öffentlichen WA-Kalender (GraphQL getCalendarEvents).
 // Grenzen (wie im Scriptable-Widget „Leichtathletik“, Deutschland erweitert):
 //   weltweit ab Gold Label (OW, DF, GW, GL), in Europa ab A, in Deutschland ab E – für Bahn, Straße und Cross
-// Programm („Events to be staged“) aus getCompetitionOrganiserInfo: nur Wettkämpfe mit einer Laufdisziplin ab 800 m
-// (Erwachsene, keine Staffeln); ohne Programm entscheidet der Name (Sprung-, Wurf-, Mehrkampf-Meetings fallen weg).
+// Programm („Events to be staged“) aus getCompetitionOrganiserInfo: Disziplinen für Erwachsene (keine Staffeln) und daraus die
+// Bereiche (calendar_events.areas: Lauf, Sprint, Hürden, Sprung, Wurf, Mehrkampf, Gehen); ohne Programm Art und Name.
+// Wettkämpfe ganz ohne Disziplinen für Erwachsene fallen weg.
 // Das Programm wird je Wettkampf höchstens einmal pro Woche abgefragt.
 // Täglich im Ablauf „Athletenpool laden“. Umgebung: SUPABASE_URL, SUPABASE_SERVICE_KEY, optional WA_API_URL/WA_API_KEY.
 import { adminClient, chunked } from "./supabase";
 import { discoverApiConfig, sleep, type ApiConfig } from "./wa";
-import { NOT_RUNNING, irrelevantChampionship, runningEvents } from "./calendar-filter";
+import { calendarAreas, irrelevantChampionship, seniorEvents } from "./calendar-filter";
 
 const db = adminClient();
 const DAYS_AHEAD = 365;
@@ -80,7 +81,7 @@ const main = async () => {
   const api: ApiConfig = process.env.WA_API_URL && process.env.WA_API_KEY
     ? { url: process.env.WA_API_URL, key: process.env.WA_API_KEY } : await discoverApiConfig();
 
-  const byId = new Map<number, Record<string, unknown> & { kinds: Set<Kind>; events?: unknown; events_checked_at?: string | null }>();
+  const byId = new Map<number, Record<string, unknown> & { kinds: Set<Kind>; events?: unknown; events_checked_at?: string | null; areas?: string[] | null }>();
   const skipped = new Set<string>();
   let failures = 0;
   for (const kind of Object.keys(QUERIES) as Kind[]) {
@@ -88,7 +89,7 @@ const main = async () => {
       for (const cat of categories) {
         try {
           for (const e of await load(api, { startDate: from, endDate: to, disciplineId: KINDS[kind], rankingCategoryId: CATEGORY_IDS[cat], ...region })) {
-            if (NOT_RUNNING.test(e.name) || irrelevantChampionship(e)) { skipped.add(e.name); continue; }
+            if (irrelevantChampionship(e)) { skipped.add(e.name); continue; }
             const prev = byId.get(Number(e.id));
             if (prev) { prev.kinds.add(kind); continue; }
             byId.set(Number(e.id), {
@@ -105,21 +106,23 @@ const main = async () => {
     }
   }
   // Programm: nur für neue Wettkämpfe oder wenn die letzte Abfrage älter als 7 Tage ist (bzw. noch kein Programm da war)
-  const known = new Map(((await db.from("calendar_events").select("id, events, events_checked_at")).data ?? [])
-    .map((r: { id: number; events: unknown; events_checked_at: string | null }) => [Number(r.id), r]));
+  const known = new Map(((await db.from("calendar_events").select("id, events, events_checked_at, areas")).data ?? [])
+    .map((r: { id: number; events: unknown; events_checked_at: string | null; areas: string[] | null }) => [Number(r.id), r]));
   let asked = 0, dropped = 0;
   for (const [id, row] of [...byId]) {
     const prev = known.get(id);
-    const fresh = prev?.events_checked_at && Date.now() - Date.parse(prev.events_checked_at) < 7 * 864e5 && prev.events;
+    // areas fehlt = noch aus der Zeit, als nur Laufdisziplinen gespeichert wurden → Programm neu holen
+    const fresh = prev?.events_checked_at && Date.now() - Date.parse(prev.events_checked_at) < 7 * 864e5 && prev.events && prev.areas;
     let units: { gender: string; events: string[] }[] | null;
     row.events = null;
     if (fresh) { units = prev!.events as { gender: string; events: string[] }[]; row.events_checked_at = prev!.events_checked_at!; }
     else { units = await programme(api, id).catch(() => null); asked++; row.events_checked_at = started; }
     if (units) {
-      const run = units.map((u) => ({ gender: u.gender, events: runningEvents(u.events) })).filter((u) => u.events.length);
-      if (!run.length) { byId.delete(id); dropped++; skipped.add(String(row.name)); continue; }
-      row.events = run;
+      const senior = units.map((u) => ({ gender: u.gender, events: seniorEvents(u.events) })).filter((u) => u.events.length);
+      if (!senior.length) { byId.delete(id); dropped++; skipped.add(String(row.name)); continue; }
+      row.events = senior;
     }
+    row.areas = calendarAreas(row.events as { events: string[] }[] | null, [...row.kinds], String(row.name));
   }
   const rows = [...byId.values()].map((r) => ({ ...r, kinds: [...r.kinds] }));
   if (!rows.length) throw new Error(`Keine Wettkämpfe gefunden (${failures} Fehler)`);
@@ -132,8 +135,8 @@ const main = async () => {
     const { error } = await db.from("calendar_events").delete().lt("updated_at", started);
     if (error) throw new Error(`calendar_events löschen: ${error.message}`);
   }
-  return `Kalender: ${rows.length} kommende Wettkämpfe (${from} bis ${to}), ${skipped.size} ohne Laufdisziplinen übersprungen ` +
-    `(${dropped} laut Programm); Programm für ${asked} Wettkämpfe abgefragt` +
+  return `Kalender: ${rows.length} kommende Wettkämpfe (${from} bis ${to}), ${skipped.size} übersprungen ` +
+    `(${dropped} laut Programm ohne Erwachsene); Programm für ${asked} Wettkämpfe abgefragt` +
     (failures ? `, ${failures} Abfragen fehlgeschlagen` : "");
 };
 

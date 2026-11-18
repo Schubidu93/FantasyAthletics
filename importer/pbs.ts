@@ -1,5 +1,5 @@
 // Persönliche Bestleistungen aus getSingleCompetitor (personalBests, progressionOfSeasonsBests) aufbereiten.
-import { parseMark } from "./placings";
+import { markCost } from "./marks";
 import { parseWaDate } from "./wa";
 
 export type RawPb = { indoor?: boolean | null; discipline?: string | null; mark?: string | null; notLegal?: boolean | null;
@@ -20,8 +20,8 @@ export function currentPbs(athleteId: string, raw: RawPb[], known: Set<string>) 
     if (!r.discipline || !r.mark || r.notLegal) continue;
     const discipline = pbDiscipline(r.discipline, !!r.indoor, known);
     const prev = out.get(discipline);
-    const s = parseMark(r.mark);
-    if (prev && s !== null && (parseMark(prev.mark) ?? Infinity) <= s) continue;
+    const s = markCost(discipline, r.mark);
+    if (prev && s !== null && (markCost(discipline, prev.mark) ?? Infinity) <= s) continue;
     out.set(discipline, { athlete_id: athleteId, discipline, mark: r.mark, date: parseWaDate(r.date ?? ""),
                           result_score: r.resultScore ?? null, venue: r.venue ?? null });
   }
@@ -30,14 +30,14 @@ export function currentPbs(athleteId: string, raw: RawPb[], known: Set<string>) 
   return [...out.values()].filter((p) => /short track/i.test(p.discipline) || !indoor.has(`${p.discipline}|${p.mark}|${p.date}`));
 }
 
-/** Beste Leistung vor `beforeYear` je Disziplin aus den Saisonbestleistungen (nur Laufzeiten). */
+/** Beste Leistung vor `beforeYear` je Disziplin aus den Saisonbestleistungen (kleinerer Vergleichswert = besser, siehe markCost). */
 export function bestBefore(athleteId: string, progression: RawProgression[], beforeYear: number, known: Set<string>) {
   const out = new Map<string, { athlete_id: string; discipline: string; mark: string; date: string | null; s: number }>();
   for (const p of progression) {
     if (!p.discipline) continue;
     const discipline = pbDiscipline(p.discipline, !!p.indoor, known);
     for (const r of p.results ?? []) {
-      const s = parseMark(r.mark);
+      const s = markCost(discipline, r.mark);
       if (s === null || !r.mark || Number(r.season) >= beforeYear) continue;
       const prev = out.get(discipline);
       if (!prev || s < prev.s) out.set(discipline, { athlete_id: athleteId, discipline, mark: r.mark, date: parseWaDate(r.date ?? ""), s });

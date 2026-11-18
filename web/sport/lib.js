@@ -3,14 +3,56 @@
 import { html } from '../vendor/preact-htm.js';
 import { openRider } from '../lib.js';
 
-export const GROUPS = ['800', '1500', '5000', '10000', 'Marathon', 'Hindernis'];
-export const GROUP_LABEL = { 800: '800 m', 1500: '1500 m', 5000: '5000 m', 10000: '10.000 m', Marathon: 'Marathon', Hindernis: 'Hindernis' };
+// Disziplingruppen (Schwerpunkt-Disziplin eines Athleten) je Bereich – wie _group_area in der Datenbank
+export const AREA_GROUPS = {
+  Lauf: ['800', '1500', '5000', '10000', 'Marathon', 'Hindernis'],
+  Sprint: ['100', '200', '400'],
+  Hürden: ['Kurzhürden', 'Langhürden'],
+  Sprung: ['Hochsprung', 'Stabhochsprung', 'Weitsprung', 'Dreisprung'],
+  Wurf: ['Kugel', 'Diskus', 'Hammer', 'Speer'],
+  Mehrkampf: ['Mehrkampf'],
+  Gehen: ['Gehen'],
+};
+export const AREAS = Object.keys(AREA_GROUPS);
+export const RUN_GROUPS = AREA_GROUPS.Lauf;
+export const GROUPS = AREAS.flatMap((a) => AREA_GROUPS[a]);
+export const GROUP_LABEL = { 800: '800 m', 1500: '1500 m', 5000: '5000 m', 10000: '10.000 m', Marathon: 'Marathon', Hindernis: 'Hindernis',
+  100: '100 m', 200: '200 m', 400: '400 m', Kurzhürden: 'Kurzhürden', Langhürden: '400 m Hürden',
+  Hochsprung: 'Hochsprung', Stabhochsprung: 'Stabhochsprung', Weitsprung: 'Weitsprung', Dreisprung: 'Dreisprung',
+  Kugel: 'Kugelstoßen', Diskus: 'Diskuswurf', Hammer: 'Hammerwurf', Speer: 'Speerwurf', Mehrkampf: 'Mehrkampf', Gehen: 'Gehen',
+  Mittel: 'Mittelstrecke', Lang: 'Langstrecke', Sprint: 'Sprint', Hürden: 'Hürden', Sprung: 'Sprung', Wurf: 'Wurf' };
+export const groupArea = (g) => AREAS.find((a) => AREA_GROUPS[a].includes(g)) || null;
 export const riderGroup = (r) => (r ? r.group_override || r.event_group : null);
+export const leagueAreas = (l) => l?.areas || ['Lauf'];
+/** Gruppen, die die Liga spielt (Filter, Auswahl) */
+export const leagueGroups = (l) => GROUPS.filter((g) => leagueAreas(l).includes(groupArea(g)));
+/** Darf in dieser Liga geholt werden? Im Pool und in einem Bereich der Liga (wie _eligible in der Datenbank) */
+export const eligible = (r, l) => r?.pool_rank != null && (!groupArea(riderGroup(r)) || leagueAreas(l).includes(groupArea(riderGroup(r))));
+
+// Positionen: jede Gruppe für sich oder ein Block mehrerer Gruppen – wie _position_groups in der Datenbank:
+// „Mittel“ (800/1500), „Lang“ (5000/10.000/Hindernis) und Sprint, Hürden, Sprung, Wurf (alle Gruppen des Bereichs)
+const BLOCKS = { Mittel: ['800', '1500'], Lang: ['5000', '10000', 'Hindernis'],
+  Sprint: AREA_GROUPS.Sprint, Hürden: AREA_GROUPS.Hürden, Sprung: AREA_GROUPS.Sprung, Wurf: AREA_GROUPS.Wurf };
+export const positionGroups = (p) => BLOCKS[p] || [p];
+/** Wählbare Positionen für diese Bereiche: einzelne Disziplinen und Blöcke */
+export const positionsFor = (areas) => AREAS.filter((a) => areas.includes(a)).flatMap((a) =>
+  a === 'Lauf' ? ['800', '1500', 'Mittel', '5000', '10000', 'Hindernis', 'Lang', 'Marathon']
+    : AREA_GROUPS[a].length > 1 ? [...AREA_GROUPS[a], a] : [a]);
+/** Spiele: Bereiche und vorgeschlagene Positionen. Ein Bereich allein = je Disziplin eine Position; alle = Blöcke
+ *  (Gehen nur über Wildcards). suggest: passende Ligagröße (im Wurf gibt es nur wenige Athleten) */
+export const AREA_PRESETS = {
+  run: { label: 'Nur Lauf (ab 800 m)', areas: ['Lauf'], lineup_groups: [...AREA_GROUPS.Lauf] },
+  sprint: { label: 'Sprint und Hürden', areas: ['Sprint', 'Hürden'], lineup_groups: [...AREA_GROUPS.Sprint, ...AREA_GROUPS.Hürden] },
+  jump: { label: 'Nur Sprung', areas: ['Sprung'], lineup_groups: [...AREA_GROUPS.Sprung] },
+  throw: { label: 'Nur Wurf', areas: ['Wurf'], lineup_groups: [...AREA_GROUPS.Wurf], suggest: { max_managers: 6, roster_size: 7 },
+    hint: 'Im Wurf gibt es nur wenige deutsche Spitzenathleten (z. B. etwa 8 Hammerwerfer je Geschlecht) – empfohlen: höchstens 6 Mitspieler und kleine Kader.' },
+  all: { label: 'Alle Disziplinen', areas: [...AREAS], lineup_groups: ['Sprint', 'Hürden', 'Mittel', 'Lang', 'Marathon', 'Sprung', 'Wurf', 'Mehrkampf'] },
+};
 export const GENDER_LABEL = { men: 'Männer', women: 'Frauen', mixed: 'Mixed' };
 
 // Positionen der Aufstellung (wie league_slots in der Datenbank): 800, 1500 … bzw. 800:M, 800:W …, dann WC1, WC2 …
 export function leagueSlots(l) {
-  const groups = l.lineup_groups || GROUPS;
+  const groups = l.lineup_groups || RUN_GROUPS;
   const out = l.lineup_mode === 'mf' ? groups.flatMap((g) => [`${g}:M`, `${g}:W`]) : [...groups];
   for (let i = 1; i <= (l.wildcards ?? 0); i++) out.push(`WC${i}`);
   return out;
@@ -51,9 +93,9 @@ export function discMeters(label) {
 }
 // Reihenfolge der Läufe: Vorläufe, Viertel-, Halbfinale, Finale; jeweils 1, 2, 3 …
 export function raceOrder(r) {
-  const m = String(r || '').match(/^(R|H|QF|SF|F)(\d*)$/);
+  const m = String(r || '').match(/^(R|Q|H|QF|SF|F)(\d*)$/);
   if (!m) return 500;
-  return { R: 0, H: 100, QF: 200, SF: 300, F: 400 }[m[1]] + (+m[2] || 0);
+  return { R: 0, Q: 50, H: 100, QF: 200, SF: 300, F: 400 }[m[1]] + (+m[2] || 0);
 }
 // Positionsname mit Geschlechts-Kennzeichen
 export function SlotLabel({ slot }) {
@@ -66,11 +108,14 @@ export function slotOk(slot, r) {
   const [g, sex] = slot.split(':');
   if (sex === 'M' && r.gender !== 'men') return false;
   if (sex === 'W' && r.gender !== 'women') return false;
-  return g.startsWith('WC') || riderGroup(r) === g;
+  return g.startsWith('WC') || positionGroups(g).includes(riderGroup(r));
 }
 
 // Disziplinnamen von World Athletics kurz und deutsch: "1500 Metres Short Track" → "1500 m (Halle)"
-const DISC = [[/^10,000 Metres/, '10.000 m'], [/ Metres Steeplechase/, ' m Hindernis'], [/ Metres Hurdles/, ' m Hürden'],
+const DISC = [[/^10,000 Metres/, '10.000 m'], [/ Kilometres Race Walk/, ' km Gehen'], [/^High Jump/, 'Hochsprung'],
+  [/^Pole Vault/, 'Stabhochsprung'], [/^Long Jump/, 'Weitsprung'], [/^Triple Jump/, 'Dreisprung'], [/^Shot Put/, 'Kugelstoßen'],
+  [/^Discus Throw/, 'Diskuswurf'], [/^Hammer Throw/, 'Hammerwurf'], [/^Javelin Throw/, 'Speerwurf'], [/^Decathlon/, 'Zehnkampf'],
+  [/^Heptathlon/, 'Siebenkampf'], [/^Pentathlon/, 'Fünfkampf'], [/ Metres Steeplechase/, ' m Hindernis'], [/ Metres Hurdles/, ' m Hürden'],
   [/ Metres/, ' m'], [/^Mile Road$/, 'Meile Straße'], [/^Mile/, 'Meile'], [/^2 Miles/, '2 Meilen'], [/^10 Miles Road/, '10 Meilen'],
   [/^Half Marathon/, 'Halbmarathon'], [/ Kilometres Road/, ' km Straße'], [/^Cross Country Relay/, 'Cross-Staffel'],
   [/^Cross Country/, 'Cross'], [/ Short Track$/, ' (Halle)'], [/ Relay/, ' Staffel'], [/ Race Walk/, ' Gehen'],
@@ -86,11 +131,11 @@ export const discWithKm = (d, competition) => {
   const km = /^Cross Country/.test(d || '') ? crossKm(competition) : null;
   return discLabel(d) + (km ? ` ${km.toLocaleString('de-DE')} km` : '');
 };
-// Lauf laut WA: F, F1, SF2, H3, QF1 …
+// Lauf bzw. Runde laut WA: F, F1, SF2, H3, QF1, Q (Qualifikation im Sprung/Wurf) …
 export function raceLabel(r) {
-  const m = (r || '').match(/^(F|SF|QF|H|R)(\d*)$/);
+  const m = (r || '').match(/^(F|SF|QF|H|R|Q)(\d*)$/);
   if (!m) return r || '';
-  const name = { F: 'Finale', SF: 'Halbfinale', QF: 'Viertelfinale', H: 'Vorlauf', R: 'Lauf' }[m[1]];
+  const name = { F: 'Finale', SF: 'Halbfinale', QF: 'Viertelfinale', H: 'Vorlauf', R: 'Lauf', Q: 'Qualifikation' }[m[1]];
   return m[2] ? `${name} ${m[2]}` : name;
 }
 

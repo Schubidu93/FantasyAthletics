@@ -37,6 +37,8 @@ def place_of(label, idx):
 tf = tables("research/out/rules/track-field-events-2026.txt")
 rr = tables("research/out/rules/road-running-2026.txt")
 xc = tables("research/out/rules/cross-country-2026.txt")
+ce = tables("research/out/rules/combined-events-2026.txt")
+rw = tables("research/out/rules/race-walking-2026.txt")
 
 # (Quelle, Tabelle, placing_table, race_type)
 spec = [
@@ -54,6 +56,10 @@ spec = [
     (rr, "4.2", "MARATHON_SIMILAR", "F"),
     (rr, "4.3", "ROAD", "F"),
     (xc, "6.1", "CROSS", "F"),
+    (ce, "3.1", "CE", "F"),
+    (rw, "5.1", "RW_HM", "F"),
+    (rw, "5.2", "RW_MAR", "F"),
+    (rw, "5.3", "RW_LONG", "F"),
 ]
 values = []
 for src, num, table, race_type in spec:
@@ -74,24 +80,39 @@ def q(v):
 
 disc = []
 for line in open("research/disciplines.txt", encoding="utf-8"):
-    name, factor, group, tables, cross = line.rstrip("\n").split("|")
+    name, factor, group, tables, cross, higher = line.rstrip("\n").split("|")
     arr = "'{" + tables + "}'"
-    disc.append(f"  ({q(name)}, {factor}, {q(group)}, {arr}, {q(cross)})")
+    disc.append(f"  ({q(name)}, {factor}, {q(group)}, {arr}, {q(cross)}, {'true' if higher else 'false'})")
+# Disziplinen, die mit der Erweiterung auf alle Disziplinen erstmals zählen (vorher Faktor 0): einmalig umstellen
+newly_scored = [n for n in (l.split("|")[0] for l in open("research/disciplines.txt", encoding="utf-8"))
+                if "Race Walk" in n or n in ("4x100 Metres Relay", "4x200 Metres Relay Short Track")]
 
 out = f"""-- =====================================================================
 -- Fantasy Athletics – Referenzdaten (wird nach supabase/schema/ eingespielt)
 -- Automatisch erzeugt von research/build_placing_sql.py – nicht von Hand ändern.
 --
--- disciplines: Disziplinfaktor (eigene Spielregel), Gruppe für die Aufstellungspositionen,
---   Platzierungstabellen und ggf. Cross-Tabelle. Bestehende Zeilen bleiben unverändert
---   (Faktoren lassen sich im Supabase Table Editor anpassen).
--- placing_scores: WA-World-Ranking-Regeln 2026 (Track & Field, Road Running, Cross Country),
---   werden bei jedem Einspielen aktualisiert.
+-- disciplines: Disziplinfaktor (eigene Spielregel), Gruppe für die Aufstellungspositionen, Platzierungstabellen,
+--   ggf. Cross-Tabelle und Wertungsrichtung (higher_better: Sprung, Wurf, Mehrkampf). Gruppe, Tabellen und Richtung
+--   werden bei jedem Einspielen aktualisiert, der Faktor nicht (lässt sich im Admin-Bereich anpassen).
+-- placing_scores: WA-World-Ranking-Regeln 2026 (Track & Field, Road Running, Cross Country, Combined Events,
+--   Race Walking), werden bei jedem Einspielen aktualisiert.
 -- =====================================================================
 
-insert into disciplines (name, factor, event_group, placing_tables, cross_table) values
+insert into disciplines (name, factor, event_group, placing_tables, cross_table, higher_better) values
 {",\n".join(disc)}
-on conflict (name) do nothing;
+on conflict (name) do update set event_group = excluded.event_group, placing_tables = excluded.placing_tables,
+  cross_table = excluded.cross_table, higher_better = excluded.higher_better;
+
+-- einmalig: Gehen und Sprintstaffeln zählen jetzt (in Ligen, die diese Bereiche spielen)
+do $$
+begin
+  if not exists (select 1 from schema_changes where name = 'alle_disziplinen_faktoren') then
+    update disciplines d set factor = x.factor from (values
+{",\n".join(f"      ({q(n)}, {f})" for n, f in ((l.split("|")[0], l.split("|")[1]) for l in open("research/disciplines.txt", encoding="utf-8")) if n in newly_scored)}
+    ) x(name, factor) where d.name = x.name and d.factor = 0;
+    insert into schema_changes (name) values ('alle_disziplinen_faktoren');
+  end if;
+end $$;
 
 insert into placing_scores (placing_table, category, race_type, place, points) values
 {",\n".join(values)}

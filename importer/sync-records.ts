@@ -1,10 +1,10 @@
 // Rekorde (DR, ER, WR) an Ergebnissen ab 2025 kennzeichnen – aus den All-time-Listen von World Athletics
 // (Deutschland, Europa, Welt; alle Leistungen statt nur der besten je Athlet). Erkennt auch Rekorde,
 // die inzwischen wieder verbessert wurden. Täglich im Ablauf „Athletenpool laden“.
-import { COUNTRY, TOPLIST_DISCIPLINES } from "./disciplines";
+import { COUNTRY, gendersOf, TOPLIST_DISCIPLINES } from "./disciplines";
 import { recordMarks } from "./records";
 import { adminClient, rpc } from "./supabase";
-import { fetchAllTime, sleep, type Gender, type Region } from "./wa";
+import { fetchAllTime, sleep, type Region } from "./wa";
 
 const db = adminClient();
 const SINCE = "2025-01-01";
@@ -17,7 +17,7 @@ const main = async () => {
   const failures: string[] = [];
   let lists = 0;
   for (const d of TOPLIST_DISCIPLINES) {
-    for (const gender of ["M", "W"] as Gender[]) {
+    for (const gender of gendersOf(d)) {
       for (const [rec, region] of REGIONS) {
         try {
           const rows = await fetchAllTime(d.path, gender, region, SINCE);
@@ -25,7 +25,7 @@ const main = async () => {
           // leere Liste = vermutlich falscher Aufruf (z. B. Region) – sichtbar machen statt still nichts zu finden
           if (!rows.length) failures.push(`${rec} ${d.name} ${gender}: leere Liste`);
           else if (!rows.some((r) => r.date)) failures.push(`${rec} ${d.name} ${gender}: Liste ohne Datum`);
-          for (const r of recordMarks(rows, SINCE)) {
+          for (const r of recordMarks(rows, SINCE, d.name)) {
             const record = r.tied ? `=${rec}` : rec;
             found.push({ athlete_id: `wa-${r.athleteId}`, discipline: d.name, date: r.date!, mark: r.mark, record });
             console.log(`${record} ${d.name} ${gender}: ${r.name} ${r.mark} (${r.date})`);

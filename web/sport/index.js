@@ -4,7 +4,10 @@ import { html, useState } from '../vendor/preact-htm.js';
 export * from './config.js';
 import { SPORT, pid } from './config.js';
 import { normName, openRider } from '../lib.js';
-import { discLabel, GROUP_LABEL, GROUPS, raceLabel, riderGroup, SexBadge } from './lib.js';
+import { discLabel, eligible, GROUP_LABEL, leagueGroups, raceLabel, riderGroup, SexBadge } from './lib.js';
+
+/** Darf in dieser Liga geholt werden (Waiver, Draft)? Im aktuellen Pool und in einem Bereich der Liga */
+export const selectable = (r, league) => eligible(r, league);
 
 
 /** Zeile unter dem Namen in Listen (Teampunkte): Sportart-Info und Zusatztext */
@@ -15,7 +18,7 @@ export const PersonLine = ({ r, sub }) => html`<${SexBadge} g=${r?.gender} /> ${
 export function usePeopleFilter(c) {
   const [group, setGroup] = useState('');
   const [gender, setGender] = useState('');
-  const ui = html`<select value=${group} onChange=${(e) => setGroup(e.target.value)}><option value="">Alle Disziplinen</option>${GROUPS.map((g) => html`<option value=${g}>${GROUP_LABEL[g]}</option>`)}</select>
+  const ui = html`<select value=${group} onChange=${(e) => setGroup(e.target.value)}><option value="">Alle Disziplinen</option>${leagueGroups(c.league).map((g) => html`<option value=${g}>${GROUP_LABEL[g]}</option>`)}</select>
       ${c.league.gender === 'mixed' && html`<select value=${gender} onChange=${(e) => setGender(e.target.value)}>
         <option value="">Männer und Frauen</option><option value="men">Männer</option><option value="women">Frauen</option></select>`}`;
   return [ui, (r) => (!group || riderGroup(r) === group) && (!gender || r.gender === gender)];

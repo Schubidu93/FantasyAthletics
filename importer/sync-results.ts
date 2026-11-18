@@ -307,7 +307,7 @@ async function resolveEventPlacings(rows: Row[], api: ApiConfig, years: number[]
     const prev = known.get(key(r));
     let place = prev?.race === "F" ? prev.place : null;
     if (place === null && r.wa_competition_id && r.wa_event_id) {
-      place = combinedPlace(await racesFor(r), r.mark as string | null, who(r));
+      place = combinedPlace(await racesFor(r), r.mark as string | null, who(r), String(r.discipline));
     }
     if (place !== null) {
       r.race = "F";
@@ -323,7 +323,7 @@ async function resolveEventPlacings(rows: Row[], api: ApiConfig, years: number[]
     const prev = known.get(key(r));
     let placing = prev?.placing_round ? { round: prev.placing_round, place: prev.placing_place } : null;
     if (!placing && r.wa_competition_id && r.wa_event_id) {
-      placing = prelimPlacing(await racesFor(r), who(r));
+      placing = prelimPlacing(await racesFor(r), who(r), String(r.discipline));
     }
     if (placing) {
       r.placing_round = placing.round;

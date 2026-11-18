@@ -21,7 +21,14 @@
   `drop function if exists` bei geänderter Signatur). Referenzdaten (Disziplinen, WA-Platzierungstabellen) nur über
   `research/build_placing_sql.py` → `supabase/reference_data.sql`. Nach dem Merge spielt „Datenbank einrichten“ beides ein.
 - Spielregeln werden in der Datenbank erzwungen (security-definer-Funktionen), nicht in der App. Positionsregeln gibt es doppelt:
-  `_slot_ok`/`league_slots` in der Datenbank und `slotOk`/`leagueSlots` in `web/lib.js` – immer beide ändern.
+  `_slot_ok`/`league_slots`/`_position_groups`/`_group_area`/`_eligible` in der Datenbank und `slotOk`/`leagueSlots`/`positionGroups`/`groupArea`/`eligible`
+  in `web/sport/lib.js` – immer beide ändern. Bereiche je Liga: `leagues.areas` (Lauf, Sprint, Hürden, Sprung, Wurf, Mehrkampf, Gehen);
+  es gibt nur Athleten mit Schwerpunkt-Disziplin darin (`_eligible`; in der App blendet `loadPeople` die übrigen aus, außer sie standen
+  in der Liga je im Kader); von ihnen zählen alle Ergebnisse, auch in anderen Bereichen. Gruppen (Schwerpunkt-Disziplin,
+  `disciplines.event_group`): Lauf 800…Hindernis, Sprint 100/200/400, Hürden Kurz-/Langhürden, Sprung 4, Wurf 4, Mehrkampf, Gehen.
+  Blöcke als Positionen: „Mittel“, „Lang“, „Sprint“, „Hürden“, „Sprung“, „Wurf“. Spiele (Voreinstellungen `AREA_PRESETS` in
+  `web/sport/lib.js`): nur Lauf, Sprint und Hürden, nur Sprung, nur Wurf (kleine Ligen empfohlen), alle (Blöcke) oder eigene Auswahl. Sprung/Wurf/Mehrkampf: mehr ist besser (`disciplines.higher_better`,
+  `_mark_cost` in der Datenbank, `markCost`/`higherBetter` in `importer/disciplines.ts`; Test prüft Gleichstand mit `research/disciplines.txt`).
 - `web/config.js` ist nur für lokale Tests und darf nicht eingecheckt werden. Keine Secrets in Code oder Chat.
 - Mobile first: Die App wird fast nur auf dem iPhone (installiert als Web-App) genutzt. Nichts darf rechts
   abgeschnitten sein; lieber umbrechen oder kürzen. Fristen mit 0:00 Uhr als Vortag ohne Uhrzeit anzeigen (`fmtUntil` in `web/lib.js`).
@@ -43,7 +50,7 @@
     (Aufstellung), `sport/matchdays.js` (Spieltag-Vorschläge), `sport/admin.js` (Zusatzbereiche im Admin) und die Sportart-Seiten
     (Personenliste, Wettkämpfe/Rennen, Profil, ggf. Kalender/Toplisten).
 - Datenbank: `supabase/schema/NN_*.sql` mit gleichen Nummern und Namen in beiden Apps. Sportart-Schicht `02_sportart.sql`:
-  `_word()` (Begriffe in Meldungen wie `SPORT`), `_fmt_pts()`, `_pts_digits()`, `_selectable()`, `_app()` (Repository, Kurzname),
+  `_word()` (Begriffe in Meldungen wie `SPORT`), `_fmt_pts()`, `_pts_digits()`, `_eligible(liga, athlet)` (darf geholt werden), `_app()` (Repository, Kurzname),
   `_sport_tick()` (Datenabruf-Zeiten), ggf. Positionen/Gruppen. Wortgleich in beiden Apps: 03, 05–08, 12–14, 16, 17 und alle `tests/sql/*` außer `06_deadlines`/`fixtures` (Liste in `scripts/shared.mjs`) – Meldungen dort nur
   mit `_word('one'|'oneAcc'|'many'|'manyDat'|'team'|'teamGen'|…)`, nie „Athlet“/„Fahrer“ fest.
 - Gemeinsame Dateien sind in `scripts/shared.mjs` aufgezählt, ihre Prüfsummen stehen in `shared-files.json` (in beiden Apps gleich).
@@ -87,7 +94,7 @@ richtet `.claude/hooks/session-start.sh` Pakete und das Test-PostgreSQL ein.
 
 ## Daten
 
-- Quelle nur **World Athletics**: DE-Toplisten (`importer/sync-pool.ts`) und die GraphQL-Schnittstelle der Website
+- Quelle nur **World Athletics**: DE-Toplisten aller Disziplinen (`importer/sync-pool.ts`, Liste in `importer/disciplines.ts`) und die GraphQL-Schnittstelle der Website
   (`importer/sync-results.ts`, `importer/placings.ts`). Ehrliche Kennung, Pausen zwischen Abfragen, keine Umgehung von Bot-Schutz.
   Den API-Schlüssel liest der Importer bei Bedarf selbst von worldathletics.org.
 - Ergebnisabruf sparsam: `resultsByAthlete` (Sammelabruf, letzte ~30 Tage, keine WA-Punkte/Wettkampf-ID) nur als Signal;
@@ -114,7 +121,10 @@ richtet `.claude/hooks/session-start.sh` Pakete und das Test-PostgreSQL ein.
   Suchtreffer mit gleicher ID, nicht von Hand; bei jedem Lauf werden alle `manual`-Athleten abgeglichen und ggf. korrigiert) → `athletes.manual = true` (immer im Pool,
   `ranking_points` aus bester WA-Leistung), dann Ergebnisse/Bestleistungen nur für diese Athleten (`ATHLETE_IDS`).
 - Kalender: `importer/sync-calendar.ts` → `calendar_events` (WA-Kalender: weltweit ab GL, Europa ab A, Deutschland ab E;
-  Programm aus `getCompetitionOrganiserInfo`, Filter in `importer/calendar-filter.ts`).
+  Programm aus `getCompetitionOrganiserInfo`, Bereiche je Wettkampf in `calendar_events.areas` aus `importer/calendar-filter.ts`).
+  Kalender-Seite und Spieltag-Vorschläge (`web/sport/matchday-plan.js`, Tests `tests/matchdays.test.ts`) richten sich nach den
+  Bereichen der Liga: Fachmeisterschaften (Cross/Straße, Winterwurf, Mehrkampf) nur in Ligen, die nur diesen Bereich spielen;
+  ohne Lauf ab Oktober „Saisonpause“.
   Fehlen DM/Hallen-DM eines Jahres bei WA, nicht raten: einmalig in der DLV-Terminliste (leichtathletik.de) nachschlagen und in
   `extra_calendar_events` (`supabase/schema/01_tabellen.sql`, mit `source_url`) eintragen; der Spieltag-Vorschlag nimmt sie, solange WA keinen Termin hat.
 - Cross: Disziplin heißt nur „Cross Country“, die Distanz steht im Wettkampfnamen („… - XC 7.5km“) → `cross_km()` in der Datenbank,
@@ -144,7 +154,6 @@ richtet `.claude/hooks/session-start.sh` Pakete und das Test-PostgreSQL ein.
 
 - Einrichtung (Supabase-Projekt, Secrets, GitHub Pages) steht noch aus – siehe README „Einrichtung“.
 - Der Importer ist mit echten Daten nur über die Erkundungs-Workflows geprüft; der erste echte Lauf sollte im Log kontrolliert werden.
-- Ideen für später: 50-%-Regel (Athleten, die die meisten Punkte außerhalb der Laufdisziplinen holen, ausschließen – mit Ausnahmeliste),
-  Startlisten, Verletzungen/Pausen markieren.
+- Ideen für später: Startlisten, Verletzungen/Pausen markieren.
 - LADV als Zusatzquelle: automatisches Auslesen laut Nutzungsbedingungen verboten, API-Keys derzeit nicht vergeben
   (siehe `research/fremdquellen-notizen.md`). Erst wieder angehen, wenn ein Key vorliegt.

@@ -1,6 +1,6 @@
-// Kalender: Laufdisziplinen ab 800 m im Wettkampfprogramm erkennen (Beispiele aus echten WA-Programmen)
+// Kalender: Bereiche im Wettkampfprogramm erkennen (Beispiele aus echten WA-Programmen)
 import { describe, expect, it } from "vitest";
-import { NOT_RUNNING, irrelevantChampionship, runningEvents } from "../importer/calendar-filter";
+import { calendarAreas, eventArea, irrelevantChampionship, nameAreas, runningEvents, seniorEvents } from "../importer/calendar-filter";
 
 describe("Kalender", () => {
   it("erkennt Laufdisziplinen ab 800 m im Programm", () => {
@@ -12,11 +12,21 @@ describe("Kalender", () => {
     expect(runningEvents(["800m", "Mile", "5000m", "10,000m", "4x800m", "20 km Race Walk"])).toEqual(["800m", "Mile", "5000m", "10,000m"]);
     expect(runningEvents(["Cross Country 10km", "Senior Race"])).toEqual(["Cross Country 10km"]);
   });
-  it("ohne Programm: Name", () => {
-    expect(NOT_RUNNING.test("22. NetAachen Domspringen")).toBe(false);   // Name verrät es nicht – Programm nötig
-    expect(NOT_RUNNING.test("Hylo Javelin Meeting")).toBe(true);
-    expect(NOT_RUNNING.test("2. LTR Wurf-Festival")).toBe(true);
-    expect(NOT_RUNNING.test("Night of Hasbergen")).toBe(false);
+  it("ordnet jede Disziplin für Erwachsene einem Bereich zu", () => {
+    expect(["100m", "400mH", "110mH", "1500m", "3000mSC", "Long Jump", "Pole Vault", "Shot Put", "Hammer Throw", "Decathlon",
+      "20 km Race Walk", "Mile", "60m", "Half Marathon"].map(eventArea))
+      .toEqual(["Sprint", "Hürden", "Hürden", "Lauf", "Lauf", "Sprung", "Sprung", "Wurf", "Wurf", "Mehrkampf", "Gehen", "Lauf", "Sprint", "Lauf"]);
+    expect(seniorEvents(["100m U20", "4x100m", "Long Jump", "Masters 800m", "Senior Race"])).toEqual(["Long Jump"]);
+  });
+
+  it("Bereiche eines Wettkampfs: Programm, sonst Art und Name", () => {
+    expect(calendarAreas([{ events: ["1500m", "Long Jump"] }, { events: ["Javelin Throw", "100m"] }], ["track"], "Meeting"))
+      .toEqual(["Lauf", "Sprint", "Sprung", "Wurf"]);
+    expect(calendarAreas(null, ["road"], "Berlin-Marathon")).toEqual(["Lauf"]);
+    expect(calendarAreas(null, ["track"], "Hylo Javelin Meeting")).toEqual(["Wurf"]);
+    expect(calendarAreas(null, ["track"], "Night of Hasbergen")).toBeNull();   // Name verrät nichts → unbekannt
+    expect(nameAreas("2. LTR Wurf-Festival")).toEqual(["Wurf"]);
+    expect(nameAreas("German Combined Events Championships")).toEqual(["Mehrkampf"]);
   });
 
   it("lässt Meisterschaften anderer Kontinente und Länder weg", () => {

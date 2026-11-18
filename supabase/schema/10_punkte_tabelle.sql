@@ -24,7 +24,7 @@ language sql stable security definer set search_path = public as $$
           or re.athlete_id in (select effective_lineup(m.id, re.manager_id)));
 $$;
 
--- Punkte pro Spieltag, Manager und Fahrer (inkl. Admin-Korrekturen)
+-- Punkte pro Spieltag, Manager und Athlet (inkl. Admin-Korrekturen)
 create or replace function _league_points(p_league uuid)
 returns table (matchday_id uuid, manager_id uuid, athlete_id text, points numeric, overridden boolean)
 language sql stable security definer set search_path = public as $$

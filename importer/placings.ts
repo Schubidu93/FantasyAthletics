@@ -13,6 +13,8 @@
 // Q/q steht in der GraphQL-Antwort im Feld `qualified`: false = qualifiziert (Q und q!),
 // null = ausgeschieden. Zusätzlich gilt als qualifiziert, wer in der Finalliste steht.
 import * as cheerio from "cheerio";
+import { markCost } from "./marks";
+export { parseMark } from "./marks";
 import type { ApiConfig } from "./wa";
 
 export type RaceEntry = {
@@ -48,15 +50,6 @@ function isPrelimRoundName(name: string) {
   return !isFinalRaceName(name) && !/combined|group|qualification/i.test(name) && name.trim() !== "";
 }
 
-/** Zeit in Sekunden: "46.12", "1:46.60", "13:45.23", "2:10:33". DNF/DNS/DQ -> null. */
-export function parseMark(mark: string | null | undefined): number | null {
-  const m = String(mark ?? "").trim().replace(",", ".").match(/^(\d+(?::\d{1,2}){0,2}(?:\.\d+)?)/);
-  if (!m) return null;
-  const parts = m[1].split(":").map(Number);
-  if (parts.some((p) => !Number.isFinite(p))) return null;
-  return parts.reduce((acc, p) => acc * 60 + p, 0);
-}
-
 /** "Hannes  BURGER" -> "hannes burger" */
 export function normalizeName(name: string) {
   return name.normalize("NFC").toLowerCase().replace(/\s+/g, " ").trim();
@@ -71,18 +64,18 @@ function findEntry(entries: RaceEntry[], athlete: Athlete) {
 const finalsOf = (competitions: Race[]) => competitions.filter((r) => isFinalRaceName(r.name));
 
 /**
- * Kombinierter Finalplatz = 1 + Anzahl der Läufer aller Finalläufe mit schnellerer Zeit
+ * Kombinierter Finalplatz = 1 + Anzahl der Athleten aller Finalläufe mit besserer Leistung (Sprung/Wurf: weiter, siehe markCost)
  * (gleiche Zeit = gleicher Platz). Athlet über ID oder Namen, ersatzweise über seine Zeit.
  */
-export function combinedPlace(competitions: Race[], mark: string | null, athlete: Athlete = {}): number | null {
+export function combinedPlace(competitions: Race[], mark: string | null, athlete: Athlete = {}, discipline = ""): number | null {
   const finals = finalsOf(competitions);
   const entries = finals.flatMap((r) => r.entries);
   const own = findEntry(entries, athlete);
   if (finals.length === 1) return own?.place ?? null; // nur ein Finallauf gelistet
   if (finals.length < 2) return null;
-  const mine = parseMark(own?.mark ?? mark);
+  const mine = markCost(discipline, own?.mark ?? mark);
   if (mine === null) return null;
-  const times = entries.map((e) => parseMark(e.mark)).filter((t): t is number => t !== null);
+  const times = entries.map((e) => markCost(discipline, e.mark)).filter((t): t is number => t !== null);
   if (!own && !times.some((t) => t === mine)) return null; // Athlet nicht gefunden -> Daten passen nicht
   return 1 + times.filter((t) => t < mine).length;
 }
@@ -93,7 +86,7 @@ export type PrelimPlacing = { round: "P9" | "P10"; place: number };
  * Wertung in der letzten Runde vor dem Finale. null, wenn der Athlet nicht in dieser Runde
  * lief (z. B. nur im Vorlauf vor einem Halbfinale) oder die Daten nicht passen.
  */
-export function prelimPlacing(competitions: Race[], athlete: Athlete): PrelimPlacing | null {
+export function prelimPlacing(competitions: Race[], athlete: Athlete, discipline = ""): PrelimPlacing | null {
   const finals = finalsOf(competitions);
   const finalists = finals.flatMap((r) => r.entries);
   if (!finalists.length) return null;
@@ -115,10 +108,10 @@ export function prelimPlacing(competitions: Race[], athlete: Athlete): PrelimPla
   const round = finalists.length <= 9 ? "P9" : "P10";
   if (inFinal(own)) return { round, place: 0 };
 
-  const mine = parseMark(own.mark);
+  const mine = markCost(discipline, own.mark);
   if (mine === null) return null; // DNF/DNS/DQ
   const qualifiedCount = entries.filter(inFinal).length;
-  const fasterOut = entries.filter((e) => !inFinal(e)).map((e) => parseMark(e.mark))
+  const fasterOut = entries.filter((e) => !inFinal(e)).map((e) => markCost(discipline, e.mark))
     .filter((t): t is number => t !== null && t < mine).length;
   return { round, place: qualifiedCount + 1 + fasterOut };
 }

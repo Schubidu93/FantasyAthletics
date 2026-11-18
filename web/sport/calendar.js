@@ -1,8 +1,8 @@
-// Kalender: kommende Wettkämpfe mit Laufdisziplinen (aus dem WA-Kalender, täglich aktualisiert)
+// Kalender: kommende Wettkämpfe in den Bereichen der Liga (aus dem WA-Kalender, täglich aktualisiert)
 // International ab Gold Label, Europa ab Kategorie A, Deutschland ab E – siehe importer/sync-calendar.ts
 import { html, useState } from '../vendor/preact-htm.js';
 import { all, flag, Loading, nationCode, normName, sb, today, useLoad } from '../lib.js';
-import { CatBadge, SexBadge } from './lib.js';
+import { CatBadge, leagueAreas, SexBadge } from './lib.js';
 
 const KIND_LABEL = { track: 'Bahn', road: 'Straße', cross: 'Cross' };
 const TOP = ['OW', 'DF', 'GW', 'GL'];
@@ -16,9 +16,9 @@ const when = (e) => (!e.end_date || e.end_date === e.start_date
 
 const saved = { kind: '', area: '', term: '' };
 
-export function Calendar() {
+export function Calendar({ c }) {
   const events = useLoad(() => all(() => sb.from('calendar_events')
-    .select('id,name,venue,country,category,kinds,competition_group,start_date,end_date,events')
+    .select('id,name,venue,country,category,kinds,competition_group,start_date,end_date,events,areas')
     .gte('start_date', new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10))
     .order('start_date').order('id')), []);
   const [kind, setKind] = useState(saved.kind);
@@ -28,9 +28,12 @@ export function Calendar() {
   if (!events.data) return html`<${Loading} error=${events.error} />`;
 
   const now = today();
+  const areas = leagueAreas(c?.league);
   const t = normName(term);
   const list = events.data
     .filter((e) => (e.end_date || e.start_date) >= now)
+    // nur Wettkämpfe mit Disziplinen der Liga (Bereiche unbekannt → anzeigen)
+    .filter((e) => !e.areas || e.areas.some((a) => areas.includes(a)))
     .filter((e) => !kind || (e.kinds || []).includes(kind))
     .filter((e) => !area || (area === 'de' ? e.country === 'GER' : area === 'top' ? TOP.includes(e.category) : e.country !== 'GER'))
     .filter((e) => !t || t.split(' ').every((w) => normName(`${e.name} ${e.venue || ''} ${e.competition_group || ''}`).includes(w)));
@@ -43,7 +46,7 @@ export function Calendar() {
 
   return html`<section class="card">
     <div class="row between"><h2>Kalender</h2><span class="muted small">${list.length} Wettkämpfe</span></div>
-    <p class="muted small">Kommende Wettkämpfe mit Laufdisziplinen ab 800 m: international ab Gold Label, in Europa ab Kategorie A,
+    <p class="muted small">Kommende Wettkämpfe mit Disziplinen dieser Liga (${areas.join(', ')}): international ab Gold Label, in Europa ab Kategorie A,
       in Deutschland ab Kategorie E. Das Programm stammt von World Athletics, sobald der Veranstalter es eingetragen hat.</p>
     <div class="filters">
       <input type="search" placeholder="Name oder Ort" value=${term} onInput=${set('term', setTerm)} />

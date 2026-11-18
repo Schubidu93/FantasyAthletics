@@ -161,6 +161,7 @@ create table if not exists disciplines (
   placing_tables text[] not null default '{}',
   cross_table    text                           -- Cross: Punkte nach Platz statt Leistungspunkten
 );
+alter table disciplines add column if not exists higher_better boolean not null default false;   -- Sprung, Wurf, Mehrkampf: mehr ist besser
 
 -- Platzierungspunkte nach den WA-World-Ranking-Regeln 2026
 --   race_type F = Finale, P9/P10 = letzte Runde vor dem Finale (Finale mit max. 9 / mit 10+ Athleten),
@@ -199,8 +200,8 @@ alter table scoring_config alter column record_er set default 100;
 alter table scoring_config alter column record_wr set default 200;
 update scoring_config set record_er = 100, record_wr = 200 where record_dr = 50 and record_er = 80 and record_wr = 100;
 insert into scoring_config (id) values (1) on conflict do nothing;
--- Pool ab 950 WA-Punkten (seit 17.11.2026); nur einmal umstellen, spätere Änderungen des Admins bleiben
-alter table scoring_config alter column pool_threshold set default 950;
+-- Pool ab 975 WA-Punkten (seit November 2026, alle Disziplinen); umgestellt in 99_einspielen.sql, spätere Änderungen des Admins bleiben
+alter table scoring_config alter column pool_threshold set default 975;
 
 
 -- Rohdaten der Ergebnisse von World Athletics (ein Eintrag pro Lauf eines Athleten)
@@ -327,7 +328,8 @@ create table if not exists calendar_events (
   updated_at  timestamptz not null default now()
 );
 create index if not exists calendar_events_start on calendar_events (start_date);
-alter table calendar_events add column if not exists events jsonb;              -- Laufdisziplinen laut Programm: [{gender, events[]}]
+alter table calendar_events add column if not exists events jsonb;              -- Disziplinen für Erwachsene laut Programm: [{gender, events[]}]
+alter table calendar_events add column if not exists areas text[];             -- Bereiche (Lauf, Sprint, …); null = unbekannt
 alter table calendar_events add column if not exists events_checked_at timestamptz;
 
 -- Termine aus anderen Quellen (z. B. DLV-Terminliste), solange sie nicht im WA-Kalender stehen.
@@ -414,6 +416,9 @@ exception when duplicate_object then null; end $$;
 alter table leagues add column if not exists lineup_mode text not null default 'free';
 alter table leagues add column if not exists lineup_groups text[] not null default array['800', '1500', '5000', '10000', 'Marathon', 'Hindernis'];
 alter table leagues add column if not exists wildcards int not null default 2;
+-- Bereiche, die die Liga spielt (Lauf, Sprint, Hürden, Sprung, Wurf, Mehrkampf, Gehen): nur Athleten mit Schwerpunkt-Disziplin
+-- darin können geholt werden; von ihnen zählen alle Ergebnisse
+alter table leagues add column if not exists areas text[] not null default array['Lauf'];
 do $$ begin
   alter table leagues drop constraint if exists leagues_gender_check;
   alter table leagues add constraint leagues_gender_check check (gender in ('men', 'women', 'mixed'));

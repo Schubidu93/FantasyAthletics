@@ -61,7 +61,7 @@ describe("Punkte nach WA-Regeln 2026", () => {
     await result(a, "Half Marathon", "GW", "F", 1, 1000, { competition: "f Halbmarathon GW-Sieg" });
     await result(a, "Cross Country", "GL", "F", 3, 1200, { competition: "g Cross GL 3." });
     await result(a, "Mountain Classic", "GL", "F", 2, 1000, { competition: "h Berglauf GL 2." });
-    await result(a, "4x100 Metres Relay", "GL", "F", 1, 1300, { competition: "i Staffel" });
+    await result(a, "Distance Medley", "GL", "F", 1, 1300, { competition: "i Staffel" });
     await result(a, "5000 Metres", "GL", "F1", 5, 1000, { competition: "j geteiltes Finale unaufgelöst" });
     await result(a, "1500 Metres", "A", "H2", 1, 1000, { competition: "k Vorlauf ohne Wertung" });
     await db.query("select rebuild_results(null)");
@@ -177,5 +177,24 @@ describe("Athletenpool", () => {
       ["wa-3", null, "800", 990],    // unter der Schwelle: nicht im Pool
       ["wa-4", null, null, null],
     ]);
+  });
+});
+
+describe("Athleten außerhalb des Pools löschen", () => {
+  it("löscht nur, wen keine Liga braucht (nicht manuell, kein Kader)", async () => {
+    await athlete(db, 1, "Im Pool", "men", "1500 Metres", 1100);
+    await athlete(db, 2, "Drunter", "men", "1500 Metres", 960);
+    await athlete(db, 3, "Drunter im Kader", "men", "1500 Metres", 960);
+    await athlete(db, 4, "Drunter manuell", "men", "1500 Metres", 960);
+    await db.query("update athletes set manual = true where id = 'wa-4'");
+    await db.query("update scoring_config set pool_threshold = 975");
+    await db.query("select refresh_pool(null)");
+    const user = await createUser(db, "admin");
+    await as(db, user);
+    const L = (await db.one("select create_league('Liga', 'Team', '{}') id")).id;
+    const m = (await db.one("select id from managers where league_id = $1", [L])).id;
+    await db.query("insert into roster_entries (league_id, manager_id, athlete_id, price, source, acquired_on) values ($1, $2, 'wa-3', 1, 'offline', current_date)", [L, m]);
+    expect((await db.one("select prune_athletes() n")).n).toBe(1);
+    expect((await db.all("select id from athletes order by id")).map((r) => r.id)).toEqual(["wa-1", "wa-3", "wa-4"]);
   });
 });

@@ -1,7 +1,7 @@
 // Spielregeln – allgemeine Regeln plus die Einstellungen der aktuellen Liga
 import { html } from '../vendor/preact-htm.js';
 import { draftCosts, fmtDate, q, sb, useLoad } from '../lib.js';
-import { GENDER_LABEL, leagueSlots, slotLabel } from './lib.js';
+import { AREAS, GENDER_LABEL, GROUP_LABEL, leagueAreas, leagueSlots, positionGroups, slotLabel } from './lib.js';
 
 const DRAFT = {
   live: 'Live-Auktion',
@@ -11,6 +11,9 @@ const DRAFT = {
 };
 
 const fmtNum = (n) => Number(n).toLocaleString('de-DE');
+// Erklärung der Blöcke, die die Liga als Positionen nutzt (z. B. „Wurf = Kugel, Diskus, Hammer oder Speer“)
+const blockText = (groups) => groups.filter((g) => positionGroups(g).length > 1)
+  .map((g) => `${GROUP_LABEL[g]} = ${positionGroups(g).map((x) => GROUP_LABEL[x]).join(', ').replace(/, ([^,]+)$/, ' oder $1')}.`).join(' ');
 
 export function Rules({ c }) {
   const l = c.league;
@@ -20,13 +23,16 @@ export function Rules({ c }) {
   const two = l.transfer_mode === 'waiver_free';
   const lineup = l.scoring_mode === 'lineup';
   const slots = leagueSlots(l);
+  const areas = leagueAreas(l);
+  const runOnly = areas.length === 1 && areas[0] === 'Lauf';
+  const areaText = runOnly ? 'nur Lauf (ab 800 m)' : areas.length === AREAS.length ? 'alle Disziplinen' : areas.join(', ');
   const extras = html`<li>Der Admin kann einen Draft-Termin festlegen – dann läuft für alle ein Countdown und der Draft startet automatisch.</li>
         ${l.draft_mode !== 'offline' && html`<li>Bist du an der Reihe${['live', 'blind'].includes(l.draft_mode) ? ' (Nominieren oder Auffüllen)' : ''}, bekommst du eine Push-Nachricht „Du bist dran“.</li>`}`;
   const row = (k, v) => html`<tr><td>${k}</td><td><strong>${v}</strong></td></tr>`;
   return html`<div class="stack rules">
     <section class="card">
       <h2>So funktioniert Runner Fantasy</h2>
-      <p>Jeder Manager stellt ein Team aus deutschen Läuferinnen und Läufern zusammen. Für jedes Ergebnis seiner
+      <p>Jeder Manager stellt ein Team aus deutschen ${runOnly ? 'Läuferinnen und Läufern' : 'Leichtathletinnen und Leichtathleten'} zusammen. Für jedes Ergebnis seiner
         ${l.scoring_mode === 'lineup' ? 'aufgestellten ' : ''}Athleten gibt es Punkte – aus der Leistung (WA-Punkte) und der Platzierung.
         Wer am Saisonende die meisten Punkte hat, gewinnt die Liga.</p>
     </section>
@@ -35,6 +41,7 @@ export function Rules({ c }) {
       <h3>Einstellungen dieser Liga</h3>
       <table class="tbl"><tbody>
         ${row('Wertung', GENDER_LABEL[l.gender])}
+        ${row('Disziplinen', areaText)}
         ${row('Saison', `${fmtDate(l.season_start)} – ${fmtDate(l.season_end)}`)}
         ${row('Mitspieler', `${c.managers.length} von max. ${l.max_managers}`)}
         ${row('Athleten pro Team', l.roster_size)}
@@ -80,10 +87,15 @@ export function Rules({ c }) {
     <details class="card rule-sec">
       <summary><h3>Athletenpool und Aufstellung</h3></summary>
       <ul>
-        <li><strong>Pool:</strong> deutsche Läuferinnen und Läufer, die in der DE-Topliste (Senioren) des aktuellen Jahres oder des Vorjahres
-          in einer Laufdisziplin ab 800 m (inkl. Halle, Hindernis und Straße) mindestens ${cfg ? cfg.pool_threshold : 950} WA-Punkte erreicht haben.
+        <li><strong>Pool:</strong> deutsche Athletinnen und Athleten, die in der DE-Topliste (Senioren) des aktuellen Jahres oder des Vorjahres
+          mindestens ${cfg ? cfg.pool_threshold : 975} WA-Punkte erreicht haben – im Lauf ab 800 m (inkl. Halle, Hindernis und Straße), Sprint (60–400 m),
+          Hürden, Sprung, Wurf, Mehrkampf und Gehen.
+          Diese Liga spielt ${areaText}: Es gibt nur Athleten, deren Schwerpunkt-Disziplin dazu gehört (die übrigen sind ausgeblendet).
+          Von ihnen zählen alle Ergebnisse${runOnly ? ', auch z. B. die 400 m eines 800-m-Läufers oder ein Gehen-Rennen' : ''}.
           ${l.gender !== 'mixed' ? `In dieser Liga nur ${GENDER_LABEL[l.gender]}.` : ''} Der Pool wird täglich aktualisiert; neue Athleten sind automatisch frei.</li>
-        <li><strong>Disziplingruppe:</strong> 800 m, 1500 m, 5000 m, 10.000 m, Marathon oder Hindernis. Maßgeblich sind die Punkte im Vorjahr
+        <li><strong>Schwerpunkt-Disziplin:</strong> Lauf 800 m, 1500 m, 5000 m, 10.000 m, Marathon oder Hindernis · Sprint 100 m (inkl. 60 m),
+          200 m oder 400 m · Hürden Kurzhürden (60/100/110 m) oder 400 m Hürden · Sprung Hoch, Stab, Weit oder Drei · Wurf Kugel, Diskus,
+          Hammer oder Speer · Mehrkampf · Gehen. Maßgeblich sind die Punkte im Vorjahr
           der Saison (Saison ${gy} → Punkte ${gy - 1}): Die Gruppe, in der ein Athlet die meisten Punkte geholt hat, gilt die ganze Saison
           (z. B. Meile → 1500 m, 3000 m → 5000 m, Halbmarathon → Marathon; Cross nach Länge: bis 3 km 1500 m, bis 6 km 5000 m, bis 12 km 10.000 m,
           darüber Marathon). Ohne Punkte zählt die beste Leistung im Vorjahr; neue Athleten ohne Vorjahresergebnisse kommen in die Gruppe ihrer
@@ -92,7 +104,9 @@ export function Rules({ c }) {
         ${lineup ? html`
           <li>Für jeden Spieltag stellst du bis zu ${slots.length} Athleten auf: ${l.lineup_mode === 'mf'
             ? 'je Disziplin einen Mann und eine Frau' : 'je Disziplin einen Athleten dieser Gruppe'}${l.wildcards > 0
-            ? `, dazu ${l.wildcards} Wildcard${l.wildcards > 1 ? 's' : ''} mit Athleten jeder Disziplin` : ''}.</li>
+            ? `, dazu ${l.wildcards} Wildcard${l.wildcards > 1 ? 's' : ''} mit Athleten jeder Disziplin der Liga` : ''}.
+            ${blockText(l.lineup_groups || [])}
+            ${areas.includes('Gehen') && !(l.lineup_groups || []).includes('Gehen') ? 'Geher können nur auf eine Wildcard.' : ''}</li>
           <li>Positionen ohne passenden Athleten bleiben leer. Bis zum Stichtag änderbar, danach ist die Aufstellung für diesen Spieltag fest.
             Stellst du nicht neu auf, gilt die Aufstellung vom vorigen Spieltag (beim ersten Spieltag: automatisch deine teuersten bzw. besten passenden Athleten).</li>
           <li>Wird ein Athlet per Waiver ersetzt, rückt der neue auf seine Position nach, wenn er dort passt – sonst bleibt sie leer.</li>`
@@ -106,12 +120,12 @@ export function Rules({ c }) {
         <li>Jedes Ergebnis bei World Athletics bringt
           <strong>Leistungspunkte</strong> = (WA-Punkte − ${cfg ? cfg.perf_threshold : 1000}) × ${cfg ? fmtNum(cfg.perf_factor) : '0,1'} (nur über der Schwelle) plus
           <strong>Platzierungspunkte</strong> = WA-Platzierungspunkte × ${cfg ? fmtNum(cfg.placing_factor) : '0,1'},
-          beides mal dem <strong>Disziplinfaktor</strong> (z. B. 5000 m 1,3 · 10.000 m 1,6 · Halbmarathon 2 · Marathon 3 · Gehen und Sprintstaffeln 0).
+          beides mal dem <strong>Disziplinfaktor</strong> (z. B. 5000 m 1,3 · 10.000 m 1,6 · Halbmarathon 2 · Marathon 3 · Staffeln 0,25 bzw. 0,33 · sonst 1).
           ${cfg && cfg.perf_threshold === 1000 && html`Beispiel: Marathon in 2:09:43 (1135 WA-Punkte), Platz 9 ohne Platzierungspunkte →
             135 × ${fmtNum(cfg.perf_factor)} × 3 = ${fmtNum(Math.round(135 * cfg.perf_factor * 3 * 100) / 100)} Punkte.`}</li>
         <li><strong>Platzierungspunkte</strong> genau nach den World-Ranking-Regeln 2026 von World Athletics: abhängig von Wettkampfkategorie
           (OW = Olympia/WM, DF = Diamond-League-Finale, GW = Hallen-WM/Diamond League, GL = EM, A–F) und Platz.
-          Eigene Tabellen für 800/1500 m, 5000 m/Hindernis, 10.000 m, Marathon und Straße; passt eine Disziplin zu mehreren Tabellen, zählt die bessere.</li>
+          Eigene Tabellen für Bahn, 5000 m/Hindernis, 10.000 m, Marathon, Straße, Mehrkampf und Gehen; passt eine Disziplin zu mehreren Tabellen, zählt die bessere.</li>
         <li><strong>Vorläufe und Halbfinals</strong> bringen nur bei OW, DF, GW und GL Platzierungspunkte – und nur in der letzten Runde vor dem Finale:
           qualifiziert (Q oder q) = fester Wert, ausgeschieden = Gesamtplatz der Runde (erst alle Qualifizierten, dann die anderen nach Zeit).</li>
         <li><strong>Meisterschaft im offenen Rennen</strong> (z. B. Deutsche Marathon-Meisterschaft im Hannover-Marathon): World Athletics führt
@@ -127,14 +141,14 @@ export function Rules({ c }) {
         <li><strong>Zwischenzeiten</strong> (z. B. die 1500 m in einem Meilenrennen) geben keine Leistungs- und Platzierungspunkte. Sie stehen
           mit ihren WA-Punkten in den Ergebnissen; Punkte gibt es nur als Rekord- oder PB-Bonus.</li>
         <li><strong>PB-Bonus:</strong> +${cfg?.pb_points ?? 10} Punkte für jede persönliche Bestleistung – schneller als alle früheren
-          Leistungen des Athleten in dieser Disziplin (laut World Athletics, auch vor 2025). Halle, Bahn und Straße zählen getrennt.
+          Leistungen des Athleten in dieser Disziplin (laut World Athletics, auch vor 2025; bei Sprung, Wurf und Mehrkampf weiter, höher bzw. mehr Punkte). Halle, Bahn und Straße zählen getrennt.
           Nur mit vorheriger Leistung in der Disziplin (das erste Rennen zählt nicht), nur ab ${cfg ? cfg.perf_threshold : 1000} WA-Punkten,
-          eine gleiche Zeit (=PB) bringt den halben Bonus. Vorlauf und Finale können beide PB sein. Staffeln bekommen keinen PB-Bonus, Zwischenzeiten schon
+          eine gleiche Leistung (=PB) bringt den halben Bonus. Vorlauf und Finale können beide PB sein. Staffeln bekommen keinen PB-Bonus, Zwischenzeiten schon
           (z. B. die 1500 m im Meilenrennen).</li>
         <li><strong>Rekord-Bonus:</strong> deutscher Rekord +${cfg?.record_dr ?? 50}, Europarekord +${cfg?.record_er ?? 100},
           Weltrekord +${cfg?.record_wr ?? 200} Punkte – zusätzlich zu den normalen Punkten; es zählt nur der höchste Rekord.
-          Ein eingestellter Rekord (gleiche Zeit, z. B. =DR) bringt die Hälfte.
-          Gilt für alle Laufdisziplinen inkl. Halle und Straße. Rekorde erkennt die App täglich an den All-time-Listen von World Athletics
+          Ein eingestellter Rekord (gleiche Leistung, z. B. =DR) bringt die Hälfte.
+          Gilt für alle Disziplinen mit Topliste inkl. Halle und Straße. Rekorde erkennt die App täglich an den All-time-Listen von World Athletics
           (alle Leistungen) – auch solche, die inzwischen wieder verbessert wurden.</li>
         <li>Punkte zählen nur innerhalb eines Spieltags – für die Spieltage, in denen der Athlet in deinem Kader steht${lineup ? ' und aufgestellt ist' : ''}.</li>
         <li>Korrigiert World Athletics ein Ergebnis, wird das automatisch übernommen, solange der Spieltag nicht eingefroren ist.</li>
@@ -195,8 +209,9 @@ export function Rules({ c }) {
           sie sind danach dauerhaft im Pool, ihre Ergebnisse und Bestleistungen werden wie bei allen anderen geladen.</li>
         <li><strong>Bestleistungen:</strong> täglich nach dem Athletenpool je Athlet von World Athletics (für Profil und PB-Bonus).</li>
         <li><strong>Rekorde:</strong> täglich nach dem Athletenpool aus den All-time-Listen von World Athletics für Deutschland, Europa und die Welt.</li>
-        <li><strong>Kalender:</strong> täglich um 6 Uhr die kommenden Wettkämpfe mit Laufdisziplinen aus dem Kalender von World Athletics –
-          international ab Gold Label, in Europa ab Kategorie A, in Deutschland ab Kategorie E; nur Wettkämpfe, deren Programm Laufdisziplinen ab 800 m enthält.</li>
+        <li><strong>Kalender:</strong> täglich um 6 Uhr die kommenden Wettkämpfe aus dem Kalender von World Athletics –
+          international ab Gold Label, in Europa ab Kategorie A, in Deutschland ab Kategorie E. Angezeigt werden Wettkämpfe mit Disziplinen
+          dieser Liga (laut Programm, sonst laut Name).</li>
         <li><strong>Ergebnisse:</strong> stündlich von 8 bis 23 Uhr für alle Athleten im Pool und in den Kadern. Erscheinen, sobald World Athletics sie veröffentlicht –
           bei großen Meisterschaften meist am selben Tag, bei kleinen Wettkämpfen manchmal Tage später. Werden die Ergebnisse eines Wettkampfs nach und nach
           hochgeladen (z. B. erst 800 m, Stunden später 5000 m), kommen sie auch nach und nach in die Wertung.</li>

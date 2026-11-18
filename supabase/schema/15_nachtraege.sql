@@ -3,17 +3,6 @@
 -- =====================================================================
 
 -- "2:09:43" / "29:18" / "13:45.12" / "29:18,4" -> Sekunden
-create or replace function mark_seconds(p text) returns numeric
-language plpgsql immutable as $$
-declare v text := replace(regexp_replace(coalesce(p, ''), '[^0-9:.,]', '', 'g'), ',', '.'); parts text[]; t numeric := 0; x text;
-begin
-  if v !~ '^\d+(:\d{1,2})*(\.\d+)?$' then return null; end if;
-  parts := string_to_array(v, ':');
-  if cardinality(parts) > 3 then return null; end if;
-  foreach x in array parts loop t := t * 60 + x::numeric; end loop;
-  return t;
-end $$;
-
 -- Koeffizienten aus allen WA-Ergebnissen mit Zeit und WA-Punkten berechnen (kleinste Quadrate). Ausreißer
 -- (z. B. falsch erfasste Zeiten) werden schrittweise aussortiert: weg, was mehr als 3 × die mittlere Abweichung
 -- (Median) + 2 Punkte daneben liegt, dann neu rechnen, bis sich nichts mehr ändert. Gibt die Zahl der Tabellen zurück.
