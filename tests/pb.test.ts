@@ -68,3 +68,24 @@ describe("Bestleistungen von World Athletics aufbereiten", () => {
       ["3000 Metres Short Track", "7:51.42", "2022-01-28"]]);
   });
 });
+
+describe("Sprung, Wurf, Mehrkampf: mehr ist besser", () => {
+  it("PB und Toplistenplatz nach Weite", async () => {
+    await athlete(db, 2, "Springer", "men", "Long Jump", 1200);
+    await athlete(db, 3, "Springer B", "men", "Long Jump", 1150);
+    await db.query("update toplist_entries set mark = '8.10' where athlete_id = 'wa-2'");
+    await db.query("update toplist_entries set mark = '7.90' where athlete_id = 'wa-3'");
+    await db.query("insert into athlete_pb_before (athlete_id, discipline, mark) values ('wa-2', 'Long Jump', '8.00')");
+    const jump = (date: string, mark: string) => db.query(
+      `insert into wa_results (athlete_id, date, competition, discipline, race, wa_race, mark, result_score)
+       values ('wa-2', $1, $2, 'Long Jump', 'F', 'F', $3, 1200)`, [date, `Meeting ${date}`, mark]);
+    await jump(`${Y}-05-01`, "7.95");   // kürzer → keine PB
+    await jump(`${Y}-06-01`, "8.05");   // weiter → PB
+    await jump(`${Y}-07-01`, "8.05");   // gleich → =PB
+    await db.query("select rebuild_results(null)");
+    expect((await db.all("select pb_points from results where athlete_id = 'wa-2' order by result_date")).map((r) => Number(r.pb_points)))
+      .toEqual([0, 10, 5]);
+    expect((await db.all("select rank from athlete_toplists('wa-2')")).map((r) => r.rank)).toEqual([1]);
+    expect((await db.all("select athlete_id from toplist($1, 'Long Jump', 'men')", [Y - 1])).map((r) => r.athlete_id)).toEqual(["wa-2", "wa-3"]);
+  });
+});

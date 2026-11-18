@@ -161,6 +161,7 @@ create table if not exists disciplines (
   placing_tables text[] not null default '{}',
   cross_table    text                           -- Cross: Punkte nach Platz statt Leistungspunkten
 );
+alter table disciplines add column if not exists higher_better boolean not null default false;   -- Sprung, Wurf, Mehrkampf: mehr ist besser
 
 -- Platzierungspunkte nach den WA-World-Ranking-Regeln 2026
 --   race_type F = Finale, P9/P10 = letzte Runde vor dem Finale (Finale mit max. 9 / mit 10+ Athleten),
@@ -301,7 +302,8 @@ alter table results add column if not exists perf_points numeric not null defaul
 alter table results add column if not exists placing_points numeric not null default 0;  -- Platzierungsanteil
 alter table results add column if not exists wa_result_id bigint;
 alter table results add column if not exists record_points numeric not null default 0;
-alter table results add column if not exists pb_points numeric not null default 0;          -- PB-Bonus          -- Rekord-Bonus                        -- Quelle in wa_results
+alter table results add column if not exists pb_points numeric not null default 0;
+alter table results add column if not exists area text;   -- Bereich der Disziplin (zählt nur in Ligen mit diesem Bereich)          -- PB-Bonus          -- Rekord-Bonus                        -- Quelle in wa_results
 create index if not exists results_athlete_date on results (athlete_id, result_date);
 
 create table if not exists sync_status (
@@ -414,6 +416,8 @@ exception when duplicate_object then null; end $$;
 alter table leagues add column if not exists lineup_mode text not null default 'free';
 alter table leagues add column if not exists lineup_groups text[] not null default array['800', '1500', '5000', '10000', 'Marathon', 'Hindernis'];
 alter table leagues add column if not exists wildcards int not null default 2;
+-- Bereiche, die die Liga spielt (Lauf, Sprint, Hürden, Sprung, Wurf, Mehrkampf, Gehen): wer geholt werden kann und was zählt
+alter table leagues add column if not exists areas text[] not null default array['Lauf'];
 do $$ begin
   alter table leagues drop constraint if exists leagues_gender_check;
   alter table leagues add constraint leagues_gender_check check (gender in ('men', 'women', 'mixed'));

@@ -162,3 +162,73 @@ describe("Draft", () => {
     await db.query("select draft_snake_pick($1, 'wa-1')", [L.id]);
   });
 });
+
+describe("Bereiche (alle Disziplinen oder nur Lauf)", () => {
+  const ALL = ["Lauf", "Sprint", "Hürden", "Sprung", "Wurf", "Mehrkampf", "Gehen"];
+
+  beforeEach(async () => {
+    await athlete(db, 1, "Läufer 800", "men", "800 Metres", 1150);
+    await athlete(db, 2, "Sprinter", "men", "100 Metres", 1160);
+    await athlete(db, 3, "Springer", "men", "Long Jump", 1140);
+    await athlete(db, 4, "Geher", "men", "20 Kilometres Race Walk", 1130);
+    await athlete(db, 5, "Hindernis", "men", "3000 Metres Steeplechase", 1120);
+    await db.query("select refresh_pool(null)");
+  });
+
+  it("Gruppen der neuen Disziplinen; Mittel/Lang fassen Laufgruppen zusammen", async () => {
+    expect(await db.all("select id, event_group from athletes order by id")).toEqual([
+      { id: "wa-1", event_group: "800" }, { id: "wa-2", event_group: "Sprint" }, { id: "wa-3", event_group: "Sprung" },
+      { id: "wa-4", event_group: "Gehen" }, { id: "wa-5", event_group: "Hindernis" },
+    ]);
+    const ok = async (slot: string, id: string) => (await db.one("select _slot_ok($1, $2) ok", [slot, id])).ok;
+    expect(await ok("Mittel", "wa-1")).toBe(true);
+    expect(await ok("Lang", "wa-5")).toBe(true);
+    expect(await ok("Lang", "wa-1")).toBe(false);
+    expect(await ok("Sprung", "wa-3")).toBe(true);
+    expect(await ok("Sprint", "wa-3")).toBe(false);
+  });
+
+  it("Einstellungen: Positionen müssen zu den Bereichen passen", async () => {
+    await as(db, alice);
+    const id = (await db.one("select create_league('A', 'T', '{}') id")).id;
+    expect((await db.one("select areas from leagues where id = $1", [id])).areas).toEqual(["Lauf"]);
+    await expect(db.query("select create_league('X', 'T', $1)", [{ lineup_groups: ["800", "Sprint"] }]))
+      .rejects.toThrow(/Bereich der Liga/);
+    await expect(db.query("select create_league('X', 'T', $1)", [{ areas: [] }])).rejects.toThrow(/mindestens einen Bereich/);
+    await expect(db.query("select create_league('X', 'T', $1)", [{ areas: ["Schwimmen"] }])).rejects.toThrow(/Unbekannter Bereich/);
+    const all = await league({ gender: "men", areas: ALL, roster_size: 12,
+      lineup_groups: ["Sprint", "Hürden", "Mittel", "Lang", "Marathon", "Sprung", "Wurf", "Mehrkampf"] });
+    expect((await db.one("select lineup_size from leagues where id = $1", [all.id])).lineup_size).toBe(10);
+  });
+
+  it("nur Athleten aus den Bereichen der Liga sind frei", async () => {
+    const lauf = await league({ gender: "men" });
+    const all = await league({ gender: "men", areas: ALL, roster_size: 12,
+      lineup_groups: ["Sprint", "Mittel", "Lang", "Sprung"] });
+    const free = async (l: string, id: string) => (await db.one("select _athlete_free($1, $2, now()) f", [l, id])).f;
+    expect([await free(lauf.id, "wa-1"), await free(lauf.id, "wa-2"), await free(lauf.id, "wa-4")]).toEqual([true, false, false]);
+    expect([await free(all.id, "wa-1"), await free(all.id, "wa-2"), await free(all.id, "wa-4")]).toEqual([true, true, true]);
+  });
+
+  it("Ergebnisse zählen nur in Bereichen der Liga (Sprint des Läufers nicht in reinen Laufligen)", async () => {
+    const lauf = await league({ gender: "men", scoring_mode: "full", draft_mode: "offline" });
+    const all = await league({ gender: "men", scoring_mode: "full", draft_mode: "offline", areas: ALL });
+    for (const L of [lauf, all]) {
+      await db.query("insert into roster_entries (league_id, manager_id, athlete_id, price, source, acquired_on) values ($1, $2, 'wa-1', 1, 'offline', $3)",
+        [L.id, L.alice, day(-30)]);
+      await db.query("update leagues set status = 'active' where id = $1", [L.id]);
+      const md = (await db.one("select upsert_matchday($1, null, 'S', $2, $3) id", [L.id, day(2), day(20)])).id;
+      await db.query("update matchdays set starts_on = $2, deadline = now() - interval '1 hour' where id = $1", [md, day(-1)]);
+    }
+    await db.query(`insert into wa_results (athlete_id, date, competition, discipline, category, race, wa_race, place, result_score, wa_competition_id)
+                    values ('wa-1', $1, 'M', '800 Metres', 'F', 'F', 'F', 9, 1100, 1),
+                           ('wa-1', $1, 'M', '400 Metres', 'F', 'F', 'F', 9, 1050, 1)`, [day(0)]);
+    await db.query("select rebuild_results(null)");
+    expect(await db.all("select label, area from results order by label")).toEqual([
+      { label: "400 Metres", area: "Sprint" }, { label: "800 Metres", area: "Lauf" },
+    ]);
+    const total = async (l: string) => Number((await db.one("select total from league_table($1) where team_name = 'Team Alice'", [l])).total);
+    expect(await total(lauf.id)).toBe(100);
+    expect(await total(all.id)).toBe(150);
+  });
+});

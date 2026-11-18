@@ -61,7 +61,7 @@ describe("Punkte nach WA-Regeln 2026", () => {
     await result(a, "Half Marathon", "GW", "F", 1, 1000, { competition: "f Halbmarathon GW-Sieg" });
     await result(a, "Cross Country", "GL", "F", 3, 1200, { competition: "g Cross GL 3." });
     await result(a, "Mountain Classic", "GL", "F", 2, 1000, { competition: "h Berglauf GL 2." });
-    await result(a, "4x100 Metres Relay", "GL", "F", 1, 1300, { competition: "i Staffel" });
+    await result(a, "Distance Medley", "GL", "F", 1, 1300, { competition: "i Staffel" });
     await result(a, "5000 Metres", "GL", "F1", 5, 1000, { competition: "j geteiltes Finale unaufgelöst" });
     await result(a, "1500 Metres", "A", "H2", 1, 1000, { competition: "k Vorlauf ohne Wertung" });
     await db.query("select rebuild_results(null)");

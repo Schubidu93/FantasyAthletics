@@ -3,14 +3,38 @@
 import { html } from '../vendor/preact-htm.js';
 import { openRider } from '../lib.js';
 
-export const GROUPS = ['800', '1500', '5000', '10000', 'Marathon', 'Hindernis'];
-export const GROUP_LABEL = { 800: '800 m', 1500: '1500 m', 5000: '5000 m', 10000: '10.000 m', Marathon: 'Marathon', Hindernis: 'Hindernis' };
+// Disziplingruppen der Athleten; die sechs Laufgruppen bilden den Bereich „Lauf“, die übrigen sind eigene Bereiche
+// (wie _group_area in der Datenbank)
+export const RUN_GROUPS = ['800', '1500', '5000', '10000', 'Marathon', 'Hindernis'];
+export const AREAS = ['Lauf', 'Sprint', 'Hürden', 'Sprung', 'Wurf', 'Mehrkampf', 'Gehen'];
+export const GROUPS = [...RUN_GROUPS, ...AREAS.slice(1)];
+export const GROUP_LABEL = { 800: '800 m', 1500: '1500 m', 5000: '5000 m', 10000: '10.000 m', Marathon: 'Marathon', Hindernis: 'Hindernis',
+  Sprint: 'Sprint', Hürden: 'Hürden', Sprung: 'Sprung', Wurf: 'Wurf', Mehrkampf: 'Mehrkampf', Gehen: 'Gehen',
+  Mittel: 'Mittelstrecke', Lang: 'Langstrecke' };
+export const groupArea = (g) => (RUN_GROUPS.includes(g) ? 'Lauf' : AREAS.includes(g) ? g : null);
 export const riderGroup = (r) => (r ? r.group_override || r.event_group : null);
+export const leagueAreas = (l) => l?.areas || ['Lauf'];
+/** Gruppen, die die Liga spielt (Filter, Auswahl) */
+export const leagueGroups = (l) => GROUPS.filter((g) => leagueAreas(l).includes(groupArea(g)));
+/** Darf in dieser Liga geholt werden? Im Pool und in einem Bereich der Liga (wie _eligible in der Datenbank) */
+export const eligible = (r, l) => r?.pool_rank != null && (!groupArea(riderGroup(r)) || leagueAreas(l).includes(groupArea(riderGroup(r))));
+
+// Positionen: jede Gruppe für sich, dazu „Mittel“ (800/1500) und „Lang“ (5000/10.000/Hindernis) – wie _position_groups
+const POSITION_GROUPS = { Mittel: ['800', '1500'], Lang: ['5000', '10000', 'Hindernis'] };
+export const positionGroups = (p) => POSITION_GROUPS[p] || [p];
+/** Wählbare Positionen für diese Bereiche (Lauf: einzeln oder zusammengefasst) */
+export const positionsFor = (areas) => [...(areas.includes('Lauf') ? ['800', '1500', 'Mittel', '5000', '10000', 'Hindernis', 'Lang', 'Marathon'] : []),
+  ...AREAS.slice(1).filter((a) => areas.includes(a))];
+/** Voreinstellungen: nur Lauf = je Laufgruppe; alle Disziplinen = Laufen zusammengefasst, Gehen nur über Wildcards */
+export const AREA_PRESETS = {
+  run: { areas: ['Lauf'], lineup_groups: [...RUN_GROUPS] },
+  all: { areas: [...AREAS], lineup_groups: ['Sprint', 'Hürden', 'Mittel', 'Lang', 'Marathon', 'Sprung', 'Wurf', 'Mehrkampf'] },
+};
 export const GENDER_LABEL = { men: 'Männer', women: 'Frauen', mixed: 'Mixed' };
 
 // Positionen der Aufstellung (wie league_slots in der Datenbank): 800, 1500 … bzw. 800:M, 800:W …, dann WC1, WC2 …
 export function leagueSlots(l) {
-  const groups = l.lineup_groups || GROUPS;
+  const groups = l.lineup_groups || RUN_GROUPS;
   const out = l.lineup_mode === 'mf' ? groups.flatMap((g) => [`${g}:M`, `${g}:W`]) : [...groups];
   for (let i = 1; i <= (l.wildcards ?? 0); i++) out.push(`WC${i}`);
   return out;
@@ -66,11 +90,14 @@ export function slotOk(slot, r) {
   const [g, sex] = slot.split(':');
   if (sex === 'M' && r.gender !== 'men') return false;
   if (sex === 'W' && r.gender !== 'women') return false;
-  return g.startsWith('WC') || riderGroup(r) === g;
+  return g.startsWith('WC') || positionGroups(g).includes(riderGroup(r));
 }
 
 // Disziplinnamen von World Athletics kurz und deutsch: "1500 Metres Short Track" → "1500 m (Halle)"
-const DISC = [[/^10,000 Metres/, '10.000 m'], [/ Metres Steeplechase/, ' m Hindernis'], [/ Metres Hurdles/, ' m Hürden'],
+const DISC = [[/^10,000 Metres/, '10.000 m'], [/ Kilometres Race Walk/, ' km Gehen'], [/^High Jump/, 'Hochsprung'],
+  [/^Pole Vault/, 'Stabhochsprung'], [/^Long Jump/, 'Weitsprung'], [/^Triple Jump/, 'Dreisprung'], [/^Shot Put/, 'Kugelstoßen'],
+  [/^Discus Throw/, 'Diskuswurf'], [/^Hammer Throw/, 'Hammerwurf'], [/^Javelin Throw/, 'Speerwurf'], [/^Decathlon/, 'Zehnkampf'],
+  [/^Heptathlon/, 'Siebenkampf'], [/^Pentathlon/, 'Fünfkampf'], [/ Metres Steeplechase/, ' m Hindernis'], [/ Metres Hurdles/, ' m Hürden'],
   [/ Metres/, ' m'], [/^Mile Road$/, 'Meile Straße'], [/^Mile/, 'Meile'], [/^2 Miles/, '2 Meilen'], [/^10 Miles Road/, '10 Meilen'],
   [/^Half Marathon/, 'Halbmarathon'], [/ Kilometres Road/, ' km Straße'], [/^Cross Country Relay/, 'Cross-Staffel'],
   [/^Cross Country/, 'Cross'], [/ Short Track$/, ' (Halle)'], [/ Relay/, ' Staffel'], [/ Race Walk/, ' Gehen'],

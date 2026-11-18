@@ -1,8 +1,8 @@
 // Athletenpool: lädt die DE-Toplisten (aktuelles Jahr + Vorjahr), speichert alle Athleten über der
 // Pool-Schwelle in athletes/toplist_entries und berechnet danach Pool-Rang und Disziplingruppe (refresh_pool).
-import { COUNTRY, TOPLIST_DISCIPLINES } from "./disciplines";
+import { COUNTRY, gendersOf, TOPLIST_DISCIPLINES } from "./disciplines";
 import { adminClient, chunked, currentYear, rpc, run } from "./supabase";
-import { fetchToplist, sleep, type Gender } from "./wa";
+import { fetchToplist, sleep } from "./wa";
 
 const db = adminClient();
 
@@ -19,7 +19,7 @@ await run(db, async () => {
 
   for (const y of years) {
     for (const d of TOPLIST_DISCIPLINES) {
-      for (const gender of ["M", "W"] as Gender[]) {
+      for (const gender of gendersOf(d)) {
         try {
           const rows = await fetchToplist(d.path, gender, y, COUNTRY, minScore);
           for (const r of rows) {
@@ -40,7 +40,7 @@ await run(db, async () => {
       }
     }
   }
-  const total = TOPLIST_DISCIPLINES.length * 2 * years.length;
+  const total = TOPLIST_DISCIPLINES.reduce((n, d) => n + gendersOf(d).length, 0) * years.length;
   if (failures.length > total / 2) throw new Error(`Zu viele Fehler beim Laden der Toplisten:\n${failures.join("\n")}`);
 
   const now = new Date().toISOString();

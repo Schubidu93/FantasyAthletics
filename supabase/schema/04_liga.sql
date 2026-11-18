@@ -9,7 +9,7 @@ begin
   if auth.uid() is null then raise exception 'Bitte zuerst anmelden.'; end if;
   insert into leagues (name, admin_user, max_managers, roster_size, scoring_mode, max_per_team,
                        draft_mode, draft_order, bid_seconds, waiver_mode, gender, season_start, season_end, transfer_mode,
-                       lineup_mode, lineup_groups, wildcards)
+                       lineup_mode, lineup_groups, wildcards, areas)
   values (p_name, auth.uid(),
           coalesce((s->>'max_managers')::int, 8),
           coalesce((s->>'roster_size')::int, 11),
@@ -26,7 +26,9 @@ begin
           coalesce(s->>'lineup_mode', 'free'),
           coalesce((select array_agg(x) from jsonb_array_elements_text(s->'lineup_groups') x),
                    array['800', '1500', '5000', '10000', 'Marathon', 'Hindernis']),
-          coalesce((s->>'wildcards')::int, 2))
+          coalesce((s->>'wildcards')::int, 2),
+          case when s ? 'areas' then (select coalesce(array_agg(x), '{}') from jsonb_array_elements_text(s->'areas') x)
+               else array['Lauf'] end)
   returning id into v_id;
   insert into managers (league_id, user_id, team_name) values (v_id, auth.uid(), p_team_name);
   insert into draft_state (league_id) values (v_id);
@@ -134,13 +136,15 @@ begin
       lineup_mode  = coalesce(s->>'lineup_mode', lineup_mode),
       lineup_groups = case when s ? 'lineup_groups' then (select coalesce(array_agg(x), '{}') from jsonb_array_elements_text(s->'lineup_groups') x)
                            else lineup_groups end,
-      wildcards    = coalesce((s->>'wildcards')::int, wildcards)
+      wildcards    = coalesce((s->>'wildcards')::int, wildcards),
+      areas        = case when s ? 'areas' then (select coalesce(array_agg(x), '{}') from jsonb_array_elements_text(s->'areas') x)
+                          else areas end
     where id = p_league;
     if (select count(*) from managers where league_id = p_league) > (select max_managers from leagues where id = p_league) then
       raise exception 'Es sind schon mehr Manager beigetreten.';
     end if;
   elsif s ?| array['max_managers', 'roster_size', 'max_per_team', 'draft_mode', 'draft_order', 'gender', 'season_start', 'bid_seconds',
-                   'lineup_mode', 'lineup_groups', 'wildcards'] then
+                   'lineup_mode', 'lineup_groups', 'wildcards', 'areas'] then
     raise exception 'Diese Einstellung ist nach dem Draft nicht mehr änderbar.';
   end if;
   -- jederzeit änderbar

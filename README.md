@@ -35,7 +35,7 @@ Die Spielregeln werden in der Datenbank geprüft (Positionen, Uhr, Kadergröße,
 ## Spielregeln in Kürze
 
 - **Wertung:** Männer, Frauen oder Mixed. Bei Mixed: Positionen beliebig besetzen oder je Disziplin ein Mann und eine Frau.
-- **Athletenpool:** DE-Toplisten (Senioren) des aktuellen Jahres und des Vorjahres, Laufdisziplinen ab 800 m inkl. Halle, Hindernis und Straße, ab 1000 WA-Punkten.
+- **Athletenpool:** DE-Toplisten (Senioren) des aktuellen Jahres und des Vorjahres, Lauf ab 800 m (inkl. Halle, Hindernis, Straße), Sprint, Hürden, Sprung, Wurf, Mehrkampf und Gehen, ab der Pool-Schwelle (`scoring_config.pool_threshold`). Jede Liga wählt ihre Bereiche (nur Lauf, alle oder eigene Auswahl).
 - **Aufstellung:** Positionen 800, 1500, 5000, 10.000, Marathon, Hindernis (wählbar) plus Wildcards. Die Gruppe eines Athleten ergibt sich aus seiner besten Toplistenleistung.
 - **Punkte je Ergebnis:** `(max(0, WA-Punkte − 1000) × Leistungsfaktor + WA-Platzierungspunkte × Platzierungsfaktor) × Disziplinfaktor`;
   Cross: `max(0, Wert der WA-Cross-Tabelle − 1000) × Cross-Faktor × Distanzfaktor` (bis 3 km 1, bis 6 km 1,3, bis 12 km 1,6, darüber 2; ohne Angabe 1,6 –

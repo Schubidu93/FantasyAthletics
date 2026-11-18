@@ -21,7 +21,11 @@
   `drop function if exists` bei geänderter Signatur). Referenzdaten (Disziplinen, WA-Platzierungstabellen) nur über
   `research/build_placing_sql.py` → `supabase/reference_data.sql`. Nach dem Merge spielt „Datenbank einrichten“ beides ein.
 - Spielregeln werden in der Datenbank erzwungen (security-definer-Funktionen), nicht in der App. Positionsregeln gibt es doppelt:
-  `_slot_ok`/`league_slots` in der Datenbank und `slotOk`/`leagueSlots` in `web/lib.js` – immer beide ändern.
+  `_slot_ok`/`league_slots`/`_position_groups`/`_group_area`/`_eligible` in der Datenbank und `slotOk`/`leagueSlots`/`positionGroups`/`groupArea`/`eligible`
+  in `web/sport/lib.js` – immer beide ändern. Bereiche je Liga: `leagues.areas` (Lauf, Sprint, Hürden, Sprung, Wurf, Mehrkampf, Gehen);
+  geholt werden und zählen (`results.area`, Filter in `_score_rows`) nur Athleten/Ergebnisse dieser Bereiche. Positionen „Mittel“ (800/1500)
+  und „Lang“ (5000/10.000/Hindernis) fassen Laufgruppen zusammen. Sprung/Wurf/Mehrkampf: mehr ist besser (`disciplines.higher_better`,
+  `_mark_cost` in der Datenbank, `markCost`/`higherBetter` in `importer/disciplines.ts`; Test prüft Gleichstand mit `research/disciplines.txt`).
 - `web/config.js` ist nur für lokale Tests und darf nicht eingecheckt werden. Keine Secrets in Code oder Chat.
 - Mobile first: Die App wird fast nur auf dem iPhone (installiert als Web-App) genutzt. Nichts darf rechts
   abgeschnitten sein; lieber umbrechen oder kürzen. Fristen mit 0:00 Uhr als Vortag ohne Uhrzeit anzeigen (`fmtUntil` in `web/lib.js`).
@@ -43,7 +47,7 @@
     (Aufstellung), `sport/matchdays.js` (Spieltag-Vorschläge), `sport/admin.js` (Zusatzbereiche im Admin) und die Sportart-Seiten
     (Personenliste, Wettkämpfe/Rennen, Profil, ggf. Kalender/Toplisten).
 - Datenbank: `supabase/schema/NN_*.sql` mit gleichen Nummern und Namen in beiden Apps. Sportart-Schicht `02_sportart.sql`:
-  `_word()` (Begriffe in Meldungen wie `SPORT`), `_fmt_pts()`, `_pts_digits()`, `_selectable()`, `_app()` (Repository, Kurzname),
+  `_word()` (Begriffe in Meldungen wie `SPORT`), `_fmt_pts()`, `_pts_digits()`, `_eligible(liga, athlet)` (darf geholt werden), `_app()` (Repository, Kurzname),
   `_sport_tick()` (Datenabruf-Zeiten), ggf. Positionen/Gruppen. Wortgleich in beiden Apps: 03, 05–08, 12–14, 16, 17 und alle `tests/sql/*` außer `06_deadlines`/`fixtures` (Liste in `scripts/shared.mjs`) – Meldungen dort nur
   mit `_word('one'|'oneAcc'|'many'|'manyDat'|'team'|'teamGen'|…)`, nie „Athlet“/„Fahrer“ fest.
 - Gemeinsame Dateien sind in `scripts/shared.mjs` aufgezählt, ihre Prüfsummen stehen in `shared-files.json` (in beiden Apps gleich).
@@ -87,7 +91,7 @@ richtet `.claude/hooks/session-start.sh` Pakete und das Test-PostgreSQL ein.
 
 ## Daten
 
-- Quelle nur **World Athletics**: DE-Toplisten (`importer/sync-pool.ts`) und die GraphQL-Schnittstelle der Website
+- Quelle nur **World Athletics**: DE-Toplisten aller Disziplinen (`importer/sync-pool.ts`, Liste in `importer/disciplines.ts`) und die GraphQL-Schnittstelle der Website
   (`importer/sync-results.ts`, `importer/placings.ts`). Ehrliche Kennung, Pausen zwischen Abfragen, keine Umgehung von Bot-Schutz.
   Den API-Schlüssel liest der Importer bei Bedarf selbst von worldathletics.org.
 - Ergebnisabruf sparsam: `resultsByAthlete` (Sammelabruf, letzte ~30 Tage, keine WA-Punkte/Wettkampf-ID) nur als Signal;
@@ -144,7 +148,7 @@ richtet `.claude/hooks/session-start.sh` Pakete und das Test-PostgreSQL ein.
 
 - Einrichtung (Supabase-Projekt, Secrets, GitHub Pages) steht noch aus – siehe README „Einrichtung“.
 - Der Importer ist mit echten Daten nur über die Erkundungs-Workflows geprüft; der erste echte Lauf sollte im Log kontrolliert werden.
-- Ideen für später: 50-%-Regel (Athleten, die die meisten Punkte außerhalb der Laufdisziplinen holen, ausschließen – mit Ausnahmeliste),
-  Startlisten, Verletzungen/Pausen markieren.
+- Kalender (`calendar-filter.ts`) nimmt bisher nur Wettkämpfe mit Laufdisziplinen – für alle Disziplinen noch erweitern.
+- Ideen für später: Startlisten, Verletzungen/Pausen markieren.
 - LADV als Zusatzquelle: automatisches Auslesen laut Nutzungsbedingungen verboten, API-Keys derzeit nicht vergeben
   (siehe `research/fremdquellen-notizen.md`). Erst wieder angehen, wenn ein Key vorliegt.

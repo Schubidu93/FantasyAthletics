@@ -11,8 +11,7 @@ $$;
 
 -- Toplisten eines Athleten mit Platz in der DE-Topliste (je Jahr, Disziplin und Geschlecht; gleiche Punkte = gleicher Platz).
 -- Gespeichert sind alle Einträge ab der Pool-Schwelle, also auch alle, die vor dem Athleten liegen.
--- Platz nach der Zeit (wie die WA-Topliste), nicht nach WA-Punkten (Hallenzeiten haben mehr Punkte)
--- (plpgsql, weil mark_seconds weiter unten steht)
+-- Platz nach der Leistung (wie die WA-Topliste), nicht nach WA-Punkten (Hallenzeiten haben mehr Punkte)
 create or replace function athlete_toplists(p_athlete text)
 returns table (year int, discipline text, mark text, score int, rank int)
 language plpgsql stable security definer set search_path = public as $$
@@ -21,7 +20,7 @@ begin
   select t.year, t.discipline, t.mark, t.score,
          (select count(*) + 1 from toplist_entries o join athletes oa on oa.id = o.athlete_id
            where o.year = t.year and o.discipline = t.discipline and oa.gender = a.gender
-             and mark_seconds(o.mark) < mark_seconds(t.mark))::int
+             and _mark_cost(t.discipline, o.mark) < _mark_cost(t.discipline, t.mark))::int
     from toplist_entries t join athletes a on a.id = t.athlete_id
    where t.athlete_id = p_athlete
    order by t.year desc, t.score desc;
@@ -40,10 +39,10 @@ returns table (rank int, athlete_id text, name text, nation text, mark text, sco
 language plpgsql stable security definer set search_path = public as $$
 begin
   return query
-  select (rank() over (order by mark_seconds(t.mark) nulls last))::int, t.athlete_id, a.name, a.nation, t.mark, t.score
+  select (rank() over (order by _mark_cost(p_discipline, t.mark) nulls last))::int, t.athlete_id, a.name, a.nation, t.mark, t.score
     from toplist_entries t join athletes a on a.id = t.athlete_id
    where t.year = p_year and t.discipline = p_discipline and a.gender = p_gender
-   order by mark_seconds(t.mark) nulls last, a.name limit least(coalesce(p_limit, 20), 200);
+   order by _mark_cost(p_discipline, t.mark) nulls last, a.name limit least(coalesce(p_limit, 20), 200);
 end $$;
 
 -- Spieljahr: die Saison, für die gerade gedraftet bzw. gespielt wird. Ab 1. November zählt das Folgejahr
@@ -173,19 +172,18 @@ language sql immutable as $$
   select coalesce(p_competition, '') ~* 'split time' or coalesce(p_remark, '') = 'ST';
 $$;
 
--- Persönliche Bestleistung: schneller als alles davor (beste Leistung vor 2025 laut WA und alle gespeicherten Ergebnisse
--- an früheren Tagen). Es muss vorher schon eine Leistung in der Disziplin geben; gleiche Zeit zählt nicht.
+-- Persönliche Bestleistung: besser als alles davor (schneller, bei Sprung/Wurf/Mehrkampf weiter bzw. mehr) (beste Leistung vor 2025 laut WA und alle gespeicherten Ergebnisse
+-- an früheren Tagen). Es muss vorher schon eine Leistung in der Disziplin geben.
 -- Vorlauf und Finale an verschiedenen Tagen können beide PB sein.
--- (plpgsql, weil mark_seconds weiter unten steht)
 -- Ergebnis: 1 = neue PB, 0.5 = PB eingestellt (=PB, gleiche Zeit), 0 = keine
 drop function if exists _is_pb(text, text, date, text);
 create or replace function _pb_factor(p_athlete text, p_discipline text, p_date date, p_mark text) returns numeric
 language plpgsql stable as $$
-declare s numeric := mark_seconds(p_mark); prior numeric;
+declare s numeric := _mark_cost(p_discipline, p_mark); prior numeric;
 begin
   prior := least(
-    (select mark_seconds(b.mark) from athlete_pb_before b where b.athlete_id = p_athlete and b.discipline = p_discipline),
-    (select min(mark_seconds(o.mark)) from wa_results o
+    (select _mark_cost(p_discipline, b.mark) from athlete_pb_before b where b.athlete_id = p_athlete and b.discipline = p_discipline),
+    (select min(_mark_cost(p_discipline, o.mark)) from wa_results o
       where o.athlete_id = p_athlete and o.discipline = p_discipline and o.date < p_date and o.relay is null));
   return case when s is null or prior is null then 0 when s < prior then 1 when s = prior then 0.5 else 0 end;
 end $$;
@@ -196,10 +194,12 @@ declare c scoring_config; n int;
 begin
   select * into c from scoring_config where id = 1;
   delete from results where p_from is null or result_date >= p_from;
-  insert into results (athlete_id, competition_id, label, result_date, rank, points, perf_points, placing_points, record_points, pb_points, wa_result_id)
-  select athlete_id, competition_id, label, date, place, perf + plc + rec + pb, perf, plc, rec, pb, id
+  insert into results (athlete_id, competition_id, label, result_date, rank, points, perf_points, placing_points, record_points, pb_points, wa_result_id, area)
+  select athlete_id, competition_id, label, date, place, perf + plc + rec + pb, perf, plc, rec, pb, id, area
     from (
       select w.id, w.athlete_id, w.date, w.place,
+             -- Bereich (Lauf, Sprint, …): zählt nur in Ligen, die diesen Bereich spielen
+             _group_area(_result_group(w.discipline, w.competition)) area,
              -- Staffel: Leistungs- und Platzierungspunkte nur anteilig (1/3 bzw. 1/4)
              case w.record when 'WR' then c.record_wr when 'ER' then c.record_er when 'DR' then c.record_dr
                            when '=WR' then c.record_wr / 2.0 when '=ER' then c.record_er / 2.0 when '=DR' then c.record_dr / 2.0 else 0 end rec,
@@ -344,24 +344,27 @@ begin
 end $$;
 
 -- Punkte pro Athlet in einem Jahr (für die Athletenliste der App); p_gender 'mixed' = alle
-create or replace function athlete_points(p_gender text, p_year int)
+-- p_areas: nur Ergebnisse dieser Bereiche (z. B. {Lauf} in reinen Laufligen); ohne Angabe alle
+drop function if exists athlete_points(text, int);
+create or replace function athlete_points(p_gender text, p_year int, p_areas text[] default null)
 returns table (athlete_id text, points numeric, results int)
 language sql stable security definer set search_path = public as $$
   select r.athlete_id, sum(r.points), count(*)::int
     from results r join athletes x on x.id = r.athlete_id
-   where _gender_ok(p_gender, x.gender)
+   where _gender_ok(p_gender, x.gender) and (p_areas is null or r.area is null or r.area = any (p_areas))
      and r.result_date >= make_date(p_year, 1, 1) and r.result_date <= make_date(p_year, 12, 31)
    group by r.athlete_id
    order by r.athlete_id;
 $$;
 
 -- Punkte der letzten Tage (Standard 30) – für „heiße freie Athleten“
-create or replace function athlete_points_recent(p_gender text, p_days int default 30)
+drop function if exists athlete_points_recent(text, int);
+create or replace function athlete_points_recent(p_gender text, p_days int default 30, p_areas text[] default null)
 returns table (athlete_id text, points numeric, results int)
 language sql stable security definer set search_path = public as $$
   select r.athlete_id, sum(r.points), count(*)::int
     from results r join athletes x on x.id = r.athlete_id
-   where _gender_ok(p_gender, x.gender) and r.result_date > current_date - p_days and r.points > 0
+   where _gender_ok(p_gender, x.gender) and (p_areas is null or r.area is null or r.area = any (p_areas)) and r.result_date > current_date - p_days and r.points > 0
    group by r.athlete_id
    order by r.athlete_id;
 $$;
