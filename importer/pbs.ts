@@ -1,5 +1,5 @@
 // Persönliche Bestleistungen aus getSingleCompetitor (personalBests, progressionOfSeasonsBests) aufbereiten.
-import { markCost } from "./disciplines";
+import { markCost } from "./marks";
 import { parseWaDate } from "./wa";
 
 export type RawPb = { indoor?: boolean | null; discipline?: string | null; mark?: string | null; notLegal?: boolean | null;

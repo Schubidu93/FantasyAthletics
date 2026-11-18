@@ -1,7 +1,6 @@
 // Toplisten, aus denen der Athletenpool gebildet wird (DE, Senioren): Lauf ab 800 m, Sprint, Hürden, Sprung, Wurf,
 // Mehrkampf und Gehen. `name` muss exakt dem WA-Disziplinnamen in den Ergebnissen entsprechen (Tabelle `disciplines`).
 // `genders`: nur für diese Geschlechter gibt es eine Liste (z. B. 110 m Hürden nur Männer).
-import { parseMark } from "./placings";
 import type { Gender } from "./wa";
 
 export type ToplistDiscipline = { name: string; path: string; genders?: Gender[] };
@@ -67,10 +66,3 @@ export const gendersOf = (d: ToplistDiscipline): Gender[] => d.genders ?? ["M", 
 export const higherBetter = (discipline: string) => /Jump|Vault|Put|Throw|athlon/.test(discipline);
 
 export const COUNTRY = "ger";
-
-
-/** Vergleichswert einer Leistung: kleiner = besser (wie `_mark_cost` in der Datenbank). */
-export function markCost(discipline: string, mark: string | null | undefined): number | null {
-  const v = parseMark(mark);
-  return v === null ? null : higherBetter(discipline) ? -v : v;
-}

@@ -93,9 +93,9 @@ export function discMeters(label) {
 }
 // Reihenfolge der Läufe: Vorläufe, Viertel-, Halbfinale, Finale; jeweils 1, 2, 3 …
 export function raceOrder(r) {
-  const m = String(r || '').match(/^(R|H|QF|SF|F)(\d*)$/);
+  const m = String(r || '').match(/^(R|Q|H|QF|SF|F)(\d*)$/);
   if (!m) return 500;
-  return { R: 0, H: 100, QF: 200, SF: 300, F: 400 }[m[1]] + (+m[2] || 0);
+  return { R: 0, Q: 50, H: 100, QF: 200, SF: 300, F: 400 }[m[1]] + (+m[2] || 0);
 }
 // Positionsname mit Geschlechts-Kennzeichen
 export function SlotLabel({ slot }) {
@@ -131,11 +131,11 @@ export const discWithKm = (d, competition) => {
   const km = /^Cross Country/.test(d || '') ? crossKm(competition) : null;
   return discLabel(d) + (km ? ` ${km.toLocaleString('de-DE')} km` : '');
 };
-// Lauf laut WA: F, F1, SF2, H3, QF1 …
+// Lauf bzw. Runde laut WA: F, F1, SF2, H3, QF1, Q (Qualifikation im Sprung/Wurf) …
 export function raceLabel(r) {
-  const m = (r || '').match(/^(F|SF|QF|H|R)(\d*)$/);
+  const m = (r || '').match(/^(F|SF|QF|H|R|Q)(\d*)$/);
   if (!m) return r || '';
-  const name = { F: 'Finale', SF: 'Halbfinale', QF: 'Viertelfinale', H: 'Vorlauf', R: 'Lauf' }[m[1]];
+  const name = { F: 'Finale', SF: 'Halbfinale', QF: 'Viertelfinale', H: 'Vorlauf', R: 'Lauf', Q: 'Qualifikation' }[m[1]];
   return m[2] ? `${name} ${m[2]}` : name;
 }
 

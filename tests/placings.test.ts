@@ -162,3 +162,14 @@ describe("Meisterschaft im offenen Rennen", () => {
     expect(mainRaces(blocks).flatMap((r) => r.entries).find((e) => e.name === "Tom THURLEY")?.place).toBe(6);
   });
 });
+
+describe("Platz über mehrere Finalgruppen: Sprung/Wurf weiter ist besser", () => {
+  it("combinedPlace nach Weite", async () => {
+    const { combinedPlace } = await import("../importer/placings");
+    const race = (name: string, entries: [number, string][]) =>
+      ({ name, number: null, date: null, entries: entries.map(([id, mark], i) => ({ athleteId: id, name: `A${id}`, mark, place: i + 1, qualified: false })) });
+    const finals = [race("Final 1", [[1, "8.10"], [2, "7.90"]]), race("Final 2", [[3, "8.00"], [4, "7.50"]])];
+    expect(combinedPlace(finals, null, { id: 3 }, "Long Jump")).toBe(2);
+    expect(combinedPlace(finals, null, { id: 3 }, "1500 Metres")).toBe(3);   // Zeiten: kleiner ist besser
+  });
+});

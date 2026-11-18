@@ -1,7 +1,7 @@
 // Rekord-Erkennung aus All-time-Listen (alle Leistungen, bestbewertete zuerst).
 // Eine Leistung ab `since` war ein Rekord, wenn es bis zu ihrem Tag keine bessere gab
 // (gleiche Leistung = Rekord eingestellt, zählt auch; Sprung/Wurf/Mehrkampf: mehr ist besser). Bessere Leistung am selben Tag (z. B. im selben Rennen) → kein Rekord.
-import { markCost } from "./disciplines";
+import { markCost } from "./marks";
 import type { ToplistRow } from "./wa";
 
 // tied = Rekord nur eingestellt (gleiche Zeit gab es schon an einem früheren Tag) → zählt halb
