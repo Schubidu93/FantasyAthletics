@@ -22,7 +22,7 @@ afterEach(async () => {
   await db.end();
 });
 
-const pts = async () => (await db.all("select label, points, record_points from results where athlete_id = 'wa-1' order by result_date"))
+const pts = async () => (await db.all("select label, points, record_points from results where athlete_id = 'wa-1' order by result_date, label desc"))
   .map((r) => [r.label, Number(r.points), Number(r.record_points)]);
 
 describe("Zwischenzeiten und Rekorde", () => {

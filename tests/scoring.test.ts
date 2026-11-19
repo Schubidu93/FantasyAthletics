@@ -199,6 +199,19 @@ describe("Athleten außerhalb des Pools löschen", () => {
   });
 });
 
+describe("Ein Wettkampf = ein Ergebnis", () => {
+  it("zählt je Wettkampf und Disziplin nur die beste Runde; Mehrkampf-Einzeldisziplinen zählen nicht", async () => {
+    const a = await athlete(db, 1, "Sprinter", "men", "100 Metres", 1200);
+    await db.query(`insert into wa_results (athlete_id, date, competition, discipline, category, race, wa_race, place, wa_place, result_score, wa_competition_id)
+      values ($1, $2, 'Meeting', '100 Metres', 'C', 'H1', 'H1', 1, 1, 1150, 7100001),
+             ($1, $2, 'Meeting', '100 Metres', 'C', 'F', 'F', 2, 2, 1170, 7100001),
+             ($1, $2, 'Meeting', '200 Metres', 'C', 'F', 'F', 1, 1, 1100, 7100001),
+             ($1, $2, 'Zehnkampf - Combined Events', 'Long Jump', 'C', 'CE1', 'CE1', 1, 1, 1100, 7100002)`, [a, D]);
+    await db.query("select rebuild_results(null)");
+    expect(await db.all("select label from results order by label")).toEqual([{ label: "100 Metres" }, { label: "200 Metres" }]);
+  });
+});
+
 describe("Staffeln", () => {
   it("Leistung und Platzierung mit ¼ der Einzelstrecke (4er-Staffel)", async () => {
     const a = await athlete(db, 1, "Sprinterin", "women", "100 Metres", 1200);

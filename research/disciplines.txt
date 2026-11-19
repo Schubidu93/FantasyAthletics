@@ -76,12 +76,12 @@ Distance Medley|0||||
 Distance Medley Short Track|0||||
 Half Marathon|2|Marathon|MARATHON_SIMILAR,ROAD||
 Half Marathon Race Walk|2|Gehen|RW_HM||
-Hammer Throw|1|Hammer|TF||1
+Hammer Throw|1.5|Hammer|TF||1
 Heptathlon|4|Mehrkampf|CE||1
 Heptathlon Short Track|3|Mehrkampf|CE||1
-High Jump|1|Hochsprung|TF||1
-Javelin Throw|1|Speer|TF||1
-Long Jump|1|Weitsprung|TF||1
+High Jump|1.3|Hochsprung|TF||1
+Javelin Throw|1.5|Speer|TF||1
+Long Jump|1.3|Weitsprung|TF||1
 Marathon|3|Marathon|MARATHON||
 Marathon Race Walk|3|Gehen|RW_MAR||
 Mile|1|1500|TF||
@@ -94,10 +94,10 @@ Mountain Running Classic Hill U20 Race|1.6|10000|10KROAD||
 Mountain Running Up & Down Senior Race|1.6|10000|10KROAD||
 Mountain Running Up & Down U20 Race|1.6|10000|10KROAD||
 Pentathlon Short Track|3|Mehrkampf|CE||1
-Pole Vault|1|Stabhochsprung|TF||1
+Pole Vault|1.3|Stabhochsprung|TF||1
 Road Race|1||||
 Shot Put|1|Kugel|TF||1
 Sprint Medley 1000m|0.25|400|TF||
-Triple Jump|1|Dreisprung|TF||1
+Triple Jump|1.3|Dreisprung|TF||1
 U20 Mountain Classic|1.6|10000|10KROAD||
 Vertical Uphill|1.6|10000|10KROAD||
