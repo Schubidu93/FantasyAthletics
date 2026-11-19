@@ -131,7 +131,7 @@ richtet `.claude/hooks/session-start.sh` Pakete und das Test-PostgreSQL ein.
   Programm-Disziplin → Schwerpunkt-Gruppe in `web/sport/groups.js` (`eventGroup`, auch Disziplin-Filter im Kalender; von App und Importer genutzt)).
   Kalender-Seite und Spieltag-Vorschläge (`web/sport/matchday-plan.js`, Tests `tests/matchdays.test.ts`) richten sich nach den
   Bereichen der Liga: Fachmeisterschaften (Cross/Straße, Winterwurf, Mehrkampf) nur in Ligen, die nur diesen Bereich spielen;
-  ohne Lauf ab Oktober „Saisonpause“.
+  ohne Lauf ab Oktober „Saisonpause“. Normale Spieltage unter 10 Tagen (Reste neben Meisterschaften) gehen im vorherigen auf (`mergeShort`).
   Fehlen DM/Hallen-DM eines Jahres bei WA, nicht raten: einmalig in der DLV-Terminliste (leichtathletik.de) nachschlagen und in
   `extra_calendar_events` (`supabase/schema/01_tabellen.sql`, mit `source_url`) eintragen; der Spieltag-Vorschlag nimmt sie, solange WA keinen Termin hat.
 - Cross: Disziplin heißt nur „Cross Country“, die Distanz steht im Wettkampfnamen („… - XC 7.5km“) → `cross_km()` in der Datenbank,

@@ -97,28 +97,37 @@ export function withChampionshipMatchdays(list, start, end, events, { onlyIfSpli
     out = out.flatMap((m) => {
       if (m.champ || !over(m, c)) return [m];
       const parts = [];
-      if (m.starts_on < c.starts_on) parts.push({ ...m, ends_on: addDays(c.starts_on, -1) });
-      if (m.ends_on > c.ends_on) parts.push({ ...m, starts_on: addDays(c.ends_on, 1) });
+      // abgeschnittene Reste merken sich die ursprüngliche Länge (siehe mergeShort)
+      const len = m.len || days(m.starts_on, m.ends_on);
+      if (m.starts_on < c.starts_on) parts.push({ ...m, ends_on: addDays(c.starts_on, -1), len });
+      if (m.ends_on > c.ends_on) parts.push({ ...m, starts_on: addDays(c.ends_on, 1), len });
       return parts;
     });
     out.push(c);
     out.sort((a, b) => a.starts_on.localeCompare(b.starts_on));
   }
-  // Reste unter 4 Tagen dem angrenzenden normalen Spieltag zuschlagen
-  for (let i = 0; i < out.length; i++) {
-    const m = out[i];
-    if (m.champ || days(m.starts_on, m.ends_on) >= 4) continue;
-    const prev = out[i - 1], next = out[i + 1];
-    if (prev && !prev.champ && addDays(prev.ends_on, 1) === m.starts_on) { prev.ends_on = m.ends_on; out.splice(i--, 1); }
-    else if (next && !next.champ && addDays(m.ends_on, 1) === next.starts_on) { next.starts_on = m.starts_on; out.splice(i--, 1); }
-  }
+  // durch eine Meisterschaft abgeschnittene Reste, die zu kurz geworden sind, anhängen (nur echte Reste: kürzer als vorher)
+  mergeShort(out, (m) => m.len && days(m.starts_on, m.ends_on) < Math.min(MIN_DAYS, m.len));
   if (renumber) { let n = 0; for (const m of out) if (!m.champ) m.name = `${renumber} ${++n}`; }
   // gleicher Name zweimal (z. B. „Juli“ vor und nach der DM) → „Juli I“, „Juli II“
   const count = {};
   for (const m of out) if (!m.champ) count[m.name] = (count[m.name] || 0) + 1;
   const seen = {};
   for (const m of out) if (!m.champ && count[m.name] > 1) m.name = `${m.name} ${['I', 'II', 'III', 'IV'][seen[m.name] = (seen[m.name] || 0) + 1, seen[m.name] - 1]}`;
-  return out.map(({ champ, ev_start, ev_end, ...m }) => m);
+  return out.map(({ champ, ev_start, ev_end, len, ...m }) => m);
+}
+
+// Kürzere normale Spieltage als MIN_DAYS (z. B. eine Woche zwischen Hallen-DM und Hallen-EM) gehen im vorherigen
+// Spieltag auf – auch wenn das eine Meisterschaft ist (Name bleibt); ohne Vorgänger im nächsten
+const MIN_DAYS = 10;
+function mergeShort(out, isShort) {
+  for (let i = 0; i < out.length; i++) {
+    const m = out[i];
+    if (m.champ || !isShort(m)) continue;
+    const prev = out[i - 1], next = out[i + 1];
+    if (prev && addDays(prev.ends_on, 1) === m.starts_on) { prev.ends_on = m.ends_on; out.splice(i--, 1); }
+    else if (next && addDays(m.ends_on, 1) === next.starts_on) { next.starts_on = m.starts_on; out.splice(i--, 1); }
+  }
 }
 
 export function monthlyProposal(start, end, events = [], areas = null) {
@@ -160,6 +169,7 @@ export function monthlyProposal(start, end, events = [], areas = null) {
     cursor = addDays(c.ends_on, 1);
   }
   out.push(...fill(cursor, end));
+  mergeShort(out, (m) => days(m.starts_on, m.ends_on) < MIN_DAYS);
   // Ohne Lauf ruht die Saison von Oktober bis Dezember (keine Straßen-, Cross- und Marathonsaison) → ein Spieltag „Saisonpause“
   if (areas && !areas.includes('Lauf')) {
     const quiet = (m) => !m.champ && +m.ends_on.slice(5, 7) >= 10 && m.starts_on.slice(5) >= '09-25';

@@ -11,9 +11,19 @@ const EVENTS = [
   ev("German Winter Throwing Championships", "2027-03-13", "2027-03-14"),
 ];
 const names = (l: { name: string }[]) => l.map((m) => m.name);
+const addOne = (d: string, n: number) => new Date(Date.parse(d) + n * 864e5).toISOString().slice(0, 10);
 type Md = { name: string; starts_on: string; ends_on: string };
 
 describe("Spieltag-Vorschläge je Liga", () => {
+  it("zu kurze Reste (z. B. eine Woche zwischen Hallen-DM und Hallen-EM) gehen im vorherigen Spieltag auf", () => {
+    const evs = [ev("German Indoor Championships", "2027-02-20", "2027-02-21"), ev("European Athletics Indoor Championships", "2027-03-04", "2027-03-07", "GL")];
+    const l: Md[] = monthlyProposal("2027-01-01", "2027-12-31", evs, ["Lauf", "Sprint"]);
+    const hdm = l.find((m) => m.name === "Hallen-DM")!;
+    expect(hdm.ends_on).toBe(addOne(l.find((m) => m.name === "Hallen-EM")!.starts_on, -1));
+    expect(l.every((m) => (Date.parse(m.ends_on) - Date.parse(m.starts_on)) / 864e5 + 1 >= 7)).toBe(true);
+    expect(names(l)).not.toContain("Februar II");
+  });
+
   it("Fachmeisterschaften nur, wenn die Liga nichts anderes spielt", () => {
     const cross = EVENTS[1], mk = EVENTS[2], ww = EVENTS[3];
     expect([championshipLabel(cross, ["Lauf"]), championshipLabel(cross, ["Lauf", "Sprint"]), championshipLabel(cross)])
