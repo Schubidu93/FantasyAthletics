@@ -34,19 +34,27 @@ export const eligible = (r, l) => r?.pool_rank != null && (!groupArea(riderGroup
 const BLOCKS = { Mittel: ['800', '1500'], Lang: ['5000', '10000', 'Hindernis'],
   Sprint: AREA_GROUPS.Sprint, Hürden: AREA_GROUPS.Hürden, Sprung: AREA_GROUPS.Sprung, Wurf: AREA_GROUPS.Wurf };
 export const positionGroups = (p) => BLOCKS[p] || [p];
-/** Wählbare Positionen für diese Bereiche: einzelne Disziplinen und Blöcke */
-export const positionsFor = (areas) => AREAS.filter((a) => areas.includes(a)).flatMap((a) =>
-  a === 'Lauf' ? ['800', '1500', 'Mittel', '5000', '10000', 'Hindernis', 'Lang', 'Marathon']
-    : AREA_GROUPS[a].length > 1 ? [...AREA_GROUPS[a], a] : [a]);
+/** Wählbare Positionen je Bereich: zuerst die Blöcke (fassen mehrere Disziplinen zusammen), dann die einzelnen Disziplinen */
+export const positionSections = (areas) => AREAS.filter((a) => areas.includes(a)).map((a) => ({
+  area: a,
+  blocks: a === 'Lauf' ? ['Mittel', 'Lang'] : AREA_GROUPS[a].length > 1 ? [a] : [],
+  singles: AREA_GROUPS[a],
+}));
+/** Alle wählbaren Positionen für diese Bereiche (Reihenfolge wie in der Auswahl) */
+export const positionsFor = (areas) => positionSections(areas).flatMap((x) => [...x.blocks, ...x.singles]);
+/** Bezeichnung eines Blocks in der Auswahl, z. B. „Mittelstrecke (800/1500 m)“, „alle Sprünge“ */
+export const BLOCK_LABEL = { Mittel: 'Mittelstrecke (800/1500 m)', Lang: 'Langstrecke (5000 m–Hindernis)',
+  Sprint: 'alle Sprints', Hürden: 'alle Hürden', Sprung: 'alle Sprünge', Wurf: 'alle Würfe' };
 /** Spiele: Bereiche und vorgeschlagene Positionen. Ein Bereich allein = je Disziplin eine Position; alle = Blöcke
  *  (Gehen nur über Wildcards). suggest: passende Ligagröße (im Wurf gibt es nur wenige Athleten) */
 export const AREA_PRESETS = {
+  all: { label: 'Alle Disziplinen', areas: [...AREAS], lineup_groups: ['Sprint', 'Hürden', 'Mittel', 'Lang', 'Marathon', 'Sprung', 'Wurf', 'Mehrkampf'] },
+
   run: { label: 'Nur Lauf (ab 800 m)', areas: ['Lauf'], lineup_groups: [...AREA_GROUPS.Lauf] },
   sprint: { label: 'Sprint und Hürden', areas: ['Sprint', 'Hürden'], lineup_groups: [...AREA_GROUPS.Sprint, ...AREA_GROUPS.Hürden] },
   jump: { label: 'Nur Sprung', areas: ['Sprung'], lineup_groups: [...AREA_GROUPS.Sprung] },
   throw: { label: 'Nur Wurf', areas: ['Wurf'], lineup_groups: [...AREA_GROUPS.Wurf], suggest: { max_managers: 6, roster_size: 7 },
     hint: 'Im Wurf gibt es nur wenige deutsche Spitzenathleten (z. B. etwa 8 Hammerwerfer je Geschlecht) – empfohlen: höchstens 6 Mitspieler und kleine Kader.' },
-  all: { label: 'Alle Disziplinen', areas: [...AREAS], lineup_groups: ['Sprint', 'Hürden', 'Mittel', 'Lang', 'Marathon', 'Sprung', 'Wurf', 'Mehrkampf'] },
 };
 export const GENDER_LABEL = { men: 'Männer', women: 'Frauen', mixed: 'Mixed' };
 
