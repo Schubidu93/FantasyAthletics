@@ -52,7 +52,7 @@ export function TopResults({ c }) {
         const p = c.riderMap[r.athlete_id];
         const owner = c.managerMap[c.owner[r.athlete_id]];
         const bonus = [Number(r.pb_points) > 0 && 'PB', Number(r.record_points) > 0 && 'Rekord'].filter(Boolean).join(' + ');
-        return html`<li key=${`${r.athlete_id}|${r.competition_id}|${r.discipline}|${r.race}|${i}`} class=${owner && owner.id === c.me?.id ? 'me' : ''}>
+        return html`<li key=${`${r.athlete_id}|${r.competition_id}|${r.discipline}|${r.race}|${i}`} class=${`pts-right${owner && owner.id === c.me?.id ? ' me' : ''}`}>
           <span><span class="res-place">${i + 1}.</span>${' '}
             <button type="button" class="linkish" onClick=${() => openRider(r.athlete_id)}>${p.name}</button>
             ${c.league.gender === 'mixed' && html` <${SexBadge} g=${p.gender} />`}
