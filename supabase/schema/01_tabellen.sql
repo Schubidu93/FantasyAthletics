@@ -118,6 +118,9 @@ create table if not exists toplist_entries (
 
 -- Von Hand hinzugefügte Athleten (Admin): immer im Pool, auch ohne Toplisteneintrag über der Schwelle
 alter table athletes add column if not exists manual boolean not null default false;
+-- Nation laut WA-Profil (täglich aus importer/sync-pbs.ts); neue Athleten aus der DE-Topliste starten als GER.
+-- Wer für ein anderes Land startet (z. B. nach Nationenwechsel), fällt aus dem Pool (außer von Hand hinzugefügt).
+alter table athletes alter column nation set default 'GER';
 -- Aufträge „Athlet hinzufügen“ (Admin → Athleten): WA-ID, Profil-Link oder Name; erledigt der Ablauf add-athlete.yml
 create table if not exists athlete_requests (
   id         bigint generated always as identity primary key,

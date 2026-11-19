@@ -10,10 +10,11 @@
 -- =====================================================================
 
 insert into disciplines (name, factor, event_group, placing_tables, cross_table, higher_better) values
-  ('10 Kilometres Race Walk', 1, 'Gehen', '{RW_HM}', null, false),
+  ('10 Kilometres Race Walk', 1.6, 'Gehen', '{RW_HM}', null, false),
   ('10 Kilometres Road', 1.6, '10000', '{10KROAD,ROAD}', null, false),
   ('10 Miles Road', 1.6, '10000', '{ROAD}', null, false),
   ('10,000 Metres', 1.6, '10000', '{10000}', null, false),
+  ('10,000 Metres Race Walk', 1.6, 'Gehen', '{RW_HM}', null, false),
   ('100 Metres', 1, '100', '{TF}', null, false),
   ('100 Metres Hurdles', 1, 'Kurzhürden', '{TF}', null, false),
   ('100 Metres Hurdles (76.2cm)', 0, null, '{}', null, false),
@@ -26,9 +27,9 @@ insert into disciplines (name, factor, event_group, placing_tables, cross_table,
   ('1500 Metres Short Track', 1, '1500', '{TF}', null, false),
   ('2 Miles', 1, '5000', '{5000SC}', null, false),
   ('2 Miles Short Track', 1, '5000', '{5000SC}', null, false),
-  ('20 Kilometres Race Walk', 1, 'Gehen', '{RW_HM}', null, false),
+  ('20 Kilometres Race Walk', 2, 'Gehen', '{RW_HM}', null, false),
   ('20 Kilometres Road', 2, 'Marathon', '{ROAD}', null, false),
-  ('20,000 Metres Race Walk', 1, 'Gehen', '{RW_HM}', null, false),
+  ('20,000 Metres Race Walk', 2, 'Gehen', '{RW_HM}', null, false),
   ('200 Metres', 1, '200', '{TF}', null, false),
   ('200 Metres Short Track', 1, '200', '{TF}', null, false),
   ('2000 Metres', 1, '1500', '{TF}', null, false),
@@ -44,7 +45,7 @@ insert into disciplines (name, factor, event_group, placing_tables, cross_table,
   ('3000 Metres Race Walk Short Track', 1, 'Gehen', '{RW_HM}', null, false),
   ('3000 Metres Short Track', 1, '5000', '{5000SC}', null, false),
   ('3000 Metres Steeplechase', 1.3, 'Hindernis', '{5000SC}', null, false),
-  ('35 Kilometres Race Walk', 1, 'Gehen', '{RW_LONG}', null, false),
+  ('35 Kilometres Race Walk', 3, 'Gehen', '{RW_LONG}', null, false),
   ('3x1000 Metres Relay', 0.33, '800', '{}', null, false),
   ('3x800 Metres Relay', 0.33, '800', '{}', null, false),
   ('400 Metres', 1, '400', '{TF}', null, false),
@@ -63,7 +64,8 @@ insert into disciplines (name, factor, event_group, placing_tables, cross_table,
   ('5 Kilometres Road', 1.3, '5000', '{5000SC,ROAD}', null, false),
   ('500 Metres Short Track', 1, '400', '{TF}', null, false),
   ('5000 Metres', 1.3, '5000', '{5000SC}', null, false),
-  ('5000 Metres Race Walk', 1, 'Gehen', '{RW_HM}', null, false),
+  ('5000 Metres Race Walk', 1.3, 'Gehen', '{RW_HM}', null, false),
+  ('5000 Metres Race Walk Short Track', 1.3, 'Gehen', '{RW_HM}', null, false),
   ('5000 Metres Short Track', 1.3, '5000', '{5000SC}', null, false),
   ('60 Metres', 1, '100', '{TF}', null, false),
   ('60 Metres Hurdles', 1, 'Kurzhürden', '{TF}', null, false),
@@ -80,20 +82,20 @@ insert into disciplines (name, factor, event_group, placing_tables, cross_table,
   ('Cross Country U20 Race', 1.6, '10000', '{}', 'CROSS', false),
   ('Cross Country U23 Race', 1.6, '10000', '{}', 'CROSS', false),
   ('Cross Short', 1, '1500', '{}', 'CROSS', false),
-  ('Decathlon', 1, 'Mehrkampf', '{CE}', null, true),
+  ('Decathlon', 4, 'Mehrkampf', '{CE}', null, true),
   ('Discus Throw', 1, 'Diskus', '{TF}', null, true),
   ('Distance Medley', 0, null, '{}', null, false),
   ('Distance Medley Short Track', 0, null, '{}', null, false),
   ('Half Marathon', 2, 'Marathon', '{MARATHON_SIMILAR,ROAD}', null, false),
-  ('Half Marathon Race Walk', 1, 'Gehen', '{RW_HM}', null, false),
+  ('Half Marathon Race Walk', 2, 'Gehen', '{RW_HM}', null, false),
   ('Hammer Throw', 1, 'Hammer', '{TF}', null, true),
-  ('Heptathlon', 1, 'Mehrkampf', '{CE}', null, true),
-  ('Heptathlon Short Track', 1, 'Mehrkampf', '{CE}', null, true),
+  ('Heptathlon', 4, 'Mehrkampf', '{CE}', null, true),
+  ('Heptathlon Short Track', 3, 'Mehrkampf', '{CE}', null, true),
   ('High Jump', 1, 'Hochsprung', '{TF}', null, true),
   ('Javelin Throw', 1, 'Speer', '{TF}', null, true),
   ('Long Jump', 1, 'Weitsprung', '{TF}', null, true),
   ('Marathon', 3, 'Marathon', '{MARATHON}', null, false),
-  ('Marathon Race Walk', 1, 'Gehen', '{RW_MAR}', null, false),
+  ('Marathon Race Walk', 3, 'Gehen', '{RW_MAR}', null, false),
   ('Mile', 1, '1500', '{TF}', null, false),
   ('Mile Road', 1, '1500', '{TF}', null, false),
   ('Mile Short Track', 1, '1500', '{TF}', null, false),
@@ -103,7 +105,7 @@ insert into disciplines (name, factor, event_group, placing_tables, cross_table,
   ('Mountain Running Classic Hill U20 Race', 1.6, '10000', '{10KROAD}', null, false),
   ('Mountain Running Up & Down Senior Race', 1.6, '10000', '{10KROAD}', null, false),
   ('Mountain Running Up & Down U20 Race', 1.6, '10000', '{10KROAD}', null, false),
-  ('Pentathlon Short Track', 1, 'Mehrkampf', '{CE}', null, true),
+  ('Pentathlon Short Track', 3, 'Mehrkampf', '{CE}', null, true),
   ('Pole Vault', 1, 'Stabhochsprung', '{TF}', null, true),
   ('Road Race', 1, null, '{}', null, false),
   ('Shot Put', 1, 'Kugel', '{TF}', null, true),
@@ -119,18 +121,52 @@ do $$
 begin
   if not exists (select 1 from schema_changes where name = 'alle_disziplinen_faktoren') then
     update disciplines d set factor = x.factor from (values
-      ('10 Kilometres Race Walk', 1),
-      ('20 Kilometres Race Walk', 1),
-      ('20,000 Metres Race Walk', 1),
+      ('10 Kilometres Race Walk', 1.6),
+      ('10,000 Metres Race Walk', 1.6),
+      ('20 Kilometres Race Walk', 2),
+      ('20,000 Metres Race Walk', 2),
       ('3000 Metres Race Walk Short Track', 1),
-      ('35 Kilometres Race Walk', 1),
+      ('35 Kilometres Race Walk', 3),
       ('4x100 Metres Relay', 0.25),
       ('4x200 Metres Relay Short Track', 0.25),
-      ('5000 Metres Race Walk', 1),
-      ('Half Marathon Race Walk', 1),
-      ('Marathon Race Walk', 1)
+      ('5000 Metres Race Walk', 1.3),
+      ('5000 Metres Race Walk Short Track', 1.3),
+      ('Half Marathon Race Walk', 2),
+      ('Marathon Race Walk', 3)
     ) x(name, factor) where d.name = x.name and d.factor = 0;
     insert into schema_changes (name) values ('alle_disziplinen_faktoren');
+  end if;
+end $$;
+
+-- einmalig: Mehrkampf zählt mehr (wenige Wettkämpfe im Jahr, zwei Tage): Zehn-/Siebenkampf ×4, Halle ×3
+do $$
+begin
+  if not exists (select 1 from schema_changes where name = 'mehrkampf_faktoren') then
+    update disciplines d set factor = x.factor from (values
+      ('Decathlon', 4),
+      ('Heptathlon', 4),
+      ('Heptathlon Short Track', 3),
+      ('Pentathlon Short Track', 3)
+    ) x(name, factor) where d.name = x.name and d.factor = 1;
+    insert into schema_changes (name) values ('mehrkampf_faktoren');
+  end if;
+end $$;
+
+-- einmalig: Gehen mit denselben Faktoren wie der Lauf über die gleiche Strecke (5000 m 1,3 · 10 km 1,6 · 20 km 2 · 35 km/Marathon 3)
+do $$
+begin
+  if not exists (select 1 from schema_changes where name = 'gehen_faktoren') then
+    update disciplines d set factor = x.factor from (values
+      ('10 Kilometres Race Walk', 1.6),
+      ('20 Kilometres Race Walk', 2),
+      ('20,000 Metres Race Walk', 2),
+      ('3000 Metres Race Walk Short Track', 1),
+      ('35 Kilometres Race Walk', 3),
+      ('5000 Metres Race Walk', 1.3),
+      ('Half Marathon Race Walk', 2),
+      ('Marathon Race Walk', 3)
+    ) x(name, factor) where d.name = x.name and d.factor = 1;
+    insert into schema_changes (name) values ('gehen_faktoren');
   end if;
 end $$;
 

@@ -84,6 +84,9 @@ for line in open("research/disciplines.txt", encoding="utf-8"):
     arr = "'{" + tables + "}'"
     disc.append(f"  ({q(name)}, {factor}, {q(group)}, {arr}, {q(cross)}, {'true' if higher else 'false'})")
 # Disziplinen, die mit der Erweiterung auf alle Disziplinen erstmals zählen (vorher Faktor 0): einmalig umstellen
+COMBINED = ["Decathlon", "Heptathlon", "Heptathlon Short Track", "Pentathlon Short Track"]
+WALKS = ["3000 Metres Race Walk Short Track", "5000 Metres Race Walk", "10 Kilometres Race Walk", "20 Kilometres Race Walk",
+         "20,000 Metres Race Walk", "Half Marathon Race Walk", "35 Kilometres Race Walk", "Marathon Race Walk"]
 newly_scored = [n for n in (l.split("|")[0] for l in open("research/disciplines.txt", encoding="utf-8"))
                 if "Race Walk" in n or n in ("4x100 Metres Relay", "4x200 Metres Relay Short Track")]
 
@@ -111,6 +114,28 @@ begin
 {",\n".join(f"      ({q(n)}, {f})" for n, f in ((l.split("|")[0], l.split("|")[1]) for l in open("research/disciplines.txt", encoding="utf-8")) if n in newly_scored)}
     ) x(name, factor) where d.name = x.name and d.factor = 0;
     insert into schema_changes (name) values ('alle_disziplinen_faktoren');
+  end if;
+end $$;
+
+-- einmalig: Mehrkampf zählt mehr (wenige Wettkämpfe im Jahr, zwei Tage): Zehn-/Siebenkampf ×4, Halle ×3
+do $$
+begin
+  if not exists (select 1 from schema_changes where name = 'mehrkampf_faktoren') then
+    update disciplines d set factor = x.factor from (values
+{",\n".join(f"      ({q(n)}, {f})" for n, f in ((l.split("|")[0], l.split("|")[1]) for l in open("research/disciplines.txt", encoding="utf-8")) if n in COMBINED)}
+    ) x(name, factor) where d.name = x.name and d.factor = 1;
+    insert into schema_changes (name) values ('mehrkampf_faktoren');
+  end if;
+end $$;
+
+-- einmalig: Gehen mit denselben Faktoren wie der Lauf über die gleiche Strecke (5000 m 1,3 · 10 km 1,6 · 20 km 2 · 35 km/Marathon 3)
+do $$
+begin
+  if not exists (select 1 from schema_changes where name = 'gehen_faktoren') then
+    update disciplines d set factor = x.factor from (values
+{",\n".join(f"      ({q(n)}, {f})" for n, f in ((l.split("|")[0], l.split("|")[1]) for l in open("research/disciplines.txt", encoding="utf-8")) if n in WALKS)}
+    ) x(name, factor) where d.name = x.name and d.factor = 1;
+    insert into schema_changes (name) values ('gehen_faktoren');
   end if;
 end $$;
 

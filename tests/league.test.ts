@@ -234,7 +234,7 @@ describe("Bereiche (alle Disziplinen oder nur Lauf)", () => {
                            ('wa-1', $1, 'M', '20 Kilometres Race Walk', 'F', 'F', 'F', 9, 1020, 1)`, [day(0)]);
     await db.query("select rebuild_results(null)");
     const total = async (l: string) => Number((await db.one("select total from league_table($1) where team_name = 'Team Alice'", [l])).total);
-    expect(await total(lauf.id)).toBe(170);   // 100 + 50 + 20
-    expect(await total(all.id)).toBe(170);
+    expect(await total(lauf.id)).toBe(190);   // 800 m 100 + 400 m 50 + 20 km Gehen 20 × 2
+    expect(await total(all.id)).toBe(190);
   });
 });

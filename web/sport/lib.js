@@ -24,8 +24,6 @@ export const GROUP_LABEL = { 800: '800 m', 1500: '1500 m', 5000: '5000 m', 10000
 export const groupArea = (g) => AREAS.find((a) => AREA_GROUPS[a].includes(g)) || null;
 export const riderGroup = (r) => (r ? r.group_override || r.event_group : null);
 export const leagueAreas = (l) => l?.areas || ['Lauf'];
-/** Gruppen, die die Liga spielt (Filter, Auswahl) */
-export const leagueGroups = (l) => GROUPS.filter((g) => leagueAreas(l).includes(groupArea(g)));
 /** Darf in dieser Liga geholt werden? Im Pool und in einem Bereich der Liga (wie _eligible in der Datenbank) */
 export const eligible = (r, l) => r?.pool_rank != null && (!groupArea(riderGroup(r)) || leagueAreas(l).includes(groupArea(riderGroup(r))));
 
@@ -57,6 +55,23 @@ export const AREA_PRESETS = {
     hint: 'Im Wurf gibt es nur wenige deutsche Spitzenathleten (z. B. etwa 8 Hammerwerfer je Geschlecht) – empfohlen: höchstens 6 Mitspieler und kleine Kader.' },
 };
 export const GENDER_LABEL = { men: 'Männer', women: 'Frauen', mixed: 'Mixed' };
+
+// Disziplin-Filter in Personenlisten: je Bereich der Liga eine Gruppe mit „alle …“, den Blöcken und den einzelnen Disziplinen.
+// Wert: '' (alle), 'area:Sprint' (ganzer Bereich), Block ('Mittel') oder Gruppe ('100')
+const AREA_ALL = { Lauf: 'alle Läufer', Sprint: 'alle Sprinter', Hürden: 'alle Hürdenläufer', Sprung: 'alle Springer', Wurf: 'alle Werfer' };
+export const groupFilterMatch = (value, r) => !value
+  || (value.startsWith('area:') ? groupArea(riderGroup(r)) === value.slice(5) : positionGroups(value).includes(riderGroup(r)));
+export function GroupFilter({ league, value, onChange }) {
+  const secs = positionSections(leagueAreas(league));
+  const opt = (v, label) => html`<option value=${v}>${label}</option>`;
+  return html`<select value=${value} onChange=${(e) => onChange(e.target.value)}>
+    <option value="">Alle Disziplinen</option>
+    ${secs.map((x) => (x.singles.length > 1
+      ? html`<optgroup label=${x.area}>${opt(`area:${x.area}`, AREA_ALL[x.area] || `alle ${x.area}`)}
+          ${x.area === 'Lauf' && x.blocks.map((b) => opt(b, GROUP_LABEL[b]))}${x.singles.map((g) => opt(g, GROUP_LABEL[g]))}</optgroup>`
+      : opt(x.singles[0], GROUP_LABEL[x.singles[0]])))}
+  </select>`;
+}
 
 // Positionen der Aufstellung (wie league_slots in der Datenbank): 800, 1500 … bzw. 800:M, 800:W …, dann WC1, WC2 …
 export function leagueSlots(l) {

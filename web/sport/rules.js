@@ -92,6 +92,7 @@ export function Rules({ c }) {
           Hürden, Sprung, Wurf, Mehrkampf und Gehen.
           Diese Liga spielt ${areaText}: Es gibt nur Athleten, deren Schwerpunkt-Disziplin dazu gehört (die übrigen sind ausgeblendet).
           Von ihnen zählen alle Ergebnisse${runOnly ? ', auch z. B. die 400 m eines 800-m-Läufers oder ein Gehen-Rennen' : ''}.
+          Nur Athleten, die laut World Athletics für Deutschland starten (nach einem Nationenwechsel fällt man heraus).
           ${l.gender !== 'mixed' ? `In dieser Liga nur ${GENDER_LABEL[l.gender]}.` : ''} Der Pool wird täglich aktualisiert; neue Athleten sind automatisch frei.</li>
         <li><strong>Schwerpunkt-Disziplin:</strong> Lauf 800 m, 1500 m, 5000 m, 10.000 m, Marathon oder Hindernis · Sprint 100 m (inkl. 60 m),
           200 m oder 400 m · Hürden Kurzhürden (60/100/110 m) oder 400 m Hürden · Sprung Hoch, Stab, Weit oder Drei · Wurf Kugel, Diskus,
@@ -120,7 +121,7 @@ export function Rules({ c }) {
         <li>Jedes Ergebnis bei World Athletics bringt
           <strong>Leistungspunkte</strong> = (WA-Punkte − ${cfg ? cfg.perf_threshold : 1000}) × ${cfg ? fmtNum(cfg.perf_factor) : '0,1'} (nur über der Schwelle) plus
           <strong>Platzierungspunkte</strong> = WA-Platzierungspunkte × ${cfg ? fmtNum(cfg.placing_factor) : '0,1'},
-          beides mal dem <strong>Disziplinfaktor</strong> (z. B. 5000 m 1,3 · 10.000 m 1,6 · Halbmarathon 2 · Marathon 3 · Staffeln 0,25 bzw. 0,33 · sonst 1).
+          beides mal dem <strong>Disziplinfaktor</strong> (z. B. 5000 m 1,3 · 10.000 m 1,6 · Halbmarathon 2 · Marathon 3 · Zehn- und Siebenkampf 4 · Mehrkampf in der Halle 3 · Gehen wie der Lauf über die gleiche Strecke (20 km 2, 35 km 3) · Staffeln 0,25 bzw. 0,33 · sonst 1). Lange Wettkämpfe zählen mehr, weil es davon nur wenige im Jahr gibt.
           ${cfg && cfg.perf_threshold === 1000 && html`Beispiel: Marathon in 2:09:43 (1135 WA-Punkte), Platz 9 ohne Platzierungspunkte →
             135 × ${fmtNum(cfg.perf_factor)} × 3 = ${fmtNum(Math.round(135 * cfg.perf_factor * 3 * 100) / 100)} Punkte.`}</li>
         <li><strong>Platzierungspunkte</strong> genau nach den World-Ranking-Regeln 2026 von World Athletics: abhängig von Wettkampfkategorie
