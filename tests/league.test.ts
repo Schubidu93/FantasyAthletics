@@ -238,6 +238,19 @@ describe("Bereiche (alle Disziplinen oder nur Lauf)", () => {
     expect(await total(all.id)).toBe(200);
   });
 
+  it("Draft-Report: Prognose aus dem Vorjahr nur mit Leistungs- und Platzierungspunkten (ohne PB- und Rekord-Bonus)", async () => {
+    const L = await league({ gender: "men", scoring_mode: "full", draft_mode: "offline" });
+    await db.query("insert into draft_lots (league_id, lot_no, athlete_id, manager_id) values ($1, 1, 'wa-1', $2)", [L.id, L.alice]);
+    const prev = (await db.one("select extract(year from season_start)::int - 1 y from leagues where id = $1", [L.id])).y;
+    await db.query("insert into athlete_pb_before (athlete_id, discipline, mark) values ('wa-1', '800 Metres', '1:50.00')");
+    await db.query(`insert into wa_results (athlete_id, date, competition, discipline, category, race, wa_race, place, mark, result_score, wa_competition_id)
+                    values ('wa-1', $1, 'M', '800 Metres', 'F', 'F', 'F', 9, '1:45.00', 1100, 1)`, [`${prev}-06-01`]);
+    await db.query("select rebuild_results(null)");
+    expect(Number((await db.one("select points from results")).points)).toBe(110);   // 100 Leistung + 10 PB
+    expect(Number((await db.one("select points from athlete_projection_points('men', $1)", [prev])).points)).toBe(100);
+    expect(Number((await db.one("select points from draft_projection($1) where manager_id = $2", [L.id, L.alice])).points)).toBe(100);
+  });
+
   it("Top-Leistungen je Team: nur Ergebnisse, die dem Team Punkte gebracht haben", async () => {
     const L = await league({ gender: "men", scoring_mode: "full", draft_mode: "offline" });
     // wa-1 bei Alice erst ab gestern: das Ergebnis von vor 3 Tagen zählt nicht für sie
