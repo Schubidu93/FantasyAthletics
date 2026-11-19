@@ -1,7 +1,7 @@
 // Wettkämpfe: alle Wettkämpfe, bei denen Athleten aus dem Pool gestartet sind, mit deren Ergebnissen und Punkten
 import { html, useState, useMemo } from '../vendor/preact-htm.js';
 import { all, flag, fmtDate, fmtPts, Loading, nationCode, normName, openRider, q, rpcAll, sb, useLoad, withFlag } from '../lib.js';
-import { BackToAthlete, CatBadge, DiscFilter, discLabel, discMeters, discWithKm, raceLabel, raceOrder, SexBadge, waResultUrl } from './lib.js';
+import { BackToAthlete, CatBadge, DiscFilter, discLabel, discOrder, discWithKm, raceLabel, raceOrder, SexBadge, waResultUrl } from './lib.js';
 
 // WA-Wettkampfkategorien (World-Ranking-Regeln): OW = Olympia/WM … F = nationale Meetings
 const CATS = [['', 'Alle Kategorien'], ['top', 'OW, DF, GW, GL'], ['OW', 'OW – Olympia/WM'], ['DF', 'DF – DL-Finale'],
@@ -114,7 +114,7 @@ function RaceDetail({ c, slug }) {
   }
   groups.forEach((g) => g.rows.sort((a, b) => (a.wa_place ?? 999) - (b.wa_place ?? 999)));
   // erst alle Männer-Disziplinen aufsteigend nach Strecke, dann die der Frauen; je Disziplin Vorläufe → Finale 1, 2, 3
-  groups.sort((a, b) => (a.sex === 'women') - (b.sex === 'women') || discMeters(a.disc) - discMeters(b.disc)
+  groups.sort((a, b) => (a.sex === 'women') - (b.sex === 'women') || discOrder(a.disc, b.disc)
     || a.disc.localeCompare(b.disc) || raceOrder(a.race) - raceOrder(b.race) || a.date.localeCompare(b.date));
   const total = rows.reduce((s, r) => s + Number(r.pts || 0), 0);
   return html`<section class="card stack">

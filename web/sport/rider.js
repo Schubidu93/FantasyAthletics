@@ -1,7 +1,7 @@
 // Athleten-Fenster: Stammdaten, Toplisten und alle Ergebnisse (Lauf, Zeit, WA-Punkte, Fantasy-Punkte)
 import { html, useState, useEffect } from '../vendor/preact-htm.js';
 import { all, flag, fmtPts, q, rpc, sb } from '../lib.js';
-import { CatBadge, discLabel, discMeters, discWithKm, GROUP_LABEL, positionRank, raceLabel, RELAYS, rememberAthlete, riderGroup, SexBadge, waAthleteUrl, waResultUrl } from './lib.js';
+import { CatBadge, discLabel, discOrder, discWithKm, GROUP_LABEL, positionRank, raceLabel, RELAYS, rememberAthlete, riderGroup, SexBadge, waAthleteUrl, waResultUrl } from './lib.js';
 
 // Ergebnisse werden ab dieser Saison gespeichert
 const FIRST_YEAR = 2025;
@@ -57,10 +57,10 @@ async function loadRider(slug, league) {
     .eq('athlete_id', slug).order('id'))).map((r) => [r.wa_result_id, r]));
   // Toplisten: neuestes Jahr zuerst, im Jahr nach Distanz aufsteigend (Freiluft vor Halle)
   const toplists = (await rpc('athlete_toplists', { p_athlete: slug }) || []).sort((a, b) =>
-    b.year - a.year || discMeters(discLabel(a.discipline)) - discMeters(discLabel(b.discipline))
+    b.year - a.year || discOrder(a.discipline, b.discipline)
     || discLabel(a.discipline).localeCompare(discLabel(b.discipline)));
   const pbs = (await q(sb.from('athlete_pbs').select('discipline,mark,date,result_score').eq('athlete_id', slug)))
-    .sort((a, b) => discMeters(discLabel(a.discipline)) - discMeters(discLabel(b.discipline)) || a.discipline.localeCompare(b.discipline));
+    .sort((a, b) => discOrder(a.discipline, b.discipline));
   const season = Object.fromEntries((await q(sb.from('athlete_season_stats').select('year,season_rank,points,athletes,overall_rank,overall_athletes').eq('athlete_id', slug)))
     .map((x) => [x.year, mixed && x.overall_rank ? { ...x, season_rank: x.overall_rank, athletes: x.overall_athletes } : x]));
   // voller PB-Bonus (zum Erkennen von =PB, das halb zählt)
@@ -103,7 +103,7 @@ export function RiderModal() {
   const inYear = (data?.results || []).filter((x) => yearOf(x) === y);
   const total = inYear.reduce((s, x) => s + Number(x.pts?.points || 0), 0);
   const dl = (x) => discWithKm(x.discipline, x.competition);
-  const discs = [...new Set(inYear.map(dl))].sort((a, b) => discMeters(a) - discMeters(b) || a.localeCompare(b));
+  const discs = [...new Set(inYear.map(dl))].sort(discOrder);
   const d = discs.includes(disc) ? disc : '';
   const inDisc = d ? inYear.filter((x) => dl(x) === d) : inYear;
   const discTotal = inDisc.reduce((s, x) => s + Number(x.pts?.points || 0), 0);

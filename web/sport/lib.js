@@ -4,8 +4,8 @@ import { html } from '../vendor/preact-htm.js';
 import { openRider, q, sb, useLoad } from '../lib.js';
 
 // Disziplingruppen je Bereich und Programm-Disziplinen des Kalenders: siehe groups.js
-import { AREA_GROUPS, AREAS, groupArea } from './groups.js';
-export { AREA_GROUPS, AREAS, groupArea };
+import { AREA_GROUPS, AREAS, discArea, groupArea } from './groups.js';
+export { AREA_GROUPS, AREAS, discArea, groupArea };
 export { eventGroup } from './groups.js';
 export const RUN_GROUPS = AREA_GROUPS.Lauf;
 export const GROUPS = AREAS.flatMap((a) => AREA_GROUPS[a]);
@@ -161,6 +161,13 @@ export function discMeters(label) {
   const m = s.match(/([\d.]+)\s*(m\b|Metres)/);
   return m ? parseFloat(m[1].replace('.', '')) : 1e6;
 }
+/** Sortierung von Disziplinnamen wie überall in der App: nach Bereich (Sprint, Hürden, Lauf, Sprung, Wurf, Mehrkampf,
+ *  Gehen, Staffeln zuletzt), darin nach Strecke, Halle nach Freiluft */
+export const discOrder = (a, b) => {
+  const k = (d) => { const x = discArea(d); return x ? AREAS.indexOf(x) : AREAS.length; };
+  return k(a) - k(b) || discMeters(discLabel(a)) - discMeters(discLabel(b)) || /Short Track|Halle/.test(a) - /Short Track|Halle/.test(b)
+    || String(a).localeCompare(String(b));
+};
 // Reihenfolge der Läufe: Vorläufe, Viertel-, Halbfinale, Finale; jeweils 1, 2, 3 …
 export function raceOrder(r) {
   const m = String(r || '').match(/^(R|Q|H|QF|SF|F)(\d*)$/);
