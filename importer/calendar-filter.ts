@@ -3,7 +3,7 @@
 
 // Programm („Events to be staged“): „100m“, „400mH“, „1500m“, „3000mSC“, „5 km Road“, „Long Jump“, „20 km Race Walk“ …
 // Jugend, Masters und Staffeln zählen nicht.
-import { eventGroup, groupArea } from "../web/sport/groups.js";
+import { AREAS, eventGroup, groupArea } from "../web/sport/groups.js";
 
 export const NOT_SENIOR = /\bU\s?\d{2}\b|\b[MW]\s?\d{2}\b|4\s*x|relay|staffel|masters/i;
 /** Bereich einer Disziplin im Programm (null = Jugend, Staffel oder unbekannt) */
@@ -27,7 +27,6 @@ export const nameAreas = (name: string) => {
 };
 /** Bereiche eines Wettkampfs: aus dem Programm, sonst aus Art (Straße/Cross = Lauf) und Name; null = unbekannt (alle) */
 export function calendarAreas(units: { events: string[] }[] | null, kinds: string[], name: string): string[] | null {
-  const ORDER = ["Lauf", "Sprint", "Hürden", "Sprung", "Wurf", "Mehrkampf", "Gehen"];
   const set = new Set<string>();
   if (units) for (const u of units) for (const e of u.events) { const a = eventArea(e); if (a) set.add(a); }
   else {
@@ -36,7 +35,7 @@ export function calendarAreas(units: { events: string[] }[] | null, kinds: strin
     if (byName) byName.forEach((a) => set.add(a));
     else if (kinds.includes("track")) return null;
   }
-  return ORDER.filter((a) => set.has(a));
+  return AREAS.filter((a) => set.has(a));
 }
 
 // Meisterschaften und Spiele anderer Kontinente bzw. Länder – dort starten keine Deutschen

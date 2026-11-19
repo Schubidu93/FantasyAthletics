@@ -1,11 +1,12 @@
 // Disziplingruppen (Schwerpunkt-Disziplinen) je Bereich und Zuordnung von Programm-Disziplinen aus dem WA-Kalender.
 // Reine Daten und Funktionen ohne Oberfläche: genutzt von der App (über sport/lib.js) und vom Importer (calendar-filter.ts).
 
-// Gruppen je Bereich – wie _group_area in der Datenbank
+// Gruppen je Bereich – wie _group_area in der Datenbank. Die Reihenfolge hier ist die Reihenfolge der Disziplinen in
+// allen Listen und Auswahlfeldern der App (Sprint, Hürden, Lauf, Sprung, Wurf, Mehrkampf, Gehen)
 export const AREA_GROUPS = {
-  Lauf: ['800', '1500', '5000', '10000', 'Marathon', 'Hindernis'],
   Sprint: ['100', '200', '400'],
   Hürden: ['Kurzhürden', 'Langhürden'],
+  Lauf: ['800', '1500', '5000', '10000', 'Marathon', 'Hindernis'],
   Sprung: ['Hochsprung', 'Stabhochsprung', 'Weitsprung', 'Dreisprung'],
   Wurf: ['Kugel', 'Diskus', 'Hammer', 'Speer'],
   Mehrkampf: ['Mehrkampf'],
@@ -13,6 +14,21 @@ export const AREA_GROUPS = {
 };
 export const AREAS = Object.keys(AREA_GROUPS);
 export const groupArea = (g) => AREAS.find((a) => AREA_GROUPS[a].includes(g)) || null;
+
+/** Bereich einer Disziplin nach ihrem Namen (WA-Name wie „110 Metres Hurdles“ oder deutsche Bezeichnung); Staffeln: null */
+export function discArea(name) {
+  const s = String(name || '');
+  if (/relay|staffel|medley/i.test(s)) return null;
+  if (/walk|gehen/i.test(s)) return 'Gehen';
+  if (/steeple|hindernis/i.test(s)) return 'Lauf';
+  if (/hurdles|hürden/i.test(s)) return 'Hürden';
+  if (/jump|vault|sprung/i.test(s)) return 'Sprung';
+  if (/throw|shot ?put|wurf|stoßen|kugel/i.test(s)) return 'Wurf';
+  if (/athlon|kampf/i.test(s)) return 'Mehrkampf';
+  if (/marathon|mile|meile|road|straße|cross|km|mountain|berg|uphill/i.test(s)) return 'Lauf';
+  const m = s.match(/^(\d[\d.,]*)\s*(m\b|metres)/i);
+  return m && parseFloat(m[1].replace(/[.,]/g, '')) < 800 ? 'Sprint' : 'Lauf';
+}
 
 // Programm im WA-Kalender („Events to be staged“): „100m“, „400mH“, „1500m“, „3000mSC“, „5 km Road“, „Long Jump“,
 // „20 km Race Walk“ … → Gruppe (verwandte Strecken wie in der Wertung: 60 m → 100 m, Meile → 1500 m, 3000 m → 5000 m).

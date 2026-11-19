@@ -1,7 +1,7 @@
 // Kalender: Bereiche im Wettkampfprogramm erkennen (Beispiele aus echten WA-Programmen)
 import { describe, expect, it } from "vitest";
 import { calendarAreas, eventArea, irrelevantChampionship, nameAreas, runningEvents, seniorEvents } from "../importer/calendar-filter";
-import { eventGroup } from "../web/sport/groups.js";
+import { AREAS, discArea, eventGroup } from "../web/sport/groups.js";
 
 describe("Kalender", () => {
   it("erkennt Laufdisziplinen ab 800 m im Programm", () => {
@@ -19,6 +19,13 @@ describe("Kalender", () => {
       .toEqual(["Sprint", "Hürden", "Hürden", "Lauf", "Lauf", "Sprung", "Sprung", "Wurf", "Wurf", "Mehrkampf", "Gehen", "Lauf", "Sprint", "Lauf"]);
     expect(seniorEvents(["100m U20", "4x100m", "Long Jump", "Masters 800m", "Senior Race"])).toEqual(["Long Jump"]);
   });
+  it("Reihenfolge der Bereiche und Bereich je Disziplinname (Sortierung aller Listen)", () => {
+    expect(AREAS).toEqual(["Sprint", "Hürden", "Lauf", "Sprung", "Wurf", "Mehrkampf", "Gehen"]);
+    expect(["400 Metres", "800 Metres", "110 Metres Hurdles", "3000 Metres Steeplechase", "Pole Vault", "Shot Put", "Heptathlon",
+      "20 Kilometres Race Walk", "Half Marathon", "4x100 Metres Relay", "100 m Hürden", "Kugelstoßen", "200 m (Halle)"].map(discArea))
+      .toEqual(["Sprint", "Lauf", "Hürden", "Lauf", "Sprung", "Wurf", "Mehrkampf", "Gehen", "Lauf", null, "Hürden", "Wurf", "Sprint"]);
+  });
+
   it("ordnet Programm-Disziplinen den Schwerpunkt-Disziplinen zu (Disziplin-Filter im Kalender)", () => {
     expect(["60m", "300m", "110mH", "400mH", "1000m", "Mile", "3000m", "3000mSC", "10,000m", "5 km Road", "Half Marathon",
       "Cross Country", "High Jump", "Shot Put", "Heptathlon", "Half Marathon Race Walk"].map(eventGroup))
@@ -28,7 +35,7 @@ describe("Kalender", () => {
 
   it("Bereiche eines Wettkampfs: Programm, sonst Art und Name", () => {
     expect(calendarAreas([{ events: ["1500m", "Long Jump"] }, { events: ["Javelin Throw", "100m"] }], ["track"], "Meeting"))
-      .toEqual(["Lauf", "Sprint", "Sprung", "Wurf"]);
+      .toEqual(["Sprint", "Lauf", "Sprung", "Wurf"]);
     expect(calendarAreas(null, ["road"], "Berlin-Marathon")).toEqual(["Lauf"]);
     expect(calendarAreas(null, ["track"], "Hylo Javelin Meeting")).toEqual(["Wurf"]);
     expect(calendarAreas(null, ["track"], "Night of Hasbergen")).toBeNull();   // Name verrät nichts → unbekannt
