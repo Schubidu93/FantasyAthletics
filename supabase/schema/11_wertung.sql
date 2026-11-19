@@ -217,11 +217,14 @@ begin
   delete from results where p_from is null or result_date >= p_from;
   insert into results (athlete_id, competition_id, label, result_date, rank, points, perf_points, placing_points, record_points, pb_points, wa_result_id)
   with pb as materialized (select * from _pb_factors())
-  -- Ein Wettkampf = ein Ergebnis: je Athlet, Wettkampf und Disziplin zählt nur die beste Runde (Vorlauf, Halbfinale, Finale …),
-  -- damit Disziplinen mit vielen Runden (Sprint, Hürden) nicht mehrfach punkten
-  select distinct on (athlete_id, competition_id, base) athlete_id, competition_id, label, date, place,
-         perf + plc + rec + pb, perf, plc, rec, pb, id
-    from (
+  -- Ein Wettkampf = ein Ergebnis: je Athlet, Wettkampf und Disziplin bringen nur der besten Runde (Vorlauf, Halbfinale, Finale …)
+  -- Leistungs- und Platzierungspunkte, damit Disziplinen mit vielen Runden (Sprint, Hürden) nicht mehrfach punkten.
+  -- Bestleistungs- und Rekord-Bonus zählen in jeder Runde.
+  select athlete_id, competition_id, label, date, place, p + plc2 + rec + pb, p, plc2, rec, pb, id
+    from (select y.*, case when rn = 1 then perf else 0 end p, case when rn = 1 then plc else 0 end plc2
+            from (select x.*, row_number() over (partition by athlete_id, competition_id, base
+                                                  order by perf + plc desc, perf + plc + rec + pb desc, date desc, id) rn
+                    from (
       select w.id, w.athlete_id, w.date, w.place,
              -- Staffel: Leistungs- und Platzierungspunkte nur anteilig (1/3 bzw. 1/4)
              case w.record when 'WR' then c.record_wr when 'ER' then c.record_er when 'DR' then c.record_dr
@@ -236,7 +239,8 @@ begin
              -- Disziplin (bei Cross mit Distanz) ohne Runde: Schlüssel für „beste Runde je Wettkampf“
              w.discipline || coalesce(' · ' || case when d.cross_table is not null then cross_km(w.competition) end || 'km', '') base,
              -- Zwischenzeiten (z. B. 1500 m im Meilenrennen): keine Leistungs- und Platzierungspunkte, nur Rekord- und PB-Bonus
-             case when _is_split(w.competition, w.remark) then 0
+             -- Einzeldisziplinen im Mehrkampf (Runde CE, CE1 …): ebenso, es zählt das Gesamtergebnis
+             case when _is_split(w.competition, w.remark) or coalesce(w.wa_race, '') ~ '^CE' then 0
                   when d.cross_table is not null then
                     round(greatest(0, coalesce((select ps.points from placing_scores ps
                                                  where ps.placing_table = d.cross_table and ps.category = w.category
@@ -248,7 +252,7 @@ begin
              end perf,
              -- Meisterschaft im offenen Rennen (z. B. DM im Frankfurt-Marathon): der höhere Wert aus Platz im Rennen
              -- und Meisterschaftsplatz (champ_place, Kategorie champ_category, Standard B) zählt
-             case when d.cross_table is not null or _is_split(w.competition, w.remark) then 0
+             case when d.cross_table is not null or _is_split(w.competition, w.remark) or coalesce(w.wa_race, '') ~ '^CE' then 0
                   else round(greatest(
                          coalesce((select max(ps.points) from placing_scores ps
                                     where ps.placing_table = any (d.placing_tables) and ps.category = w.category
@@ -262,15 +266,12 @@ begin
         from wa_results w left join disciplines d on d.name = w.discipline
         left join pb pf on pf.wa_result_id = w.id
        where (p_from is null or w.date >= p_from) and w.date >= date '2025-01-01'
-         -- Einzeldisziplinen innerhalb eines Mehrkampfs (Runde CE, CE1 …) zählen nicht extra – nur das Gesamtergebnis
-         and coalesce(w.wa_race, '') !~ '^CE'
          -- Nachtrag entfällt, sobald World Athletics dasselbe Ergebnis führt (gleiche Disziplin, ±1 Tag)
          and not (w.source = 'manual' and w.relay is null and exists (select 1 from wa_results o
                    where o.athlete_id = w.athlete_id and o.source = 'wa' and o.discipline = w.discipline
                      and abs(o.date - w.date) <= 1))
-    ) x
-   where perf + plc + rec + pb > 0
-   order by athlete_id, competition_id, base, perf + plc + rec + pb desc, date desc, id
+    ) x) y) z
+   where p + plc2 + rec + pb > 0
   on conflict (athlete_id, competition_id, label) do nothing;
   get diagnostics n = row_count;
   return n;
