@@ -121,7 +121,11 @@ export function Rules({ c }) {
         ${areas.includes('Lauf') && html`<li>Cross nach Länge: bis 3 km 1500 m, bis 6 km 5000 m, bis 12 km 10.000 m, darüber Marathon.</li>`}
         <li>Ohne Punkte im Vorjahr zählt die beste Leistung; ganz neue Athleten kommen in die Disziplin ihrer ersten Leistung
           ab ${cfg?.new_group_threshold ?? 975} WA-Punkten.</li>
-        <li><strong>Pool-Rang</strong> (Reihenfolge im Draft): nach den Punkten im Vorjahr der Saison, bei Gleichstand nach der besten Toplistenleistung.</li>
+        <li><strong>Pool-Rang</strong> (Reihenfolge im Draft): nach den Punkten im Vorjahr der Saison, bei Gleichstand nach der besten Toplistenleistung.
+          In den Athletenlisten steht er vorne (z. B. „1. Robert FARKEN“).</li>
+        ${lineup && html`<li><strong>Positions-Rang:</strong> Der Chip hinter dem Namen (z. B. „#2 Mittelstrecke“) zeigt den Platz unter allen Athleten,
+          die auf dieselbe Position dieser Liga passen – in derselben Reihenfolge wie der Pool-Rang${l.lineup_mode === 'mf' ? ', getrennt nach Männern und Frauen' : ''}.
+          Wer auf keine eigene Position passt, ist „nur Wildcard“.</li>`}
         ${lineup ? html`
           <li>Für jeden Spieltag stellst du bis zu ${slots.length} Athleten auf: ${l.lineup_mode === 'mf'
             ? 'je Disziplin einen Mann und eine Frau' : 'je Disziplin einen Athleten dieser Gruppe'}${l.wildcards > 0
@@ -146,13 +150,11 @@ export function Rules({ c }) {
       ${cfg && cfg.perf_threshold === 1000 && html`<p class="muted small">Beispiel: Marathon in 2:09:43 (1135 WA-Punkte), Platz 9 ohne Platzierungspunkte:
         135 × ${fmtNum(cfg.perf_factor)} × ${fmtNum(mf)} = <strong>${fmtNum(Math.round(135 * cfg.perf_factor * mf * 100) / 100)} Punkte</strong>.</p>`}
       <h4 class="rule-sub">Disziplinfaktoren</h4>
-      <p class="muted small">Lange Wettkämpfe zählen mehr, weil es davon nur wenige im Jahr gibt. Alle anderen Disziplinen: × 1.
+      <p class="muted small">Disziplinen mit wenigen Wettkämpfen im Jahr (lange Strecken, Mehrkampf, Sprung, Hammer und Speer) zählen mehr. Alle anderen Disziplinen: × 1.
         Staffeln: Leistung und Platzierung wie über die Einzelstrecke, davon ¼ (4er-Staffel) bzw. ⅓ (3er-Staffel).</p>
       <table class="tbl rule-tbl"><tbody>
         ${factorRows(disciplines, areas).map(([f, names]) => html`<tr key=${f}><td class="num">× ${fmtNum(f)}</td><td>${names.join(' · ')}</td></tr>`)}
       </tbody></table>
-      <ul>
-      </ul>
       <h4 class="rule-sub">Platzierung</h4>
       <ul>
         <li>Nach den World-Ranking-Regeln 2026 von World Athletics – je nach Kategorie und Platz. Kategorien: OW = Olympia/WM ·
@@ -257,7 +259,8 @@ export function Rules({ c }) {
           kann der Admin von Hand nachtragen – mit Bruttozeit, Land, Wettkampfkategorie (Standard F) und Link zur Quelle. Die WA-Punkte berechnet
           die App nach den Punktetabellen von World Athletics; mit Platz gibt es Platzierungspunkte nach der Kategorie. Taucht das Ergebnis später
           bei World Athletics auf, gilt das WA-Ergebnis.</li>
-        <li><strong>Staffeln</strong> (3 × 800 m, 3 × 1000 m, 4 × 400 m, nur als Nachtrag): Die Endzeit wird durch die Zahl der Läufer geteilt
+        <li><strong>Staffeln</strong> von World Athletics werden automatisch gewertet (siehe Punkte). Staffeln, die World Athletics nicht führt
+          (3 × 800 m, 3 × 1000 m, 4 × 400 m), kann der Admin nachtragen: Die Endzeit wird durch die Zahl der Läufer geteilt
           und wie ein Einzelrennen über die Teilstrecke gewertet (z. B. 3 × 800 m in 6:08,33 → 2:02,78 über 800 m). Jeder Läufer bekommt
           davon ein Drittel bzw. Viertel – für Leistung und Platzierung.</li>
         <li><strong>Korrekturen:</strong> Bei falschen Daten kann der Admin Punkte manuell korrigieren – jede Korrektur wird protokolliert.</li>
