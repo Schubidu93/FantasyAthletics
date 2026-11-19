@@ -13,7 +13,7 @@ function range(period, from, to) {
 }
 
 // Auswahl bleibt beim Zurückkehren aus einem Athletenprofil erhalten
-const saved = { period: '30', from: daysAgo(29), to: iso(new Date()), disc: '' };
+const saved = { period: '30', from: daysAgo(29), to: iso(new Date()), disc: '', team: '' };
 const keep = (key, setter) => (v) => { saved[key] = v; setter(v); };
 
 export function TopResults({ c }) {
@@ -23,20 +23,27 @@ export function TopResults({ c }) {
   const [disc, setDiscRaw] = useState(saved.disc);
   const setPeriod = keep('period', setPeriodRaw), setFrom = keep('from', setFromRaw), setTo = keep('to', setToRaw);
   const setDisc = keep('disc', setDiscRaw);
+  const [teamRaw, setTeamRaw] = useState(saved.team);
+  const setTeam = keep('team', setTeamRaw);
+  // Team-Filter erst ab dem ersten Spieltag: Ergebnisse, die diesem Team in der Liga Punkte gebracht haben
+  const started = (c.matchdays || []).some((m) => m.starts_on <= iso(new Date()));
+  const team = started && c.managers.some((m) => m.id === teamRaw) ? teamRaw : '';
   const [a, b] = range(period, from, to);
-  const list = useLoad(() => rpc('top_results', { p_gender: c.league.gender, p_from: a, p_to: b, p_discipline: disc || null, p_limit: 200 }),
-    [c.league.gender, a, b, disc]);
+  const list = useLoad(() => rpc('top_results', { p_gender: c.league.gender, p_from: a, p_to: b, p_discipline: disc || null, p_limit: 200,
+    p_league: c.league.id, p_manager: team || null }), [c.league.id, c.league.gender, a, b, disc, team]);
   // nur Athleten, die es in dieser Liga gibt (Bereiche der Liga)
   const rows = (list.data || []).filter((r) => c.riderMap[r.athlete_id]).slice(0, 100);
 
   return html`<section class="card">
     <${BackToAthlete} />
     <h2>Top-Leistungen</h2>
-    <p class="muted small">Die einzelnen Ergebnisse mit den meisten Punkten.</p>
+    <p class="muted small">Die einzelnen Ergebnisse mit den meisten Punkten.${team ? ' Nur Ergebnisse, die diesem Team in der Liga Punkte gebracht haben.' : ''}</p>
     <div class="filters">
       <select value=${period} onChange=${(e) => setPeriod(e.target.value)} aria-label="Zeitraum">
         ${PERIODS.map(([k, l]) => html`<option value=${k}>${l}</option>`)}</select>
       <${DiscFilter} value=${disc} onChange=${setDisc} />
+      ${started && html`<select value=${team} onChange=${(e) => setTeam(e.target.value)} aria-label="Team">
+        <option value="">Alle Teams</option>${c.managers.map((m) => html`<option value=${m.id}>${m.team_name}</option>`)}</select>`}
       ${period === 'custom' && html`<label class="small">von <input type="date" value=${from} max=${to} onChange=${(e) => setFrom(e.target.value)} /></label>
         <label class="small">bis <input type="date" value=${to} min=${from} onChange=${(e) => setTo(e.target.value)} /></label>`}
     </div>

@@ -237,4 +237,23 @@ describe("Bereiche (alle Disziplinen oder nur Lauf)", () => {
     expect(await total(lauf.id)).toBe(200);   // 800 m 100 + 400 m 50 + 20 km Gehen 20 × 2,5
     expect(await total(all.id)).toBe(200);
   });
+
+  it("Top-Leistungen je Team: nur Ergebnisse, die dem Team Punkte gebracht haben", async () => {
+    const L = await league({ gender: "men", scoring_mode: "full", draft_mode: "offline" });
+    // wa-1 bei Alice erst ab gestern: das Ergebnis von vor 3 Tagen zählt nicht für sie
+    await db.query("insert into roster_entries (league_id, manager_id, athlete_id, price, source, acquired_on) values ($1, $2, 'wa-1', 1, 'offline', $3)",
+      [L.id, L.alice, day(-1)]);
+    await db.query("update leagues set status = 'active' where id = $1", [L.id]);
+    const md = (await db.one("select upsert_matchday($1, null, 'S', $2, $3) id", [L.id, day(2), day(20)])).id;
+    await db.query("update matchdays set starts_on = $2, deadline = now() - interval '1 hour' where id = $1", [md, day(-5)]);
+    await db.query(`insert into wa_results (athlete_id, date, competition, discipline, category, race, wa_race, place, result_score, wa_competition_id)
+                    values ('wa-1', $1, 'Heute', '800 Metres', 'F', 'F', 'F', 9, 1100, 1), ('wa-1', $2, 'Früher', '800 Metres', 'F', 'F', 'F', 9, 1150, 2),
+                           ('wa-2', $1, 'Heute', '800 Metres', 'F', 'F', 'F', 9, 1200, 1)`, [day(0), day(-3)]);
+    await db.query("select rebuild_results(null)");
+    const top = async (m: string | null) => (await db.all("select athlete_id, points::float p from top_results('men', $1, $2, null, 100, $3, $4)",
+      [day(-10), day(0), L.id, m])).map((r) => `${r.athlete_id} ${r.p}`);
+    expect(await top(null)).toEqual(["wa-2 200", "wa-1 150", "wa-1 100"]);
+    expect(await top(L.alice)).toEqual(["wa-1 100"]);
+    expect(await top(L.bob)).toEqual([]);
+  });
 });
