@@ -109,7 +109,8 @@ richtet `.claude/hooks/session-start.sh` Pakete und das Test-PostgreSQL ein.
   ohne Punkte beste Leistung, neue Athleten erste Leistung ab `new_group_threshold` (975) im Spieljahr, sonst Toplisten.
   Im Pool nur `athletes.nation = 'GER'` (Nation laut WA-Profil, täglich aus `sync-pbs.ts`; Nationenwechsel → raus) oder `manual`.
   Faktoren je Disziplin in `research/disciplines.txt`; Änderungen an bestehenden Faktoren einmalig über `schema_changes` in `build_placing_sql.py`
-  (Mehrkampf: Zehn-/Siebenkampf 4, Halle 3; Gehen wie Lauf über die gleiche Strecke).
+  (Mehrkampf: Zehn-/Siebenkampf 4, Halle 3; Gehen wie Lauf über die gleiche Strecke; Sprung 1,3; Hammer/Speer 1,5).
+  `rebuild_results`: je Athlet, Wettkampf und Disziplin nur die beste Runde; Mehrkampf-Einzeldisziplinen (`wa_race` CE…) zählen nicht.
 - Bestleistungen: `importer/sync-pbs.ts` (getSingleCompetitor: personalBests, progressionOfSeasonsBests) → `athlete_pbs` (Profil)
   und `athlete_pb_before` (beste Leistung vor 2025). PB-Bonus `scoring_config.pb_points` über `_pb_factor()` in `rebuild_results`
   (schneller als alles davor = 1, gleich = 0,5 „=PB“; eingestellte Rekorde `=DR/=ER/=WR` halb; ab Schwelle, auch Zwischenzeiten, keine Staffeln; Halle = „… Short Track“).

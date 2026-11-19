@@ -176,6 +176,9 @@ export function Rules({ c }) {
       </ul>
       <h4 class="rule-sub">Gut zu wissen</h4>
       <ul>
+        <li><strong>Ein Wettkampf = ein Ergebnis:</strong> Läuft ein Athlet bei einem Wettkampf mehrere Runden (z. B. Vorlauf und Finale),
+          zählt nur die beste – mit allen Punkten und Boni dieser Runde.</li>
+        ${areas.includes('Mehrkampf') && html`<li><strong>Mehrkampf:</strong> Es zählt nur das Gesamtergebnis, nicht die einzelnen Disziplinen darin.</li>`}
         ${areas.includes('Lauf') && html`<li><strong>Cross:</strong> fester Wert je Platz und Kategorie (z. B. GL-Sieg 1200) statt WA-Punkten, gewertet wie eine
           Leistung × ${cfg ? fmtNum(cfg.cross_factor) : '0,1'} × Distanzfaktor (bis 3 km 1 · bis 6 km 1,3 · bis 12 km 1,6 · darüber 2).</li>`}
         <li><strong>Zwischenzeiten</strong> (z. B. 1500 m im Meilenrennen) bringen nur Bestleistungs- und Rekord-Bonus.</li>

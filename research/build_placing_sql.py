@@ -85,6 +85,7 @@ for line in open("research/disciplines.txt", encoding="utf-8"):
     disc.append(f"  ({q(name)}, {factor}, {q(group)}, {arr}, {q(cross)}, {'true' if higher else 'false'})")
 # Disziplinen, die mit der Erweiterung auf alle Disziplinen erstmals zählen (vorher Faktor 0): einmalig umstellen
 COMBINED = ["Decathlon", "Heptathlon", "Heptathlon Short Track", "Pentathlon Short Track"]
+FIELD = ["High Jump", "Pole Vault", "Long Jump", "Triple Jump", "Hammer Throw", "Javelin Throw"]
 WALKS = ["3000 Metres Race Walk Short Track", "5000 Metres Race Walk", "10 Kilometres Race Walk", "20 Kilometres Race Walk",
          "20,000 Metres Race Walk", "Half Marathon Race Walk", "35 Kilometres Race Walk", "Marathon Race Walk"]
 newly_scored = [n for n in (l.split("|")[0] for l in open("research/disciplines.txt", encoding="utf-8"))
@@ -136,6 +137,18 @@ begin
 {",\n".join(f"      ({q(n)}, {f})" for n, f in ((l.split("|")[0], l.split("|")[1]) for l in open("research/disciplines.txt", encoding="utf-8")) if n in WALKS)}
     ) x(name, factor) where d.name = x.name and d.factor = 1;
     insert into schema_changes (name) values ('gehen_faktoren');
+  end if;
+end $$;
+
+-- einmalig: Sprung ×1,3, Hammer und Speer ×1,5 – weniger Wettkämpfe im Jahr (Auswertung 2025: Top-10 je Schwerpunkt
+-- 130–200 Punkte gegenüber 230–330 in den anderen Bereichen, nachdem je Wettkampf nur die beste Runde zählt)
+do $$
+begin
+  if not exists (select 1 from schema_changes where name = 'feld_faktoren') then
+    update disciplines d set factor = x.factor from (values
+{",\n".join(f"      ({q(n)}, {f})" for n, f in ((l.split("|")[0], l.split("|")[1]) for l in open("research/disciplines.txt", encoding="utf-8")) if n in FIELD)}
+    ) x(name, factor) where d.name = x.name and d.factor = 1;
+    insert into schema_changes (name) values ('feld_faktoren');
   end if;
 end $$;
 

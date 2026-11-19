@@ -88,12 +88,12 @@ insert into disciplines (name, factor, event_group, placing_tables, cross_table,
   ('Distance Medley Short Track', 0, null, '{}', null, false),
   ('Half Marathon', 2, 'Marathon', '{MARATHON_SIMILAR,ROAD}', null, false),
   ('Half Marathon Race Walk', 2, 'Gehen', '{RW_HM}', null, false),
-  ('Hammer Throw', 1, 'Hammer', '{TF}', null, true),
+  ('Hammer Throw', 1.5, 'Hammer', '{TF}', null, true),
   ('Heptathlon', 4, 'Mehrkampf', '{CE}', null, true),
   ('Heptathlon Short Track', 3, 'Mehrkampf', '{CE}', null, true),
-  ('High Jump', 1, 'Hochsprung', '{TF}', null, true),
-  ('Javelin Throw', 1, 'Speer', '{TF}', null, true),
-  ('Long Jump', 1, 'Weitsprung', '{TF}', null, true),
+  ('High Jump', 1.3, 'Hochsprung', '{TF}', null, true),
+  ('Javelin Throw', 1.5, 'Speer', '{TF}', null, true),
+  ('Long Jump', 1.3, 'Weitsprung', '{TF}', null, true),
   ('Marathon', 3, 'Marathon', '{MARATHON}', null, false),
   ('Marathon Race Walk', 3, 'Gehen', '{RW_MAR}', null, false),
   ('Mile', 1, '1500', '{TF}', null, false),
@@ -106,11 +106,11 @@ insert into disciplines (name, factor, event_group, placing_tables, cross_table,
   ('Mountain Running Up & Down Senior Race', 1.6, '10000', '{10KROAD}', null, false),
   ('Mountain Running Up & Down U20 Race', 1.6, '10000', '{10KROAD}', null, false),
   ('Pentathlon Short Track', 3, 'Mehrkampf', '{CE}', null, true),
-  ('Pole Vault', 1, 'Stabhochsprung', '{TF}', null, true),
+  ('Pole Vault', 1.3, 'Stabhochsprung', '{TF}', null, true),
   ('Road Race', 1, null, '{}', null, false),
   ('Shot Put', 1, 'Kugel', '{TF}', null, true),
   ('Sprint Medley 1000m', 0.25, '400', '{TF}', null, false),
-  ('Triple Jump', 1, 'Dreisprung', '{TF}', null, true),
+  ('Triple Jump', 1.3, 'Dreisprung', '{TF}', null, true),
   ('U20 Mountain Classic', 1.6, '10000', '{10KROAD}', null, false),
   ('Vertical Uphill', 1.6, '10000', '{10KROAD}', null, false)
 on conflict (name) do update set event_group = excluded.event_group, placing_tables = excluded.placing_tables,
@@ -167,6 +167,23 @@ begin
       ('Marathon Race Walk', 3)
     ) x(name, factor) where d.name = x.name and d.factor = 1;
     insert into schema_changes (name) values ('gehen_faktoren');
+  end if;
+end $$;
+
+-- einmalig: Sprung ×1,3, Hammer und Speer ×1,5 – weniger Wettkämpfe im Jahr (Auswertung 2025: Top-10 je Schwerpunkt
+-- 130–200 Punkte gegenüber 230–330 in den anderen Bereichen, nachdem je Wettkampf nur die beste Runde zählt)
+do $$
+begin
+  if not exists (select 1 from schema_changes where name = 'feld_faktoren') then
+    update disciplines d set factor = x.factor from (values
+      ('Hammer Throw', 1.5),
+      ('High Jump', 1.3),
+      ('Javelin Throw', 1.5),
+      ('Long Jump', 1.3),
+      ('Pole Vault', 1.3),
+      ('Triple Jump', 1.3)
+    ) x(name, factor) where d.name = x.name and d.factor = 1;
+    insert into schema_changes (name) values ('feld_faktoren');
   end if;
 end $$;
 
