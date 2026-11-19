@@ -121,7 +121,7 @@ export function Rules({ c }) {
         <li>Jedes Ergebnis bei World Athletics bringt
           <strong>Leistungspunkte</strong> = (WA-Punkte − ${cfg ? cfg.perf_threshold : 1000}) × ${cfg ? fmtNum(cfg.perf_factor) : '0,1'} (nur über der Schwelle) plus
           <strong>Platzierungspunkte</strong> = WA-Platzierungspunkte × ${cfg ? fmtNum(cfg.placing_factor) : '0,1'},
-          beides mal dem <strong>Disziplinfaktor</strong> (z. B. 5000 m 1,3 · 10.000 m 1,6 · Halbmarathon 2 · Marathon 3 · Zehn- und Siebenkampf 4 · Mehrkampf in der Halle 3 · Staffeln 0,25 bzw. 0,33 · sonst 1). Lange Wettkämpfe zählen mehr, weil es davon nur wenige im Jahr gibt.
+          beides mal dem <strong>Disziplinfaktor</strong> (z. B. 5000 m 1,3 · 10.000 m 1,6 · Halbmarathon 2 · Marathon 3 · Zehn- und Siebenkampf 4 · Mehrkampf in der Halle 3 · Gehen 1,5 bis 4 je nach Strecke (20 km 3, 35 km 4) · Staffeln 0,25 bzw. 0,33 · sonst 1). Lange Wettkämpfe zählen mehr, weil es davon nur wenige im Jahr gibt.
           ${cfg && cfg.perf_threshold === 1000 && html`Beispiel: Marathon in 2:09:43 (1135 WA-Punkte), Platz 9 ohne Platzierungspunkte →
             135 × ${fmtNum(cfg.perf_factor)} × 3 = ${fmtNum(Math.round(135 * cfg.perf_factor * 3 * 100) / 100)} Punkte.`}</li>
         <li><strong>Platzierungspunkte</strong> genau nach den World-Ranking-Regeln 2026 von World Athletics: abhängig von Wettkampfkategorie

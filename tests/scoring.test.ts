@@ -211,6 +211,16 @@ describe("Mehrkampf", () => {
   });
 });
 
+describe("Gehen", () => {
+  it("Faktor nach Strecke (wenige Rennen im Jahr)", async () => {
+    expect(await db.all(`select name, factor::float f from disciplines where name in
+      ('5000 Metres Race Walk', '10,000 Metres Race Walk', '20 Kilometres Race Walk', '35 Kilometres Race Walk') order by f`)).toEqual([
+      { name: "5000 Metres Race Walk", f: 1.5 }, { name: "10,000 Metres Race Walk", f: 2 },
+      { name: "20 Kilometres Race Walk", f: 3 }, { name: "35 Kilometres Race Walk", f: 4 },
+    ]);
+  });
+});
+
 describe("Nationenwechsel", () => {
   it("wer laut WA für ein anderes Land startet, ist nicht mehr im Pool (außer von Hand hinzugefügt)", async () => {
     await athlete(db, 1, "Deutsch", "women", "100 Metres", 1150);
