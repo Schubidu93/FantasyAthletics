@@ -34,7 +34,7 @@ export function withPositionRanks(people, league) {
   for (const r of people) {
     if (r.pool_rank == null) continue;
     const p = positions.find((x) => positionGroups(x).includes(riderGroup(r)));
-    if (!p) continue;
+    if (!p) { r.pos_wildcard = (league?.wildcards ?? 0) > 0; continue; }
     // getrennt nach Geschlecht nur, wenn je Position ein Mann und eine Frau aufgestellt werden (lineup_mode 'mf')
     r.pos_key = league?.lineup_mode === 'mf' ? `${p}|${r.gender}` : p;
     r.pos_rank = count[r.pos_key] = (count[r.pos_key] || 0) + 1;
