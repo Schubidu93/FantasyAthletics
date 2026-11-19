@@ -65,10 +65,3 @@ select.mini { font-size: .75rem; padding: 2px 6px; width: auto; min-height: 0; }
 .mini-label { font-size: .75rem; display: inline-flex; gap: .3rem; align-items: center; }
 .place-sub { display: block; font-size: .68rem; line-height: 1.1; white-space: nowrap; }
 
-/* Regeln: Formel-Kasten, Zwischenüberschriften, kleine Tabellen */
-.rule-formula { background: var(--accent-soft); border-radius: 8px; padding: .6rem .75rem; display: flex; flex-direction: column; gap: .2rem; font-size: .92rem; }
-.rule-sub { margin: .9rem 0 .3rem; font-size: .95rem; }
-.rule-tbl td { vertical-align: top; font-size: .9rem; overflow-wrap: anywhere; }
-.rule-tbl td:first-child { width: 34%; font-weight: 600; padding-right: .6rem; overflow-wrap: normal; hyphens: auto; }
-.rule-tbl td.num:first-child { width: 1%; white-space: nowrap; }
-.rule-steps { margin: 0; padding-left: 1.3rem; display: flex; flex-direction: column; gap: .35rem; }
