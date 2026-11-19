@@ -199,6 +199,16 @@ describe("Athleten außerhalb des Pools löschen", () => {
   });
 });
 
+describe("Staffeln", () => {
+  it("Leistung und Platzierung mit ¼ der Einzelstrecke (4er-Staffel)", async () => {
+    const a = await athlete(db, 1, "Sprinterin", "women", "100 Metres", 1200);
+    await result(a, "100 Metres", "GL", "F", 1, 1180, { competition: "Einzel" });
+    await result(a, "4x100 Metres Relay", "GL", "F", 1, 1180, { competition: "Staffel" });
+    await db.query("select rebuild_results(null)");
+    expect(await points()).toEqual({ Einzel: [180, 120], Staffel: [45, 30] });   // je × 0,25
+  });
+});
+
 describe("Mehrkampf", () => {
   it("Zehn- und Siebenkampf zählen 4-fach, Halle 3-fach", async () => {
     expect(await db.all("select name, factor::float f from disciplines where name ~ 'athlon' order by name")).toEqual([

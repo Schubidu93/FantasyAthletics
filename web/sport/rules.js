@@ -145,7 +145,8 @@ export function Rules({ c }) {
       ${cfg && cfg.perf_threshold === 1000 && html`<p class="muted small">Beispiel: Marathon in 2:09:43 (1135 WA-Punkte), Platz 9 ohne Platzierungspunkte:
         135 × ${fmtNum(cfg.perf_factor)} × 3 = <strong>${fmtNum(Math.round(135 * cfg.perf_factor * 3 * 100) / 100)} Punkte</strong>.</p>`}
       <h4 class="rule-sub">Disziplinfaktoren</h4>
-      <p class="muted small">Lange Wettkämpfe zählen mehr, weil es davon nur wenige im Jahr gibt. Alle anderen Disziplinen: × 1, Staffeln: × ¼ bzw. ⅓.</p>
+      <p class="muted small">Lange Wettkämpfe zählen mehr, weil es davon nur wenige im Jahr gibt. Alle anderen Disziplinen: × 1.
+        Staffeln: Leistung und Platzierung wie über die Einzelstrecke, davon ¼ (4er-Staffel) bzw. ⅓ (3er-Staffel).</p>
       <table class="tbl rule-tbl"><tbody>
         ${factorRows(disciplines, areas).map(([f, names]) => html`<tr key=${f}><td class="num">× ${fmtNum(f)}</td><td>${names.join(' · ')}</td></tr>`)}
       </tbody></table>
