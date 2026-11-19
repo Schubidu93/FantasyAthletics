@@ -89,7 +89,7 @@ insert into disciplines (name, factor, event_group, placing_tables, cross_table,
   ('Half Marathon', 2.5, 'Marathon', '{MARATHON_SIMILAR,ROAD}', null, false),
   ('Half Marathon Race Walk', 2.5, 'Gehen', '{RW_HM}', null, false),
   ('Hammer Throw', 1.5, 'Hammer', '{TF}', null, true),
-  ('Heptathlon', 4, 'Mehrkampf', '{CE}', null, true),
+  ('Heptathlon', 3, 'Mehrkampf', '{CE}', null, true),
   ('Heptathlon Short Track', 3, 'Mehrkampf', '{CE}', null, true),
   ('High Jump', 1.3, 'Hochsprung', '{TF}', null, true),
   ('Javelin Throw', 1.5, 'Speer', '{TF}', null, true),
@@ -105,7 +105,7 @@ insert into disciplines (name, factor, event_group, placing_tables, cross_table,
   ('Mountain Running Classic Hill U20 Race', 2, '10000', '{10KROAD}', null, false),
   ('Mountain Running Up & Down Senior Race', 2, '10000', '{10KROAD}', null, false),
   ('Mountain Running Up & Down U20 Race', 2, '10000', '{10KROAD}', null, false),
-  ('Pentathlon Short Track', 3, 'Mehrkampf', '{CE}', null, true),
+  ('Pentathlon Short Track', 2.5, 'Mehrkampf', '{CE}', null, true),
   ('Pole Vault', 1.3, 'Stabhochsprung', '{TF}', null, true),
   ('Road Race', 1, null, '{}', null, false),
   ('Shot Put', 1, 'Kugel', '{TF}', null, true),
@@ -138,15 +138,15 @@ begin
   end if;
 end $$;
 
--- einmalig: Mehrkampf zählt mehr (wenige Wettkämpfe im Jahr, zwei Tage): Zehn-/Siebenkampf ×4, Halle ×3
+-- einmalig: Mehrkampf zählt mehr (wenige Wettkämpfe im Jahr, zwei Tage): Zehn-/Siebenkampf ×4, Halle ×3 (später angepasst, s. u.)
 do $$
 begin
   if not exists (select 1 from schema_changes where name = 'mehrkampf_faktoren') then
     update disciplines d set factor = x.factor from (values
       ('Decathlon', 4),
-      ('Heptathlon', 4),
+      ('Heptathlon', 3),
       ('Heptathlon Short Track', 3),
-      ('Pentathlon Short Track', 3)
+      ('Pentathlon Short Track', 2.5)
     ) x(name, factor) where d.name = x.name and d.factor = 1;
     insert into schema_changes (name) values ('mehrkampf_faktoren');
   end if;
@@ -228,6 +228,16 @@ begin
       ('Vertical Uphill', 2, 1.6)
     ) x(name, factor, old) where d.name = x.name and d.factor = x.old;
     insert into schema_changes (name) values ('lauf_faktoren_2');
+  end if;
+end $$;
+
+-- einmalig: Siebenkampf ×3 (wie Siebenkampf Halle), Fünfkampf Halle ×2,5 – Zehnkampf bleibt ×4
+do $$
+begin
+  if not exists (select 1 from schema_changes where name = 'mehrkampf_faktoren_2') then
+    update disciplines d set factor = x.factor from (values ('Heptathlon', 3, 4), ('Pentathlon Short Track', 2.5, 3)
+    ) x(name, factor, old) where d.name = x.name and d.factor = x.old;
+    insert into schema_changes (name) values ('mehrkampf_faktoren_2');
   end if;
 end $$;
 

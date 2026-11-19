@@ -123,7 +123,7 @@ begin
   end if;
 end $$;
 
--- einmalig: Mehrkampf zählt mehr (wenige Wettkämpfe im Jahr, zwei Tage): Zehn-/Siebenkampf ×4, Halle ×3
+-- einmalig: Mehrkampf zählt mehr (wenige Wettkämpfe im Jahr, zwei Tage): Zehn-/Siebenkampf ×4, Halle ×3 (später angepasst, s. u.)
 do $$
 begin
   if not exists (select 1 from schema_changes where name = 'mehrkampf_faktoren') then
@@ -166,6 +166,16 @@ begin
 {",\n".join(f"      ({q(n)}, {f}, {o})" for n, f, o in RUN_ROWS)}
     ) x(name, factor, old) where d.name = x.name and d.factor = x.old;
     insert into schema_changes (name) values ('lauf_faktoren_2');
+  end if;
+end $$;
+
+-- einmalig: Siebenkampf ×3 (wie Siebenkampf Halle), Fünfkampf Halle ×2,5 – Zehnkampf bleibt ×4
+do $$
+begin
+  if not exists (select 1 from schema_changes where name = 'mehrkampf_faktoren_2') then
+    update disciplines d set factor = x.factor from (values ('Heptathlon', 3, 4), ('Pentathlon Short Track', 2.5, 3)
+    ) x(name, factor, old) where d.name = x.name and d.factor = x.old;
+    insert into schema_changes (name) values ('mehrkampf_faktoren_2');
   end if;
 end $$;
 

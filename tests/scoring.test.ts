@@ -286,9 +286,9 @@ describe("Staffeln", () => {
 });
 
 describe("Mehrkampf", () => {
-  it("Zehn- und Siebenkampf zählen 4-fach, Halle 3-fach", async () => {
+  it("Zehnkampf zählt 4-fach, Siebenkampf (auch Halle) 3-fach, Fünfkampf Halle 2,5-fach", async () => {
     expect(await db.all("select name, factor::float f from disciplines where name ~ 'athlon' order by name")).toEqual([
-      { name: "Decathlon", f: 4 }, { name: "Heptathlon", f: 4 }, { name: "Heptathlon Short Track", f: 3 }, { name: "Pentathlon Short Track", f: 3 },
+      { name: "Decathlon", f: 4 }, { name: "Heptathlon", f: 3 }, { name: "Heptathlon Short Track", f: 3 }, { name: "Pentathlon Short Track", f: 2.5 },
     ]);
     const a = await athlete(db, 1, "Zehnkämpfer", "men", "Decathlon", 1200);
     await result(a, "Decathlon", "GL", "F", 9, 1100, { competition: "Götzis" });
