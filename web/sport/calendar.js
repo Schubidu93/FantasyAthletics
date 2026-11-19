@@ -2,7 +2,7 @@
 // International ab Gold Label, Europa ab Kategorie A, Deutschland ab E – siehe importer/sync-calendar.ts
 import { html, useState } from '../vendor/preact-htm.js';
 import { all, flag, Loading, nationCode, normName, sb, today, useLoad } from '../lib.js';
-import { CatBadge, leagueAreas, SexBadge } from './lib.js';
+import { CatBadge, eventGroup, GroupFilter, groupFilterMatch, leagueAreas, SexBadge } from './lib.js';
 
 const KIND_LABEL = { track: 'Bahn', road: 'Straße', cross: 'Cross' };
 const TOP = ['OW', 'DF', 'GW', 'GL'];
@@ -14,7 +14,9 @@ const when = (e) => (!e.end_date || e.end_date === e.start_date
   ? `${WD[day(e.start_date).getDay()]} ${dm(e.start_date)}`
   : `${dm(e.start_date)}–${dm(e.end_date)}`);
 
-const saved = { kind: '', area: '', term: '' };
+const saved = { kind: '', area: '', term: '', disc: '' };
+// Hat der Wettkampf laut Programm eine Disziplin der gewählten Gruppe bzw. des Blocks? (ohne Programm: unbekannt → nein)
+const hasDisc = (e, value) => (e.events || []).some((u) => u.events.some((ev) => groupFilterMatch(value, { event_group: eventGroup(ev) })));
 
 export function Calendar({ c }) {
   const events = useLoad(() => all(() => sb.from('calendar_events')
@@ -24,6 +26,8 @@ export function Calendar({ c }) {
   const [kind, setKind] = useState(saved.kind);
   const [area, setArea] = useState(saved.area);
   const [term, setTerm] = useState(saved.term);
+  const [disc, setDiscRaw] = useState(saved.disc);
+  const setDisc = (v) => { saved.disc = v; setDiscRaw(v); };
   const set = (k, f) => (e) => { saved[k] = e.target.value; f(e.target.value); };
   if (!events.data) return html`<${Loading} error=${events.error} />`;
 
@@ -35,6 +39,7 @@ export function Calendar({ c }) {
     // nur Wettkämpfe mit Disziplinen der Liga (Bereiche unbekannt → anzeigen)
     .filter((e) => !e.areas || e.areas.some((a) => areas.includes(a)))
     .filter((e) => !kind || (e.kinds || []).includes(kind))
+    .filter((e) => !disc || hasDisc(e, disc))
     .filter((e) => !area || (area === 'de' ? e.country === 'GER' : area === 'top' ? TOP.includes(e.category) : e.country !== 'GER'))
     .filter((e) => !t || t.split(' ').every((w) => normName(`${e.name} ${e.venue || ''} ${e.competition_group || ''}`).includes(w)));
   const months = [];
@@ -58,7 +63,9 @@ export function Calendar({ c }) {
         <option value="">Alle Regionen</option><option value="top">Höchste Kategorien (OW, DF, GW, GL)</option>
         <option value="int">International</option><option value="de">Deutschland</option>
       </select>
+      <${GroupFilter} league=${c?.league} value=${disc} onChange=${setDisc} />
     </div>
+    ${disc && html`<p class="muted small">Nur Wettkämpfe, deren Programm diese Disziplin enthält.</p>`}
     ${list.length === 0 ? html`<p class="muted">Keine Wettkämpfe gefunden.</p>` : months.map((m) => html`
       <h3 class="cal-month" key=${m.key}>${MONTHS[+m.key.slice(5, 7) - 1]} ${m.key.slice(0, 4)}</h3>
       <ul class="list race-list">${m.items.map((e) => html`<li key=${e.id} class=${e.country === 'GER' ? 'cal-de' : ''}>

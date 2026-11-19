@@ -1,6 +1,7 @@
 // Kalender: Bereiche im Wettkampfprogramm erkennen (Beispiele aus echten WA-Programmen)
 import { describe, expect, it } from "vitest";
 import { calendarAreas, eventArea, irrelevantChampionship, nameAreas, runningEvents, seniorEvents } from "../importer/calendar-filter";
+import { eventGroup } from "../web/sport/groups.js";
 
 describe("Kalender", () => {
   it("erkennt Laufdisziplinen ab 800 m im Programm", () => {
@@ -17,6 +18,12 @@ describe("Kalender", () => {
       "20 km Race Walk", "Mile", "60m", "Half Marathon"].map(eventArea))
       .toEqual(["Sprint", "Hürden", "Hürden", "Lauf", "Lauf", "Sprung", "Sprung", "Wurf", "Wurf", "Mehrkampf", "Gehen", "Lauf", "Sprint", "Lauf"]);
     expect(seniorEvents(["100m U20", "4x100m", "Long Jump", "Masters 800m", "Senior Race"])).toEqual(["Long Jump"]);
+  });
+  it("ordnet Programm-Disziplinen den Schwerpunkt-Disziplinen zu (Disziplin-Filter im Kalender)", () => {
+    expect(["60m", "300m", "110mH", "400mH", "1000m", "Mile", "3000m", "3000mSC", "10,000m", "5 km Road", "Half Marathon",
+      "Cross Country", "High Jump", "Shot Put", "Heptathlon", "Half Marathon Race Walk"].map(eventGroup))
+      .toEqual(["100", "400", "Kurzhürden", "Langhürden", "800", "1500", "5000", "Hindernis", "10000", "5000", "Marathon",
+        "10000", "Hochsprung", "Kugel", "Mehrkampf", "Gehen"]);
   });
 
   it("Bereiche eines Wettkampfs: Programm, sonst Art und Name", () => {

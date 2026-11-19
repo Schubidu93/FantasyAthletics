@@ -3,17 +3,10 @@
 import { html } from '../vendor/preact-htm.js';
 import { openRider, q, sb, useLoad } from '../lib.js';
 
-// Disziplingruppen (Schwerpunkt-Disziplin eines Athleten) je Bereich – wie _group_area in der Datenbank
-export const AREA_GROUPS = {
-  Lauf: ['800', '1500', '5000', '10000', 'Marathon', 'Hindernis'],
-  Sprint: ['100', '200', '400'],
-  Hürden: ['Kurzhürden', 'Langhürden'],
-  Sprung: ['Hochsprung', 'Stabhochsprung', 'Weitsprung', 'Dreisprung'],
-  Wurf: ['Kugel', 'Diskus', 'Hammer', 'Speer'],
-  Mehrkampf: ['Mehrkampf'],
-  Gehen: ['Gehen'],
-};
-export const AREAS = Object.keys(AREA_GROUPS);
+// Disziplingruppen je Bereich und Programm-Disziplinen des Kalenders: siehe groups.js
+import { AREA_GROUPS, AREAS, groupArea } from './groups.js';
+export { AREA_GROUPS, AREAS, groupArea };
+export { eventGroup } from './groups.js';
 export const RUN_GROUPS = AREA_GROUPS.Lauf;
 export const GROUPS = AREAS.flatMap((a) => AREA_GROUPS[a]);
 export const GROUP_LABEL = { 800: '800 m', 1500: '1500 m', 5000: '5000 m', 10000: '10.000 m', Marathon: 'Marathon', Hindernis: 'Hindernis',
@@ -21,7 +14,6 @@ export const GROUP_LABEL = { 800: '800 m', 1500: '1500 m', 5000: '5000 m', 10000
   Hochsprung: 'Hochsprung', Stabhochsprung: 'Stabhochsprung', Weitsprung: 'Weitsprung', Dreisprung: 'Dreisprung',
   Kugel: 'Kugelstoßen', Diskus: 'Diskuswurf', Hammer: 'Hammerwurf', Speer: 'Speerwurf', Mehrkampf: 'Mehrkampf', Gehen: 'Gehen',
   Mittel: 'Mittelstrecke', Lang: 'Langstrecke', Sprint: 'Sprint', Hürden: 'Hürden', Sprung: 'Sprung', Wurf: 'Wurf' };
-export const groupArea = (g) => AREAS.find((a) => AREA_GROUPS[a].includes(g)) || null;
 export const riderGroup = (r) => (r ? r.group_override || r.event_group : null);
 export const leagueAreas = (l) => l?.areas || ['Lauf'];
 /** Darf in dieser Liga geholt werden? Im Pool und in einem Bereich der Liga (wie _eligible in der Datenbank) */
