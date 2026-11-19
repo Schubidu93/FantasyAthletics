@@ -190,21 +190,24 @@ language sql immutable as $$
   select coalesce(p_competition, '') ~* 'split time' or coalesce(p_remark, '') = 'ST';
 $$;
 
--- Persönliche Bestleistung: besser als alles davor (schneller, bei Sprung/Wurf/Mehrkampf weiter bzw. mehr) (beste Leistung vor 2025 laut WA und alle gespeicherten Ergebnisse
--- an früheren Tagen). Es muss vorher schon eine Leistung in der Disziplin geben.
--- Vorlauf und Finale an verschiedenen Tagen können beide PB sein.
--- Ergebnis: 1 = neue PB, 0.5 = PB eingestellt (=PB, gleiche Zeit), 0 = keine
-drop function if exists _is_pb(text, text, date, text);
-create or replace function _pb_factor(p_athlete text, p_discipline text, p_date date, p_mark text) returns numeric
-language plpgsql stable as $$
-declare s numeric := _mark_cost(p_discipline, p_mark); prior numeric;
-begin
-  prior := least(
-    (select _mark_cost(p_discipline, b.mark) from athlete_pb_before b where b.athlete_id = p_athlete and b.discipline = p_discipline),
-    (select min(_mark_cost(p_discipline, o.mark)) from wa_results o
-      where o.athlete_id = p_athlete and o.discipline = p_discipline and o.date < p_date and o.relay is null));
-  return case when s is null or prior is null then 0 when s < prior then 1 when s = prior then 0.5 else 0 end;
-end $$;
+-- Persönliche Bestleistung je Ergebnis (wa_results.id → Faktor): besser als alles davor (schneller, bei Sprung/Wurf/Mehrkampf
+-- weiter bzw. mehr) – beste Leistung vor 2025 laut WA und alle gespeicherten Ergebnisse an früheren Tagen (ohne Staffeln).
+-- Es muss vorher schon eine Leistung in der Disziplin geben. Vorlauf und Finale an verschiedenen Tagen können beide PB sein.
+-- 1 = neue PB, 0.5 = PB eingestellt (=PB, gleiche Leistung), 0 = keine. In einem Durchgang über alle Ergebnisse (Fenster
+-- je Athlet und Disziplin), damit auch zehntausende Ergebnisse schnell gehen.
+drop function if exists _pb_factor(text, text, date, text);
+create or replace function _pb_factors() returns table (wa_result_id bigint, factor numeric)
+language sql stable as $$
+  select x.id, case when x.cost is null or x.prior is null then 0 when x.cost < x.prior then 1 when x.cost = x.prior then 0.5 else 0 end
+    from (select w.id, w.cost,
+                 least(b.cost, min(w.cost) over (partition by w.athlete_id, w.discipline order by w.date
+                                                 range between unbounded preceding and interval '1 day' preceding)) prior
+            from (select o.id, o.athlete_id, o.discipline, o.date, _mark_cost(d.higher_better, o.mark) cost
+                    from wa_results o left join disciplines d on d.name = o.discipline where o.relay is null) w
+            left join (select pb.athlete_id, pb.discipline, _mark_cost(d.higher_better, pb.mark) cost
+                         from athlete_pb_before pb left join disciplines d on d.name = pb.discipline) b
+              on b.athlete_id = w.athlete_id and b.discipline = w.discipline) x;
+$$;
 
 create or replace function rebuild_results(p_from date default null) returns int
 language plpgsql security definer set search_path = public as $$
@@ -213,6 +216,7 @@ begin
   select * into c from scoring_config where id = 1;
   delete from results where p_from is null or result_date >= p_from;
   insert into results (athlete_id, competition_id, label, result_date, rank, points, perf_points, placing_points, record_points, pb_points, wa_result_id)
+  with pb as materialized (select * from _pb_factors())
   select athlete_id, competition_id, label, date, place, perf + plc + rec + pb, perf, plc, rec, pb, id
     from (
       select w.id, w.athlete_id, w.date, w.place,
@@ -221,7 +225,7 @@ begin
                            when '=WR' then c.record_wr / 2.0 when '=ER' then c.record_er / 2.0 when '=DR' then c.record_dr / 2.0 else 0 end rec,
              -- PB-Bonus: nur für Leistungen ab der Schwelle, auch für Zwischenzeiten, nicht für Staffeln
              case when w.relay is null and coalesce(w.result_score, 0) >= c.perf_threshold
-                  then c.pb_points * _pb_factor(w.athlete_id, w.discipline, w.date, w.mark) else 0 end pb,
+                  then c.pb_points * coalesce(pf.factor, 0) else 0 end pb,
              coalesce('wa-c' || w.wa_competition_id, 'wa-' || md5(w.competition || w.date::text)) competition_id,
              w.discipline || case when d.cross_table is not null and cross_km(w.competition) is not null
                                   then ' · ' || cross_km(w.competition) || 'km' else '' end
@@ -251,6 +255,7 @@ begin
                           * c.placing_factor * coalesce(d.factor, 0) * coalesce(w.share, 1), 2)
              end plc
         from wa_results w left join disciplines d on d.name = w.discipline
+        left join pb pf on pf.wa_result_id = w.id
        where (p_from is null or w.date >= p_from) and w.date >= date '2025-01-01'
          -- Nachtrag entfällt, sobald World Athletics dasselbe Ergebnis führt (gleiche Disziplin, ±1 Tag)
          and not (w.source = 'manual' and w.relay is null and exists (select 1 from wa_results o
