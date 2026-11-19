@@ -1,7 +1,7 @@
 // Wettkämpfe: alle Wettkämpfe, bei denen Athleten aus dem Pool gestartet sind, mit deren Ergebnissen und Punkten
 import { html, useState, useMemo } from '../vendor/preact-htm.js';
 import { all, flag, fmtDate, fmtPts, Loading, nationCode, normName, openRider, q, rpcAll, sb, useLoad, withFlag } from '../lib.js';
-import { AREAS, BackToAthlete, CatBadge, discLabel, discMeters, discSections, discWithKm, raceLabel, raceOrder, SexBadge, waResultUrl } from './lib.js';
+import { BackToAthlete, CatBadge, DiscFilter, discLabel, discMeters, discWithKm, raceLabel, raceOrder, SexBadge, waResultUrl } from './lib.js';
 
 // WA-Wettkampfkategorien (World-Ranking-Regeln): OW = Olympia/WM … F = nationale Meetings
 const CATS = [['', 'Alle Kategorien'], ['top', 'OW, DF, GW, GL'], ['OW', 'OW – Olympia/WM'], ['DF', 'DF – DL-Finale'],
@@ -19,19 +19,6 @@ export function Races({ c, sub }) {
   if (sub) return html`<${RaceDetail} key=${sub} c=${c} slug=${decodeURIComponent(sub)} />`;
   if (!races.data) return html`<${Loading} error=${races.error} />`;
   return html`<${RaceList} c=${c} races=${races.data.map((r) => ({ ...r, country: r.country && nationCode(r.country) }))} />`;
-}
-
-// Disziplin-Auswahl: nach Bereich gruppiert wie bei den Toplisten, Disziplinen ohne Schwerpunkt (z. B. Straßenlauf) unter „Sonstige“
-function DiscFilter({ names, value, onChange }) {
-  const dis = useLoad(() => q(sb.from('disciplines').select('name,event_group')), []);
-  const groupOf = Object.fromEntries((dis.data || []).map((d) => [d.name, d.event_group]));
-  const sections = discSections(names, groupOf, AREAS);
-  const rest = names.filter((d) => !sections.some((x) => x.discs.includes(d))).sort();
-  if (rest.length) sections.push({ area: 'Sonstige', discs: rest });
-  if (value && !names.includes(value)) sections.push({ area: '', discs: [value] });
-  return html`<select value=${value} onChange=${(e) => onChange(e.target.value)} aria-label="Disziplin">
-    <option value="">Alle Disziplinen</option>
-    ${sections.map((x) => html`<optgroup label=${x.area}>${x.discs.map((d) => html`<option value=${d}>${discLabel(d)}</option>`)}</optgroup>`)}</select>`;
 }
 
 function RaceList({ c, races }) {

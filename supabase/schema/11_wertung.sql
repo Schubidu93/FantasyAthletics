@@ -420,6 +420,22 @@ language sql stable security definer set search_path = public as $$
    order by r.athlete_id;
 $$;
 
+-- Wettkämpfe → Top-Leistungen: einzelne Ergebnisse mit den meisten Punkten in einem Zeitraum, optional einer Disziplin
+create or replace function top_results(p_gender text, p_from date, p_to date, p_discipline text default null, p_limit int default 100)
+returns table (athlete_id text, result_date date, competition_id text, competition text, discipline text, race text, mark text,
+               points numeric, perf_points numeric, placing_points numeric, pb_points numeric, record_points numeric)
+language sql stable security definer set search_path = public as $$
+  select r.athlete_id, r.result_date, r.competition_id, coalesce(c.name, w.competition), coalesce(w.discipline, r.label),
+         w.wa_race, w.mark, r.points, r.perf_points, r.placing_points, r.pb_points, r.record_points
+    from results r join athletes x on x.id = r.athlete_id
+         left join wa_results w on w.id = r.wa_result_id
+         left join competitions c on c.id = r.competition_id
+   where _gender_ok(p_gender, x.gender) and r.result_date between p_from and p_to and r.points > 0
+     and (p_discipline is null or w.discipline = p_discipline)
+   order by r.points desc, r.result_date desc, r.id
+   limit least(coalesce(p_limit, 100), 300);
+$$;
+
 -- Saisonwertung je Jahr fest gespeichert (Rang und Punkte je Athlet, getrennt nach Männern/Frauen),
 -- damit das Athletenfenster sie sofort zeigt. Wird nach jedem Ergebnisabruf neu berechnet.
 create table if not exists athlete_season_stats (
