@@ -1,17 +1,7 @@
 // Toplisten (DE) von World Athletics: Jahr, Disziplin und Geschlecht wählen, die besten 20 sehen
 import { html } from '../vendor/preact-htm.js';
 import { flag, Loading, openRider, q, rpc, sb, useLoad } from '../lib.js';
-import { AREA_GROUPS, AREAS, BackToAthlete, discLabel, discMeters, groupArea, leagueAreas, SexBadge } from './lib.js';
-
-const GROUP_ORDER = AREAS.flatMap((a) => AREA_GROUPS[a]);
-/** Disziplinen je Bereich der Liga, sortiert nach Schwerpunkt-Disziplin und Strecke, Halle nach Freiluft */
-function discSections(names, groupOf, areas) {
-  const key = (d) => [GROUP_ORDER.indexOf(groupOf[d]), discMeters(discLabel(d)), /Short Track/.test(d) ? 1 : 0];
-  const cmp = (a, b) => { const x = key(a), y = key(b); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2] || a.localeCompare(b); };
-  return AREAS.filter((a) => areas.includes(a))
-    .map((a) => ({ area: a, discs: names.filter((d) => groupArea(groupOf[d]) === a).sort(cmp) }))
-    .filter((x) => x.discs.length);
-}
+import { BackToAthlete, discLabel, discSections, leagueAreas, SexBadge } from './lib.js';
 
 export function Toplists({ c, sub, sub2, sub3 }) {
   const idx = useLoad(() => rpc('toplist_index'), []);

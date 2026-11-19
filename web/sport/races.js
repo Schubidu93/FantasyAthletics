@@ -1,7 +1,7 @@
 // Wettkämpfe: alle Wettkämpfe, bei denen Athleten aus dem Pool gestartet sind, mit deren Ergebnissen und Punkten
 import { html, useState, useMemo } from '../vendor/preact-htm.js';
-import { all, flag, fmtDate, fmtPts, Loading, nationCode, normName, openRider, q, sb, useLoad, withFlag } from '../lib.js';
-import { BackToAthlete, CatBadge, discMeters, discWithKm, raceLabel, raceOrder, SexBadge, waResultUrl } from './lib.js';
+import { all, flag, fmtDate, fmtPts, Loading, nationCode, normName, openRider, q, rpcAll, sb, useLoad, withFlag } from '../lib.js';
+import { AREAS, BackToAthlete, CatBadge, discLabel, discMeters, discSections, discWithKm, raceLabel, raceOrder, SexBadge, waResultUrl } from './lib.js';
 
 // WA-Wettkampfkategorien (World-Ranking-Regeln): OW = Olympia/WM … F = nationale Meetings
 const CATS = [['', 'Alle Kategorien'], ['top', 'OW, DF, GW, GL'], ['OW', 'OW – Olympia/WM'], ['DF', 'DF – DL-Finale'],
@@ -10,7 +10,7 @@ const CATS = [['', 'Alle Kategorien'], ['top', 'OW, DF, GW, GL'], ['OW', 'OW –
 const matchCat = (r, g) => !g || (g === 'top' ? ['OW', 'DF', 'GW', 'GL'].includes(r.category) : r.category === g);
 
 // Filter bleiben beim Zurückkehren aus einem Wettkampf erhalten
-const saved = { cat: '', country: '', term: '', year: String(new Date().getFullYear()), md: '', mine: false };
+const saved = { cat: '', country: '', term: '', year: String(new Date().getFullYear()), md: '', mine: false, disc: '' };
 const keep = (key, setter) => (v) => { saved[key] = v; setter(v); };
 
 export function Races({ c, sub }) {
@@ -21,6 +21,19 @@ export function Races({ c, sub }) {
   return html`<${RaceList} c=${c} races=${races.data.map((r) => ({ ...r, country: r.country && nationCode(r.country) }))} />`;
 }
 
+// Disziplin-Auswahl: nach Bereich gruppiert wie bei den Toplisten, Disziplinen ohne Schwerpunkt (z. B. Straßenlauf) unter „Sonstige“
+function DiscFilter({ names, value, onChange }) {
+  const dis = useLoad(() => q(sb.from('disciplines').select('name,event_group')), []);
+  const groupOf = Object.fromEntries((dis.data || []).map((d) => [d.name, d.event_group]));
+  const sections = discSections(names, groupOf, AREAS);
+  const rest = names.filter((d) => !sections.some((x) => x.discs.includes(d))).sort();
+  if (rest.length) sections.push({ area: 'Sonstige', discs: rest });
+  if (value && !names.includes(value)) sections.push({ area: '', discs: [value] });
+  return html`<select value=${value} onChange=${(e) => onChange(e.target.value)} aria-label="Disziplin">
+    <option value="">Alle Disziplinen</option>
+    ${sections.map((x) => html`<optgroup label=${x.area}>${x.discs.map((d) => html`<option value=${d}>${discLabel(d)}</option>`)}</optgroup>`)}</select>`;
+}
+
 function RaceList({ c, races }) {
   const [catV, setCatRaw] = useState(saved.cat);
   const [country, setCountryRaw] = useState(saved.country);
@@ -28,6 +41,11 @@ function RaceList({ c, races }) {
   const [year, setYearRaw] = useState(saved.year);
   const [mdId, setMdRaw] = useState(saved.md);
   const [mine, setMineRaw] = useState(saved.mine);
+  const [disc, setDiscRaw] = useState(saved.disc);
+  const setDisc = keep('disc', setDiscRaw);
+  // Disziplinen je Wettkampf (für den Disziplin-Filter)
+  const discs = useLoad(async () => Object.fromEntries((await rpcAll('competition_disciplines')).map((r) => [r.competition_id, r.disciplines])), []);
+  const discNames = useMemo(() => [...new Set(Object.values(discs.data || {}).flat())], [discs.data]);
   const setCatV = keep('cat', setCatRaw), setCountry = keep('country', setCountryRaw), setTerm = keep('term', setTermRaw);
   const setYear = keep('year', setYearRaw), setMine = keep('mine', setMineRaw);
   const setMd = (v) => { keep('md', setMdRaw)(v); if (v) setYear(''); };
@@ -50,6 +68,7 @@ function RaceList({ c, races }) {
     && (!year || (r.start_date || '').slice(0, 4) === year)
     && (!md || (r.start_date <= md.ends_on && (r.end_date || r.start_date) >= md.starts_on))
     && (!mine || owned.data?.has(r.id))
+    && (!disc || discs.data?.[r.id]?.includes(disc))
     && (!t || t.split(' ').every((w) => normName(`${r.name} ${r.venue || ''}`).includes(w))));
 
   return html`<section class="card">
@@ -60,10 +79,11 @@ function RaceList({ c, races }) {
       <select value=${year} onChange=${(e) => setYear(e.target.value)}><option value="">Alle Jahre</option>${years.map((y) => html`<option value=${y}>${y}</option>`)}</select>
       ${(c.matchdays || []).length > 0 && html`<select value=${mdId} onChange=${(e) => setMd(e.target.value)}>
         <option value="">Alle Spieltage</option>${c.matchdays.map((m) => html`<option value=${m.id}>${m.name}</option>`)}</select>`}
+      <${DiscFilter} names=${discNames} value=${disc} onChange=${setDisc} />
       <select value=${country} onChange=${(e) => setCountry(e.target.value)}><option value="">Alle Länder</option>${countries.map((x) => html`<option value=${x}>${withFlag(x)}</option>`)}</select>
       <label class="check small"><input type="checkbox" checked=${mine} onChange=${(e) => setMine(e.target.checked)} /> nur mit Athleten aus Kadern</label>
     </div>
-    ${list.length === 0 ? html`<p class="muted">Keine Wettkämpfe gefunden.</p>` : html`<ul class="list race-list">${list.slice(0, 300).map((r) => html`<li key=${r.id}>
+    ${disc && !discs.data ? html`<${Loading} error=${discs.error} />` : list.length === 0 ? html`<p class="muted">Keine Wettkämpfe gefunden.</p>` : html`<ul class="list race-list">${list.slice(0, 300).map((r) => html`<li key=${r.id}>
       <a class="race-link" href=${`#/league/${c.league.id}/races/${encodeURIComponent(r.id)}`}>
         <span class="race-date">${fmtDate(r.start_date)}${r.end_date && r.end_date !== r.start_date ? ` – ${fmtDate(r.end_date)}` : ''}</span>
         <span class="race-name"><strong>${(r.name || '').replace(/\s*-\s*XC\s*[\d.,]+\s*km$/i, '')}</strong>
@@ -74,6 +94,7 @@ function RaceList({ c, races }) {
 }
 
 function RaceDetail({ c, slug }) {
+  const [only, setOnly] = useState(saved.disc);
   const data = useLoad(async () => {
     const [race] = await q(sb.from('competitions').select('*').eq('id', slug));
     const id = slug.startsWith('wa-c') ? +slug.slice(4) : null;
@@ -88,7 +109,8 @@ function RaceDetail({ c, slug }) {
     return { race, rows: rows.map((r) => ({ ...r, pts: pts[r.id] })) };
   }, [slug]);
   if (!data.data) return html`<${Loading} error=${data.error} />`;
-  const { race, rows } = data.data;
+  const { race, rows: allRows } = data.data;
+  const rows = only ? allRows.filter((r) => r.discipline === only) : allRows;
   const back = html`<div class="row between"><a href=${`#/league/${c.league.id}/races`} class="small-link">← Alle Wettkämpfe</a><${BackToAthlete} /></div>`;
   if (!race) return html`<section class="card">${back}<p class="muted">Wettkampf nicht gefunden.</p></section>`;
   // nach Disziplin und Lauf gruppieren, innerhalb nach Platz
@@ -115,6 +137,8 @@ function RaceDetail({ c, slug }) {
       <p class="muted small">${fmtDate(race.start_date)}${race.end_date && race.end_date !== race.start_date ? ` – ${fmtDate(race.end_date)}` : ''}
         ${race.venue ? ` · ${race.country ? flag(race.country) + ' ' : ''}${race.venue}` : ''} · ${fmtPts(total)} Punkte gesamt
         ${race.category ? html` <${CatBadge} cat=${race.category} />` : ''}</p>
+      ${only && html`<p class="small">Nur ${discLabel(only)} ·${' '}
+        <button type="button" class="linkish" onClick=${() => setOnly('')}>alle Disziplinen zeigen</button></p>`}
       ${race.id?.startsWith('wa-c') && html`<a class="small" href=${waResultUrl(race.id.slice(4))} target="_blank" rel="noopener">WA-Ergebnisse ↗</a>`}
     </div>
     ${groups.length === 0 ? html`<p class="muted">Keine Ergebnisse von Pool-Athleten.</p>` : groups.map((g) => html`<div class="detail-rider" key=${g.key}>

@@ -107,8 +107,14 @@ export function RiderModal() {
   const d = discs.includes(disc) ? disc : '';
   const inDisc = d ? inYear.filter((x) => dl(x) === d) : inYear;
   const discTotal = inDisc.reduce((s, x) => s + Number(x.pts?.points || 0), 0);
+  // Mehrkampf: Einzeldisziplinen (Runde CE…) stehen direkt unter dem Gesamtergebnis desselben Wettkampfs
+  const isCE = (x) => /^CE/.test(x.wa_race || '');
+  const compEnd = {};
+  for (const x of inYear) if (x.wa_competition_id && !(compEnd[x.wa_competition_id] >= x.date)) compEnd[x.wa_competition_id] = x.date;
+  const sortDate = (x) => (isCE(x) && compEnd[x.wa_competition_id]) || x.date;
   const shown = (allRuns ? inDisc : inDisc.filter((x) => x.pts))
-    .sort((a, b) => (byPoints ? Number(b.pts?.points ?? -1) - Number(a.pts?.points ?? -1) : 0) || b.date.localeCompare(a.date));
+    .sort((a, b) => (byPoints ? Number(b.pts?.points ?? -1) - Number(a.pts?.points ?? -1) : 0)
+      || sortDate(b).localeCompare(sortDate(a)) || isCE(a) - isCE(b) || b.date.localeCompare(a.date));
   const sr = data?.season?.[y];
   const g = riderGroup(r);
   const L = leagueId();

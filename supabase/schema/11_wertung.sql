@@ -45,6 +45,15 @@ begin
    order by _mark_cost(p_discipline, t.mark) nulls last, a.name limit least(coalesce(p_limit, 20), 200);
 end $$;
 
+-- Wettkämpfe → Ergebnisse: welche Disziplinen es je Wettkampf gab (für den Disziplin-Filter)
+create or replace function competition_disciplines()
+returns table (competition_id text, disciplines text[])
+language sql stable security definer set search_path = public as $$
+  select 'wa-c' || wa_competition_id, array_agg(distinct discipline order by discipline)
+    from wa_results where wa_competition_id is not null
+   group by wa_competition_id order by wa_competition_id;
+$$;
+
 -- Spieljahr: die Saison, für die gerade gedraftet bzw. gespielt wird. Ab 1. November zählt das Folgejahr
 -- (Draft für die neue Saison); von Hand festlegbar über scoring_config.game_year.
 create or replace function game_year() returns int

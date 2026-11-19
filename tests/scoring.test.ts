@@ -211,6 +211,19 @@ describe("Ein Wettkampf = ein Ergebnis", () => {
     expect(await db.all("select label from results order by label")).toEqual([{ label: "100 Metres" }, { label: "200 Metres" }]);
   });
 
+  it("Disziplinen je Wettkampf für den Filter in Wettkämpfe → Ergebnisse", async () => {
+    const a = await athlete(db, 1, "Läuferin", "women", "800 Metres", 1200);
+    const b = await athlete(db, 2, "Werferin", "women", "Discus Throw", 1200);
+    for (const [id, disc, comp] of [[a, "800 Metres", 7200001], [a, "1500 Metres", 7200001], [b, "Discus Throw", 7200001], [b, "Discus Throw", 7200002]] as const) {
+      await db.query(`insert into wa_results (athlete_id, date, competition, discipline, category, race, place, mark, result_score, wa_competition_id)
+        values ($1, $2, 'Meeting ' || $4::text, $3, 'C', 'F', 1, '1', 1100, $4::bigint)`, [id, D, disc, comp]);
+    }
+    expect(await db.all("select * from competition_disciplines()")).toEqual([
+      { competition_id: "wa-c7200001", disciplines: ["1500 Metres", "800 Metres", "Discus Throw"] },
+      { competition_id: "wa-c7200002", disciplines: ["Discus Throw"] },
+    ]);
+  });
+
   it("Mehrkampf: Einzeldisziplinen bringen nur Bestleistungs- und Rekord-Bonus", async () => {
     const a = await athlete(db, 1, "Zehnkämpfer", "men", "Decathlon", 1200);
     await db.query("insert into athlete_pb_before (athlete_id, discipline, mark) values ($1, 'Long Jump', '7.50')", [a]);

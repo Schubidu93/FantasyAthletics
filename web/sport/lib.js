@@ -59,6 +59,15 @@ export const GENDER_LABEL = { men: 'Männer', women: 'Frauen', mixed: 'Mixed' };
 // Disziplin-Filter in Personenlisten: je Bereich der Liga eine Gruppe mit „alle …“, den Blöcken und den einzelnen Disziplinen.
 // Wert: '' (alle), 'area:Sprint' (ganzer Bereich), Block ('Mittel') oder Gruppe ('100')
 const AREA_ALL = { Lauf: 'alle Läufer', Sprint: 'alle Sprinter', Hürden: 'alle Hürdenläufer', Sprung: 'alle Springer', Wurf: 'alle Werfer' };
+/** Disziplinen je Bereich der Liga, sortiert nach Schwerpunkt-Disziplin und Strecke, Halle nach Freiluft */
+export function discSections(names, groupOf, areas) {
+  const key = (d) => [GROUPS.indexOf(groupOf[d]), discMeters(discLabel(d)), /Short Track/.test(d) ? 1 : 0];
+  const cmp = (a, b) => { const x = key(a), y = key(b); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2] || a.localeCompare(b); };
+  return AREAS.filter((a) => areas.includes(a))
+    .map((a) => ({ area: a, discs: names.filter((d) => groupArea(groupOf[d]) === a).sort(cmp) }))
+    .filter((x) => x.discs.length);
+}
+
 export const groupFilterMatch = (value, r) => !value
   || (value.startsWith('area:') ? groupArea(riderGroup(r)) === value.slice(5) : positionGroups(value).includes(riderGroup(r)));
 export function GroupFilter({ league, value, onChange }) {
