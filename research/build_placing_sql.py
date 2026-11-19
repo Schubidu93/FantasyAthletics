@@ -86,6 +86,11 @@ for line in open("research/disciplines.txt", encoding="utf-8"):
 # Disziplinen, die mit der Erweiterung auf alle Disziplinen erstmals zählen (vorher Faktor 0): einmalig umstellen
 COMBINED = ["Decathlon", "Heptathlon", "Heptathlon Short Track", "Pentathlon Short Track"]
 FIELD = ["High Jump", "Pole Vault", "Long Jump", "Triple Jump", "Hammer Throw", "Javelin Throw"]
+# Faktor neu → alt (Migration lauf_faktoren_2)
+RUN_UP = {"1.5": "1.3", "2": "1.6", "2.5": "2", "4": "3"}
+RUN_GROUPS = {"800", "1500", "5000", "10000", "Marathon", "Hindernis", "Gehen"}
+RUN_ROWS = [(f[0], f[1], RUN_UP[f[1]]) for f in (l.split("|") for l in open("research/disciplines.txt", encoding="utf-8"))
+            if f[2] in RUN_GROUPS and f[1] in RUN_UP]
 WALKS = ["3000 Metres Race Walk Short Track", "5000 Metres Race Walk", "10 Kilometres Race Walk", "20 Kilometres Race Walk",
          "20,000 Metres Race Walk", "Half Marathon Race Walk", "35 Kilometres Race Walk", "Marathon Race Walk"]
 newly_scored = [n for n in (l.split("|")[0] for l in open("research/disciplines.txt", encoding="utf-8"))
@@ -149,6 +154,18 @@ begin
 {",\n".join(f"      ({q(n)}, {f})" for n, f in ((l.split("|")[0], l.split("|")[1]) for l in open("research/disciplines.txt", encoding="utf-8")) if n in FIELD)}
     ) x(name, factor) where d.name = x.name and d.factor = 1;
     insert into schema_changes (name) values ('feld_faktoren');
+  end if;
+end $$;
+
+-- einmalig: Lauf und Gehen über längere Strecken höher (Marathon ×4 wie Zehnkampf; 5000 m/Hindernis 1,5, 10.000 m 2,
+-- Halbmarathon 2,5) – lange Strecken laufen nur wenige Rennen im Jahr
+do $$
+begin
+  if not exists (select 1 from schema_changes where name = 'lauf_faktoren_2') then
+    update disciplines d set factor = x.factor from (values
+{",\n".join(f"      ({q(n)}, {f}, {o})" for n, f, o in RUN_ROWS)}
+    ) x(name, factor, old) where d.name = x.name and d.factor = x.old;
+    insert into schema_changes (name) values ('lauf_faktoren_2');
   end if;
 end $$;
 

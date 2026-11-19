@@ -110,8 +110,8 @@ describe("Aufstellung und Wertung", () => {
                            ('wa-6', $1, 'M', '5000 Metres', 'A', 'F', 'F', 2, 1000, 1)`, [day(0)]);
     await db.query("select rebuild_results(null)");
     const t = await db.all("select team_name, total from league_table($1) order by team_name", [L.id]);
-    // wa-1: 100 + A-Sieg 100; wa-6 (Wildcard): A 2. Tab. 2.5 = 63 × 1,3 = 81,9; wa-3 nicht aufgestellt
-    expect(t.map((r) => [r.team_name, Number(r.total)])).toEqual([["Team Alice", 281.9], ["Team Bob", 0]]);
+    // wa-1: 100 + A-Sieg 100; wa-6 (Wildcard): A 2. Tab. 2.5 = 63 × 1,5 = 94,5; wa-3 nicht aufgestellt
+    expect(t.map((r) => [r.team_name, Number(r.total)])).toEqual([["Team Alice", 294.5], ["Team Bob", 0]]);
 
     await db.query("select _lineup_swap($1, $2, 'wa-2', 'wa-4', $3)", [L.id, L.alice, day(-1)]);   // W 1500 passt nicht auf 800:W
     await db.query("select _lineup_swap($1, $2, 'wa-6', 'wa-8', $3)", [L.id, L.alice, day(-1)]);   // Wildcard nimmt jeden
@@ -234,7 +234,7 @@ describe("Bereiche (alle Disziplinen oder nur Lauf)", () => {
                            ('wa-1', $1, 'M', '20 Kilometres Race Walk', 'F', 'F', 'F', 9, 1020, 1)`, [day(0)]);
     await db.query("select rebuild_results(null)");
     const total = async (l: string) => Number((await db.one("select total from league_table($1) where team_name = 'Team Alice'", [l])).total);
-    expect(await total(lauf.id)).toBe(190);   // 800 m 100 + 400 m 50 + 20 km Gehen 20 × 2
-    expect(await total(all.id)).toBe(190);
+    expect(await total(lauf.id)).toBe(200);   // 800 m 100 + 400 m 50 + 20 km Gehen 20 × 2,5
+    expect(await total(all.id)).toBe(200);
   });
 });

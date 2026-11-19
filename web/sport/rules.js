@@ -35,6 +35,7 @@ export function Rules({ c }) {
   const l = c.league;
   const cfg = useLoad(() => q(sb.from('scoring_config').select('*').eq('id', 1)).then((r) => r[0]), []).data;
   const disciplines = useLoad(() => q(sb.from('disciplines').select('name,factor,event_group')), []).data || [];
+  const mf = Number(disciplines.find((d) => d.name === 'Marathon')?.factor || 1);
   // Spieljahr: ab 1. November das Folgejahr (wie game_year() in der Datenbank)
   const gy = cfg?.game_year || new Date().getFullYear() + (new Date().getMonth() >= 10 ? 1 : 0);
   const two = l.transfer_mode === 'waiver_free';
@@ -143,7 +144,7 @@ export function Rules({ c }) {
         <div>dazu Bonus für Bestleistung und Rekord <span class="muted">(siehe unten)</span></div>
       </div>
       ${cfg && cfg.perf_threshold === 1000 && html`<p class="muted small">Beispiel: Marathon in 2:09:43 (1135 WA-Punkte), Platz 9 ohne Platzierungspunkte:
-        135 × ${fmtNum(cfg.perf_factor)} × 3 = <strong>${fmtNum(Math.round(135 * cfg.perf_factor * 3 * 100) / 100)} Punkte</strong>.</p>`}
+        135 × ${fmtNum(cfg.perf_factor)} × ${fmtNum(mf)} = <strong>${fmtNum(Math.round(135 * cfg.perf_factor * mf * 100) / 100)} Punkte</strong>.</p>`}
       <h4 class="rule-sub">Disziplinfaktoren</h4>
       <p class="muted small">Lange Wettkämpfe zählen mehr, weil es davon nur wenige im Jahr gibt. Alle anderen Disziplinen: × 1.
         Staffeln: Leistung und Platzierung wie über die Einzelstrecke, davon ¼ (4er-Staffel) bzw. ⅓ (3er-Staffel).</p>
@@ -178,10 +179,11 @@ export function Rules({ c }) {
       <ul>
         <li><strong>Ein Wettkampf = ein Ergebnis:</strong> Läuft ein Athlet bei einem Wettkampf mehrere Runden (z. B. Vorlauf und Finale),
           gibt es Leistungs- und Platzierungspunkte nur für die beste. Bestleistungs- und Rekord-Bonus zählen in jeder Runde.</li>
-        ${areas.includes('Mehrkampf') && html`<li><strong>Mehrkampf:</strong> Es zählt das Gesamtergebnis. Die einzelnen Disziplinen darin bringen
-          nur den Bestleistungs- und Rekord-Bonus.</li>`}
+        ${areas.includes('Mehrkampf') && html`<li><strong>Mehrkampf:</strong> Platzierungspunkte gibt es nur für das Gesamtergebnis.
+          Die einzelnen Disziplinen darin bringen Leistungspunkte, wenn sie über ${cfg ? cfg.perf_threshold : 1000} WA-Punkten liegen
+          (z. B. ein starker Weitsprung), dazu Bestleistungs- und Rekord-Bonus.</li>`}
         ${areas.includes('Lauf') && html`<li><strong>Cross:</strong> fester Wert je Platz und Kategorie (z. B. GL-Sieg 1200) statt WA-Punkten, gewertet wie eine
-          Leistung × ${cfg ? fmtNum(cfg.cross_factor) : '0,1'} × Distanzfaktor (bis 3 km 1 · bis 6 km 1,3 · bis 12 km 1,6 · darüber 2).</li>`}
+          Leistung × ${cfg ? fmtNum(cfg.cross_factor) : '0,1'} × Distanzfaktor (bis 3 km 1 · bis 6 km 1,5 · bis 12 km 2 · darüber 2,5).</li>`}
         <li><strong>Zwischenzeiten</strong> (z. B. 1500 m im Meilenrennen) bringen nur Bestleistungs- und Rekord-Bonus.</li>
         <li>Punkte zählen nur in Spieltagen, in denen der Athlet in deinem Kader steht${lineup ? ' und aufgestellt ist' : ''}.</li>
         <li>Korrigiert World Athletics ein Ergebnis, wird das automatisch übernommen, solange der Spieltag nicht eingefroren ist.</li>
