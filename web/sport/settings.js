@@ -1,6 +1,6 @@
 // Liga-Einstellungen der Leichtathletik: Startwerte, eigene Felder (Positionen je Disziplin), zusätzliche gespeicherte Werte.
 import { html, useState } from '../vendor/preact-htm.js';
-import { AREA_PRESETS, AREAS, GENDER_LABEL, GROUP_LABEL, leagueSlots, positionGroups, positionsFor, groupArea, RUN_GROUPS } from './lib.js';
+import { AREA_PRESETS, AREAS, BLOCK_LABEL, GENDER_LABEL, GROUP_LABEL, leagueSlots, positionGroups, positionSections, positionsFor, groupArea, RUN_GROUPS } from './lib.js';
 
 /** Startwerte beim Anlegen einer Liga (zusätzlich zu den gemeinsamen) */
 export const LEAGUE_DEFAULTS = {
@@ -88,8 +88,15 @@ export function SquadFields({ f, set, locked }) {
       <label>Wildcards (beliebige Disziplin)<input type="number" min="0" max="6" value=${f.wildcards} onInput=${set('wildcards')} disabled=${locked} /></label>
       <div class="span2 group-pick">
         <span class="label-text">Disziplinen in der Aufstellung</span>
-        <div class="chips chips-grid">${positions.map((g) => html`<label class="check chip" key=${g}>
-          <input type="checkbox" checked=${groups.includes(g)} disabled=${locked} onChange=${() => toggleGroup(g)} /> ${GROUP_LABEL[g]}</label>`)}</div>
+        <p class="muted small">Ein <strong>Block</strong> nimmt jeden Athleten des Bereichs auf, eine einzelne Disziplin nur ihre Spezialisten.</p>
+        ${positionSections(areas).map((sec) => html`<div class="pos-section" key=${sec.area}>
+          <span class="pos-area">${sec.area}</span>
+          <div class="chips chips-grid">
+            ${sec.blocks.map((g) => html`<label class="check chip chip-block" key=${g}>
+              <input type="checkbox" checked=${groups.includes(g)} disabled=${locked} onChange=${() => toggleGroup(g)} /> ${BLOCK_LABEL[g]}</label>`)}
+            ${sec.singles.map((g) => html`<label class="check chip" key=${g}>
+              <input type="checkbox" checked=${groups.includes(g)} disabled=${locked} onChange=${() => toggleGroup(g)} /> ${GROUP_LABEL[g]}</label>`)}
+          </div></div>`)}
         <p class="muted small"><strong>${slots.length} Positionen:</strong> ${f.gender === 'mixed' && f.lineup_mode === 'mf' ? 'je ein Mann und eine Frau in ' : 'je eine in '}${
           groups.length ? positions.filter((g) => groups.includes(g)).map((g) => GROUP_LABEL[g]).join(', ') : '–'}${
           +f.wildcards > 0 ? `, dazu ${+f.wildcards === 1 ? 'eine Wildcard' : `${+f.wildcards} Wildcards`} (beliebige Disziplin)` : ''}.
