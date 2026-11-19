@@ -210,6 +210,18 @@ describe("Ein Wettkampf = ein Ergebnis", () => {
     await db.query("select rebuild_results(null)");
     expect(await db.all("select label from results order by label")).toEqual([{ label: "100 Metres" }, { label: "200 Metres" }]);
   });
+
+  it("Bestleistungen und Rekorde zählen auch in Vorläufen", async () => {
+    const a = await athlete(db, 1, "Sprinter", "men", "100 Metres", 1200);
+    await db.query("insert into athlete_pb_before (athlete_id, discipline, mark) values ($1, '100 Metres', '10.30')", [a]);
+    await db.query(`insert into wa_results (athlete_id, date, competition, discipline, category, race, wa_race, place, wa_place, mark, result_score, wa_competition_id, record)
+      values ($1, $2, 'Meeting', '100 Metres', 'C', 'H1', 'H1', 1, 1, '10.25', 1150, 7100001, 'DR'),
+             ($1, $3, 'Meeting', '100 Metres', 'C', 'F', 'F', 2, 2, '10.20', 1170, 7100001, null)`, [a, D, `${Y}-06-02`]);
+    await db.query("select rebuild_results(null)");
+    // Vorlauf: nur PB-Bonus 10 + Rekord 50; Finale: Leistung 170 + PB 10 (+ Platzierung)
+    const rows = await db.all("select label, perf_points::float perf, pb_points::float pb, record_points::float rec from results order by label");
+    expect(rows).toEqual([{ label: "100 Metres", perf: 170, pb: 10, rec: 0 }, { label: "100 Metres · H1", perf: 0, pb: 10, rec: 50 }]);
+  });
 });
 
 describe("Staffeln", () => {
