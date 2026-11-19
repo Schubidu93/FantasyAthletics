@@ -1,7 +1,7 @@
 // Athleten-Fenster: Stammdaten, Toplisten und alle Ergebnisse (Lauf, Zeit, WA-Punkte, Fantasy-Punkte)
 import { html, useState, useEffect } from '../vendor/preact-htm.js';
 import { all, flag, fmtPts, q, rpc, sb } from '../lib.js';
-import { CatBadge, discLabel, discMeters, discWithKm, GROUP_LABEL, raceLabel, RELAYS, rememberAthlete, riderGroup, SexBadge, waAthleteUrl, waResultUrl } from './lib.js';
+import { CatBadge, discLabel, discMeters, discWithKm, GROUP_LABEL, positionRank, raceLabel, RELAYS, rememberAthlete, riderGroup, SexBadge, waAthleteUrl, waResultUrl } from './lib.js';
 
 // Ergebnisse werden ab dieser Saison gespeichert
 const FIRST_YEAR = 2025;
@@ -118,6 +118,7 @@ export function RiderModal() {
   const sr = data?.season?.[y];
   const g = riderGroup(r);
   const L = leagueId();
+  const pr = r && positionRank(L, r.id);
   const setRecord = async (x, v) => {
     try { await rpc('set_result_record', { p_id: x.id, p_record: v || null }); setData(await loadRider(slug, L)); }
     catch (e) { setError(e.message); }
@@ -138,8 +139,10 @@ export function RiderModal() {
           ${r && html`<a class="small" href=${waAthleteUrl(r)} target="_blank" rel="noopener">WA-Profil ↗</a>`}
           ${r && html`<div class="muted small"><${SexBadge} g=${r.gender} /> ${[g && (GROUP_LABEL[g] || g),
             r.birth_date && `Jg. ${r.birth_date.slice(0, 4)} (${Math.floor((Date.now() - new Date(r.birth_date)) / 31557600000)} J.)`].filter(Boolean).join(' · ')}</div>`}
-          ${r && html`<div class="small"><strong>${r.pool_rank ? `Pool-Platz ${r.pool_rank}` : 'Nicht im aktuellen Pool'}</strong>${r.best_mark
-            ? ` · Bestleistung ${discLabel(r.best_discipline)} ${r.best_mark} (${Math.round(r.ranking_points || 0)} WA-Punkte)` : ''}</div>`}
+          ${r && html`<div class="small">${pr
+            ? html`<strong>Platz ${pr.rank} von ${pr.of}</strong> auf der Position ${pr.label} dieser Liga · Pool-Platz ${r.pool_rank}`
+            : html`<strong>${r.pool_rank ? `Pool-Platz ${r.pool_rank}` : 'Nicht im aktuellen Pool'}</strong>`}</div>`}
+          ${r?.best_mark && html`<div class="small muted">Bestleistung ${discLabel(r.best_discipline)} ${r.best_mark} (${Math.round(r.ranking_points || 0)} WA-Punkte)</div>`}
           ${y && html`<div class="small">${y}: ${fmtPts(total)} Punkte${sr ? ` · Platz ${sr.season_rank}` : ''}</div>`}
         </div>
         <button class="ghost small" onClick=${() => setSlug(null)} aria-label="Schließen">✕</button>

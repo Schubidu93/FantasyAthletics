@@ -30,16 +30,25 @@ const POS_SHORT = { Mittel: 'Mittelstrecke', Lang: 'Langstrecke' };
 export function withPositionRanks(people, league) {
   const positions = league?.lineup_groups || RUN_GROUPS;
   const count = {};
+  const ranked = [];
   for (const r of people) {
     if (r.pool_rank == null) continue;
     const p = positions.find((x) => positionGroups(x).includes(riderGroup(r)));
     if (!p) continue;
-    const key = `${p}|${r.gender}`;
-    r.pos_rank = count[key] = (count[key] || 0) + 1;
+    r.pos_key = `${p}|${r.gender}`;
+    r.pos_rank = count[r.pos_key] = (count[r.pos_key] || 0) + 1;
     r.pos_label = POS_SHORT[p] || GROUP_LABEL[p] || p;
+    ranked.push(r);
+  }
+  // fürs Athletenprofil (öffnet sich auch außerhalb der Listen): Rang, Position und Zahl der Athleten auf dieser Position
+  if (league?.id) {
+    POS_RANKS[league.id] = Object.fromEntries(ranked.map((r) => [r.id, { rank: r.pos_rank, label: r.pos_label, of: count[r.pos_key] }]));
   }
   return people;
 }
+const POS_RANKS = {};
+/** Positions-Rang eines Athleten in einer Liga ({ rank, label, of }) – sobald die Athleten der Liga geladen sind */
+export const positionRank = (leagueId, athleteId) => POS_RANKS[leagueId]?.[athleteId] || null;
 /** Wählbare Positionen je Bereich: zuerst die Blöcke (fassen mehrere Disziplinen zusammen), dann die einzelnen Disziplinen */
 export const positionSections = (areas) => AREAS.filter((a) => areas.includes(a)).map((a) => ({
   area: a,
