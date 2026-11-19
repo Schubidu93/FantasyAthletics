@@ -198,3 +198,28 @@ describe("Athleten außerhalb des Pools löschen", () => {
     expect((await db.all("select id from athletes order by id")).map((r) => r.id)).toEqual(["wa-1", "wa-3", "wa-4"]);
   });
 });
+
+describe("Mehrkampf", () => {
+  it("Zehn- und Siebenkampf zählen 4-fach, Halle 3-fach", async () => {
+    expect(await db.all("select name, factor::float f from disciplines where name ~ 'athlon' order by name")).toEqual([
+      { name: "Decathlon", f: 4 }, { name: "Heptathlon", f: 4 }, { name: "Heptathlon Short Track", f: 3 }, { name: "Pentathlon Short Track", f: 3 },
+    ]);
+    const a = await athlete(db, 1, "Zehnkämpfer", "men", "Decathlon", 1200);
+    await result(a, "Decathlon", "GL", "F", 9, 1100, { competition: "Götzis" });
+    await db.query("select rebuild_results(null)");
+    expect(await points()).toEqual({ "Götzis": [400, 84] });   // (1100 − 1000) × 1 × 4; Platz 9 GL laut Mehrkampf-Tabelle 21 × 4
+  });
+});
+
+describe("Nationenwechsel", () => {
+  it("wer laut WA für ein anderes Land startet, ist nicht mehr im Pool (außer von Hand hinzugefügt)", async () => {
+    await athlete(db, 1, "Deutsch", "women", "100 Metres", 1150);
+    await athlete(db, 2, "Gewechselt", "women", "100 Metres", 1200);
+    await athlete(db, 3, "Gewechselt, manuell", "women", "100 Metres", 1100);
+    await db.query("update athletes set nation = 'POR' where id in ('wa-2', 'wa-3')");
+    await db.query("update athletes set manual = true where id = 'wa-3'");
+    await db.query("select refresh_pool(null)");
+    expect((await db.all("select id, pool_rank from athletes order by id")).map((r) => [r.id, r.pool_rank !== null]))
+      .toEqual([["wa-1", true], ["wa-2", false], ["wa-3", true]]);
+  });
+});

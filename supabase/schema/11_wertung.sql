@@ -114,7 +114,7 @@ begin
    where p.athlete_id = a.id and p.total > 0;
   update athletes r set pool_rank = x.rk
     from (select id, row_number() over (order by coalesce(group_points, 0) desc, ranking_points desc nulls last, name) rk
-            from athletes where ranking_points >= c.pool_threshold or manual) x
+            from athletes where (ranking_points >= c.pool_threshold and coalesce(nation, 'GER') = 'GER') or manual) x
    where x.id = r.id;
   get diagnostics n = row_count;
   return n;

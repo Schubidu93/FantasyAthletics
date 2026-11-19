@@ -68,15 +68,15 @@ Cross Country Senior Race|1.6|10000||CROSS|
 Cross Country U20 Race|1.6|10000||CROSS|
 Cross Country U23 Race|1.6|10000||CROSS|
 Cross Short|1|1500||CROSS|
-Decathlon|1|Mehrkampf|CE||1
+Decathlon|4|Mehrkampf|CE||1
 Discus Throw|1|Diskus|TF||1
 Distance Medley|0||||
 Distance Medley Short Track|0||||
 Half Marathon|2|Marathon|MARATHON_SIMILAR,ROAD||
 Half Marathon Race Walk|1|Gehen|RW_HM||
 Hammer Throw|1|Hammer|TF||1
-Heptathlon|1|Mehrkampf|CE||1
-Heptathlon Short Track|1|Mehrkampf|CE||1
+Heptathlon|4|Mehrkampf|CE||1
+Heptathlon Short Track|3|Mehrkampf|CE||1
 High Jump|1|Hochsprung|TF||1
 Javelin Throw|1|Speer|TF||1
 Long Jump|1|Weitsprung|TF||1
@@ -91,7 +91,7 @@ Mountain Running Classic Hill Senior Race|1.6|10000|10KROAD||
 Mountain Running Classic Hill U20 Race|1.6|10000|10KROAD||
 Mountain Running Up & Down Senior Race|1.6|10000|10KROAD||
 Mountain Running Up & Down U20 Race|1.6|10000|10KROAD||
-Pentathlon Short Track|1|Mehrkampf|CE||1
+Pentathlon Short Track|3|Mehrkampf|CE||1
 Pole Vault|1|Stabhochsprung|TF||1
 Road Race|1||||
 Shot Put|1|Kugel|TF||1

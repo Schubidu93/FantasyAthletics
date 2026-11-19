@@ -26,7 +26,7 @@ await run(db, async () => {
             const slug = `wa-${r.athleteId}`;
             athletes.set(slug, {
               id: slug, wa_id: r.athleteId, name: r.name, gender: gender === "M" ? "men" : "women",
-              nation: "GER", ...(r.birthDate ? { birth_date: r.birthDate } : {}),
+              ...(r.birthDate ? { birth_date: r.birthDate } : {}),
             });
             const key = `${slug}|${y}|${d.name}`;
             const prev = entries.get(key);

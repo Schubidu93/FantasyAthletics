@@ -84,6 +84,7 @@ for line in open("research/disciplines.txt", encoding="utf-8"):
     arr = "'{" + tables + "}'"
     disc.append(f"  ({q(name)}, {factor}, {q(group)}, {arr}, {q(cross)}, {'true' if higher else 'false'})")
 # Disziplinen, die mit der Erweiterung auf alle Disziplinen erstmals zählen (vorher Faktor 0): einmalig umstellen
+COMBINED = ["Decathlon", "Heptathlon", "Heptathlon Short Track", "Pentathlon Short Track"]
 newly_scored = [n for n in (l.split("|")[0] for l in open("research/disciplines.txt", encoding="utf-8"))
                 if "Race Walk" in n or n in ("4x100 Metres Relay", "4x200 Metres Relay Short Track")]
 
@@ -111,6 +112,17 @@ begin
 {",\n".join(f"      ({q(n)}, {f})" for n, f in ((l.split("|")[0], l.split("|")[1]) for l in open("research/disciplines.txt", encoding="utf-8")) if n in newly_scored)}
     ) x(name, factor) where d.name = x.name and d.factor = 0;
     insert into schema_changes (name) values ('alle_disziplinen_faktoren');
+  end if;
+end $$;
+
+-- einmalig: Mehrkampf zählt mehr (wenige Wettkämpfe im Jahr, zwei Tage): Zehn-/Siebenkampf ×4, Halle ×3
+do $$
+begin
+  if not exists (select 1 from schema_changes where name = 'mehrkampf_faktoren') then
+    update disciplines d set factor = x.factor from (values
+{",\n".join(f"      ({q(n)}, {f})" for n, f in ((l.split("|")[0], l.split("|")[1]) for l in open("research/disciplines.txt", encoding="utf-8")) if n in COMBINED)}
+    ) x(name, factor) where d.name = x.name and d.factor = 1;
+    insert into schema_changes (name) values ('mehrkampf_faktoren');
   end if;
 end $$;
 
