@@ -14,7 +14,7 @@ function range(period, from, to) {
 
 // Auswahl bleibt beim Zurückkehren aus einem Athletenprofil erhalten
 const saved = { period: '30', from: daysAgo(29), to: iso(new Date()), disc: '', team: '', order: 'points' };
-const ORDERS = [['points', 'Fantasy-Punkte'], ['wa', 'WA-Punkte']];
+const ORDERS = [['points', 'Nach Fantasy-Pkt.'], ['wa', 'Nach WA-Punkten']];
 const keep = (key, setter) => (v) => { saved[key] = v; setter(v); };
 
 export function TopResults({ c }) {
@@ -46,12 +46,13 @@ export function TopResults({ c }) {
         ${PERIODS.map(([k, l]) => html`<option value=${k}>${l}</option>`)}</select>
       <${DiscFilter} value=${disc} onChange=${setDisc} />
       <select value=${order} onChange=${(e) => setOrder(e.target.value)} aria-label="Sortierung">
-        ${ORDERS.map(([k, l]) => html`<option value=${k}>Sortiert nach ${l}</option>`)}</select>
+        ${ORDERS.map(([k, l]) => html`<option value=${k}>${l}</option>`)}</select>
       ${started && html`<select value=${team} onChange=${(e) => setTeam(e.target.value)} aria-label="Team">
         <option value="">Alle Teams</option>${c.managers.map((m) => html`<option value=${m.id}>${m.team_name}</option>`)}</select>`}
-      ${period === 'custom' && html`<label class="small">von <input type="date" value=${from} max=${to} onChange=${(e) => setFrom(e.target.value)} /></label>
-        <label class="small">bis <input type="date" value=${to} min=${from} onChange=${(e) => setTo(e.target.value)} /></label>`}
     </div>
+    ${period === 'custom' && html`<div class="date-range">
+      <label>von<input type="date" value=${from} max=${to} onChange=${(e) => setFrom(e.target.value)} /></label>
+      <label>bis<input type="date" value=${to} min=${from} onChange=${(e) => setTo(e.target.value)} /></label></div>`}
     ${!list.data ? html`<${Loading} error=${list.error} />` : rows.length === 0 ? html`<p class="muted">Keine Ergebnisse mit Punkten in diesem Zeitraum.</p>` : html`
       <ul class="list compact">${rows.map((r, i) => {
         const p = c.riderMap[r.athlete_id];
