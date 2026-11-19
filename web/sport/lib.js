@@ -24,6 +24,22 @@ export const eligible = (r, l) => r?.pool_rank != null && (!groupArea(riderGroup
 const BLOCKS = { Mittel: ['800', '1500'], Lang: ['5000', '10000', 'Hindernis'],
   Sprint: AREA_GROUPS.Sprint, Hürden: AREA_GROUPS.Hürden, Sprung: AREA_GROUPS.Sprung, Wurf: AREA_GROUPS.Wurf };
 export const positionGroups = (p) => BLOCKS[p] || [p];
+const POS_SHORT = { Mittel: 'Mittelstrecke', Lang: 'Langstrecke' };
+/** Positions-Rang je Liga: Platz (nach Pool-Rang) unter den Athleten gleichen Geschlechts, die auf dieselbe Position
+ *  der Liga passen (z. B. „#3 1500 m“ oder bei Blöcken „#1 Wurf“); setzt pos_rank und pos_label an den Personen */
+export function withPositionRanks(people, league) {
+  const positions = league?.lineup_groups || RUN_GROUPS;
+  const count = {};
+  for (const r of people) {
+    if (r.pool_rank == null) continue;
+    const p = positions.find((x) => positionGroups(x).includes(riderGroup(r)));
+    if (!p) continue;
+    const key = `${p}|${r.gender}`;
+    r.pos_rank = count[key] = (count[key] || 0) + 1;
+    r.pos_label = POS_SHORT[p] || GROUP_LABEL[p] || p;
+  }
+  return people;
+}
 /** Wählbare Positionen je Bereich: zuerst die Blöcke (fassen mehrere Disziplinen zusammen), dann die einzelnen Disziplinen */
 export const positionSections = (areas) => AREAS.filter((a) => areas.includes(a)).map((a) => ({
   area: a,
