@@ -44,8 +44,9 @@ export function RiderCell({ r }) {
     + (r.ranking_points ? ` · ${Math.round(r.ranking_points)} P.` : '');
   return html`<span class="rider">
     <span class="rider-line">
-      <button type="button" class="rider-name linkish" title="Ergebnisse anzeigen"
-        onClick=${(e) => { e.stopPropagation(); openRider(r.id); }}>${r.name}</button>
+      <span>${r.pos_rank && r.pool_rank
+          ? html`<strong class="res-place" title="Platz im Athletenpool (nach Punkten im Vorjahr der Saison)">${r.pool_rank}.</strong> ` : ''}<button type="button" class="rider-name linkish" title="Ergebnisse anzeigen"
+        onClick=${(e) => { e.stopPropagation(); openRider(r.id); }}>${r.name}</button></span>
       ${r.pos_rank ? html`<span class="rank-chip" title="Platz unter den Athleten dieser Position der Liga (nach Punkten im Vorjahr der Saison)">#${r.pos_rank} ${r.pos_label}</span>`
         : r.pool_rank && html`<span class="rank-chip" title="Platz im Athletenpool (nach Punkten im Vorjahr der Saison)">#${r.pool_rank}</span>`}
       ${r.inactive && html`<span class="tag warn">inaktiv</span>`}
