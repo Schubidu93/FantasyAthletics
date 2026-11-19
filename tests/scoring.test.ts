@@ -212,11 +212,11 @@ describe("Mehrkampf", () => {
 });
 
 describe("Gehen", () => {
-  it("Faktor nach Strecke (wenige Rennen im Jahr)", async () => {
+  it("Faktor wie der Lauf über die gleiche Strecke", async () => {
     expect(await db.all(`select name, factor::float f from disciplines where name in
       ('5000 Metres Race Walk', '10,000 Metres Race Walk', '20 Kilometres Race Walk', '35 Kilometres Race Walk') order by f`)).toEqual([
-      { name: "5000 Metres Race Walk", f: 1.5 }, { name: "10,000 Metres Race Walk", f: 2 },
-      { name: "20 Kilometres Race Walk", f: 3 }, { name: "35 Kilometres Race Walk", f: 4 },
+      { name: "5000 Metres Race Walk", f: 1.3 }, { name: "10,000 Metres Race Walk", f: 1.6 },
+      { name: "20 Kilometres Race Walk", f: 2 }, { name: "35 Kilometres Race Walk", f: 3 },
     ]);
   });
 });

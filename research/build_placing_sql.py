@@ -128,7 +128,7 @@ begin
   end if;
 end $$;
 
--- einmalig: Gehen nach Wettkampfdauer wie der Lauf (wenige Rennen im Jahr): bis 5000 m 1,5 · 10 km 2 · 20 km 3 · 35 km/Marathon 4
+-- einmalig: Gehen mit denselben Faktoren wie der Lauf über die gleiche Strecke (5000 m 1,3 · 10 km 1,6 · 20 km 2 · 35 km/Marathon 3)
 do $$
 begin
   if not exists (select 1 from schema_changes where name = 'gehen_faktoren') then
