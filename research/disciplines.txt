@@ -34,21 +34,21 @@
 3000 Metres Short Track|1|5000|5000SC||
 3000 Metres Steeplechase|1.3|Hindernis|5000SC||
 35 Kilometres Race Walk|3|Gehen|RW_LONG||
-3x1000 Metres Relay|0.33|800|||
-3x800 Metres Relay|0.33|800|||
+3x1000 Metres Relay|0.33|800|TF||
+3x800 Metres Relay|0.33|800|TF||
 400 Metres|1|400|TF||
 400 Metres Hurdles|1|Langhürden|TF||
 400 Metres Short Track|1|400|TF||
 400m hurdles (84.0cm)|0||||
-4x100 Metres Relay|0.25|100|||
-4x200 Metres Relay Short Track|0.25|200|||
-4x400 Metres Relay|0.25|400|||
-4x400 Metres Relay Mixed|0.25|400|||
-4x400 Metres Relay Mixed Short Track|0.25|400|||
-4x400 Metres Relay Short Track|0.25|400|||
-4x800 Metres Relay|0.25|800|||
-4x800 Metres Relay Short Track|0.25|800|||
-4xMile Relay|0.25|1500|||
+4x100 Metres Relay|0.25|100|TF||
+4x200 Metres Relay Short Track|0.25|200|TF||
+4x400 Metres Relay|0.25|400|TF||
+4x400 Metres Relay Mixed|0.25|400|TF||
+4x400 Metres Relay Mixed Short Track|0.25|400|TF||
+4x400 Metres Relay Short Track|0.25|400|TF||
+4x800 Metres Relay|0.25|800|TF||
+4x800 Metres Relay Short Track|0.25|800|TF||
+4xMile Relay|0.25|1500|TF||
 5 Kilometres Road|1.3|5000|5000SC,ROAD||
 500 Metres Short Track|1|400|TF||
 5000 Metres|1.3|5000|5000SC||
@@ -97,7 +97,7 @@ Pentathlon Short Track|3|Mehrkampf|CE||1
 Pole Vault|1|Stabhochsprung|TF||1
 Road Race|1||||
 Shot Put|1|Kugel|TF||1
-Sprint Medley 1000m|0.25|400|||
+Sprint Medley 1000m|0.25|400|TF||
 Triple Jump|1|Dreisprung|TF||1
 U20 Mountain Classic|1.6|10000|10KROAD||
 Vertical Uphill|1.6|10000|10KROAD||

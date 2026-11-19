@@ -1,22 +1,35 @@
 // Toplisten (DE) von World Athletics: Jahr, Disziplin und Geschlecht wählen, die besten 20 sehen
 import { html } from '../vendor/preact-htm.js';
-import { flag, Loading, openRider, rpc, useLoad } from '../lib.js';
-import { BackToAthlete, discLabel, discMeters, SexBadge } from './lib.js';
+import { flag, Loading, openRider, q, rpc, sb, useLoad } from '../lib.js';
+import { AREA_GROUPS, AREAS, BackToAthlete, discLabel, discMeters, groupArea, leagueAreas, SexBadge } from './lib.js';
+
+const GROUP_ORDER = AREAS.flatMap((a) => AREA_GROUPS[a]);
+/** Disziplinen je Bereich der Liga, sortiert nach Schwerpunkt-Disziplin und Strecke, Halle nach Freiluft */
+function discSections(names, groupOf, areas) {
+  const key = (d) => [GROUP_ORDER.indexOf(groupOf[d]), discMeters(discLabel(d)), /Short Track/.test(d) ? 1 : 0];
+  const cmp = (a, b) => { const x = key(a), y = key(b); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2] || a.localeCompare(b); };
+  return AREAS.filter((a) => areas.includes(a))
+    .map((a) => ({ area: a, discs: names.filter((d) => groupArea(groupOf[d]) === a).sort(cmp) }))
+    .filter((x) => x.discs.length);
+}
 
 export function Toplists({ c, sub, sub2, sub3 }) {
   const idx = useLoad(() => rpc('toplist_index'), []);
+  const dis = useLoad(() => q(sb.from('disciplines').select('name,event_group')), []);
+  const groupOf = Object.fromEntries((dis.data || []).map((d) => [d.name, d.event_group]));
   const rows = idx.data || [];
   const years = [...new Set(rows.map((r) => r.year))].sort((a, b) => b - a);
   const year = years.includes(+sub) ? +sub : years[0];
   const genders = c.league.gender === 'mixed' ? ['men', 'women'] : [c.league.gender];
   const gender = genders.includes(sub3) ? sub3 : genders[0];
-  const discs = rows.filter((r) => r.year === year && r.gender === gender).map((r) => r.discipline)
-    .sort((a, b) => discMeters(discLabel(a)) - discMeters(discLabel(b)) || a.localeCompare(b));
+  const sections = discSections(rows.filter((r) => r.year === year && r.gender === gender).map((r) => r.discipline),
+    groupOf, leagueAreas(c.league));
+  const discs = sections.flatMap((x) => x.discs);
   const disc = discs.includes(sub2 && decodeURIComponent(sub2)) ? decodeURIComponent(sub2) : discs[0];
   const list = useLoad(() => (year && disc ? rpc('toplist', { p_year: year, p_discipline: disc, p_gender: gender, p_limit: 20 }) : Promise.resolve([])),
     [year, disc, gender]);
   const go = (y, d, g) => { location.hash = `#/league/${c.league.id}/toplists/${y}/${encodeURIComponent(d || '')}/${g}`; };
-  if (!idx.data) return html`<${Loading} error=${idx.error} />`;
+  if (!idx.data || !dis.data) return html`<${Loading} error=${idx.error || dis.error} />`;
   const owner = (id) => c.managerMap[c.owner[id]];
 
   return html`<section class="card">
@@ -30,7 +43,7 @@ export function Toplists({ c, sub, sub2, sub3 }) {
         ${genders.length > 1 && html`<select value=${gender} onChange=${(e) => go(year, disc, e.target.value)} aria-label="Geschlecht">
           <option value="men">Männer</option><option value="women">Frauen</option></select>`}
         <select value=${disc} onChange=${(e) => go(year, e.target.value, gender)} aria-label="Disziplin">
-          ${discs.map((d) => html`<option value=${d}>${discLabel(d)}</option>`)}</select>
+          ${sections.map((x) => html`<optgroup label=${x.area}>${x.discs.map((d) => html`<option value=${d}>${discLabel(d)}</option>`)}</optgroup>`)}</select>
       </div>
       ${!list.data ? html`<${Loading} error=${list.error} />` : list.data.length === 0 ? html`<p class="muted">Keine Einträge.</p>` : html`
         <h3 class="cal-month">${discLabel(disc)} <${SexBadge} g=${gender} /> ${year}</h3>
