@@ -3,18 +3,11 @@
 
 // Programm („Events to be staged“): „100m“, „400mH“, „1500m“, „3000mSC“, „5 km Road“, „Long Jump“, „20 km Race Walk“ …
 // Jugend, Masters und Staffeln zählen nicht.
+import { eventGroup, groupArea } from "../web/sport/groups.js";
+
 export const NOT_SENIOR = /\bU\s?\d{2}\b|\b[MW]\s?\d{2}\b|4\s*x|relay|staffel|masters/i;
-const AREA_EVENT: [string, RegExp][] = [
-  ["Gehen", /walk|\bRW\b|gehen/i],
-  ["Hürden", /^\d+\s*m\s*H\b|hurdles/i],
-  ["Mehrkampf", /decathlon|heptathlon|pentathlon|combined/i],
-  ["Sprung", /jump|vault/i],
-  ["Wurf", /throw|shot ?put/i],
-  ["Lauf", /^(800|1000|1500|2000|3000|5000|10[,.]?000)\s*m|mile|steeple|\d+([.,]\d+)?\s*k(m|ilomet)|marathon|cross|\bxc\b|road/i],
-  ["Sprint", /^(50|55|60|100|150|200|300|400|500)\s*m\b/i],
-];
 /** Bereich einer Disziplin im Programm (null = Jugend, Staffel oder unbekannt) */
-export const eventArea = (e: string) => (NOT_SENIOR.test(e) ? null : AREA_EVENT.find(([, re]) => re.test(e.trim()))?.[0] ?? null);
+export const eventArea = (e: string): string | null => (NOT_SENIOR.test(e) ? null : groupArea(eventGroup(e)));
 /** Disziplinen für Erwachsene, die einem Bereich zugeordnet werden können */
 export const seniorEvents = (events: string[]) => events.filter((e) => eventArea(e));
 /** Laufdisziplinen ab 800 m */

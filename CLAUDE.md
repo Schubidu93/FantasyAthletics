@@ -127,7 +127,8 @@ richtet `.claude/hooks/session-start.sh` Pakete und das Test-PostgreSQL ein.
   Suchtreffer mit gleicher ID, nicht von Hand; bei jedem Lauf werden alle `manual`-Athleten abgeglichen und ggf. korrigiert) → `athletes.manual = true` (immer im Pool,
   `ranking_points` aus bester WA-Leistung), dann Ergebnisse/Bestleistungen nur für diese Athleten (`ATHLETE_IDS`).
 - Kalender: `importer/sync-calendar.ts` → `calendar_events` (WA-Kalender: weltweit ab GL, Europa ab A, Deutschland ab E;
-  Programm aus `getCompetitionOrganiserInfo`, Bereiche je Wettkampf in `calendar_events.areas` aus `importer/calendar-filter.ts`).
+  Programm aus `getCompetitionOrganiserInfo`, Bereiche je Wettkampf in `calendar_events.areas` aus `importer/calendar-filter.ts`;
+  Programm-Disziplin → Schwerpunkt-Gruppe in `web/sport/groups.js` (`eventGroup`, auch Disziplin-Filter im Kalender; von App und Importer genutzt)).
   Kalender-Seite und Spieltag-Vorschläge (`web/sport/matchday-plan.js`, Tests `tests/matchdays.test.ts`) richten sich nach den
   Bereichen der Liga: Fachmeisterschaften (Cross/Straße, Winterwurf, Mehrkampf) nur in Ligen, die nur diesen Bereich spielen;
   ohne Lauf ab Oktober „Saisonpause“.
