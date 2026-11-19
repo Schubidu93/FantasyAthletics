@@ -421,12 +421,14 @@ language sql stable security definer set search_path = public as $$
 $$;
 
 -- Wettkämpfe → Top-Leistungen: einzelne Ergebnisse mit den meisten Punkten in einem Zeitraum, optional einer Disziplin;
--- mit p_manager nur Ergebnisse, die diesem Team in der Liga Punkte gebracht haben (Spieltag, ggf. aufgestellt – _score_rows)
+-- mit p_manager nur Ergebnisse, die diesem Team in der Liga Punkte gebracht haben (Spieltag, ggf. aufgestellt – _score_rows);
+-- p_order: 'points' (Fantasy-Punkte) oder 'wa' (WA-Punkte der Leistung)
 drop function if exists top_results(text, date, date, text, int);
+drop function if exists top_results(text, date, date, text, int, uuid, uuid);
 create or replace function top_results(p_gender text, p_from date, p_to date, p_discipline text default null, p_limit int default 100,
-                                       p_league uuid default null, p_manager uuid default null)
+                                       p_league uuid default null, p_manager uuid default null, p_order text default 'points')
 returns table (athlete_id text, result_date date, competition_id text, competition text, discipline text, race text, mark text,
-               points numeric, perf_points numeric, placing_points numeric, pb_points numeric, record_points numeric)
+               points numeric, perf_points numeric, placing_points numeric, pb_points numeric, record_points numeric, wa_points int)
 language plpgsql stable security definer set search_path = public as $$
 begin
   if p_manager is not null and not (is_member(p_league) or _is_service()) then raise exception 'Keine Berechtigung.'; end if;
@@ -435,7 +437,7 @@ begin
     select distinct s.athlete_id, s.competition_id, s.label from _score_rows(p_league) s
      where p_manager is not null and s.manager_id = p_manager)
   select r.athlete_id, r.result_date, r.competition_id, coalesce(c.name, w.competition), coalesce(w.discipline, r.label),
-         w.wa_race, w.mark, r.points, r.perf_points, r.placing_points, r.pb_points, r.record_points
+         w.wa_race, w.mark, r.points, r.perf_points, r.placing_points, r.pb_points, r.record_points, w.result_score
     from results r join athletes x on x.id = r.athlete_id
          left join wa_results w on w.id = r.wa_result_id
          left join competitions c on c.id = r.competition_id
@@ -443,7 +445,8 @@ begin
      and (p_discipline is null or w.discipline = p_discipline)
      and (p_manager is null or exists (select 1 from team t where t.athlete_id = r.athlete_id
                                          and t.competition_id = r.competition_id and t.label = r.label))
-   order by r.points desc, r.result_date desc, r.id
+     and (p_order is distinct from 'wa' or w.result_score is not null)
+   order by case when p_order = 'wa' then w.result_score end desc nulls last, r.points desc, r.result_date desc, r.id
    limit least(coalesce(p_limit, 100), 300);
 end $$;
 

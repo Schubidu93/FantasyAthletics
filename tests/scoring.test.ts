@@ -231,11 +231,15 @@ describe("Ein Wettkampf = ein Ergebnis", () => {
       values ($1, $3, 'Meeting A', '800 Metres', 'F', 'F', 9, '2:00', 1100),
              ($1, $3, 'Meeting A', '1500 Metres', 'F', 'F', 9, '4:00', 1150),
              ($2, $3, 'Meeting A', '800 Metres', 'F', 'F', 9, '1:45', 1200),
+             ($2, $3, 'Meeting B', 'Marathon', 'F', 'F', 9, '2:10:00', 1100),
              ($1, $4, 'Meeting alt', '800 Metres', 'F', 'F', 9, '1:59', 1300)`, [a, b, D, `${Y - 1}-06-01`]);
     await db.query("select rebuild_results(null)");
-    const top = async (g: string, disc: string | null) => (await db.all("select athlete_id, discipline, points::float p from top_results($1, $2, $3, $4)",
-      [g, `${Y}-01-01`, `${Y}-12-31`, disc])).map((r) => `${r.athlete_id} ${r.discipline} ${r.p}`);
-    expect(await top("mixed", null)).toEqual(["wa-2 800 Metres 200", "wa-1 1500 Metres 150", "wa-1 800 Metres 100"]);
+    const top = async (g: string, disc: string | null, order = "points") => (await db.all(
+      "select athlete_id, discipline, points::float p from top_results($1, $2, $3, $4, 100, null, null, $5)",
+      [g, `${Y}-01-01`, `${Y}-12-31`, disc, order])).map((r) => `${r.athlete_id} ${r.discipline} ${r.p}`);
+    expect(await top("mixed", null)).toEqual(["wa-2 Marathon 400", "wa-2 800 Metres 200", "wa-1 1500 Metres 150", "wa-1 800 Metres 100"]);
+    // nach WA-Punkten: 1200, 1150, dann 1100 (bei Gleichstand mehr Fantasy-Punkte zuerst)
+    expect(await top("mixed", null, "wa")).toEqual(["wa-2 800 Metres 200", "wa-1 1500 Metres 150", "wa-2 Marathon 400", "wa-1 800 Metres 100"]);
     expect(await top("women", "800 Metres")).toEqual(["wa-1 800 Metres 100"]);
   });
 
