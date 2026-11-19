@@ -2,6 +2,9 @@
 import { html, useState } from '../vendor/preact-htm.js';
 import { AREA_PRESETS, AREAS, BLOCK_LABEL, GENDER_LABEL, GROUP_LABEL, leagueSlots, positionGroups, positionSections, positionsFor, groupArea, RUN_GROUPS } from './lib.js';
 
+// Positionen in den Einstellungen: erst Sprint, Hürden, Lauf, dann die übrigen Bereiche
+const SECTION_ORDER = (a) => { const i = ['Sprint', 'Hürden', 'Lauf'].indexOf(a); return i < 0 ? 3 + AREAS.indexOf(a) : i; };
+
 /** Startwerte beim Anlegen einer Liga (zusätzlich zu den gemeinsamen) */
 export const LEAGUE_DEFAULTS = {
   roster_size: 11, scoring_mode: 'lineup', draft_mode: 'snake', bid_seconds: 30,
@@ -89,14 +92,14 @@ export function SquadFields({ f, set, locked }) {
       <div class="span2 group-pick">
         <span class="label-text">Disziplinen in der Aufstellung</span>
         <p class="muted small">Ein <strong>Block</strong> nimmt jeden Athleten des Bereichs auf, eine einzelne Disziplin nur ihre Spezialisten.</p>
-        ${positionSections(areas).map((sec) => html`<div class="pos-section" key=${sec.area}>
+        ${positionSections(areas).sort((x, y) => SECTION_ORDER(x.area) - SECTION_ORDER(y.area)).map((sec) => html`<div class="pos-section" key=${sec.area}>
           <span class="pos-area">${sec.area}</span>
-          <div class="chips chips-grid">
-            ${sec.blocks.map((g) => html`<label class="check chip chip-block" key=${g}>
-              <input type="checkbox" checked=${groups.includes(g)} disabled=${locked} onChange=${() => toggleGroup(g)} /> ${BLOCK_LABEL[g]}</label>`)}
-            ${sec.singles.map((g) => html`<label class="check chip" key=${g}>
+          ${sec.parts.map((part) => html`<div class="chips chips-grid" key=${part.block || 'einzeln'}>
+            ${part.block && html`<label class="check chip chip-block">
+              <input type="checkbox" checked=${groups.includes(part.block)} disabled=${locked} onChange=${() => toggleGroup(part.block)} /> ${BLOCK_LABEL[part.block]}</label>`}
+            ${part.singles.map((g) => html`<label class="check chip" key=${g}>
               <input type="checkbox" checked=${groups.includes(g)} disabled=${locked} onChange=${() => toggleGroup(g)} /> ${GROUP_LABEL[g]}</label>`)}
-          </div></div>`)}
+          </div>`)}</div>`)}
         <p class="muted small"><strong>${slots.length} Positionen:</strong> ${f.gender === 'mixed' && f.lineup_mode === 'mf' ? 'je ein Mann und eine Frau in ' : 'je eine in '}${
           groups.length ? positions.filter((g) => groups.includes(g)).map((g) => GROUP_LABEL[g]).join(', ') : '–'}${
           +f.wildcards > 0 ? `, dazu ${+f.wildcards === 1 ? 'eine Wildcard' : `${+f.wildcards} Wildcards`} (beliebige Disziplin)` : ''}.

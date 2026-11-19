@@ -51,11 +51,14 @@ const POS_RANKS = {};
 /** Positions-Rang eines Athleten in einer Liga ({ rank, label, of }) – sobald die Athleten der Liga geladen sind */
 export const positionRank = (leagueId, athleteId) => POS_RANKS[leagueId]?.[athleteId] || null;
 /** Wählbare Positionen je Bereich: zuerst die Blöcke (fassen mehrere Disziplinen zusammen), dann die einzelnen Disziplinen */
-export const positionSections = (areas) => AREAS.filter((a) => areas.includes(a)).map((a) => ({
-  area: a,
-  blocks: a === 'Lauf' ? ['Mittel', 'Lang'] : AREA_GROUPS[a].length > 1 ? [a] : [],
-  singles: AREA_GROUPS[a],
-}));
+// parts: je Block die Disziplinen darunter (Lauf: Mittelstrecke, Langstrecke, dann Marathon für sich)
+export const positionSections = (areas) => AREAS.filter((a) => areas.includes(a)).map((a) => {
+  const blocks = a === 'Lauf' ? ['Mittel', 'Lang'] : AREA_GROUPS[a].length > 1 ? [a] : [];
+  const inBlock = blocks.flatMap(positionGroups);
+  const rest = AREA_GROUPS[a].filter((g) => !inBlock.includes(g));
+  return { area: a, blocks, singles: AREA_GROUPS[a],
+    parts: [...blocks.map((b) => ({ block: b, singles: positionGroups(b) })), ...(rest.length ? [{ block: null, singles: rest }] : [])] };
+});
 /** Alle wählbaren Positionen für diese Bereiche (Reihenfolge wie in der Auswahl) */
 export const positionsFor = (areas) => positionSections(areas).flatMap((x) => [...x.blocks, ...x.singles]);
 /** Bezeichnung eines Blocks in der Auswahl, z. B. „Mittelstrecke (800/1500 m)“, „alle Sprünge“ */
