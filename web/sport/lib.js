@@ -103,9 +103,11 @@ export const SexBadge = ({ g }) => {
 // WA-Wettkampfkategorie als farbiges Abzeichen (wie im Kalender-Widget): DL/OW/DF/GW lila, GL blau, A grün, sonst grau
 const CAT_CLASS = { OW: 'b-top', DF: 'b-top', GW: 'b-top', DL: 'b-top', GL: 'b-gl', A: 'b-a' };
 export const CatBadge = ({ cat }) => (cat ? html`<span class=${`badge ${CAT_CLASS[cat] || 'b-low'}`} title="Kategorie bei World Athletics">${cat}</span>` : '');
-// Sortierschlüssel für Disziplinen: Strecke in Metern (800 m < 1500 m < Meile < … < Marathon)
+// Sortierschlüssel für Disziplinen: Strecke in Metern (800 m < 1500 m < Meile < … < Marathon), Staffeln am Ende
 export function discMeters(label) {
   const s = String(label || '');
+  // Staffeln immer ans Ende (nach Einzeldisziplinen, Sprung, Wurf, Mehrkampf), untereinander nach Teilstrecke
+  if (/Staffel|Relay|Medley/i.test(s)) return 1e7 + discMeters(s.replace(/\d+\s*[x×]\s*/i, '').replace(/Staffel|Relay|Medley/gi, ''));
   if (/Halbmarathon|Half Marathon/i.test(s)) return 21097;
   if (/Marathon/i.test(s)) return 42195;
   if (/Meile|Mile/i.test(s)) return 1609;
