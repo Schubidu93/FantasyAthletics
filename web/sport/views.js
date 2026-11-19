@@ -5,9 +5,9 @@ import { Calendar } from './calendar.js';
 import { Toplists } from './toplists.js';
 import { TopResults } from './top.js';
 import { all, sb } from '../lib.js';
-import { groupArea, leagueAreas, riderGroup } from './lib.js';
+import { groupArea, leagueAreas, riderGroup, withPositionRanks } from './lib.js';
 
-/** Athleten der Liga (Mixed: beide Geschlechter), sortiert nach Pool-Rang: nur mit Schwerpunkt-Disziplin in den
+/** Athleten der Liga (Mixed: beide Geschlechter), sortiert nach Pool-Rang, mit Positions-Rang: nur mit Schwerpunkt-Disziplin in den
  *  Bereichen der Liga – dazu alle, die in der Liga je in einem Kader standen (auch wenn sich ihr Schwerpunkt geändert hat) */
 export async function loadPeople(league) {
   const [people, rostered] = await Promise.all([
@@ -19,7 +19,7 @@ export async function loadPeople(league) {
   ]);
   const keep = new Set(rostered.map((r) => r.athlete_id));
   const areas = leagueAreas(league);
-  return people.filter((r) => keep.has(r.id) || !groupArea(riderGroup(r)) || areas.includes(groupArea(riderGroup(r))));
+  return withPositionRanks(people.filter((r) => keep.has(r.id) || !groupArea(riderGroup(r)) || areas.includes(groupArea(riderGroup(r)))), league);
 }
 
 /** Bereiche der Navigation für Personen und Wettkämpfe */

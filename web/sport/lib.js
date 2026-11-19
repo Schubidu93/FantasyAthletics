@@ -24,6 +24,32 @@ export const eligible = (r, l) => r?.pool_rank != null && (!groupArea(riderGroup
 const BLOCKS = { Mittel: ['800', '1500'], Lang: ['5000', '10000', 'Hindernis'],
   Sprint: AREA_GROUPS.Sprint, Hürden: AREA_GROUPS.Hürden, Sprung: AREA_GROUPS.Sprung, Wurf: AREA_GROUPS.Wurf };
 export const positionGroups = (p) => BLOCKS[p] || [p];
+const POS_SHORT = { Mittel: 'Mittelstrecke', Lang: 'Langstrecke' };
+/** Positions-Rang je Liga: Platz (nach Pool-Rang) unter den Athleten, die auf dieselbe Position der Liga passen
+ *  (bei „je Disziplin Mann und Frau“ getrennt nach Geschlecht) (z. B. „#3 1500 m“ oder bei Blöcken „#1 Wurf“); setzt pos_rank und pos_label an den Personen */
+export function withPositionRanks(people, league) {
+  const positions = league?.lineup_groups || RUN_GROUPS;
+  const count = {};
+  const ranked = [];
+  for (const r of people) {
+    if (r.pool_rank == null) continue;
+    const p = positions.find((x) => positionGroups(x).includes(riderGroup(r)));
+    if (!p) continue;
+    // getrennt nach Geschlecht nur, wenn je Position ein Mann und eine Frau aufgestellt werden (lineup_mode 'mf')
+    r.pos_key = league?.lineup_mode === 'mf' ? `${p}|${r.gender}` : p;
+    r.pos_rank = count[r.pos_key] = (count[r.pos_key] || 0) + 1;
+    r.pos_label = POS_SHORT[p] || GROUP_LABEL[p] || p;
+    ranked.push(r);
+  }
+  // fürs Athletenprofil (öffnet sich auch außerhalb der Listen): Rang, Position und Zahl der Athleten auf dieser Position
+  if (league?.id) {
+    POS_RANKS[league.id] = Object.fromEntries(ranked.map((r) => [r.id, { rank: r.pos_rank, label: r.pos_label, of: count[r.pos_key] }]));
+  }
+  return people;
+}
+const POS_RANKS = {};
+/** Positions-Rang eines Athleten in einer Liga ({ rank, label, of }) – sobald die Athleten der Liga geladen sind */
+export const positionRank = (leagueId, athleteId) => POS_RANKS[leagueId]?.[athleteId] || null;
 /** Wählbare Positionen je Bereich: zuerst die Blöcke (fassen mehrere Disziplinen zusammen), dann die einzelnen Disziplinen */
 export const positionSections = (areas) => AREAS.filter((a) => areas.includes(a)).map((a) => ({
   area: a,
