@@ -1,7 +1,7 @@
 // Leichtathletik-Helfer: Disziplingruppen und Positionen, Bezeichnungen, Links zu World Athletics, Abzeichen,
 // Staffeln für Nachträge, Rücksprung zum Athletenfenster
 import { html } from '../vendor/preact-htm.js';
-import { openRider } from '../lib.js';
+import { openRider, q, sb, useLoad } from '../lib.js';
 
 // Disziplingruppen (Schwerpunkt-Disziplin eines Athleten) je Bereich – wie _group_area in der Datenbank
 export const AREA_GROUPS = {
@@ -66,6 +66,21 @@ export function discSections(names, groupOf, areas) {
   return AREAS.filter((a) => areas.includes(a))
     .map((a) => ({ area: a, discs: names.filter((d) => groupArea(groupOf[d]) === a).sort(cmp) }))
     .filter((x) => x.discs.length);
+}
+
+// Disziplin-Auswahl: nach Bereich gruppiert wie bei den Toplisten, Disziplinen ohne Schwerpunkt (z. B. Straßenlauf) unter „Sonstige“.
+// names: angebotene Disziplinen (ohne Angabe alle, die Punkte geben können)
+export function DiscFilter({ names, value, onChange }) {
+  const dis = useLoad(() => q(sb.from('disciplines').select('name,event_group,factor')), []);
+  const groupOf = Object.fromEntries((dis.data || []).map((d) => [d.name, d.event_group]));
+  names = names || (dis.data || []).filter((d) => Number(d.factor) > 0).map((d) => d.name);
+  const sections = discSections(names, groupOf, AREAS);
+  const rest = names.filter((d) => !sections.some((x) => x.discs.includes(d))).sort();
+  if (rest.length) sections.push({ area: 'Sonstige', discs: rest });
+  if (value && !names.includes(value)) sections.push({ area: '', discs: [value] });
+  return html`<select value=${value} onChange=${(e) => onChange(e.target.value)} aria-label="Disziplin">
+    <option value="">Alle Disziplinen</option>
+    ${sections.map((x) => html`<optgroup label=${x.area}>${x.discs.map((d) => html`<option value=${d}>${discLabel(d)}</option>`)}</optgroup>`)}</select>`;
 }
 
 export const groupFilterMatch = (value, r) => !value

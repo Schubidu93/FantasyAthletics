@@ -224,6 +224,21 @@ describe("Ein Wettkampf = ein Ergebnis", () => {
     ]);
   });
 
+  it("Top-Leistungen: meiste Punkte im Zeitraum, je Disziplin und Geschlecht", async () => {
+    const a = await athlete(db, 1, "Läuferin", "women", "800 Metres", 1200);
+    const b = await athlete(db, 2, "Läufer", "men", "800 Metres", 1200);
+    await db.query(`insert into wa_results (athlete_id, date, competition, discipline, category, race, place, mark, result_score)
+      values ($1, $3, 'Meeting A', '800 Metres', 'F', 'F', 9, '2:00', 1100),
+             ($1, $3, 'Meeting A', '1500 Metres', 'F', 'F', 9, '4:00', 1150),
+             ($2, $3, 'Meeting A', '800 Metres', 'F', 'F', 9, '1:45', 1200),
+             ($1, $4, 'Meeting alt', '800 Metres', 'F', 'F', 9, '1:59', 1300)`, [a, b, D, `${Y - 1}-06-01`]);
+    await db.query("select rebuild_results(null)");
+    const top = async (g: string, disc: string | null) => (await db.all("select athlete_id, discipline, points::float p from top_results($1, $2, $3, $4)",
+      [g, `${Y}-01-01`, `${Y}-12-31`, disc])).map((r) => `${r.athlete_id} ${r.discipline} ${r.p}`);
+    expect(await top("mixed", null)).toEqual(["wa-2 800 Metres 200", "wa-1 1500 Metres 150", "wa-1 800 Metres 100"]);
+    expect(await top("women", "800 Metres")).toEqual(["wa-1 800 Metres 100"]);
+  });
+
   it("Mehrkampf: Einzeldisziplinen bringen Leistungspunkte ab 1000 und Bonus, keine Platzierungspunkte", async () => {
     const a = await athlete(db, 1, "Zehnkämpfer", "men", "Decathlon", 1200);
     await db.query("insert into athlete_pb_before (athlete_id, discipline, mark) values ($1, 'Long Jump', '7.50')", [a]);
