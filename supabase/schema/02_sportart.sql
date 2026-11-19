@@ -50,10 +50,13 @@ begin
 end $$;
 
 -- Vergleichswert einer Leistung: kleiner = besser (Zeiten direkt; Sprung, Wurf und Mehrkampf: mehr ist besser)
+create or replace function _mark_cost(p_higher_better boolean, p_mark text) returns numeric
+language sql immutable as $$
+  select case when coalesce(p_higher_better, false) then -mark_seconds(p_mark) else mark_seconds(p_mark) end;
+$$;
 create or replace function _mark_cost(p_discipline text, p_mark text) returns numeric
 language sql stable as $$
-  select case when coalesce((select higher_better from disciplines where name = p_discipline), false)
-              then -mark_seconds(p_mark) else mark_seconds(p_mark) end;
+  select _mark_cost((select higher_better from disciplines where name = p_discipline), p_mark);
 $$;
 
 -- Bereich einer Disziplingruppe (Schwerpunkt-Disziplin eines Athleten):
