@@ -22,6 +22,13 @@ begin
     perform prune_athletes();
     insert into schema_changes (name) values ('pool_975');
   end if;
+  -- Cross-Distanzfaktoren wie die Lauf-Faktoren angehoben (lauf_faktoren_2 in reference_data.sql)
+  if not exists (select 1 from schema_changes where name = 'cross_faktoren_2') then
+    update cross_distance_factors f set factor = x.factor
+      from (values (6, 1.3, 1.5), (12, 1.6, 2), (1000, 2, 2.5)) x(max_km, old, factor)
+     where f.max_km = x.max_km and f.factor = x.old;
+    insert into schema_changes (name) values ('cross_faktoren_2');
+  end if;
   -- „Neue Punkte“-Push startet ab jetzt: bisherige Punkte als schon gemeldet eintragen (kein Schwall beim Einführen)
   if not exists (select 1 from schema_changes where name = 'point_pushes_seed') then
     insert into point_pushes (manager_id, athlete_id, competition_id, label)

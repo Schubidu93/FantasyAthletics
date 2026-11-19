@@ -25,11 +25,11 @@ describe("Standardwerte wie im alten Spiel (Faktor 0,1)", () => {
     await result(a, "Cross Country", "GL", "F", 1, 0, { competition: "e Cross Pforzheim - XC 7.5km" });
     await db.query("select rebuild_results(null)");
     expect(await points()).toEqual({
-      "a 15 km Nijmegen": [3.04, 0],        // altes Spiel: 3,04
-      "b Marathon Frankfurt": [40.5, 0],    // altes Spiel: 40,50
-      "c 10 km DM Siegburg": [12.32, 4],    // WA 2026: Road Running B 2. = 25 (altes Spiel: 50 → 20,32)
-      "d 10 km Berlin": [13.76, 0.32],      // WA 2026: Road Running F 2. = 2 (altes Spiel: 14,40)
-      "e Cross Pforzheim - XC 7.5km": [32, 0], // (1200 − 1000) × 0,1 × 1,6 – wie im alten Spiel
+      "a 15 km Nijmegen": [3.8, 0],         // 19 × 0,1 × 2 (altes Spiel mit Faktor 1,6: 3,04)
+      "b Marathon Frankfurt": [54, 0],      // 135 × 0,1 × 4 (altes Spiel mit Faktor 3: 40,50)
+      "c 10 km DM Siegburg": [15.4, 5],     // WA 2026: Road Running B 2. = 25 (altes Spiel: 50 → 20,32)
+      "d 10 km Berlin": [17.2, 0.4],        // WA 2026: Road Running F 2. = 2 (altes Spiel: 14,40)
+      "e Cross Pforzheim - XC 7.5km": [40, 0], // (1200 − 1000) × 0,1 × 2
     });
   });
 });
@@ -70,11 +70,11 @@ describe("Punkte nach WA-Regeln 2026", () => {
       "a GL-Sieg 1500": [180, 120],                // (1180−1000) + Tab. 2.2 GL 1.
       "b WM-Halbfinale Q": [150, 100],             // Tab. 2.3 Q/q
       "c WM-Halbfinale raus": [0, 84],             // Tab. 2.3 10.
-      "d WM-Vorlauf 5000 Q": [130, 72.8],          // Faktor 1,3; Tab. 2.6 Q/q 56
-      "e Marathon GL 2.": [450, 225],              // Faktor 3; Tab. 4.1 GL 2. = 75
-      "f Halbmarathon GW-Sieg": [0, 200],          // max(Tab. 4.2: 32, Tab. 4.3: 100) × 2
-      "g Cross GL 3.": [264, 0],                   // Tab. 6.1 GL 3. = 1165 → (1165 − 1000) × 1 × 1,6, keine Platzierungspunkte
-      "h Berglauf GL 2.": [0, 43.2],               // Tab. 2.10 GL 2. = 27 × 1,6
+      "d WM-Vorlauf 5000 Q": [150, 84],            // Faktor 1,5; Tab. 2.6 Q/q 56
+      "e Marathon GL 2.": [600, 300],              // Faktor 4; Tab. 4.1 GL 2. = 75
+      "f Halbmarathon GW-Sieg": [0, 250],          // max(Tab. 4.2: 32, Tab. 4.3: 100) × 2,5
+      "g Cross GL 3.": [330, 0],                   // Tab. 6.1 GL 3. = 1165 → (1165 − 1000) × 1 × 2, keine Platzierungspunkte
+      "h Berglauf GL 2.": [0, 54],                 // Tab. 2.10 GL 2. = 27 × 2
       "i Staffel": null,                           // Faktor 0
       "j geteiltes Finale unaufgelöst": null,      // F1 ohne kombinierte Platzierung
       "k Vorlauf ohne Wertung": null,
@@ -98,11 +98,11 @@ describe("Punkte nach WA-Regeln 2026", () => {
     // Wertung: max(0, Cross-Tabellenwert − 1000) × Cross-Faktor (1) × Distanzfaktor
     expect(rows.map((r) => [r.athlete_id, r.label, Number(r.perf_points), Number(r.placing_points)])).toEqual([
       ["wa-1", "Cross Country · 1.5km", 165, 0],   // GL 3. = 1165 → 165 × 1
-      ["wa-1", "Cross Country · 7.5km", 320, 0],   // GL 1. = 1200 → 200 × 1,6
+      ["wa-1", "Cross Country · 7.5km", 400, 0],   // GL 1. = 1200 → 200 × 2
       ["wa-2", "Cross Country · 1.5km", 200, 0],   // GL 1. = 1200 → 200 × 1
-      ["wa-2", "Cross Country · 4.2km", 65, 0],    // B 1. = 1050 → 50 × 1,3
-      ["wa-3", "Cross Country", 264, 0],           // ohne Distanz: GL 3. = 1165 → 165 × 1,6
-      ["wa-3", "Cross Country · 30.0km", 140, 0],  // GL 12. = 1070 → 70 × 2
+      ["wa-2", "Cross Country · 4.2km", 75, 0],    // B 1. = 1050 → 50 × 1,5
+      ["wa-3", "Cross Country", 330, 0],           // ohne Distanz: GL 3. = 1165 → 165 × 2
+      ["wa-3", "Cross Country · 30.0km", 175, 0],  // GL 12. = 1070 → 70 × 2,5
     ]);
     // unter 1000 gibt es nichts (B 20. = 770)
     await db.query(`insert into wa_results (athlete_id, date, competition, discipline, category, race, wa_race, place, result_score, wa_competition_id)
@@ -133,10 +133,10 @@ describe("Athletenpool", () => {
     const b = await athlete(db, 2, "Knapp drunter", "men", "800 Metres", 1200);
     const n = await athlete(db, 3, "Neu", "women", "1500 Metres", 1100);
     const x = await athlete(db, 4, "Crosser", "men", "5000 Metres", 1100);
-    // A: 5000er-Block 129,9 Punkte (3000 m: 100 + 5000 m: 23 × 1,3), 10.000er-Block 120 (75 × 1,6)
+    // A: 5000er-Block 134,5 Punkte (3000 m: 100 + 5000 m: 23 × 1,5), 10.000er-Block 130 (65 × 2)
     await ins(a, `${Y}-05-01`, "3000 Metres", 1100);
     await ins(a, `${Y}-06-01`, "5000 Metres", 1023);
-    await ins(a, `${Y}-07-01`, "10,000 Metres", 1075);
+    await ins(a, `${Y}-07-01`, "10,000 Metres", 1065);
     // B: nur Leistungen unter der Schwelle → Gruppe der höchsten Leistung (1500 m)
     await ins(b, `${Y}-05-01`, "1500 Metres", 999);
     await ins(b, `${Y}-06-01`, "800 Metres", 990);
@@ -146,15 +146,15 @@ describe("Athletenpool", () => {
     await ins(n, `${Y + 1}-05-01`, "1500 Metres", 1050);
     // X: Cross nach Distanz – 1,5 km zählt für 1500, 7,5 km für 10.000
     await ins(x, `${Y}-11-01`, "Cross Country", 0, "Cross A - XC 1.5km", "GL", 1);   // 1200 → 200 × 1
-    await ins(x, `${Y}-11-02`, "Cross Country", 0, "Cross B - XC 7.5km", "GL", 12);  // 1070 → 70 × 1,6 = 112
+    await ins(x, `${Y}-11-02`, "Cross Country", 0, "Cross B - XC 7.5km", "GL", 12);  // 1070 → 70 × 2 = 140
     await db.query("select rebuild_results(null)");
     await db.query("select refresh_pool(null)");
     const rows = await db.all("select id, event_group, group_basis, group_points, pool_rank from athletes order by id");
     expect(rows.map((r) => [r.id, r.event_group, r.group_basis, Number(r.group_points ?? -1), r.pool_rank])).toEqual([
-      ["wa-1", "5000", "points", 249.9, 2],
+      ["wa-1", "5000", "points", 264.5, 2],
       ["wa-2", "1500", "best", 0, 3],
       ["wa-3", "Hindernis", "first", -1, 4],
-      ["wa-4", "1500", "points", 312, 1],
+      ["wa-4", "1500", "points", 340, 1],
     ]);
   });
 
@@ -200,13 +200,13 @@ describe("Athleten außerhalb des Pools löschen", () => {
 });
 
 describe("Ein Wettkampf = ein Ergebnis", () => {
-  it("zählt je Wettkampf und Disziplin nur die beste Runde; Mehrkampf-Einzeldisziplinen zählen nicht", async () => {
+  it("zählt je Wettkampf und Disziplin nur die beste Runde; Mehrkampf-Einzeldisziplinen unter 1000 zählen nicht", async () => {
     const a = await athlete(db, 1, "Sprinter", "men", "100 Metres", 1200);
     await db.query(`insert into wa_results (athlete_id, date, competition, discipline, category, race, wa_race, place, wa_place, result_score, wa_competition_id)
       values ($1, $2, 'Meeting', '100 Metres', 'C', 'H1', 'H1', 1, 1, 1150, 7100001),
              ($1, $2, 'Meeting', '100 Metres', 'C', 'F', 'F', 2, 2, 1170, 7100001),
              ($1, $2, 'Meeting', '200 Metres', 'C', 'F', 'F', 1, 1, 1100, 7100001),
-             ($1, $2, 'Zehnkampf - Combined Events', 'Long Jump', 'C', 'CE1', 'CE1', 1, 1, 1100, 7100002)`, [a, D]);
+             ($1, $2, 'Zehnkampf - Combined Events', 'Long Jump', 'C', 'CE1', 'CE1', 1, 1, 990, 7100002)`, [a, D]);
     await db.query("select rebuild_results(null)");
     expect(await db.all("select label from results order by label")).toEqual([{ label: "100 Metres" }, { label: "200 Metres" }]);
   });
@@ -224,14 +224,14 @@ describe("Ein Wettkampf = ein Ergebnis", () => {
     ]);
   });
 
-  it("Mehrkampf: Einzeldisziplinen bringen nur Bestleistungs- und Rekord-Bonus", async () => {
+  it("Mehrkampf: Einzeldisziplinen bringen Leistungspunkte ab 1000 und Bonus, keine Platzierungspunkte", async () => {
     const a = await athlete(db, 1, "Zehnkämpfer", "men", "Decathlon", 1200);
     await db.query("insert into athlete_pb_before (athlete_id, discipline, mark) values ($1, 'Long Jump', '7.50')", [a]);
     await db.query(`insert into wa_results (athlete_id, date, competition, discipline, category, race, wa_race, place, wa_place, mark, result_score, wa_competition_id)
       values ($1, $2, 'Zehnkampf - Combined Events', 'Long Jump', 'C', 'CE1', 'CE1', 1, 1, '7.70', 1100, 7100002)`, [a, D]);
     await db.query("select rebuild_results(null)");
     expect(await db.all("select perf_points::float perf, placing_points::float plc, pb_points::float pb from results"))
-      .toEqual([{ perf: 0, plc: 0, pb: 10 }]);
+      .toEqual([{ perf: 130, plc: 0, pb: 10 }]);   // (1100 − 1000) × 1 × 1,3
   });
 
   it("Bestleistungen und Rekorde zählen auch in Vorläufen", async () => {
@@ -255,6 +255,15 @@ describe("Staffeln", () => {
     await db.query("select rebuild_results(null)");
     expect(await points()).toEqual({ Einzel: [180, 120], Staffel: [45, 30] });   // je × 0,25
   });
+
+  it("Staffeln geben keinen Bestleistungs-Bonus", async () => {
+    const a = await athlete(db, 1, "Sprinterin", "women", "100 Metres", 1200);
+    await db.query("insert into athlete_pb_before (athlete_id, discipline, mark) values ($1, '4x100 Metres Relay', '44.00')", [a]);
+    await db.query(`insert into wa_results (athlete_id, date, competition, discipline, category, race, wa_race, place, wa_place, mark, result_score)
+      values ($1, $2, 'Staffel', '4x100 Metres Relay', 'GL', 'F', 'F', 1, 1, '43.00', 1180)`, [a, D]);
+    await db.query("select rebuild_results(null)");
+    expect(Number((await db.one("select pb_points from results")).pb_points)).toBe(0);
+  });
 });
 
 describe("Mehrkampf", () => {
@@ -273,21 +282,28 @@ describe("Gehen", () => {
   it("Faktor wie der Lauf über die gleiche Strecke", async () => {
     expect(await db.all(`select name, factor::float f from disciplines where name in
       ('5000 Metres Race Walk', '10,000 Metres Race Walk', '20 Kilometres Race Walk', '35 Kilometres Race Walk') order by f`)).toEqual([
-      { name: "5000 Metres Race Walk", f: 1.3 }, { name: "10,000 Metres Race Walk", f: 1.6 },
-      { name: "20 Kilometres Race Walk", f: 2 }, { name: "35 Kilometres Race Walk", f: 3 },
+      { name: "5000 Metres Race Walk", f: 1.5 }, { name: "10,000 Metres Race Walk", f: 2 },
+      { name: "20 Kilometres Race Walk", f: 2.5 }, { name: "35 Kilometres Race Walk", f: 4 },
     ]);
   });
 });
 
 describe("Nationenwechsel", () => {
-  it("wer laut WA für ein anderes Land startet, ist nicht mehr im Pool (außer von Hand hinzugefügt)", async () => {
+  it("wer laut WA für ein anderes Land startet, wird gelöscht (außer von Hand hinzugefügt oder im Kader)", async () => {
     await athlete(db, 1, "Deutsch", "women", "100 Metres", 1150);
     await athlete(db, 2, "Gewechselt", "women", "100 Metres", 1200);
     await athlete(db, 3, "Gewechselt, manuell", "women", "100 Metres", 1100);
     await db.query("update athletes set nation = 'POR' where id in ('wa-2', 'wa-3')");
     await db.query("update athletes set manual = true where id = 'wa-3'");
+    await athlete(db, 4, "Gewechselt, im Kader", "women", "100 Metres", 1200);
+    await db.query("update athletes set nation = 'PHI' where id = 'wa-4'");
+    await as(db, await createUser(db, "admin"));
+    const L = (await db.one("select create_league('Liga', 'Team', '{}') id")).id;
+    const m = (await db.one("select id from managers where league_id = $1", [L])).id;
+    await db.query("insert into roster_entries (league_id, manager_id, athlete_id, price, source, acquired_on) values ($1, $2, 'wa-4', 1, 'offline', current_date)", [L, m]);
     await db.query("select refresh_pool(null)");
+    // gewechselt: gelöscht, außer von Hand hinzugefügt oder in einer Liga verwendet (dann nur nicht mehr im Pool)
     expect((await db.all("select id, pool_rank from athletes order by id")).map((r) => [r.id, r.pool_rank !== null]))
-      .toEqual([["wa-1", true], ["wa-2", false], ["wa-3", true]]);
+      .toEqual([["wa-1", true], ["wa-3", true], ["wa-4", false]]);
   });
 });

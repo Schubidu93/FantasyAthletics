@@ -126,6 +126,8 @@ begin
             from athletes where (ranking_points >= c.pool_threshold and coalesce(nation, 'GER') = 'GER') or manual) x
    where x.id = r.id;
   get diagnostics n = row_count;
+  -- wer für ein anderes Land startet, verschwindet ganz (außer er wird in einer Liga verwendet)
+  perform prune_athletes(true);
   return n;
 end $$;
 
@@ -133,10 +135,14 @@ end $$;
 -- Tausch, keiner Aufstellung und keinem eingefrorenen Spieltag). „Gebraucht“ = jede Tabelle, die per Fremdschlüssel ohne
 -- „on delete cascade“ auf athletes zeigt (neue Tabellen zählen automatisch mit), dazu score_snapshot.
 -- Ergebnisse, Bestleistungen und Toplisteneinträge der gelöschten Athleten fallen mit weg.
-create or replace function prune_athletes() returns int
+-- Athleten außerhalb des Pools löschen, solange sie nirgends verwendet werden (Kader, Draft, Tausch …);
+-- p_foreign_only: nur die, die laut WA für ein anderes Land starten (läuft bei jedem refresh_pool)
+drop function if exists prune_athletes();
+create or replace function prune_athletes(p_foreign_only boolean default false) returns int
 language plpgsql security definer set search_path = public as $$
 declare cond text := ' and not exists (select 1 from score_snapshot x where x.athlete_id = a.id)'; r record; n int;
 begin
+  if p_foreign_only then cond := cond || ' and coalesce(a.nation, ''GER'') <> ''GER'''; end if;
   for r in select c.conrelid::regclass tbl, att.attname col
              from pg_constraint c join pg_attribute att on att.attrelid = c.conrelid and att.attnum = c.conkey[1]
             where c.contype = 'f' and c.confrelid = 'athletes'::regclass and c.confdeltype <> 'c' loop
@@ -162,9 +168,9 @@ create table if not exists cross_distance_factors (
 );
 insert into cross_distance_factors (max_km, factor, label) values
   (3, 1, 'bis 3 km – wie 1500 m'),
-  (6, 1.3, 'über 3 bis 6 km – wie 3000/5000 m'),
-  (12, 1.6, 'über 6 bis 12 km – wie 10.000 m'),
-  (1000, 2, 'über 12 km – wie Halbmarathon/25 km Straße')
+  (6, 1.5, 'über 3 bis 6 km – wie 3000/5000 m'),
+  (12, 2, 'über 6 bis 12 km – wie 10.000 m'),
+  (1000, 2.5, 'über 12 km – wie Halbmarathon/25 km Straße')
 on conflict (max_km) do nothing;
 
 create or replace function _cross_factor(p_km numeric) returns numeric
@@ -199,8 +205,14 @@ language sql immutable as $$
   select coalesce(p_competition, '') ~* 'split time' or coalesce(p_remark, '') = 'ST';
 $$;
 
+-- Staffel laut Disziplin (z. B. „4x100 Metres Relay“, „Distance Medley“): keine Bestleistungen
+create or replace function _is_relay(p_discipline text) returns boolean
+language sql immutable as $$
+  select coalesce(p_discipline, '') ~* '(relay|medley)';
+$$;
+
 -- Persönliche Bestleistung je Ergebnis (wa_results.id → Faktor): besser als alles davor (schneller, bei Sprung/Wurf/Mehrkampf
--- weiter bzw. mehr) – beste Leistung vor 2025 laut WA und alle gespeicherten Ergebnisse an früheren Tagen (ohne Staffeln).
+-- weiter bzw. mehr) – beste Leistung vor 2025 laut WA und alle gespeicherten Ergebnisse an früheren Tagen (Staffeln nie).
 -- Es muss vorher schon eine Leistung in der Disziplin geben. Vorlauf und Finale an verschiedenen Tagen können beide PB sein.
 -- 1 = neue PB, 0.5 = PB eingestellt (=PB, gleiche Leistung), 0 = keine. In einem Durchgang über alle Ergebnisse (Fenster
 -- je Athlet und Disziplin), damit auch zehntausende Ergebnisse schnell gehen.
@@ -212,7 +224,7 @@ language sql stable as $$
                  least(b.cost, min(w.cost) over (partition by w.athlete_id, w.discipline order by w.date
                                                  range between unbounded preceding and interval '1 day' preceding)) prior
             from (select o.id, o.athlete_id, o.discipline, o.date, _mark_cost(d.higher_better, o.mark) cost
-                    from wa_results o left join disciplines d on d.name = o.discipline where o.relay is null) w
+                    from wa_results o left join disciplines d on d.name = o.discipline where o.relay is null and not _is_relay(o.discipline)) w
             left join (select pb.athlete_id, pb.discipline, _mark_cost(d.higher_better, pb.mark) cost
                          from athlete_pb_before pb left join disciplines d on d.name = pb.discipline) b
               on b.athlete_id = w.athlete_id and b.discipline = w.discipline) x;
@@ -247,9 +259,10 @@ begin
                || case when w.wa_race in ('', 'F') then '' else ' · ' || w.wa_race end label,
              -- Disziplin (bei Cross mit Distanz) ohne Runde: Schlüssel für „beste Runde je Wettkampf“
              w.discipline || coalesce(' · ' || case when d.cross_table is not null then cross_km(w.competition) end || 'km', '') base,
-             -- Zwischenzeiten (z. B. 1500 m im Meilenrennen): keine Leistungs- und Platzierungspunkte, nur Rekord- und PB-Bonus
-             -- Einzeldisziplinen im Mehrkampf (Runde CE, CE1 …): ebenso, es zählt das Gesamtergebnis
-             case when _is_split(w.competition, w.remark) or coalesce(w.wa_race, '') ~ '^CE' then 0
+             -- Zwischenzeiten (z. B. 1500 m im Meilenrennen): keine Leistungs- und Platzierungspunkte, nur Rekord- und PB-Bonus.
+             -- Einzeldisziplinen im Mehrkampf (Runde CE, CE1 …): Leistungspunkte wie sonst (nur über der Schwelle, also selten),
+             -- aber keine Platzierungspunkte – die Platzierung zählt im Gesamtergebnis
+             case when _is_split(w.competition, w.remark) then 0
                   when d.cross_table is not null then
                     round(greatest(0, coalesce((select ps.points from placing_scores ps
                                                  where ps.placing_table = d.cross_table and ps.category = w.category
