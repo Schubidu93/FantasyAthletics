@@ -239,7 +239,8 @@ begin
              -- Disziplin (bei Cross mit Distanz) ohne Runde: Schlüssel für „beste Runde je Wettkampf“
              w.discipline || coalesce(' · ' || case when d.cross_table is not null then cross_km(w.competition) end || 'km', '') base,
              -- Zwischenzeiten (z. B. 1500 m im Meilenrennen): keine Leistungs- und Platzierungspunkte, nur Rekord- und PB-Bonus
-             case when _is_split(w.competition, w.remark) then 0
+             -- Einzeldisziplinen im Mehrkampf (Runde CE, CE1 …): ebenso, es zählt das Gesamtergebnis
+             case when _is_split(w.competition, w.remark) or coalesce(w.wa_race, '') ~ '^CE' then 0
                   when d.cross_table is not null then
                     round(greatest(0, coalesce((select ps.points from placing_scores ps
                                                  where ps.placing_table = d.cross_table and ps.category = w.category
@@ -251,7 +252,7 @@ begin
              end perf,
              -- Meisterschaft im offenen Rennen (z. B. DM im Frankfurt-Marathon): der höhere Wert aus Platz im Rennen
              -- und Meisterschaftsplatz (champ_place, Kategorie champ_category, Standard B) zählt
-             case when d.cross_table is not null or _is_split(w.competition, w.remark) then 0
+             case when d.cross_table is not null or _is_split(w.competition, w.remark) or coalesce(w.wa_race, '') ~ '^CE' then 0
                   else round(greatest(
                          coalesce((select max(ps.points) from placing_scores ps
                                     where ps.placing_table = any (d.placing_tables) and ps.category = w.category
@@ -265,8 +266,6 @@ begin
         from wa_results w left join disciplines d on d.name = w.discipline
         left join pb pf on pf.wa_result_id = w.id
        where (p_from is null or w.date >= p_from) and w.date >= date '2025-01-01'
-         -- Einzeldisziplinen innerhalb eines Mehrkampfs (Runde CE, CE1 …) zählen nicht extra – nur das Gesamtergebnis
-         and coalesce(w.wa_race, '') !~ '^CE'
          -- Nachtrag entfällt, sobald World Athletics dasselbe Ergebnis führt (gleiche Disziplin, ±1 Tag)
          and not (w.source = 'manual' and w.relay is null and exists (select 1 from wa_results o
                    where o.athlete_id = w.athlete_id and o.source = 'wa' and o.discipline = w.discipline

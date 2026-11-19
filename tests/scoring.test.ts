@@ -211,6 +211,16 @@ describe("Ein Wettkampf = ein Ergebnis", () => {
     expect(await db.all("select label from results order by label")).toEqual([{ label: "100 Metres" }, { label: "200 Metres" }]);
   });
 
+  it("Mehrkampf: Einzeldisziplinen bringen nur Bestleistungs- und Rekord-Bonus", async () => {
+    const a = await athlete(db, 1, "Zehnkämpfer", "men", "Decathlon", 1200);
+    await db.query("insert into athlete_pb_before (athlete_id, discipline, mark) values ($1, 'Long Jump', '7.50')", [a]);
+    await db.query(`insert into wa_results (athlete_id, date, competition, discipline, category, race, wa_race, place, wa_place, mark, result_score, wa_competition_id)
+      values ($1, $2, 'Zehnkampf - Combined Events', 'Long Jump', 'C', 'CE1', 'CE1', 1, 1, '7.70', 1100, 7100002)`, [a, D]);
+    await db.query("select rebuild_results(null)");
+    expect(await db.all("select perf_points::float perf, placing_points::float plc, pb_points::float pb from results"))
+      .toEqual([{ perf: 0, plc: 0, pb: 10 }]);
+  });
+
   it("Bestleistungen und Rekorde zählen auch in Vorläufen", async () => {
     const a = await athlete(db, 1, "Sprinter", "men", "100 Metres", 1200);
     await db.query("insert into athlete_pb_before (athlete_id, discipline, mark) values ($1, '100 Metres', '10.30')", [a]);
