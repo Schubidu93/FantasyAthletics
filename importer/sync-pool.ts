@@ -1,7 +1,7 @@
 // Athletenpool: lädt die DE-Toplisten (aktuelles Jahr + Vorjahr), speichert alle Athleten über der
 // Pool-Schwelle in athletes/toplist_entries und berechnet danach Pool-Rang und Disziplingruppe (refresh_pool).
 import { COUNTRY, gendersOf, TOPLIST_DISCIPLINES } from "./disciplines";
-import { adminClient, chunked, currentYear, rpc, run } from "./supabase";
+import { adminClient, chunked, currentYear, rpc, run, selectAll } from "./supabase";
 import { fetchToplist, sleep } from "./wa";
 
 const db = adminClient();
@@ -44,9 +44,14 @@ await run(db, async () => {
   if (failures.length > total / 2) throw new Error(`Zu viele Fehler beim Laden der Toplisten:\n${failures.join("\n")}`);
 
   const now = new Date().toISOString();
-  // Zeilen mit und ohne Geburtsdatum getrennt speichern (ein Upsert braucht überall dieselben Spalten)
-  const list = [...athletes.values()];
-  for (const part of [list.filter((a) => a.birth_date), list.filter((a) => !a.birth_date)]) {
+  // Namen setzt die Topliste nur bei neuen Athleten: Namenswechsel (z. B. nach Hochzeit) übernimmt sync-pbs aus dem
+  // WA-Profil, ältere Toplisten führen oft noch den alten Namen
+  const known = new Set((await selectAll<{ id: string }>((a, b) => db.from("athletes").select("id").order("id").range(a, b))).map((a) => a.id));
+  const list = [...athletes.values()].map(({ name, ...a }) => (known.has(a.id as string) ? a : { ...a, name }));
+  // Zeilen getrennt nach vorhandenen Spalten speichern (ein Upsert braucht überall dieselben Spalten)
+  const parts = new Map<string, Record<string, unknown>[]>();
+  for (const a of list) { const k = Object.keys(a).sort().join(","); parts.set(k, [...(parts.get(k) ?? []), a]); }
+  for (const part of parts.values()) {
     await chunked(part, 500, async (chunk) => {
       const { error } = await db.from("athletes").upsert(chunk.map((a) => ({ ...a, updated_at: now })), { onConflict: "id" });
       if (error) throw new Error(`athletes: ${error.message}`);
