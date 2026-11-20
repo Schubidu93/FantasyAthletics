@@ -8,5 +8,7 @@ describe("Namen aus dem WA-Profil", () => {
     expect(waName("Adrian", "König-Rannenberg")).toBe("Adrian KÖNIG-RANNENBERG");
     expect(waName(" Robert ", "FARKEN")).toBe("Robert FARKEN");
     expect(waName(null, "Ehlers")).toBe("EHLERS");
+    expect(waName("Laura", "Voß")).toBe("Laura VOß");   // ß bleibt, nicht „VOSS“
+    expect(waName("Sophie", "Weißenberg")).toBe("Sophie WEIßENBERG");
   });
 });
