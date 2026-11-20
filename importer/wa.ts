@@ -63,7 +63,9 @@ const MONTHS: Record<string, string> = {
 
 /** Anzeigename wie in den WA-Toplisten: „Yemisi MABRY“ (Nachname groß) – aus Vor- und Nachname des WA-Profils */
 export function waName(given: string | null | undefined, family: string | null | undefined): string {
-  return `${(given ?? "").trim()} ${(family ?? "").trim().toLocaleUpperCase("de-DE")}`.trim();
+  // „ß“ bleibt erhalten (toUpperCase machte sonst „VOSS“ aus „Voß“) – wie in den Toplisten („Laura VOß“)
+  const upper = (family ?? "").trim().split("ß").map((x) => x.toLocaleUpperCase("de-DE")).join("ß");
+  return `${(given ?? "").trim()} ${upper}`.trim();
 }
 
 /** "18 OCT 2026" -> "2026-10-18" */
