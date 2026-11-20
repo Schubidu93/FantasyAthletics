@@ -5,12 +5,12 @@
 // Täglich im Ablauf „Athletenpool laden“. Danach werden die Punkte ab 2025 neu berechnet.
 import { bestBefore, currentPbs, type RawPb, type RawProgression } from "./pbs";
 import { adminClient, chunked, currentYear, rpc, selectAll } from "./supabase";
-import { discoverApiConfig, sleep, type ApiConfig } from "./wa";
+import { discoverApiConfig, sleep, waName, type ApiConfig } from "./wa";
 
 const db = adminClient();
 const FIRST_YEAR = 2025;
 const QUERY = `query($id: Int) { getSingleCompetitor(id: $id) {
-  basicData { countryCode }
+  basicData { countryCode givenName familyName }
   personalBests { results { indoor discipline mark notLegal venue date resultScore } }
   progressionOfSeasonsBests { discipline indoor results { season mark date } } } }`;
 
@@ -20,13 +20,16 @@ async function load(api: ApiConfig, id: number) {
     body: JSON.stringify({ query: QUERY, variables: { id } }) });
   if (res.status === 429) throw new Error("WA bremst (429)");
   if (!res.ok) throw new Error(`WA-API ${res.status}`);
-  const body = (await res.json()) as { data?: { getSingleCompetitor?: { basicData?: { countryCode?: string | null };
+  const body = (await res.json()) as { data?: { getSingleCompetitor?: { basicData?: { countryCode?: string | null; givenName?: string | null; familyName?: string | null };
                                        personalBests?: { results?: RawPb[] }; progressionOfSeasonsBests?: RawProgression[] } };
                                        errors?: { message: string }[] };
   if (body.errors?.length) throw new Error(body.errors[0].message);
   const c = body.data?.getSingleCompetitor;
-  return { pbs: c?.personalBests?.results ?? [], progression: c?.progressionOfSeasonsBests ?? [], nation: c?.basicData?.countryCode ?? null };
+  return { pbs: c?.personalBests?.results ?? [], progression: c?.progressionOfSeasonsBests ?? [], nation: c?.basicData?.countryCode ?? null,
+    name: c?.basicData?.familyName ? waName(c.basicData.givenName, c.basicData.familyName) : null };
 }
+
+type Athlete = { id: string; wa_id: number; nation: string | null; name: string };
 
 const main = async () => {
   const api: ApiConfig = process.env.WA_API_URL && process.env.WA_API_KEY
@@ -35,12 +38,13 @@ const main = async () => {
   // ATHLETE_IDS (z. B. „Athlet hinzufügen“): nur diese Athleten
   const only = (process.env.ATHLETE_IDS || "").split(",").map((s) => s.trim()).filter(Boolean);
   const athletes = only.length
-    ? ((await db.from("athletes").select("id, wa_id, nation").in("id", only)).data ?? []) as { id: string; wa_id: number; nation: string | null }[]
-    : await selectAll<{ id: string; wa_id: number; nation: string | null }>((a, b) => db.from("athletes").select("id, wa_id, nation").order("id").range(a, b));
+    ? ((await db.from("athletes").select("id, wa_id, nation, name").in("id", only)).data ?? []) as Athlete[]
+    : await selectAll<Athlete>((a, b) => db.from("athletes").select("id, wa_id, nation, name").order("id").range(a, b));
   const pbs: ReturnType<typeof currentPbs> = [];
   const before: ReturnType<typeof bestBefore> = [];
   const done: string[] = [];
   const nations: { id: string; nation: string }[] = [];   // geänderte Nationen
+  const names: { id: string; name: string }[] = [];       // geänderte Namen (z. B. nach Hochzeit)
   const failures: string[] = [];
   for (const a of athletes) {
     if (!a.wa_id) continue;
@@ -49,6 +53,7 @@ const main = async () => {
       pbs.push(...currentPbs(a.id, r.pbs, known));
       before.push(...bestBefore(a.id, r.progression, FIRST_YEAR, known));
       if (r.nation && r.nation !== a.nation) nations.push({ id: a.id, nation: r.nation });
+      if (r.name && r.name !== a.name) names.push({ id: a.id, name: r.name });
       done.push(a.id);
     } catch (e) {
       failures.push(`${a.id}: ${(e as Error).message}`);
@@ -72,6 +77,11 @@ const main = async () => {
     const { error } = await db.from("athletes").update({ nation: n.nation }).eq("id", n.id);
     if (error) throw new Error(`Nation ${n.id}: ${error.message}`);
     console.log(`Nation geändert: ${n.id} → ${n.nation}`);
+  }
+  for (const n of names) {
+    const { error } = await db.from("athletes").update({ name: n.name }).eq("id", n.id);
+    if (error) throw new Error(`Name ${n.id}: ${error.message}`);
+    console.log(`Name geändert: ${n.id} → ${n.name}`);
   }
   if (nations.length) await rpc(db, "refresh_pool", {});
   // PB-Bonus hängt an athlete_pb_before → Punkte ab 2025 neu

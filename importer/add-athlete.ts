@@ -8,7 +8,7 @@ import { appendFileSync } from "node:fs";
 import { idFromQuery } from "./add-athlete-id";
 import { normalizeName } from "./placings";
 import { adminClient, rpc } from "./supabase";
-import { discoverApiConfig, parseWaDate, sleep, type ApiConfig } from "./wa";
+import { discoverApiConfig, parseWaDate, sleep, waName, type ApiConfig } from "./wa";
 
 const db = adminClient();
 type Req = { id: number; query: string; status: string };
@@ -40,7 +40,7 @@ async function basic(api: ApiConfig, id: number) {
     `query($id: Int) { getSingleCompetitor(id: $id) { basicData { givenName familyName countryCode birthDate sexCode } } }`, { id });
   const b = data.getSingleCompetitor?.basicData;
   if (!b?.familyName) throw new Error(`Keine Daten für WA-ID ${id}`);
-  return { name: `${b.givenName ?? ""} ${b.familyName}`.trim(), nation: b.countryCode ?? null, birth: parseWaDate(b.birthDate ?? ""),
+  return { name: waName(b.givenName, b.familyName), nation: b.countryCode ?? null, birth: parseWaDate(b.birthDate ?? ""),
     gender: genderFrom(b.sexCode) };
 }
 

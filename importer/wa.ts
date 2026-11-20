@@ -61,6 +61,11 @@ const MONTHS: Record<string, string> = {
   JUL: "07", AUG: "08", SEP: "09", OCT: "10", NOV: "11", DEC: "12",
 };
 
+/** Anzeigename wie in den WA-Toplisten: „Yemisi MABRY“ (Nachname groß) – aus Vor- und Nachname des WA-Profils */
+export function waName(given: string | null | undefined, family: string | null | undefined): string {
+  return `${(given ?? "").trim()} ${(family ?? "").trim().toLocaleUpperCase("de-DE")}`.trim();
+}
+
 /** "18 OCT 2026" -> "2026-10-18" */
 export function parseWaDate(s: string): string | null {
   const m = s?.trim().match(/^(\d{1,2})\s+([A-Za-z]{3})\w*\s+(\d{4})$/);
