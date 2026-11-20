@@ -120,7 +120,7 @@ export function Rules({ c }) {
       </ul>
       <h4 class="rule-sub">Ränge in den Listen</h4>
       <table class="tbl rule-tbl"><tbody>
-        ${row('1. Name', `Pool-Rang: nach Punkten ${gy - 1}, bei Gleichstand nach bester Leistung. Reihenfolge im Draft.`)}
+        ${row('1. Name', `Rang unter den Athleten dieser Liga: nach Punkten ${gy - 1}, bei Gleichstand nach bester Leistung. Reihenfolge im Draft.`)}
         ${lineup && row(`#2 ${GROUP_LABEL[(l.lineup_groups || RUN_GROUPS)[0]] || ''}`, `Rang auf dieser Position der Liga${l.lineup_mode === 'mf' ? ', getrennt nach Männern und Frauen' : ''}.`)}
         ${lineup && l.wildcards > 0 && row('nur Wildcard', 'passt auf keine eigene Position, nur auf eine Wildcard.')}
       </tbody></table>
