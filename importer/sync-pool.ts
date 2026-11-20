@@ -46,8 +46,10 @@ await run(db, async () => {
   const now = new Date().toISOString();
   // Namen setzt die Topliste nur bei neuen Athleten: Namenswechsel (z. B. nach Hochzeit) übernimmt sync-pbs aus dem
   // WA-Profil, ältere Toplisten führen oft noch den alten Namen
-  const known = new Set((await selectAll<{ id: string }>((a, b) => db.from("athletes").select("id").order("id").range(a, b))).map((a) => a.id));
-  const list = [...athletes.values()].map(({ name, ...a }) => (known.has(a.id as string) ? a : { ...a, name }));
+  // (der Name muss trotzdem mitgeschickt werden – Upsert prüft „nicht leer“ schon vor dem Abgleich –, also der gespeicherte)
+  const known = new Map((await selectAll<{ id: string; name: string }>((a, b) => db.from("athletes").select("id, name").order("id").range(a, b)))
+    .map((a) => [a.id, a.name]));
+  const list = [...athletes.values()].map((a) => ({ ...a, name: known.get(a.id as string) ?? a.name }));
   // Zeilen getrennt nach vorhandenen Spalten speichern (ein Upsert braucht überall dieselben Spalten)
   const parts = new Map<string, Record<string, unknown>[]>();
   for (const a of list) { const k = Object.keys(a).sort().join(","); parts.set(k, [...(parts.get(k) ?? []), a]); }
