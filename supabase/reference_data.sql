@@ -91,9 +91,9 @@ insert into disciplines (name, factor, event_group, placing_tables, cross_table,
   ('Hammer Throw', 1.5, 'Hammer', '{TF}', null, true),
   ('Heptathlon', 3, 'Mehrkampf', '{CE}', null, true),
   ('Heptathlon Short Track', 3, 'Mehrkampf', '{CE}', null, true),
-  ('High Jump', 1.3, 'Hochsprung', '{TF}', null, true),
-  ('Javelin Throw', 1.5, 'Speer', '{TF}', null, true),
-  ('Long Jump', 1.3, 'Weitsprung', '{TF}', null, true),
+  ('High Jump', 1, 'Hochsprung', '{TF}', null, true),
+  ('Javelin Throw', 1, 'Speer', '{TF}', null, true),
+  ('Long Jump', 1, 'Weitsprung', '{TF}', null, true),
   ('Marathon', 4, 'Marathon', '{MARATHON}', null, false),
   ('Marathon Race Walk', 4, 'Gehen', '{RW_MAR}', null, false),
   ('Mile', 1, '1500', '{TF}', null, false),
@@ -106,11 +106,11 @@ insert into disciplines (name, factor, event_group, placing_tables, cross_table,
   ('Mountain Running Up & Down Senior Race', 2, '10000', '{10KROAD}', null, false),
   ('Mountain Running Up & Down U20 Race', 2, '10000', '{10KROAD}', null, false),
   ('Pentathlon Short Track', 2.5, 'Mehrkampf', '{CE}', null, true),
-  ('Pole Vault', 1.3, 'Stabhochsprung', '{TF}', null, true),
+  ('Pole Vault', 1, 'Stabhochsprung', '{TF}', null, true),
   ('Road Race', 1, null, '{}', null, false),
   ('Shot Put', 1, 'Kugel', '{TF}', null, true),
   ('Sprint Medley 1000m', 0.25, '400', '{TF}', null, false),
-  ('Triple Jump', 1.3, 'Dreisprung', '{TF}', null, true),
+  ('Triple Jump', 1, 'Dreisprung', '{TF}', null, true),
   ('U20 Mountain Classic', 2, '10000', '{10KROAD}', null, false),
   ('Vertical Uphill', 2, '10000', '{10KROAD}', null, false)
 on conflict (name) do update set event_group = excluded.event_group, placing_tables = excluded.placing_tables,
@@ -177,11 +177,11 @@ begin
   if not exists (select 1 from schema_changes where name = 'feld_faktoren') then
     update disciplines d set factor = x.factor from (values
       ('Hammer Throw', 1.5),
-      ('High Jump', 1.3),
-      ('Javelin Throw', 1.5),
-      ('Long Jump', 1.3),
-      ('Pole Vault', 1.3),
-      ('Triple Jump', 1.3)
+      ('High Jump', 1),
+      ('Javelin Throw', 1),
+      ('Long Jump', 1),
+      ('Pole Vault', 1),
+      ('Triple Jump', 1)
     ) x(name, factor) where d.name = x.name and d.factor = 1;
     insert into schema_changes (name) values ('feld_faktoren');
   end if;
@@ -248,6 +248,16 @@ begin
     update disciplines d set factor = 1.3
      where d.name in ('3000 Metres', '3000 Metres Short Track', '2 Miles', '2 Miles Short Track') and d.factor = 1;
     insert into schema_changes (name) values ('faktoren_3000m');
+  end if;
+end $$;
+
+-- einmalig: Sprünge und Speer ×1 (viele Wettkämpfe, Diamond League) – nur Hammer bleibt ×1,5
+do $$
+begin
+  if not exists (select 1 from schema_changes where name = 'feld_faktoren_2') then
+    update disciplines d set factor = 1 from (values ('High Jump', 1.3), ('Long Jump', 1.3), ('Pole Vault', 1.3),
+      ('Triple Jump', 1.3), ('Javelin Throw', 1.5)) x(name, old) where d.name = x.name and d.factor = x.old;
+    insert into schema_changes (name) values ('feld_faktoren_2');
   end if;
 end $$;
 

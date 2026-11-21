@@ -112,7 +112,7 @@ richtet `.claude/hooks/session-start.sh` Pakete und das Test-PostgreSQL ein.
   Im Pool nur `athletes.nation = 'GER'` (Nation laut WA-Profil, täglich aus `sync-pbs.ts`; Nationenwechsel → `refresh_pool` löscht sie über `prune_athletes(true)`, außer in einer Liga verwendet) oder `manual`.
   Faktoren je Disziplin in `research/disciplines.txt`; Änderungen an bestehenden Faktoren einmalig über `schema_changes` in `build_placing_sql.py`
   (Mehrkampf: Zehnkampf 4, Siebenkampf (auch Halle) 3, Fünfkampf Halle 2,5; Lauf: 3000 m/2 Meilen 1,3, 5000 m/Hindernis 1,5, 10.000 m/10 km/Cross 2, Halbmarathon 2,5, Marathon 4;
-  Gehen wie Lauf über die gleiche Strecke; Sprung 1,3; Hammer/Speer 1,5).
+  Gehen wie Lauf über die gleiche Strecke; Sprung, Kugel, Diskus, Speer 1; Hammer 1,5).
   `rebuild_results`: je Athlet, Wettkampf und Disziplin Leistung + Platzierung nur der besten Runde (PB-/Rekord-Bonus jede Runde); Mehrkampf-Einzeldisziplinen (`wa_race` CE…) Leistung (ab 1000) und PB-/Rekord-Bonus, keine Platzierung;
   Staffeln (`_is_relay`) nie PB-Bonus.
 - Bestleistungen: `importer/sync-pbs.ts` (getSingleCompetitor: personalBests, progressionOfSeasonsBests) → `athlete_pbs` (Profil)
