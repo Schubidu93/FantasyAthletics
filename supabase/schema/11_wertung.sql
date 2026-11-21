@@ -46,12 +46,16 @@ begin
 end $$;
 
 -- Wettkämpfe → Ergebnisse: welche Disziplinen es je Wettkampf gab (für den Disziplin-Filter)
+drop function if exists competition_disciplines();
 create or replace function competition_disciplines()
-returns table (competition_id text, disciplines text[])
+returns table (competition_id text, disciplines text[], men text[], women text[])
 language sql stable security definer set search_path = public as $$
-  select 'wa-c' || wa_competition_id, array_agg(distinct discipline order by discipline)
-    from wa_results where wa_competition_id is not null
-   group by wa_competition_id order by wa_competition_id;
+  select 'wa-c' || w.wa_competition_id, array_agg(distinct w.discipline order by w.discipline),
+         coalesce(array_agg(distinct w.discipline order by w.discipline) filter (where a.gender = 'men'), '{}'),
+         coalesce(array_agg(distinct w.discipline order by w.discipline) filter (where a.gender = 'women'), '{}')
+    from wa_results w join athletes a on a.id = w.athlete_id
+   where w.wa_competition_id is not null
+   group by w.wa_competition_id order by w.wa_competition_id;
 $$;
 
 -- Spieljahr: die Saison, für die gerade gedraftet bzw. gespielt wird. Ab 1. November zählt das Folgejahr

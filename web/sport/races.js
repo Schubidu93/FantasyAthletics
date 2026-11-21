@@ -21,6 +21,18 @@ export function Races({ c, sub }) {
   return html`<${RaceList} c=${c} races=${races.data.map((r) => ({ ...r, country: r.country && nationCode(r.country) }))} />`;
 }
 
+// Disziplinen eines Wettkampfs je Geschlecht (wie im Kalender), deutsch, sortiert, lange Listen gekürzt
+const MAX_DISCS = 6;
+function RaceDiscs({ d, gender }) {
+  if (!d) return '';
+  const rows = [['M', d.men], ['W', d.women]].filter(([g, l]) => l.length && (gender === 'mixed' || gender === (g === 'M' ? 'men' : 'women')));
+  return rows.map(([g, l]) => {
+    const names = [...new Set([...l].sort(discOrder).map(discLabel))];
+    const more = names.length - MAX_DISCS;
+    return html`<small class="race-discs"><${SexBadge} g=${g} /> ${names.slice(0, MAX_DISCS).join(', ')}${more > 0 ? ` +${more} weitere` : ''}</small>`;
+  });
+}
+
 function RaceList({ c, races }) {
   const [catV, setCatRaw] = useState(saved.cat);
   const [country, setCountryRaw] = useState(saved.country);
@@ -31,8 +43,8 @@ function RaceList({ c, races }) {
   const [disc, setDiscRaw] = useState(saved.disc);
   const setDisc = keep('disc', setDiscRaw);
   // Disziplinen je Wettkampf (für den Disziplin-Filter)
-  const discs = useLoad(async () => Object.fromEntries((await rpcAll('competition_disciplines')).map((r) => [r.competition_id, r.disciplines])), []);
-  const discNames = useMemo(() => [...new Set(Object.values(discs.data || {}).flat())], [discs.data]);
+  const discs = useLoad(async () => Object.fromEntries((await rpcAll('competition_disciplines')).map((r) => [r.competition_id, r])), []);
+  const discNames = useMemo(() => [...new Set(Object.values(discs.data || {}).flatMap((x) => x.disciplines))], [discs.data]);
   const setCatV = keep('cat', setCatRaw), setCountry = keep('country', setCountryRaw), setTerm = keep('term', setTermRaw);
   const setYear = keep('year', setYearRaw), setMine = keep('mine', setMineRaw);
   const setMd = (v) => { keep('md', setMdRaw)(v); if (v) setYear(''); };
@@ -55,7 +67,7 @@ function RaceList({ c, races }) {
     && (!year || (r.start_date || '').slice(0, 4) === year)
     && (!md || (r.start_date <= md.ends_on && (r.end_date || r.start_date) >= md.starts_on))
     && (!mine || owned.data?.has(r.id))
-    && (!disc || discs.data?.[r.id]?.includes(disc))
+    && (!disc || discs.data?.[r.id]?.disciplines.includes(disc))
     && (!t || t.split(' ').every((w) => normName(`${r.name} ${r.venue || ''}`).includes(w))));
 
   return html`<section class="card">
@@ -74,7 +86,8 @@ function RaceList({ c, races }) {
       <a class="race-link" href=${`#/league/${c.league.id}/races/${encodeURIComponent(r.id)}`}>
         <span class="race-date">${fmtDate(r.start_date)}${r.end_date && r.end_date !== r.start_date ? ` – ${fmtDate(r.end_date)}` : ''}</span>
         <span class="race-name"><strong>${(r.name || '').replace(/\s*-\s*XC\s*[\d.,]+\s*km$/i, '')}</strong>
-          <small><${CatBadge} cat=${r.category} /> ${r.country ? `${flag(r.country)} ${r.venue ? r.venue.replace(/\s*\([A-Z]{3}\)\s*$/, '') : r.country}` : ''}</small></span>
+          <small><${CatBadge} cat=${r.category} /> ${r.country ? `${flag(r.country)} ${r.venue ? r.venue.replace(/\s*\([A-Z]{3}\)\s*$/, '') : r.country}` : ''}</small>
+          <${RaceDiscs} d=${discs.data?.[r.id]} gender=${c.league.gender} /></span>
       </a></li>`)}</ul>`}
     ${list.length > 300 && html`<p class="muted small">Es werden die neuesten 300 angezeigt – Filter eingrenzen.</p>`}
   </section>`;
