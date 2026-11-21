@@ -69,6 +69,6 @@ export function DraftRoster({ c, managerId }) {
   const name = (r) => c.riderMap[r.athlete_id]?.name || r.athlete_id;
   const open = rows.filter((x) => !x[1]).length;
   return html`<p class="muted small">${open > 0 ? `Noch ${open} von ${rows.length} Plätzen offen.` : 'Kader komplett.'}</p>
-    <ul class="list compact lineup">${rows.map(([k, r, label]) => html`<li key=${k} class=${r ? '' : 'slot-open'}>
+    <ul class="list draft-roster">${rows.map(([k, r, label]) => html`<li key=${k} class=${r ? '' : 'slot-open'}>
       <span class="slot-name">${label}</span><span>${r ? name(r) : 'offen'}</span></li>`)}</ul>`;
 }
