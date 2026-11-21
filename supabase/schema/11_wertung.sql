@@ -46,12 +46,16 @@ begin
 end $$;
 
 -- Wettkämpfe → Ergebnisse: welche Disziplinen es je Wettkampf gab (für den Disziplin-Filter)
+drop function if exists competition_disciplines();
 create or replace function competition_disciplines()
-returns table (competition_id text, disciplines text[])
+returns table (competition_id text, disciplines text[], men text[], women text[])
 language sql stable security definer set search_path = public as $$
-  select 'wa-c' || wa_competition_id, array_agg(distinct discipline order by discipline)
-    from wa_results where wa_competition_id is not null
-   group by wa_competition_id order by wa_competition_id;
+  select 'wa-c' || w.wa_competition_id, array_agg(distinct w.discipline order by w.discipline),
+         coalesce(array_agg(distinct w.discipline order by w.discipline) filter (where a.gender = 'men'), '{}'),
+         coalesce(array_agg(distinct w.discipline order by w.discipline) filter (where a.gender = 'women'), '{}')
+    from wa_results w join athletes a on a.id = w.athlete_id
+   where w.wa_competition_id is not null
+   group by w.wa_competition_id order by w.wa_competition_id;
 $$;
 
 -- Spieljahr: die Saison, für die gerade gedraftet bzw. gespielt wird. Ab 1. November zählt das Folgejahr
@@ -126,6 +130,16 @@ begin
             from athletes where (ranking_points >= c.pool_threshold and coalesce(nation, 'GER') = 'GER') or manual) x
    where x.id = r.id;
   get diagnostics n = row_count;
+  -- beste Leistung der letzten 12 Monate (nach WA-Punkten; ohne Staffeln, Zwischenzeiten, Mehrkampf-Einzeldisziplinen)
+  update athletes a set recent_discipline = b.discipline, recent_mark = b.mark, recent_score = b.result_score
+    from (select a2.id, w.discipline, w.mark, w.result_score
+            from athletes a2
+            left join lateral (select w.discipline, w.mark, w.result_score from wa_results w
+                                where w.athlete_id = a2.id and w.date > current_date - 365 and w.result_score > 0
+                                  and w.relay is null and not _is_relay(w.discipline) and w.wa_race not like 'CE%'
+                                  and not _is_split(w.competition, w.remark)
+                                order by w.result_score desc, w.date desc limit 1) w on true) b
+   where b.id = a.id and (a.recent_mark, a.recent_score, a.recent_discipline) is distinct from (b.mark, b.result_score, b.discipline);
   -- wer für ein anderes Land startet, verschwindet ganz (außer er wird in einer Liga verwendet)
   perform prune_athletes(true);
   return n;

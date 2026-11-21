@@ -71,3 +71,4 @@ select.mini { font-size: .75rem; padding: 2px 6px; width: auto; min-height: 0; }
 .draft-roster .slot-name { font-weight: 600; }
 .draft-roster li.slot-open { background: var(--warn-soft); border-color: transparent; }
 .draft-roster li.slot-open > span:last-child { color: var(--warn); }
+.race-link .race-discs { color: var(--muted); }

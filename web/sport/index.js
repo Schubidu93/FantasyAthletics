@@ -40,8 +40,8 @@ export function RiderCell({ r }) {
   const g = riderGroup(r);
   const meta = [g && (GROUP_LABEL[g] || g), r.birth_date && `Jg. ${r.birth_date.slice(0, 4)}`]
     .filter(Boolean).join(' · ');
-  const best = r.best_mark && `${r.best_discipline?.replace(' Metres', ' m').replace('Short Track', '(Halle)') || ''} ${r.best_mark}`
-    + (r.ranking_points ? ` · ${Math.round(r.ranking_points)} P.` : '');
+  // beste Leistung der letzten 12 Monate
+  const best = r.recent_mark && `${discLabel(r.recent_discipline)} ${r.recent_mark}${r.recent_score ? ` · ${r.recent_score} P.` : ''}`;
   return html`<span class="rider">
     <span class="rider-line">
       <span>${r.league_rank
@@ -52,7 +52,7 @@ export function RiderCell({ r }) {
       ${r.inactive && html`<span class="tag warn">inaktiv</span>`}
     </span>
     <span class="rider-meta"><${SexBadge} g=${r.gender} />${meta ? ` ${meta}` : ''}</span>
-    ${best && html`<span class="rider-team" title="Beste Toplistenleistung">${best}</span>`}
+    ${best && html`<span class="rider-team" title="Beste Leistung der letzten 12 Monate">${best}</span>`}
   </span>`;
 }
 

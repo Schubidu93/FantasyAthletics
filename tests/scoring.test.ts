@@ -219,8 +219,8 @@ describe("Ein Wettkampf = ein Ergebnis", () => {
         values ($1, $2, 'Meeting ' || $4::text, $3, 'C', 'F', 1, '1', 1100, $4::bigint)`, [id, D, disc, comp]);
     }
     expect(await db.all("select * from competition_disciplines()")).toEqual([
-      { competition_id: "wa-c7200001", disciplines: ["1500 Metres", "800 Metres", "Discus Throw"] },
-      { competition_id: "wa-c7200002", disciplines: ["Discus Throw"] },
+      { competition_id: "wa-c7200001", disciplines: ["1500 Metres", "800 Metres", "Discus Throw"], men: [], women: ["1500 Metres", "800 Metres", "Discus Throw"] },
+      { competition_id: "wa-c7200002", disciplines: ["Discus Throw"], men: [], women: ["Discus Throw"] },
     ]);
   });
 
