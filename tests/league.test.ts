@@ -163,6 +163,16 @@ describe("Draft", () => {
   });
 });
 
+describe("Wettkämpfe ohne Ergebnisse", () => {
+  it("verschwinden beim Aufräumen, solche mit Ergebnissen bleiben", async () => {
+    await athlete(db, 1, "M", "men", "800 Metres", 1150);
+    await db.query("insert into wa_results (athlete_id, date, competition, discipline, mark, result_score, wa_competition_id) values ('wa-1', current_date, 'Mit', '800 Metres', '1:46.00', 1150, 7300001)");
+    await db.query("insert into competitions (id, name, start_date, end_date) values ('wa-c7300001', 'Mit', current_date, current_date), ('wa-c7300002', 'Leer', current_date, current_date)");
+    await db.query("select prune_athletes(true)");
+    expect((await db.all("select id from competitions where id like 'wa-c73%' order by id")).map((r) => r.id)).toEqual(["wa-c7300001"]);
+  });
+});
+
 describe("Beste Leistung der letzten 12 Monate", () => {
   it("nimmt die beste WA-Leistung im Jahreszeitraum, ohne Staffel und ältere Ergebnisse", async () => {
     await athlete(db, 1, "M", "men", "800 Metres", 1150);

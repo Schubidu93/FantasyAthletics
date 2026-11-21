@@ -164,6 +164,10 @@ begin
   end loop;
   execute 'delete from athletes a where a.pool_rank is null and not a.manual' || cond;
   get diagnostics n = row_count;
+  -- Wettkämpfe ohne Ergebnis mehr (z. B. nur Athleten, die gerade gelöscht wurden) verschwinden aus der Liste
+  delete from competitions c
+   where c.id like 'wa-c%' and not exists (select 1 from results res where res.competition_id = c.id)
+     and c.id not in (select 'wa-c' || w.wa_competition_id from wa_results w where w.wa_competition_id is not null);
   return n;
 end $$;
 

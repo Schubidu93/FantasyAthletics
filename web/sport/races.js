@@ -1,7 +1,7 @@
 // Wettkämpfe: alle Wettkämpfe, bei denen Athleten aus dem Pool gestartet sind, mit deren Ergebnissen und Punkten
 import { html, useState, useMemo } from '../vendor/preact-htm.js';
 import { all, flag, fmtDate, fmtPts, Loading, nationCode, normName, openRider, q, rpcAll, sb, useLoad, withFlag } from '../lib.js';
-import { BackToAthlete, CatBadge, DiscFilter, discLabel, discOrder, discWithKm, raceLabel, raceOrder, SexBadge, waResultUrl } from './lib.js';
+import { BackToAthlete, CatBadge, DiscFilter, discLabel, discOrder, discWithKm, MONTHS, raceLabel, raceOrder, SexBadge, waResultUrl } from './lib.js';
 
 // WA-Wettkampfkategorien (World-Ranking-Regeln): OW = Olympia/WM … F = nationale Meetings
 const CATS = [['', 'Alle Kategorien'], ['top', 'OW, DF, GW, GL'], ['OW', 'OW – Olympia/WM'], ['DF', 'DF – DL-Finale'],
@@ -29,8 +29,19 @@ function RaceDiscs({ d, gender }) {
   return rows.map(([g, l]) => {
     const names = [...new Set([...l].sort(discOrder).map(discLabel))];
     const more = names.length - MAX_DISCS;
-    return html`<small class="race-discs"><${SexBadge} g=${g} /> ${names.slice(0, MAX_DISCS).join(', ')}${more > 0 ? ` +${more} weitere` : ''}</small>`;
+    return html`<small class="cal-unit"><${SexBadge} g=${g} /> ${names.slice(0, MAX_DISCS).join(', ')}${more > 0 ? ` +${more} weitere` : ''}</small>`;
   });
+}
+
+// Liste nach Monaten gruppieren (wie der Kalender), neueste zuerst
+function months(list) {
+  const out = [];
+  for (const r of list) {
+    const key = (r.start_date || '').slice(0, 7);
+    if (out.at(-1)?.key !== key) out.push({ key, items: [] });
+    out.at(-1).items.push(r);
+  }
+  return out;
 }
 
 function RaceList({ c, races }) {
@@ -82,13 +93,16 @@ function RaceList({ c, races }) {
       <select value=${country} onChange=${(e) => setCountry(e.target.value)}><option value="">Alle Länder</option>${countries.map((x) => html`<option value=${x}>${withFlag(x)}</option>`)}</select>
       <label class="check small"><input type="checkbox" checked=${mine} onChange=${(e) => setMine(e.target.checked)} /> nur mit Athleten aus Kadern</label>
     </div>
-    ${disc && !discs.data ? html`<${Loading} error=${discs.error} />` : list.length === 0 ? html`<p class="muted">Keine Wettkämpfe gefunden.</p>` : html`<ul class="list race-list">${list.slice(0, 300).map((r) => html`<li key=${r.id}>
-      <a class="race-link" href=${`#/league/${c.league.id}/races/${encodeURIComponent(r.id)}`}>
-        <span class="race-date">${fmtDate(r.start_date)}${r.end_date && r.end_date !== r.start_date ? ` – ${fmtDate(r.end_date)}` : ''}</span>
+    ${disc && !discs.data ? html`<${Loading} error=${discs.error} />` : list.length === 0 ? html`<p class="muted">Keine Wettkämpfe gefunden.</p>` : months(list.slice(0, 300)).map((m) => html`
+      <h3 class="cal-month" key=${m.key}>${MONTHS[+m.key.slice(5, 7) - 1]} ${m.key.slice(0, 4)}</h3>
+      <ul class="list race-list">${m.items.map((r) => html`<li key=${r.id} class=${r.country === 'GER' ? 'cal-de' : ''}>
+      <a class="race-link cal-item" href=${`#/league/${c.league.id}/races/${encodeURIComponent(r.id)}`}>
+        <span class="cal-text"><span class="race-date">${fmtDate(r.start_date)}${r.end_date && r.end_date !== r.start_date ? ` – ${fmtDate(r.end_date)}` : ''}</span>
         <span class="race-name"><strong>${(r.name || '').replace(/\s*-\s*XC\s*[\d.,]+\s*km$/i, '')}</strong>
-          <small><${CatBadge} cat=${r.category} /> ${r.country ? `${flag(r.country)} ${r.venue ? r.venue.replace(/\s*\([A-Z]{3}\)\s*$/, '') : r.country}` : ''}</small>
-          <${RaceDiscs} d=${discs.data?.[r.id]} gender=${c.league.gender} /></span>
-      </a></li>`)}</ul>`}
+          ${r.country && html`<small>${flag(r.country)} ${r.venue ? r.venue.replace(/\s*\([A-Z]{3}\)\s*$/, '') : r.country}</small>`}
+          <${RaceDiscs} d=${discs.data?.[r.id]} gender=${c.league.gender} /></span></span>
+        <${CatBadge} cat=${r.category} />
+      </a></li>`)}</ul>`)}
     ${list.length > 300 && html`<p class="muted small">Es werden die neuesten 300 angezeigt – Filter eingrenzen.</p>`}
   </section>`;
 }

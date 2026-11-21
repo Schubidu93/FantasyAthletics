@@ -2,12 +2,11 @@
 // International ab Gold Label, Europa ab Kategorie A, Deutschland ab E – siehe importer/sync-calendar.ts
 import { html, useState } from '../vendor/preact-htm.js';
 import { all, flag, Loading, nationCode, normName, sb, today, useLoad } from '../lib.js';
-import { CatBadge, eventGroup, GroupFilter, groupFilterMatch, leagueAreas, SexBadge } from './lib.js';
+import { CatBadge, eventGroup, GroupFilter, groupFilterMatch, leagueAreas, MONTHS, SexBadge } from './lib.js';
 
 const KIND_LABEL = { track: 'Bahn', road: 'Straße', cross: 'Cross' };
 const TOP = ['OW', 'DF', 'GW', 'GL'];
 const WD = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
-const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 const day = (d) => new Date(`${d}T00:00:00`);
 const dm = (d) => `${d.slice(8, 10)}.${d.slice(5, 7)}.`;
 const when = (e) => (!e.end_date || e.end_date === e.start_date
