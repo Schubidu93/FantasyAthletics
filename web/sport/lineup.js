@@ -50,25 +50,25 @@ export function Lineup({ c }) {
   </section>`;
 }
 
-/** Kader im Draft nach den Positionen der Liga: jeder Pick füllt die erste freie passende Position
- *  (erst Disziplin, dann Wildcard), weitere Athleten stehen unten; offene Positionen sind hervorgehoben */
+/** Kader im Draft nach den Positionen der Liga (vor dem Draft leer): jeder Pick füllt die erste freie passende Position
+ *  (erst Disziplin, dann Wildcard), danach die Reserveplätze; offene Plätze sind hervorgehoben */
 export function DraftRoster({ c, managerId }) {
-  const slots = leagueSlots(c.league);
+  const lineup = c.league.scoring_mode === 'lineup';
+  const slots = lineup ? leagueSlots(c.league) : [];
+  const reserve = Math.max(0, c.league.roster_size - slots.length);
   const mine = c.active.filter((r) => r.manager_id === managerId);   // in Pick-Reihenfolge
-  const at = {}, extra = [];
+  const at = {};
   const place = (r, wild) => {
     const s = slots.find((x) => !at[x] && x.startsWith('WC') === wild && slotOk(x, c.riderMap[r.athlete_id]));
     if (s) at[s] = r;
     return !!s;
   };
-  const rest = mine.filter((r) => !place(r, false));
-  for (const r of rest) if (!place(r, true)) extra.push(r);
+  const extra = mine.filter((r) => !place(r, false)).filter((r) => !place(r, true));
+  const rows = [...slots.map((s) => [s, at[s], html`<${SlotLabel} slot=${s} />`]),
+    ...Array.from({ length: Math.max(reserve, extra.length) }, (_, i) => [`R${i}`, extra[i], lineup ? `Reserve ${i + 1}` : `Platz ${i + 1}`])];
   const name = (r) => c.riderMap[r.athlete_id]?.name || r.athlete_id;
-  const open = slots.filter((s) => !at[s]).length;
-  return html`${open > 0 && html`<p class="muted small">Noch ${open} von ${slots.length} Positionen offen.</p>`}
-    <ul class="list compact lineup">${slots.map((s) => html`<li key=${s} class=${at[s] ? '' : 'slot-open'}>
-      <span class="slot-name"><${SlotLabel} slot=${s} /></span>
-      <span>${at[s] ? name(at[s]) : 'offen'}</span></li>`)}</ul>
-    ${extra.length > 0 && html`<h4>Weitere im Kader</h4>
-      <ul class="list compact">${extra.map((r) => html`<li key=${r.id}><span>${name(r)}</span></li>`)}</ul>`}`;
+  const open = rows.filter((x) => !x[1]).length;
+  return html`<p class="muted small">${open > 0 ? `Noch ${open} von ${rows.length} Plätzen offen.` : 'Kader komplett.'}</p>
+    <ul class="list compact lineup">${rows.map(([k, r, label]) => html`<li key=${k} class=${r ? '' : 'slot-open'}>
+      <span class="slot-name">${label}</span><span>${r ? name(r) : 'offen'}</span></li>`)}</ul>`;
 }
