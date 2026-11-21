@@ -163,6 +163,21 @@ describe("Draft", () => {
   });
 });
 
+describe("Beste Leistung der letzten 12 Monate", () => {
+  it("nimmt die beste WA-Leistung im Jahreszeitraum, ohne Staffel und ältere Ergebnisse", async () => {
+    await athlete(db, 1, "M", "men", "800 Metres", 1150);
+    const add = (days: number, disc: string, mark: string, score: number) => db.query(
+      "insert into wa_results (athlete_id, date, competition, discipline, mark, result_score) values ('wa-1', current_date - $1::int, 'Test ' || $1, $2, $3, $4)",
+      [days, disc, mark, score]);
+    await add(10, "800 Metres", "1:46.00", 1150);
+    await add(400, "800 Metres", "1:44.00", 1250);           // älter als 12 Monate
+    await add(20, "4x400 Metres Relay", "3:01.00", 1300);    // Staffel zählt nicht
+    await db.query("select refresh_pool(null)");
+    const a = await db.one("select recent_discipline, recent_mark, recent_score from athletes where id = 'wa-1'");
+    expect(a).toEqual({ recent_discipline: "800 Metres", recent_mark: "1:46.00", recent_score: 1150 });
+  });
+});
+
 describe("Bereiche (alle Disziplinen oder nur Lauf)", () => {
   const ALL = ["Lauf", "Sprint", "Hürden", "Sprung", "Wurf", "Mehrkampf", "Gehen"];
 

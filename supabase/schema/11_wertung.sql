@@ -126,6 +126,16 @@ begin
             from athletes where (ranking_points >= c.pool_threshold and coalesce(nation, 'GER') = 'GER') or manual) x
    where x.id = r.id;
   get diagnostics n = row_count;
+  -- beste Leistung der letzten 12 Monate (nach WA-Punkten; ohne Staffeln, Zwischenzeiten, Mehrkampf-Einzeldisziplinen)
+  update athletes a set recent_discipline = b.discipline, recent_mark = b.mark, recent_score = b.result_score
+    from (select a2.id, w.discipline, w.mark, w.result_score
+            from athletes a2
+            left join lateral (select w.discipline, w.mark, w.result_score from wa_results w
+                                where w.athlete_id = a2.id and w.date > current_date - 365 and w.result_score > 0
+                                  and w.relay is null and not _is_relay(w.discipline) and w.wa_race not like 'CE%'
+                                  and not _is_split(w.competition, w.remark)
+                                order by w.result_score desc, w.date desc limit 1) w on true) b
+   where b.id = a.id and (a.recent_mark, a.recent_score, a.recent_discipline) is distinct from (b.mark, b.result_score, b.discipline);
   -- wer für ein anderes Land startet, verschwindet ganz (außer er wird in einer Liga verwendet)
   perform prune_athletes(true);
   return n;

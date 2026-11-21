@@ -107,6 +107,7 @@ richtet `.claude/hooks/session-start.sh` Pakete und das Test-PostgreSQL ein.
   Pool: `toplist_entries` → `refresh_pool()` setzt Bestleistung, `athletes.pool_rank` und `event_group`. Gruppe und Pool-Rang
   nach den Fantasy-Punkten im Vorjahr des Spieljahrs (`game_year()`: ab 1.11. das Folgejahr; Cross nach Länge über `_result_group`),
   ohne Punkte beste Leistung, neue Athleten erste Leistung ab `new_group_threshold` (975) im Spieljahr, sonst Toplisten.
+  Listen zeigen die beste Leistung der letzten 12 Monate (`athletes.recent_*`, in `refresh_pool`; ohne Staffeln/Zwischenzeiten/Mehrkampf-Teile).
   Namen: neue Athleten aus der Topliste, danach täglich aus dem WA-Profil (`sync-pbs.ts`, `waName`: „Vorname NACHNAME“) – so kommen Namenswechsel an.
   Im Pool nur `athletes.nation = 'GER'` (Nation laut WA-Profil, täglich aus `sync-pbs.ts`; Nationenwechsel → `refresh_pool` löscht sie über `prune_athletes(true)`, außer in einer Liga verwendet) oder `manual`.
   Faktoren je Disziplin in `research/disciplines.txt`; Änderungen an bestehenden Faktoren einmalig über `schema_changes` in `build_placing_sql.py`

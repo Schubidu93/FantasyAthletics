@@ -103,6 +103,10 @@ alter table athletes add column if not exists group_basis text;      -- wie die 
 alter table athletes add column if not exists best_discipline text;
 alter table athletes add column if not exists best_mark text;
 alter table athletes add column if not exists best_year int;
+-- beste Leistung der letzten 12 Monate (Anzeige in den Listen; refresh_pool)
+alter table athletes add column if not exists recent_discipline text;
+alter table athletes add column if not exists recent_mark text;
+alter table athletes add column if not exists recent_score int;
 create index if not exists athletes_gender_rank on athletes (gender, pool_rank);
 
 -- Toplisten-Einträge (DE, Senioren, alle Disziplinen) – Grundlage für den Pool
