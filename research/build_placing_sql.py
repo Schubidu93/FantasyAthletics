@@ -199,6 +199,16 @@ begin
   end if;
 end $$;
 
+-- einmalig: Sprünge und Speer wieder ×1,3 – Auswertung 2026: weniger Wettkämpfe als Sprint/Hürden, mit ×1 deutlich hinten
+do $$
+begin
+  if not exists (select 1 from schema_changes where name = 'feld_faktoren_3') then
+    update disciplines d set factor = 1.3
+     where d.name in ('High Jump', 'Long Jump', 'Pole Vault', 'Triple Jump', 'Javelin Throw') and d.factor = 1;
+    insert into schema_changes (name) values ('feld_faktoren_3');
+  end if;
+end $$;
+
 insert into placing_scores (placing_table, category, race_type, place, points) values
 {",\n".join(values)}
 on conflict (placing_table, category, race_type, place) do update set points = excluded.points;
