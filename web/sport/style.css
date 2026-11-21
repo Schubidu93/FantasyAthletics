@@ -65,10 +65,4 @@ select.mini { font-size: .75rem; padding: 2px 6px; width: auto; min-height: 0; }
 .mini-label { font-size: .75rem; display: inline-flex; gap: .3rem; align-items: center; }
 .place-sub { display: block; font-size: .68rem; line-height: 1.1; white-space: nowrap; }
 
-.draft-roster { display: grid; gap: 6px; }
-.draft-roster li { padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); }
-.draft-roster li:last-child { border-bottom: 1px solid var(--border); }
-.draft-roster .slot-name { font-weight: 600; }
-.draft-roster li.slot-open { background: var(--warn-soft); border-color: transparent; }
-.draft-roster li.slot-open > span:last-child { color: var(--warn); }
 .race-list a.race-link.cal-item { flex-direction: row; }
