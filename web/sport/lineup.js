@@ -1,7 +1,7 @@
 // Aufstellung für den nächsten Spieltag (Team → Kader): Leichtathletik mit festen Positionen je Disziplin
 import { html, useState, useEffect } from '../vendor/preact-htm.js';
 import { fmtDeadline } from '../views/deadline.js';
-import { Msg, rpc, useAction } from '../lib.js';
+import { Msg, rpc, SlotTiles, useAction } from '../lib.js';
 import { leagueSlots, SlotLabel, slotOk } from './lib.js';
 
 // Feste Positionen: je Disziplingruppe (ggf. getrennt nach Männern/Frauen) plus Wildcards
@@ -64,11 +64,8 @@ export function DraftRoster({ c, managerId }) {
     return !!s;
   };
   const extra = mine.filter((r) => !place(r, false)).filter((r) => !place(r, true));
-  const rows = [...slots.map((s) => [s, at[s], html`<${SlotLabel} slot=${s} />`]),
-    ...Array.from({ length: Math.max(reserve, extra.length) }, (_, i) => [`R${i}`, extra[i], lineup ? `Reserve ${i + 1}` : `Platz ${i + 1}`])];
-  const name = (r) => c.riderMap[r.athlete_id]?.name || r.athlete_id;
-  const open = rows.filter((x) => !x[1]).length;
-  return html`<p class="muted small">${open > 0 ? `Noch ${open} von ${rows.length} Plätzen offen.` : 'Kader komplett.'}</p>
-    <ul class="list draft-roster">${rows.map(([k, r, label]) => html`<li key=${k} class=${r ? '' : 'slot-open'}>
-      <span class="slot-name">${label}</span><span>${r ? name(r) : 'offen'}</span></li>`)}</ul>`;
+  const name = (r) => r && (c.riderMap[r.athlete_id]?.name || r.athlete_id);
+  const rows = [...slots.map((s) => ({ key: s, label: html`<${SlotLabel} slot=${s} />`, name: name(at[s]), extra: at[s]?.price || '' })),
+    ...Array.from({ length: Math.max(reserve, extra.length) }, (_, i) => ({ key: `R${i}`, label: lineup ? `Reserve ${i + 1}` : `Platz ${i + 1}`, name: name(extra[i]), extra: extra[i]?.price || '' }))];
+  return html`<${SlotTiles} rows=${rows} />`;
 }
