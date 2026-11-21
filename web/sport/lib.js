@@ -192,7 +192,7 @@ export function slotOk(slot, r) {
 }
 
 // Disziplinnamen von World Athletics kurz und deutsch: "1500 Metres Short Track" → "1500 m (Halle)"
-const DISC = [[/^10,000 Metres/, '10.000 m'], [/ Kilometres Race Walk/, ' km Gehen'], [/^High Jump/, 'Hochsprung'],
+const DISC = [[/^(\d+),(\d{3}) Metres/, '$1.$2 m'], [/ Kilometres Race Walk/, ' km Gehen'], [/^High Jump/, 'Hochsprung'],
   [/^Pole Vault/, 'Stabhochsprung'], [/^Long Jump/, 'Weitsprung'], [/^Triple Jump/, 'Dreisprung'], [/^Shot Put/, 'Kugelstoßen'],
   [/^Discus Throw/, 'Diskuswurf'], [/^Hammer Throw/, 'Hammerwurf'], [/^Javelin Throw/, 'Speerwurf'], [/^Decathlon/, 'Zehnkampf'],
   [/^Heptathlon/, 'Siebenkampf'], [/^Pentathlon/, 'Fünfkampf'], [/ Metres Steeplechase/, ' m Hindernis'], [/ Metres Hurdles/, ' m Hürden'],

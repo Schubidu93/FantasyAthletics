@@ -13,8 +13,8 @@
 150 Metres|1|100|TF||
 1500 Metres|1|1500|TF||
 1500 Metres Short Track|1|1500|TF||
-2 Miles|1|5000|5000SC||
-2 Miles Short Track|1|5000|5000SC||
+2 Miles|1.3|5000|5000SC||
+2 Miles Short Track|1.3|5000|5000SC||
 20 Kilometres Race Walk|2.5|Gehen|RW_HM||
 20 Kilometres Road|2.5|Marathon|ROAD||
 20,000 Metres Race Walk|2.5|Gehen|RW_HM||
@@ -29,9 +29,9 @@
 300 Metres|1|400|TF||
 300 Metres Hurdles|1|Langhürden|TF||
 300 Metres Short Track|1|400|TF||
-3000 Metres|1|5000|5000SC||
+3000 Metres|1.3|5000|5000SC||
 3000 Metres Race Walk Short Track|1|Gehen|RW_HM||
-3000 Metres Short Track|1|5000|5000SC||
+3000 Metres Short Track|1.3|5000|5000SC||
 3000 Metres Steeplechase|1.5|Hindernis|5000SC||
 35 Kilometres Race Walk|4|Gehen|RW_LONG||
 3x1000 Metres Relay|0.33|800|TF||

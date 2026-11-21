@@ -133,7 +133,7 @@ describe("Athletenpool", () => {
     const b = await athlete(db, 2, "Knapp drunter", "men", "800 Metres", 1200);
     const n = await athlete(db, 3, "Neu", "women", "1500 Metres", 1100);
     const x = await athlete(db, 4, "Crosser", "men", "5000 Metres", 1100);
-    // A: 5000er-Block 134,5 Punkte (3000 m: 100 + 5000 m: 23 × 1,5), 10.000er-Block 130 (65 × 2)
+    // A: 5000er-Block 164,5 Punkte (3000 m: 100 × 1,3 + 5000 m: 23 × 1,5), 10.000er-Block 130 (65 × 2)
     await ins(a, `${Y}-05-01`, "3000 Metres", 1100);
     await ins(a, `${Y}-06-01`, "5000 Metres", 1023);
     await ins(a, `${Y}-07-01`, "10,000 Metres", 1065);
@@ -151,7 +151,7 @@ describe("Athletenpool", () => {
     await db.query("select refresh_pool(null)");
     const rows = await db.all("select id, event_group, group_basis, group_points, pool_rank from athletes order by id");
     expect(rows.map((r) => [r.id, r.event_group, r.group_basis, Number(r.group_points ?? -1), r.pool_rank])).toEqual([
-      ["wa-1", "5000", "points", 264.5, 2],
+      ["wa-1", "5000", "points", 294.5, 2],
       ["wa-2", "1500", "best", 0, 3],
       ["wa-3", "Hindernis", "first", -1, 4],
       ["wa-4", "1500", "points", 340, 1],

@@ -25,8 +25,8 @@ insert into disciplines (name, factor, event_group, placing_tables, cross_table,
   ('150 Metres', 1, '100', '{TF}', null, false),
   ('1500 Metres', 1, '1500', '{TF}', null, false),
   ('1500 Metres Short Track', 1, '1500', '{TF}', null, false),
-  ('2 Miles', 1, '5000', '{5000SC}', null, false),
-  ('2 Miles Short Track', 1, '5000', '{5000SC}', null, false),
+  ('2 Miles', 1.3, '5000', '{5000SC}', null, false),
+  ('2 Miles Short Track', 1.3, '5000', '{5000SC}', null, false),
   ('20 Kilometres Race Walk', 2.5, 'Gehen', '{RW_HM}', null, false),
   ('20 Kilometres Road', 2.5, 'Marathon', '{ROAD}', null, false),
   ('20,000 Metres Race Walk', 2.5, 'Gehen', '{RW_HM}', null, false),
@@ -41,9 +41,9 @@ insert into disciplines (name, factor, event_group, placing_tables, cross_table,
   ('300 Metres', 1, '400', '{TF}', null, false),
   ('300 Metres Hurdles', 1, 'Langhürden', '{TF}', null, false),
   ('300 Metres Short Track', 1, '400', '{TF}', null, false),
-  ('3000 Metres', 1, '5000', '{5000SC}', null, false),
+  ('3000 Metres', 1.3, '5000', '{5000SC}', null, false),
   ('3000 Metres Race Walk Short Track', 1, 'Gehen', '{RW_HM}', null, false),
-  ('3000 Metres Short Track', 1, '5000', '{5000SC}', null, false),
+  ('3000 Metres Short Track', 1.3, '5000', '{5000SC}', null, false),
   ('3000 Metres Steeplechase', 1.5, 'Hindernis', '{5000SC}', null, false),
   ('35 Kilometres Race Walk', 4, 'Gehen', '{RW_LONG}', null, false),
   ('3x1000 Metres Relay', 0.33, '800', '{TF}', null, false),
@@ -238,6 +238,16 @@ begin
     update disciplines d set factor = x.factor from (values ('Heptathlon', 3, 4), ('Pentathlon Short Track', 2.5, 3)
     ) x(name, factor, old) where d.name = x.name and d.factor = x.old;
     insert into schema_changes (name) values ('mehrkampf_faktoren_2');
+  end if;
+end $$;
+
+-- einmalig: 3000 m und 2 Meilen (auch Halle) ×1,3 – Zwischenstrecken mit wenigen Rennen im Jahr
+do $$
+begin
+  if not exists (select 1 from schema_changes where name = 'faktoren_3000m') then
+    update disciplines d set factor = 1.3
+     where d.name in ('3000 Metres', '3000 Metres Short Track', '2 Miles', '2 Miles Short Track') and d.factor = 1;
+    insert into schema_changes (name) values ('faktoren_3000m');
   end if;
 end $$;
 
