@@ -250,7 +250,7 @@ describe("Ein Wettkampf = ein Ergebnis", () => {
       values ($1, $2, 'Zehnkampf - Combined Events', 'Long Jump', 'C', 'CE1', 'CE1', 1, 1, '7.70', 1100, 7100002)`, [a, D]);
     await db.query("select rebuild_results(null)");
     expect(await db.all("select perf_points::float perf, placing_points::float plc, pb_points::float pb from results"))
-      .toEqual([{ perf: 100, plc: 0, pb: 10 }]);   // (1100 − 1000) × 1 × 1
+      .toEqual([{ perf: 130, plc: 0, pb: 10 }]);   // (1100 − 1000) × 1 × 1,3
   });
 
   it("Bestleistungen und Rekorde zählen auch in Vorläufen", async () => {
