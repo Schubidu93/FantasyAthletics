@@ -179,6 +179,26 @@ begin
   end if;
 end $$;
 
+-- einmalig: 3000 m und 2 Meilen (auch Halle) ×1,3 – Zwischenstrecken mit wenigen Rennen im Jahr
+do $$
+begin
+  if not exists (select 1 from schema_changes where name = 'faktoren_3000m') then
+    update disciplines d set factor = 1.3
+     where d.name in ('3000 Metres', '3000 Metres Short Track', '2 Miles', '2 Miles Short Track') and d.factor = 1;
+    insert into schema_changes (name) values ('faktoren_3000m');
+  end if;
+end $$;
+
+-- einmalig: Sprünge und Speer ×1 (viele Wettkämpfe, Diamond League) – nur Hammer bleibt ×1,5
+do $$
+begin
+  if not exists (select 1 from schema_changes where name = 'feld_faktoren_2') then
+    update disciplines d set factor = 1 from (values ('High Jump', 1.3), ('Long Jump', 1.3), ('Pole Vault', 1.3),
+      ('Triple Jump', 1.3), ('Javelin Throw', 1.5)) x(name, old) where d.name = x.name and d.factor = x.old;
+    insert into schema_changes (name) values ('feld_faktoren_2');
+  end if;
+end $$;
+
 insert into placing_scores (placing_table, category, race_type, place, points) values
 {",\n".join(values)}
 on conflict (placing_table, category, race_type, place) do update set points = excluded.points;
