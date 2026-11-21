@@ -49,3 +49,26 @@ export function Lineup({ c }) {
     <${Msg} msg=${a.msg} />
   </section>`;
 }
+
+/** Kader im Draft nach den Positionen der Liga: jeder Pick füllt die erste freie passende Position
+ *  (erst Disziplin, dann Wildcard), weitere Athleten stehen unten; offene Positionen sind hervorgehoben */
+export function DraftRoster({ c, managerId }) {
+  const slots = leagueSlots(c.league);
+  const mine = c.active.filter((r) => r.manager_id === managerId);   // in Pick-Reihenfolge
+  const at = {}, extra = [];
+  const place = (r, wild) => {
+    const s = slots.find((x) => !at[x] && x.startsWith('WC') === wild && slotOk(x, c.riderMap[r.athlete_id]));
+    if (s) at[s] = r;
+    return !!s;
+  };
+  const rest = mine.filter((r) => !place(r, false));
+  for (const r of rest) if (!place(r, true)) extra.push(r);
+  const name = (r) => c.riderMap[r.athlete_id]?.name || r.athlete_id;
+  const open = slots.filter((s) => !at[s]).length;
+  return html`${open > 0 && html`<p class="muted small">Noch ${open} von ${slots.length} Positionen offen.</p>`}
+    <ul class="list compact lineup">${slots.map((s) => html`<li key=${s} class=${at[s] ? '' : 'slot-open'}>
+      <span class="slot-name"><${SlotLabel} slot=${s} /></span>
+      <span>${at[s] ? name(at[s]) : 'offen'}</span></li>`)}</ul>
+    ${extra.length > 0 && html`<h4>Weitere im Kader</h4>
+      <ul class="list compact">${extra.map((r) => html`<li key=${r.id}><span>${name(r)}</span></li>`)}</ul>`}`;
+}

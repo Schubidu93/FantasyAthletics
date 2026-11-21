@@ -5,7 +5,7 @@ import { AREA_PRESETS, AREAS, BLOCK_LABEL, GENDER_LABEL, GROUP_LABEL, leagueSlot
 /** Startwerte beim Anlegen einer Liga (zusätzlich zu den gemeinsamen) */
 export const LEAGUE_DEFAULTS = {
   roster_size: 11, scoring_mode: 'lineup', draft_mode: 'snake', bid_seconds: 30,
-  gender: 'mixed', lineup_mode: 'free', ...AREA_PRESETS.run, wildcards: 2,
+  gender: 'mixed', lineup_mode: 'free', ...AREA_PRESETS.all, wildcards: 2,
 };
 export const SEASON_END = '12-31';
 export const GENDER_OPTIONS = [['mixed', 'Mixed (Männer und Frauen)'], ['men', 'Nur Männer'], ['women', 'Nur Frauen']];
@@ -53,7 +53,7 @@ export const settingsPayload = (f, { locked = false } = {}) => (locked ? {} : {
 
 /** Felder zwischen „Anzahl Mitspieler“ und „Draft-Modus“: Disziplinen, Wertung, Kadergröße, Positionen */
 export function SquadFields({ f, set, locked }) {
-  const areas = f.areas || AREA_PRESETS.run.areas;
+  const areas = f.areas || AREA_PRESETS.all.areas;
   // „Eigene Auswahl“ bleibt gewählt, auch wenn die Bereiche gerade einer Voreinstellung entsprechen
   const [custom, setCustom] = useState(presetOf(areas) === 'custom');
   const preset = custom ? 'custom' : presetOf(areas);
