@@ -11,10 +11,6 @@ const DRAFT = {
 };
 
 const fmtNum = (n) => Number(n).toLocaleString('de-DE');
-// Erklärung der Blöcke, die die Liga als Positionen nutzt (z. B. „Wurf = Kugel, Diskus, Hammer oder Speer“)
-const blockText = (groups) => groups.filter((g) => positionGroups(g).length > 1)
-  .map((g) => `${GROUP_LABEL[g]} = ${positionGroups(g).map((x) => GROUP_LABEL[x]).join(', ').replace(/, ([^,]+)$/, ' oder $1')}.`).join(' ');
-
 // Disziplinfaktoren aus der Datenbank, zusammengefasst je Faktor (nur Bereiche der Liga, ohne Staffeln und Faktor 1):
 // z. B. ×1,6 → „10.000 m, 10 km Straße, Cross, Berglauf“
 const family = (name) => (/^Cross/.test(name) ? 'Cross' : /Mountain|Vertical/.test(name) ? 'Berglauf'
@@ -47,7 +43,10 @@ export function Rules({ c }) {
   const thr = cfg ? cfg.perf_threshold : 1000;
   const auction = ['live', 'blind'].includes(l.draft_mode);
   const row = (k, v) => html`<tr><td>${k}</td><td>${v}</td></tr>`;
-  const geherWildcard = areas.includes('Gehen') && !(l.lineup_groups || []).includes('Gehen');
+  const groups = l.lineup_groups || RUN_GROUPS;
+  // Schwerpunkt-Gruppen der Liga ohne eigene Position (z. B. Gehen): nur auf Wildcards
+  const covered = new Set(groups.flatMap((g) => positionGroups(g)));
+  const wildOnly = AREAS.filter((a) => areas.includes(a)).flatMap((a) => AREA_GROUPS[a]).filter((g) => !covered.has(g)).map((g) => GROUP_LABEL[g] || g);
 
   return html`<div class="stack rules">
     <section class="card">
@@ -106,32 +105,35 @@ export function Rules({ c }) {
       <ul>
         <li><strong>Wer ist dabei:</strong> Deutsche mit mindestens ${cfg ? cfg.pool_threshold : 975} WA-Punkten in der deutschen Topliste (dieses oder letztes Jahr).
           Wer für ein anderes Land startet, fällt raus.</li>
-        <li><strong>Diese Liga:</strong> nur Athleten mit Schwerpunkt in ${areaText}${l.gender !== 'mixed' ? `, nur ${GENDER_LABEL[l.gender]}` : ''}.
-          Es zählen aber <strong>alle</strong> ihre Ergebnisse${runOnly ? ' (z. B. auch die 400 m eines 800-m-Läufers)' : ''}.</li>
+        <li><strong>Diese Liga:</strong> ${areas.length === AREAS.length ? 'Athleten aller Disziplinen' : `nur Athleten mit Schwerpunkt in ${areaText}`}${l.gender !== 'mixed' ? `, nur ${GENDER_LABEL[l.gender]}` : ''}.
+          Es zählen <strong>alle</strong> ihre Ergebnisse, auch in anderen Disziplinen${runOnly ? ' (z. B. die 400 m eines 800-m-Läufers)' : ''}.</li>
       </ul>
-      <h4 class="rule-sub">Schwerpunkt-Disziplinen</h4>
-      <table class="tbl rule-tbl"><tbody>
+      ${lineup ? html`<h4 class="rule-sub">Positionen (${slots.length})</h4>
+        <table class="tbl rule-tbl"><tbody>
+          ${groups.map((g) => html`<tr key=${g}><td>${GROUP_LABEL[g] || g}${l.lineup_mode === 'mf' ? ' (M + F)' : ''}</td>
+            <td>${positionGroups(g).map((x) => GROUP_LABEL[x]).join(' · ')}</td></tr>`)}
+          ${l.wildcards > 0 && row(`Wildcard${l.wildcards > 1 ? ` (${l.wildcards}×)` : ''}`, `jede Disziplin der Liga${wildOnly.length ? `, auch ${wildOnly.join(', ')}` : ''}`)}
+        </tbody></table>
+        <ul>
+          <li>Wer auf welche Position darf, entscheidet die Schwerpunkt-Disziplin des Athleten (siehe unten).
+            ${wildOnly.length ? `${wildOnly.join(', ')} ${wildOnly.length > 1 ? 'haben' : 'hat'} keine eigene Position, nur Wildcards.` : ''}</li>
+          <li>Änderbar bis zum Stichtag, dann fest. Ohne Änderung gilt die Aufstellung vom vorigen Spieltag (beim ersten: automatisch die besten passenden).</li>
+          <li>Wird ein Athlet per Waiver ersetzt, rückt der neue nach, wenn er auf die Position passt.</li>
+        </ul>` : html`<h4 class="rule-sub">Disziplinen</h4><table class="tbl rule-tbl"><tbody>
         ${AREAS.filter((a) => areas.includes(a)).map((a) => html`<tr key=${a}><td>${a}</td><td>${AREA_GROUPS[a].map((g) => GROUP_LABEL[g]).join(' · ')}</td></tr>`)}
-      </tbody></table>
+      </tbody></table>`}
+      <h4 class="rule-sub">Schwerpunkt-Disziplin</h4>
       <ul>
-        <li>Schwerpunkt = Disziplin mit den meisten Punkten ${gy - 1} (gilt die ganze Saison ${gy}). Verwandtes zählt mit: Meile → 1500 m, 3000 m → 5000 m,
+        <li>Disziplin mit den meisten Punkten ${gy - 1} (gilt die ganze Saison ${gy}). Verwandtes zählt mit: Meile → 1500 m, 3000 m → 5000 m,
           Halbmarathon → Marathon, 60 m → 100 m${areas.includes('Lauf') ? '; Cross nach Länge' : ''}.</li>
         <li>Ohne Punkte: beste Leistung; ganz Neue: erste Leistung ab ${cfg?.new_group_threshold ?? 975} WA-Punkten.</li>
       </ul>
       <h4 class="rule-sub">Ränge in den Listen</h4>
       <table class="tbl rule-tbl"><tbody>
         ${row('1. Name', `Rang unter den Athleten dieser Liga: nach Punkten ${gy - 1}, bei Gleichstand nach bester Leistung. Reihenfolge im Draft.`)}
-        ${lineup && row(`#2 ${GROUP_LABEL[(l.lineup_groups || RUN_GROUPS)[0]] || ''}`, `Rang auf dieser Position der Liga${l.lineup_mode === 'mf' ? ', getrennt nach Männern und Frauen' : ''}.`)}
+        ${lineup && row(`#2 ${GROUP_LABEL[groups[0]] || ''}`, `Rang auf dieser Position der Liga${l.lineup_mode === 'mf' ? ', getrennt nach Männern und Frauen' : ''}.`)}
         ${lineup && l.wildcards > 0 && row('nur Wildcard', 'passt auf keine eigene Position, nur auf eine Wildcard.')}
       </tbody></table>
-      ${lineup ? html`<h4 class="rule-sub">Aufstellung</h4>
-        <ul>
-          <li>${slots.length} Positionen: ${l.lineup_mode === 'mf' ? 'je Disziplin ein Mann und eine Frau' : 'je Position ein passender Athlet'}${l.wildcards > 0
-            ? `, dazu ${l.wildcards} Wildcard${l.wildcards > 1 ? 's' : ''} (jede Disziplin der Liga)` : ''}. ${blockText(l.lineup_groups || [])}
-            ${geherWildcard ? 'Geher nur auf Wildcards.' : ''}</li>
-          <li>Änderbar bis zum Stichtag, dann fest. Ohne Änderung gilt die Aufstellung vom vorigen Spieltag (beim ersten: automatisch die besten passenden).</li>
-          <li>Wird ein Athlet per Waiver ersetzt, rückt der neue nach, wenn er auf die Position passt.</li>
-        </ul>` : ''}
     </details>
 
     <details class="card rule-sec">
