@@ -180,7 +180,7 @@ function ManualResults({ c }) {
         <label>Ort (optional)<input value=${f.venue} onInput=${set('venue')} /></label>
         <label>Kategorie<select value=${f.category} onChange=${set('category')}>
           ${['F', 'E', 'D', 'C', 'B', 'A', 'GL', 'GW', 'DF', 'OW'].map((k) => html`<option value=${k}>${k}</option>`)}</select></label>
-        <label>${relay ? 'Endzeit der Staffel' : 'Bruttozeit'}<input inputmode="decimal" placeholder=${relay ? 'z. B. 6:08.33' : 'z. B. 29:18 oder 1:02:45'}
+        <label>${relay ? 'Endzeit der Staffel' : 'Bruttozeit'}<input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder=${relay ? 'z. B. 6:08.33' : 'z. B. 29:18 oder 1:02:45'}
           value=${f.mark} onInput=${set('mark')} /></label>
         <label>Platz (optional)<input type="number" min="1" value=${f.place} onInput=${set('place')} /></label>
         <label>Quelle (Link)<input type="url" placeholder="https://my.raceresult.com/…" value=${f.source_url} onInput=${set('source_url')} /></label>
