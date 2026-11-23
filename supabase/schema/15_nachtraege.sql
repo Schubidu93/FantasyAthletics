@@ -54,11 +54,18 @@ end $$;
 -- WA-Punkte einer Zeit (null, wenn es für Disziplin/Geschlecht noch keine Tabelle gibt)
 create or replace function wa_points(p_discipline text, p_gender text, p_mark text) returns int
 language sql stable security definer set search_path = public as $$
-  select case when mark_seconds(p_mark) is null then null
-              -- jenseits des Tiefpunkts der Parabel (sehr langsam) gibt es 0 Punkte
-              when mark_seconds(p_mark) >= -k.b / (2 * k.a) then 0
-              else greatest(0, round(k.a * mark_seconds(p_mark)^2 + k.b * mark_seconds(p_mark) + k.c))::int end
-    from scoring_coefficients k where k.discipline = p_discipline and k.gender = p_gender;
+  -- offizielle WA-Tabelle zuerst, sonst die aus WA-Ergebnissen geschätzte Parabel
+  with k as (select a, b, c from wa_scoring_tables where discipline = p_discipline and gender = p_gender
+             union all
+             select a, b, c from scoring_coefficients
+              where discipline = p_discipline and gender = p_gender
+                and not exists (select 1 from wa_scoring_tables where discipline = p_discipline and gender = p_gender)),
+       x as (select mark_seconds(p_mark) v, coalesce((select higher_better from disciplines where name = p_discipline), false) hb)
+  select case when x.v is null then null
+              -- jenseits des Tiefpunkts der Parabel (zu langsam bzw. zu kurz) gibt es 0 Punkte
+              when (not x.hb and x.v >= -k.b / (2 * k.a)) or (x.hb and x.v <= -k.b / (2 * k.a)) then 0
+              else greatest(0, round(k.a * x.v^2 + k.b * x.v + k.c))::int end
+    from k, x;
 $$;
 
 create or replace function _require_any_admin() returns void

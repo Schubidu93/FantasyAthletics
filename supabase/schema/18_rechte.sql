@@ -32,6 +32,7 @@ alter table cross_distance_factors enable row level security;
 alter table keepers         enable row level security;
 alter table app_config      enable row level security;   -- keine Policies: nur Service-Key
 alter table scoring_coefficients enable row level security;
+alter table wa_scoring_tables enable row level security;
 alter table calendar_events enable row level security;
 alter table extra_calendar_events enable row level security;
 alter table athlete_sync    enable row level security;   -- keine Policies: nur Service-Key
@@ -44,7 +45,7 @@ declare t text;
 begin
   -- öffentliche Stammdaten: lesbar für angemeldete Nutzer
   foreach t in array array['athletes', 'competitions', 'results', 'sync_status', 'athlete_season_stats', 'toplist_entries',
-                           'wa_results', 'disciplines', 'placing_scores', 'scoring_config', 'cross_distance_factors', 'scoring_coefficients',
+                           'wa_results', 'disciplines', 'placing_scores', 'scoring_config', 'cross_distance_factors', 'scoring_coefficients', 'wa_scoring_tables',
                            'calendar_events', 'extra_calendar_events', 'athlete_pbs', 'athlete_pb_before', 'athlete_requests'] loop
     execute format('drop policy if exists read_all on %I', t);
     execute format('create policy read_all on %I for select to authenticated using (true)', t);

@@ -101,7 +101,8 @@ richtet `.claude/hooks/session-start.sh` Pakete und das Test-PostgreSQL ein.
   Einzelabruf (`getSingleCompetitorResultsDate`, ganzes Jahr mit WA-Punkten) nur für Athleten mit Neuem bzw. nachts zur Kontrolle.
   Ende-zu-Ende-Test: `tests/importer.test.ts` (Nachbau von WA und Supabase-Schnittstelle).
 - Nachträge: `wa_results.source = 'manual'` (+ `source_url`), angelegt über `add_manual_result`; der Importer löscht/überschreibt
-  nur `source = 'wa'`. WA-Punkte aus `scoring_coefficients` (Parabel je Disziplin/Geschlecht, nachts neu berechnet).
+  nur `source = 'wa'`. WA-Punkte (`wa_points`) aus den offiziellen WA-Tabellen `wa_scoring_tables` (`research/build_wa_scoring.py` → `research/wa_scoring.txt`,
+  PDF über Ablauf „WA-Punktetabellen laden“), sonst aus `scoring_coefficients` (Parabel je Disziplin/Geschlecht aus WA-Ergebnissen, nachts neu berechnet).
   RaceResult/LADV nicht automatisch abrufen (siehe `research/fremdquellen-notizen.md`).
 - Rohdaten in `wa_results`; `rebuild_results()` berechnet daraus die Punkte in `results` (die Spiellogik von UCI Fantasy liest nur `results`).
   Pool: `toplist_entries` → `refresh_pool()` setzt Bestleistung, `athletes.pool_rank` und `event_group`. Gruppe und Pool-Rang
