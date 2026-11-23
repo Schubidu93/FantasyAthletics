@@ -107,7 +107,14 @@ function ManualResults({ c }) {
   const [edit, setEdit] = useState(null);       // IDs der Zeilen, die ersetzt werden
   const [check, setCheck] = useState(null);
   const a = useAction();
-  const set = (k) => (e) => { setF({ ...f, [k]: e.target.value }); setCheck(null); };
+  // Quelle vorbelegen: gleicher Wettkampf (und möglichst gleiche Disziplin) wie ein früherer Nachtrag → gleiche Ergebnisliste
+  const withSource = (n) => {
+    if (n.source_url || !n.competition) return n;
+    const same = (list.data || []).filter((x) => x.source_url && x.competition === n.competition);
+    const hit = same.find((x) => x.discipline === (RELAYS[n.relay]?.leg || n.discipline)) || same[0];
+    return hit ? { ...n, source_url: hit.source_url } : n;
+  };
+  const set = (k) => (e) => { setF(withSource({ ...f, [k]: e.target.value })); setCheck(null); };
   const relay = RELAYS[f.relay];
   const maxRiders = relay ? relay.legs : 1;
   const mark = relay ? relayMark(f.mark) : f.mark.trim();
@@ -117,8 +124,8 @@ function ManualResults({ c }) {
   const pick = (r) => { if (!riders.some((x) => x.id === r.id)) setRiders(relay ? [...riders, r].slice(0, maxRiders) : [r]); setCheck(null); };
   const pickComp = (id) => {
     const x = (comps.data || []).find((y) => y.id === id);
-    setF({ ...f, competition_id: id, ...(x ? { competition: x.name, venue: x.venue || '', country: x.country || '', category: x.category || 'F',
-      date: f.date && f.date >= x.start_date ? f.date : x.start_date } : { competition: '', venue: '', country: '', category: 'F' }) });
+    setF(withSource({ ...f, competition_id: id, ...(x ? { competition: x.name, venue: x.venue || '', country: x.country || '', category: x.category || 'F',
+      date: f.date && f.date >= x.start_date ? f.date : x.start_date } : { competition: '', venue: '', country: '', category: 'F' }) }));
     setCheck(null);
   };
   const doCheck = () => a.run(async () => {
