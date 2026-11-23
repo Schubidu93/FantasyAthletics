@@ -96,6 +96,11 @@ WALKS = ["3000 Metres Race Walk Short Track", "5000 Metres Race Walk", "10 Kilom
 newly_scored = [n for n in (l.split("|")[0] for l in open("research/disciplines.txt", encoding="utf-8"))
                 if "Race Walk" in n or n in ("4x100 Metres Relay", "4x200 Metres Relay Short Track")]
 
+scoring = []
+for line in open("research/wa_scoring.txt", encoding="utf-8"):
+    n, g, a, b, c, lo, hi = line.rstrip("\n").split("|")
+    scoring.append(f"  ({q(n)}, {q(g)}, {a}, {b}, {c}, {lo}, {hi})")
+
 out = f"""-- =====================================================================
 -- Fantasy Athletics – Referenzdaten (wird nach supabase/schema/ eingespielt)
 -- Automatisch erzeugt von research/build_placing_sql.py – nicht von Hand ändern.
@@ -208,6 +213,12 @@ begin
     insert into schema_changes (name) values ('feld_faktoren_3');
   end if;
 end $$;
+
+-- offizielle WA-Punktetabellen (research/wa_scoring.txt aus research/build_wa_scoring.py)
+insert into wa_scoring_tables (discipline, gender, a, b, c, x_min, x_max) values
+{",\n".join(scoring)}
+on conflict (discipline, gender) do update set a = excluded.a, b = excluded.b, c = excluded.c,
+  x_min = excluded.x_min, x_max = excluded.x_max;
 
 insert into placing_scores (placing_table, category, race_type, place, points) values
 {",\n".join(values)}

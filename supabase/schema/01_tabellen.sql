@@ -262,6 +262,19 @@ do $$ begin
 exception when duplicate_object then null; end $$;
 
 -- WA-Punktetabellen nachgebaut: Punkte = a·t² + b·t + c (t = Zeit in Sekunden), je Disziplin und Geschlecht
+-- offizielle WA-Punktetabellen (Scoring Tables, research/wa_scoring.txt → reference_data.sql): Punkte = a·x² + b·x + c,
+-- x = Sekunden bzw. Meter/Punkte; haben Vorrang vor den geschätzten scoring_coefficients
+create table if not exists wa_scoring_tables (
+  discipline text not null,
+  gender     text not null check (gender in ('men', 'women')),
+  a          numeric not null,
+  b          numeric not null,
+  c          numeric not null,
+  x_min      numeric,                 -- Bereich der Tabelle
+  x_max      numeric,
+  primary key (discipline, gender)
+);
+
 -- aus den vorhandenen WA-Ergebnissen berechnet (fit_scoring_coefficients) – für Nachträge ohne WA-Punkte
 create table if not exists scoring_coefficients (
   discipline text not null,

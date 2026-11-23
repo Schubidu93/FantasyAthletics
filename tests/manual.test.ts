@@ -24,6 +24,8 @@ beforeEach(async () => {
                     values ($1, $2, 'WA-Lauf', '10 Kilometres Road', 'F', 'F', $3, $4)`, [slug, `${Y}-01-10`, fmt(t), table(t)]);
   }
   await db.query(`update wa_results set result_score = 900 where athlete_id in ('wa-1003', 'wa-1040')`);
+  // die erfundene Tabelle gilt nur ohne offizielle WA-Tabelle für 10 km Straße
+  await db.query("delete from wa_scoring_tables where discipline = '10 Kilometres Road'");
 });
 afterEach(async () => {
   await db.end();
@@ -48,6 +50,16 @@ describe("WA-Punkte aus der Zeit", () => {
     }
     expect((await db.one("select wa_points('10 Kilometres Road', 'women', '29:18') p")).p).toBeNull();   // keine Tabelle
     expect((await db.one("select wa_points('10 Kilometres Road', 'men', '1:10:00') p")).p).toBe(0);     // jenseits der Tabelle
+  });
+});
+
+describe("Offizielle WA-Punktetabellen", () => {
+  it("haben Vorrang und treffen die Tabelle (Lauf, Sprung, Straße)", async () => {
+    const p = (d: string, g: string, m: string) => db.one("select wa_points($1, $2, $3) p", [d, g, m]).then((r) => r.p);
+    expect(await p("Long Jump", "men", "8.20")).toBe(1181);            // Tabelle: 8,20 m = 1181 Punkte
+    expect(await p("5000 Metres", "women", "1:00:00")).toBe(0);         // jenseits der Tabelle
+    await db.query("select fit_scoring_coefficients()");
+    expect(await p("Half Marathon", "women", "1:10:00")).toBeGreaterThan(1000);
   });
 });
 
@@ -79,8 +91,8 @@ describe("Ergebnisse nachtragen", () => {
     await add({ mark: "28:00" });
     await expect(add({ mark: "28:05", date: `${Y}-03-02` })).rejects.toThrow(/schon ein Ergebnis/);
     await expect(add({ mark: "DNF", discipline: "Half Marathon" })).rejects.toThrow(/Zeit nicht erkannt/);
-    await expect(add({ mark: "1:02:00", discipline: "Half Marathon" })).rejects.toThrow(/von Hand angeben/);
-    await add({ mark: "1:02:00", discipline: "Half Marathon", wa_points: 1180 });   // ohne Tabelle: Punkte von Hand
+    await expect(add({ mark: "4:10", discipline: "Mile Steeplechase" })).rejects.toThrow(/von Hand angeben/);
+    await add({ mark: "4:10", discipline: "Mile Steeplechase", wa_points: 1180 });   // ohne Tabelle: Punkte von Hand
     await expect(add({ mark: "28:00", discipline: "Cross Country" })).rejects.toThrow(/kann nicht nachgetragen/);
     expect((await db.one("select manual_result_check('wa-1', '10 Kilometres Road', $1, '28:00') c", [D])).c.duplicate)
       .toMatchObject({ source: "manual", competition: "Stadtlauf" });
@@ -115,13 +127,15 @@ describe("Nachträge: Staffeln, Bearbeiten, Land", () => {
     [{ date: D, competition: "Staffel-DM", country: "GER", source_url: "https://example.org", ...p }]);
 
   it("Staffel: Teilstrecke aus der Endzeit, ein Drittel der Punkte inkl. Platzierung", async () => {
-    await save({ relay: "3x800", athlete_ids: ["wa-1", "wa-2", "wa-3"], mark: "6:08:33", wa_points: 1150, category: "B", place: 1 });
+    await save({ relay: "3x800", athlete_ids: ["wa-1", "wa-2", "wa-3"], mark: "5:15:00", category: "B", place: 1 });
     const rows = await db.all("select athlete_id, discipline, mark, share, category, wa_race from wa_results where source = 'manual' order by athlete_id");
     expect(rows).toHaveLength(3);
-    expect(rows[0]).toMatchObject({ discipline: "800 Metres", mark: "6:08.33", category: "B", wa_race: "Staffel 3x800" });
+    expect(rows[0]).toMatchObject({ discipline: "800 Metres", mark: "5:15.00", category: "B", wa_race: "Staffel 3x800" });
     expect(Number(rows[0].share)).toBeCloseTo(1 / 3, 3);
     const r = await db.one("select perf_points, placing_points from results where athlete_id = 'wa-1'");
-    expect(Number(r.perf_points)).toBeCloseTo(150 * 0.1 / 3, 1);
+    const leg = (await db.one("select wa_points('800 Metres', 'men', '1:45.00') p")).p;   // offizielle Tabelle
+    expect(leg).toBeGreaterThan(1150);
+    expect(Number(r.perf_points)).toBeCloseTo((leg - 1000) * 0.1 / 3, 1);
     const full = Number((await db.one(`select max(points) p from placing_scores ps join disciplines d on ps.placing_table = any (d.placing_tables)
       where d.name = '800 Metres' and ps.category = 'B' and ps.race_type = 'F' and ps.place = 1`)).p);
     expect(Number(r.placing_points)).toBeCloseTo(full * 0.1 / 3, 1);
