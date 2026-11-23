@@ -1,0 +1,40 @@
+name: WA-Punktetabellen laden
+
+# Lädt die offiziellen WA Scoring Tables (PDF) und legt den Text auf den Zweig „probe-scoring-tables“
+# (nicht main). Daraus werden die Koeffizienten für research/wa_scoring.txt abgeleitet.
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Link zum PDF auf worldathletics.org"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: command -v pdftotext >/dev/null || sudo apt-get install -y -qq poppler-utils
+      - name: PDF laden und in Text umwandeln
+        env:
+          URL: ${{ inputs.url }}
+        run: |
+          case "$URL" in https://worldathletics.org/*) ;; *) echo "Nur Links auf worldathletics.org"; exit 1;; esac
+          curl -sSfL -A "Mozilla/5.0 (compatible; FantasyAthletics/2.0)" -o tables.pdf "$URL"
+          pdfinfo tables.pdf | head -20
+          mkdir -p research/out/scoring
+          pdftotext -layout tables.pdf research/out/scoring/tables.txt
+          gzip -9 research/out/scoring/tables.txt
+          ls -la research/out/scoring
+      - name: Auf eigenen Zweig legen
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B probe-scoring-tables
+          git add -f research/out/scoring
+          git commit -m "WA-Punktetabellen: Text aus dem PDF"
+          git push -f origin probe-scoring-tables
