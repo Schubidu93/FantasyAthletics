@@ -17,18 +17,17 @@ async function loadByIds(ids) {
 }
 
 export async function loadPeople(league) {
-  // aus der Datenbank nur Athleten aus dem Land der Liga, von Hand hinzugefügte und alle, die je im Kader der Liga standen
+  // aus der Datenbank nur Athleten aus dem Land der Liga und alle, die je im Kader der Liga standen
   const base = () => {
     const x = sb.from('athletes').select('*');
     return league.gender === 'mixed' ? x : x.eq('gender', league.gender);
   };
   const rostered = (await all(() => sb.from('roster_entries').select('athlete_id').eq('league_id', league.id).order('id'))).map((r) => r.athlete_id);
-  const [own, manual, former] = await Promise.all([
+  const [own, former] = await Promise.all([
     all(() => base().eq('nation', league.nation || 'GER').order('pool_rank', { nullsFirst: false }).order('id')),
-    all(() => base().eq('manual', true).order('id')),
     loadByIds([...new Set(rostered)]),
   ]);
-  const byId = new Map([...own, ...manual, ...former].map((r) => [r.id, r]));
+  const byId = new Map([...own, ...former].map((r) => [r.id, r]));
   const keep = new Set(rostered);
   const areas = leagueAreas(league);
   const people = [...byId.values()].sort((a, b) => (a.pool_rank ?? 1e9) - (b.pool_rank ?? 1e9) || a.id.localeCompare(b.id));

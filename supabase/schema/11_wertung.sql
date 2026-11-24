@@ -27,10 +27,10 @@ begin
 end $$;
 
 -- Toplisten-Ansicht: vorhandene Jahre/Disziplinen/Geschlechter und die besten Einträge einer Liste
--- Land eines Athleten passt zur Liga (null = alle Länder; von Hand hinzugefügte immer) – wie _eligible/fromLeagueCountry
+-- Land eines Athleten passt zur Liga (null = alle Länder; auch von Hand hinzugefügte nur im eigenen Land) – wie _eligible/fromLeagueCountry
 create or replace function _nation_ok(p_nation text, a athletes) returns boolean
 language sql immutable as $$
-  select p_nation is null or a.manual or coalesce(a.nation, 'GER') = p_nation;
+  select p_nation is null or coalesce(a.nation, 'GER') = p_nation;
 $$;
 
 -- Toplisten je Land (Land des Athleten laut WA-Profil, wie die Liga: leagues.nation)

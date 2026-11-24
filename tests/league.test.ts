@@ -177,6 +177,10 @@ describe("Land der Liga", () => {
     const ok = (l: string, a: string) => db.one("select _eligible(l, a) ok from leagues l, athletes a where l.id = $1 and a.id = $2", [l, a]).then((r) => r.ok);
     expect([await ok(de.id, "wa-1"), await ok(de.id, "wa-2")]).toEqual([true, false]);
     expect([await ok(nl.id, "wa-1"), await ok(nl.id, "wa-2")]).toEqual([false, true]);
+    // auch von Hand hinzugefügte zählen nur in ihrem Land
+    await db.query("update athletes set manual = true where id = 'wa-2'");
+    expect([await ok(de.id, "wa-2"), await ok(nl.id, "wa-2")]).toEqual([false, true]);
+    await db.query("update athletes set manual = false where id = 'wa-2'");
     // Land ist nach dem Anlegen fest
     await db.query("select update_league_settings($1, '{\"nation\": \"GER\"}')", [nl.id]);
     expect((await db.one("select nation from leagues where id = $1", [nl.id])).nation).toBe("NED");

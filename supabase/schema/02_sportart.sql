@@ -93,7 +93,7 @@ drop function if exists _selectable(int);
 create or replace function _eligible(l leagues, a athletes) returns boolean
 language sql stable as $$
   select a.pool_rank is not null
-     and (a.manual or coalesce(a.nation, 'GER') = l.nation)
+     and coalesce(a.nation, 'GER') = l.nation
      and coalesce(_group_area(coalesce(a.group_override, a.event_group)) = any (l.areas), true);
 $$;
 
