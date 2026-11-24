@@ -18,7 +18,8 @@ export const riderGroup = (r) => (r ? r.group_override || r.event_group : null);
 export const leagueAreas = (l) => l?.areas || ['Lauf'];
 /** Darf in dieser Liga geholt werden? Im Pool, aus dem Land der Liga (von Hand hinzugefügte immer) und in einem Bereich der Liga
  *  (wie _eligible in der Datenbank) */
-export const eligible = (r, l) => r?.pool_rank != null && (r.manual || (r.nation || 'GER') === (l?.nation || 'GER'))
+export const fromLeagueCountry = (r, l) => !!r && (r.manual || (r.nation || 'GER') === (l?.nation || 'GER'));
+export const eligible = (r, l) => r?.pool_rank != null && fromLeagueCountry(r, l)
   && (!groupArea(riderGroup(r)) || leagueAreas(l).includes(groupArea(riderGroup(r))));
 
 // Positionen: jede Gruppe für sich oder ein Block mehrerer Gruppen – wie _position_groups in der Datenbank:
