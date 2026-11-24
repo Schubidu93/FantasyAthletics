@@ -80,6 +80,18 @@ export const AREA_PRESETS = {
     hint: 'Im Wurf gibt es nur wenige deutsche Spitzenathleten (z. B. etwa 8 Hammerwerfer je Geschlecht) – empfohlen: höchstens 6 Mitspieler und kleine Kader.' },
 };
 export const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+/** Texte je Land der Liga bzw. des Athleten (Länder selbst: Tabelle pool_nations). rec = Kürzel des Landesrekords */
+export const NATION_TEXT = {
+  GER: { name: 'Deutschland', people: 'Deutsche', adj: 'deutsche', record: 'Deutscher Rekord', rec: 'DR', champs: 'DM' },
+  NED: { name: 'Niederlande', people: 'Niederländer', adj: 'niederländische', record: 'Niederländischer Rekord', rec: 'NR', champs: 'NK' },
+};
+export const nationText = (code) => NATION_TEXT[code || 'GER'] || NATION_TEXT.GER;
+/** Rekord-Kürzel und -Name für die Anzeige: intern heißt der Landesrekord immer „DR“ */
+export const recordShort = (rec, nation) => String(rec || '').replace('DR', nationText(nation).rec);
+export const recordName = (rec, nation) => {
+  const base = { DR: nationText(nation).record, ER: 'Europarekord', WR: 'Weltrekord' }[String(rec || '').replace('=', '')] || rec;
+  return String(rec || '').startsWith('=') ? `${base} eingestellt` : base;
+};
 export const GENDER_LABEL = { men: 'Männer', women: 'Frauen', mixed: 'Mixed' };
 
 // Disziplin-Filter in Personenlisten: je Bereich der Liga eine Gruppe mit „alle …“, den Blöcken und den einzelnen Disziplinen.
@@ -136,7 +148,7 @@ export function slotLabel(slot) {
   return sex ? `${base} ${sex === 'M' ? 'M' : 'F'}` : base;
 }
 // Links zu World Athletics: Athletenprofil (Pfad aus Land und Name, entscheidend ist die ID am Ende) und Ergebnisse
-const WA_COUNTRY = { GER: 'germany', AUT: 'austria', SUI: 'switzerland' };
+const WA_COUNTRY = { GER: 'germany', NED: 'netherlands', AUT: 'austria', SUI: 'switzerland' };
 export function waAthleteUrl(r) {
   const id = r.wa_id || String(r.id || '').replace(/^wa-/, '');
   const slug = (r.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/ß/g, 'ss')

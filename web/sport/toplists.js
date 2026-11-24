@@ -1,7 +1,7 @@
 // Toplisten (DE) von World Athletics: Jahr, Disziplin und Geschlecht wählen, die besten 20 sehen
 import { html } from '../vendor/preact-htm.js';
 import { flag, Loading, openRider, q, rpc, sb, useLoad } from '../lib.js';
-import { BackToAthlete, discLabel, discSections, leagueAreas, SexBadge } from './lib.js';
+import { BackToAthlete, discLabel, discSections, leagueAreas, nationText, SexBadge } from './lib.js';
 
 export function Toplists({ c, sub, sub2, sub3 }) {
   const idx = useLoad(() => rpc('toplist_index', { p_nation: c.league.nation || 'GER' }), []);
@@ -25,7 +25,7 @@ export function Toplists({ c, sub, sub2, sub3 }) {
   return html`<section class="card">
     <${BackToAthlete} />
     <h2>Toplisten</h2>
-    <p class="muted small">Deutsche Bestenliste von World Athletics – die besten 20 je Disziplin.</p>
+    <p class="muted small">Bestenliste ${nationText(c.league.nation).name} von World Athletics – die besten 20 je Disziplin.</p>
     ${!years.length ? html`<p class="muted">Noch keine Toplisten geladen.</p>` : html`
       <div class="filters">
         <select value=${year} onChange=${(e) => go(e.target.value, disc, gender)} aria-label="Jahr">

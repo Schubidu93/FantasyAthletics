@@ -25,7 +25,7 @@ export function SettingsExtra({ c }) {
       ${field('placing_factor', 'Platzierung: Faktor', '0.01')}
       ${field('cross_factor', 'Cross: Faktor', '0.01')}
       ${field('new_group_threshold', 'Neue Athleten: Gruppe ab WA-Punkten')}
-      ${field('record_dr', 'Bonus deutscher Rekord')}
+      ${field('record_dr', 'Bonus Landesrekord (DR, NR)')}
       ${field('record_er', 'Bonus Europarekord')}
       ${field('record_wr', 'Bonus Weltrekord')}
       ${field('pb_points', 'Bonus persönliche Bestleistung')}

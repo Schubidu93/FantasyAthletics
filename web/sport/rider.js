@@ -1,7 +1,7 @@
 // Athleten-Fenster: Stammdaten, Toplisten und alle Ergebnisse (Lauf, Zeit, WA-Punkte, Fantasy-Punkte)
 import { html, useState, useEffect } from '../vendor/preact-htm.js';
 import { all, flag, fmtPts, q, rpc, sb } from '../lib.js';
-import { CatBadge, discLabel, discOrder, discWithKm, GROUP_LABEL, leagueRank, raceLabel, RELAYS, rememberAthlete, riderGroup, SexBadge, waAthleteUrl, waResultUrl } from './lib.js';
+import { CatBadge, discLabel, discOrder, discWithKm, GROUP_LABEL, leagueRank, raceLabel, recordName, recordShort, RELAYS, rememberAthlete, riderGroup, SexBadge, waAthleteUrl, waResultUrl } from './lib.js';
 
 // Ergebnisse werden ab dieser Saison gespeichert
 const FIRST_YEAR = 2025;
@@ -34,8 +34,6 @@ function compShort(c) {
 // „18.07.26“
 const dateShort = (d) => (d ? `${d.slice(8, 10)}.${d.slice(5, 7)}.${d.slice(2, 4)}` : '');
 const isSplit = (x) => /split time/i.test(x.competition || '') || x.remark === 'ST';
-const RECORD = { DR: 'Deutscher Rekord', ER: 'Europarekord', WR: 'Weltrekord',
-  '=DR': 'Deutscher Rekord eingestellt', '=ER': 'Europarekord eingestellt', '=WR': 'Weltrekord eingestellt' };
 function runNote(x) {
   if (isSplit(x)) return 'Zwischenzeit – Punkte nur bei Rekord oder PB';
   if (x.wa_race && x.wa_race !== x.race) return `${raceLabel(x.wa_race)}: ${x.wa_place ?? '–'}. · kombiniert`;
@@ -182,7 +180,7 @@ export function RiderModal() {
             <span class="res-what"><b>${x.relay ? `Staffel ${RELAYS[x.relay]?.label || x.relay}` : discWithKm(x.discipline, x.competition)}${x.race && x.race !== 'F' ? ` · ${raceLabel(x.race)}` : ''} · <span class="nowrap">${x.mark || '–'}</span></b>
               ${(x.record || isTitle(x) || Number(x.pts?.pb_points) > 0) && html`<span class="res-tags">
                 ${isTitle(x) && html`<span>🏆 Meister</span>`}
-                ${x.record && html`<span><span class="badge b-rec">${x.record}</span> ${RECORD[x.record]}</span>`}
+                ${x.record && html`<span><span class="badge b-rec">${recordShort(x.record, r?.nation)}</span> ${recordName(x.record, r?.nation)}</span>`}
                 ${Number(x.pts?.pb_points) > 0 && html`<span>${Number(x.pts.pb_points) < Number(x.pbFull)
                   ? html`<span class="badge b-pb">=PB</span> Bestleistung eingestellt` : html`<span class="badge b-pb">PB</span> Bestleistung`}</span>`}</span>`}
               <small title=${x.competition}>${x.country ? `${flag(x.country)} ` : ''}${compShort(x.competition)}${(x.champ_category || x.category) ? html` <${CatBadge} cat=${x.champ_category || x.category} />` : ''}</small>

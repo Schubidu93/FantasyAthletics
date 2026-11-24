@@ -95,7 +95,7 @@ function RaceList({ c, races }) {
     </div>
     ${disc && !discs.data ? html`<${Loading} error=${discs.error} />` : list.length === 0 ? html`<p class="muted">Keine Wettkämpfe gefunden.</p>` : months(list.slice(0, 300)).map((m) => html`
       <h3 class="cal-month" key=${m.key}>${MONTHS[+m.key.slice(5, 7) - 1]} ${m.key.slice(0, 4)}</h3>
-      <ul class="list race-list">${m.items.map((r) => html`<li key=${r.id} class=${r.country === 'GER' ? 'cal-de' : ''}>
+      <ul class="list race-list">${m.items.map((r) => html`<li key=${r.id} class=${r.country === (c.league.nation || 'GER') ? 'cal-de' : ''}>
       <a class="race-link cal-item" href=${`#/league/${c.league.id}/races/${encodeURIComponent(r.id)}`}>
         <span class="cal-text"><span class="race-date">${fmtDate(r.start_date)}${r.end_date && r.end_date !== r.start_date ? ` – ${fmtDate(r.end_date)}` : ''}</span>
         <span class="race-name"><strong>${(r.name || '').replace(/\s*-\s*XC\s*[\d.,]+\s*km$/i, '')}</strong>
