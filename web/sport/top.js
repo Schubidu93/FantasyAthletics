@@ -33,7 +33,7 @@ export function TopResults({ c }) {
   const team = started && c.managers.some((m) => m.id === teamRaw) ? teamRaw : '';
   const [a, b] = range(period, from, to);
   const list = useLoad(() => rpc('top_results', { p_gender: c.league.gender, p_from: a, p_to: b, p_discipline: disc || null, p_limit: 200,
-    p_league: c.league.id, p_manager: team || null, p_order: order }), [c.league.id, c.league.gender, a, b, disc, team, order]);
+    p_league: c.league.id, p_manager: team || null, p_order: order, p_nation: c.league.nation || 'GER' }), [c.league.id, c.league.gender, a, b, disc, team, order]);
   // nur Athleten, die es in dieser Liga gibt (Bereiche der Liga)
   const rows = (list.data || []).filter((r) => c.riderMap[r.athlete_id]).slice(0, 100);
 

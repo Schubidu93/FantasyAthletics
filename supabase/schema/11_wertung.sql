@@ -27,6 +27,12 @@ begin
 end $$;
 
 -- Toplisten-Ansicht: vorhandene Jahre/Disziplinen/Geschlechter und die besten Einträge einer Liste
+-- Land eines Athleten passt zur Liga (null = alle Länder; von Hand hinzugefügte immer) – wie _eligible/fromLeagueCountry
+create or replace function _nation_ok(p_nation text, a athletes) returns boolean
+language sql immutable as $$
+  select p_nation is null or a.manual or coalesce(a.nation, 'GER') = p_nation;
+$$;
+
 -- Toplisten je Land (Land des Athleten laut WA-Profil, wie die Liga: leagues.nation)
 drop function if exists toplist_index();
 create or replace function toplist_index(p_nation text default 'GER')
@@ -51,15 +57,42 @@ end $$;
 
 -- Wettkämpfe → Ergebnisse: welche Disziplinen es je Wettkampf gab (für den Disziplin-Filter)
 drop function if exists competition_disciplines();
-create or replace function competition_disciplines()
+drop function if exists competition_disciplines(text);
+-- je Wettkampf die Disziplinen (gesamt, Männer, Frauen) – nur Ergebnisse von Athleten des Landes (p_nation null = alle);
+-- Wettkämpfe ohne Ergebnis aus dem Land fehlen ganz (die App blendet sie aus). Nachträge über Name und Datum.
+create or replace function competition_disciplines(p_nation text default null)
 returns table (competition_id text, disciplines text[], men text[], women text[])
 language sql stable security definer set search_path = public as $$
-  select 'wa-c' || w.wa_competition_id, array_agg(distinct w.discipline order by w.discipline),
-         coalesce(array_agg(distinct w.discipline order by w.discipline) filter (where a.gender = 'men'), '{}'),
-         coalesce(array_agg(distinct w.discipline order by w.discipline) filter (where a.gender = 'women'), '{}')
-    from wa_results w join athletes a on a.id = w.athlete_id
-   where w.wa_competition_id is not null
-   group by w.wa_competition_id order by w.wa_competition_id;
+  with r as (
+    select 'wa-c' || w.wa_competition_id cid, w.discipline, a.gender
+      from wa_results w join athletes a on a.id = w.athlete_id
+     where w.wa_competition_id is not null and _nation_ok(p_nation, a)
+    union all
+    select c.id, w.discipline, a.gender
+      from wa_results w join athletes a on a.id = w.athlete_id
+      join competitions c on c.id !~ '^wa-c' and c.name = w.competition and w.date between c.start_date and coalesce(c.end_date, c.start_date)
+     where w.source = 'manual' and _nation_ok(p_nation, a))
+  select cid, array_agg(distinct discipline order by discipline),
+         coalesce(array_agg(distinct discipline order by discipline) filter (where gender = 'men'), '{}'),
+         coalesce(array_agg(distinct discipline order by discipline) filter (where gender = 'women'), '{}')
+    from r group by cid order by cid;
+$$;
+
+-- Ergebnisse eines Wettkampfs (WA über die Wettkampf-ID, Nachträge über Name und Datum) mit Fantasy-Punkten,
+-- nur von Athleten des Landes (p_nation null = alle)
+create or replace function competition_results(p_competition text, p_nation text default null)
+returns table (id bigint, athlete_id text, date date, competition text, discipline text, category text, race text, place int,
+               wa_race text, wa_place int, placing_round text, placing_place int, mark text, result_score int, remark text,
+               wa_event_id bigint, champ_place int, source_url text, pts numeric)
+language sql stable security definer set search_path = public as $$
+  select w.id, w.athlete_id, w.date, w.competition, w.discipline, w.category, w.race, w.place, w.wa_race, w.wa_place,
+         w.placing_round, w.placing_place, w.mark, w.result_score, w.remark, w.wa_event_id, w.champ_place, w.source_url,
+         (select r.points from results r where r.wa_result_id = w.id limit 1)
+    from wa_results w join athletes a on a.id = w.athlete_id, competitions c
+   where c.id = p_competition and _nation_ok(p_nation, a)
+     and (case when c.id ~ '^wa-c' then w.wa_competition_id = substr(c.id, 5)::bigint
+               else w.source = 'manual' and w.competition = c.name and w.date between c.start_date and coalesce(c.end_date, c.start_date) end)
+   order by w.date, w.id;
 $$;
 
 -- Spieljahr: die Saison, für die gerade gedraftet bzw. gespielt wird. Ab 1. November zählt das Folgejahr
@@ -421,12 +454,13 @@ end $$;
 
 -- Punkte pro Athlet in einem Jahr (für die Athletenliste der App); p_gender 'mixed' = alle
 drop function if exists athlete_points(text, int, text[]);
-create or replace function athlete_points(p_gender text, p_year int)
+drop function if exists athlete_points(text, int);
+create or replace function athlete_points(p_gender text, p_year int, p_nation text default null)
 returns table (athlete_id text, points numeric, results int)
 language sql stable security definer set search_path = public as $$
   select r.athlete_id, sum(r.points), count(*)::int
     from results r join athletes x on x.id = r.athlete_id
-   where _gender_ok(p_gender, x.gender)
+   where _gender_ok(p_gender, x.gender) and _nation_ok(p_nation, x)
      and r.result_date >= make_date(p_year, 1, 1) and r.result_date <= make_date(p_year, 12, 31)
    group by r.athlete_id
    order by r.athlete_id;
@@ -434,12 +468,13 @@ $$;
 
 -- Punkte der letzten Tage (Standard 30) – für „heiße freie Athleten“
 drop function if exists athlete_points_recent(text, int, text[]);
-create or replace function athlete_points_recent(p_gender text, p_days int default 30)
+drop function if exists athlete_points_recent(text, int);
+create or replace function athlete_points_recent(p_gender text, p_days int default 30, p_nation text default null)
 returns table (athlete_id text, points numeric, results int)
 language sql stable security definer set search_path = public as $$
   select r.athlete_id, sum(r.points), count(*)::int
     from results r join athletes x on x.id = r.athlete_id
-   where _gender_ok(p_gender, x.gender) and r.result_date > current_date - p_days and r.points > 0
+   where _gender_ok(p_gender, x.gender) and _nation_ok(p_nation, x) and r.result_date > current_date - p_days and r.points > 0
    group by r.athlete_id
    order by r.athlete_id;
 $$;
@@ -449,8 +484,10 @@ $$;
 -- p_order: 'points' (Fantasy-Punkte) oder 'wa' (WA-Punkte der Leistung)
 drop function if exists top_results(text, date, date, text, int);
 drop function if exists top_results(text, date, date, text, int, uuid, uuid);
+drop function if exists top_results(text, date, date, text, int, uuid, uuid, text);
 create or replace function top_results(p_gender text, p_from date, p_to date, p_discipline text default null, p_limit int default 100,
-                                       p_league uuid default null, p_manager uuid default null, p_order text default 'points')
+                                       p_league uuid default null, p_manager uuid default null, p_order text default 'points',
+                                       p_nation text default null)
 returns table (athlete_id text, result_date date, competition_id text, competition text, discipline text, race text, mark text,
                points numeric, perf_points numeric, placing_points numeric, pb_points numeric, record_points numeric, wa_points int)
 language plpgsql stable security definer set search_path = public as $$
@@ -465,7 +502,7 @@ begin
     from results r join athletes x on x.id = r.athlete_id
          left join wa_results w on w.id = r.wa_result_id
          left join competitions c on c.id = r.competition_id
-   where _gender_ok(p_gender, x.gender) and r.result_date between p_from and p_to and r.points > 0
+   where _gender_ok(p_gender, x.gender) and _nation_ok(p_nation, x) and r.result_date between p_from and p_to and r.points > 0
      and (p_discipline is null or w.discipline = p_discipline)
      and (p_manager is null or exists (select 1 from team t where t.athlete_id = r.athlete_id
                                          and t.competition_id = r.competition_id and t.label = r.label))

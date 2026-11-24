@@ -181,6 +181,14 @@ describe("Land der Liga", () => {
     await db.query("select update_league_settings($1, '{\"nation\": \"GER\"}')", [nl.id]);
     expect((await db.one("select nation from leagues where id = $1", [nl.id])).nation).toBe("NED");
     expect((await db.all("select athlete_id from toplist($1, '800 Metres', 'men', 20, 'NED')", [new Date().getFullYear() - 1])).map((r) => r.athlete_id)).toEqual(["wa-2"]);
+    // Ergebnisse und Wettkämpfe nur aus dem Land der Liga
+    for (const [id, comp] of [["wa-1", 7400001], ["wa-2", 7400002]] as const) {
+      await db.query("insert into wa_results (athlete_id, date, competition, discipline, mark, result_score, wa_competition_id) values ($1, current_date - 3, 'M', '800 Metres', '1:46.00', 1150, $2)", [id, comp]);
+    }
+    expect((await db.all("select competition_id from competition_disciplines('NED')")).map((r) => r.competition_id)).toEqual(["wa-c7400002"]);
+    await db.query("insert into competitions (id, name, start_date, end_date) values ('wa-c7400001', 'M', current_date - 3, current_date - 3)");
+    expect(await db.all("select athlete_id from competition_results('wa-c7400001', 'NED')")).toEqual([]);
+    expect((await db.all("select athlete_id from competition_results('wa-c7400001', 'GER')")).map((r) => r.athlete_id)).toEqual(["wa-1"]);
   });
 });
 

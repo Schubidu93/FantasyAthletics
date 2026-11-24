@@ -9,17 +9,29 @@ import { fromLeagueCountry, groupArea, leagueAreas, riderGroup, withLeagueRanks 
 
 /** Athleten der Liga (Mixed: beide Geschlechter), sortiert nach Pool-Rang, mit Positions-Rang: nur mit Schwerpunkt-Disziplin in den
  *  Bereichen der Liga – dazu alle, die in der Liga je in einem Kader standen (auch wenn sich ihr Schwerpunkt geändert hat) */
+// Athleten nach IDs, in Blöcken (lange ID-Listen sprengen sonst die Adresse der Abfrage)
+async function loadByIds(ids) {
+  const out = [];
+  for (let i = 0; i < ids.length; i += 150) out.push(...await all(() => sb.from('athletes').select('*').in('id', ids.slice(i, i + 150)).order('id')));
+  return out;
+}
+
 export async function loadPeople(league) {
-  const [people, rostered] = await Promise.all([
-    all(() => {
-      const x = sb.from('athletes').select('*');
-      return (league.gender === 'mixed' ? x : x.eq('gender', league.gender)).order('pool_rank', { nullsFirst: false }).order('id');
-    }),
-    all(() => sb.from('roster_entries').select('athlete_id').eq('league_id', league.id).order('id')),
+  // aus der Datenbank nur Athleten aus dem Land der Liga, von Hand hinzugefügte und alle, die je im Kader der Liga standen
+  const base = () => {
+    const x = sb.from('athletes').select('*');
+    return league.gender === 'mixed' ? x : x.eq('gender', league.gender);
+  };
+  const rostered = (await all(() => sb.from('roster_entries').select('athlete_id').eq('league_id', league.id).order('id'))).map((r) => r.athlete_id);
+  const [own, manual, former] = await Promise.all([
+    all(() => base().eq('nation', league.nation || 'GER').order('pool_rank', { nullsFirst: false }).order('id')),
+    all(() => base().eq('manual', true).order('id')),
+    loadByIds([...new Set(rostered)]),
   ]);
-  const keep = new Set(rostered.map((r) => r.athlete_id));
+  const byId = new Map([...own, ...manual, ...former].map((r) => [r.id, r]));
+  const keep = new Set(rostered);
   const areas = leagueAreas(league);
-  // nur Athleten aus dem Land der Liga und ihren Bereichen (wer je im Kader stand, bleibt sichtbar)
+  const people = [...byId.values()].sort((a, b) => (a.pool_rank ?? 1e9) - (b.pool_rank ?? 1e9) || a.id.localeCompare(b.id));
   return withLeagueRanks(people.filter((r) => keep.has(r.id)
     || (fromLeagueCountry(r, league) && (!groupArea(riderGroup(r)) || areas.includes(groupArea(riderGroup(r)))))), league);
 }

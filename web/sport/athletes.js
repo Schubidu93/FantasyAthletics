@@ -17,10 +17,10 @@ export function Riders({ c }) {
   const recent = sort === 'recent';
   const sel = recent ? 'recent' : sel0;
   const year = sel === 'rank' || recent ? +(ys[0] || new Date().getFullYear()) : +sel;
-  const pts = useLoad(() => recent ? rpcAll('athlete_points_recent', { p_gender: c.league.gender, p_days: 30 })
-    : rpcAll('athlete_points', { p_gender: c.league.gender, p_year: year }), [c.league.gender, year, recent]);
+  const pts = useLoad(() => recent ? rpcAll('athlete_points_recent', { p_gender: c.league.gender, p_days: 30, p_nation: c.league.nation || 'GER' })
+    : rpcAll('athlete_points', { p_gender: c.league.gender, p_year: year, p_nation: c.league.nation || 'GER' }), [c.league.gender, year, recent]);
   // Heiße freie Athleten: die 10 freien mit den meisten Punkten der letzten 30 Tage (🔥 in der Liste)
-  const hot = useLoad(() => rpcAll('athlete_points_recent', { p_gender: c.league.gender, p_days: 30 }), [c.league.gender]);
+  const hot = useLoad(() => rpcAll('athlete_points_recent', { p_gender: c.league.gender, p_days: 30, p_nation: c.league.nation || 'GER' }), [c.league.gender]);
   const hotSet = useMemo(() => new Set((hot.data || []).filter((p) => !c.owner[p.athlete_id] && c.riderMap[p.athlete_id])
     .sort((a, b) => b.points - a.points).slice(0, 10).map((p) => p.athlete_id)), [hot.data]);
   const [term, setTerm] = useState('');
