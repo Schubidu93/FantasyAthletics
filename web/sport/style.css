@@ -66,3 +66,4 @@ select.mini { font-size: .75rem; padding: 2px 6px; width: auto; min-height: 0; }
 .place-sub { display: block; font-size: .68rem; line-height: 1.1; white-space: nowrap; }
 
 .race-list a.race-link.cal-item { flex-direction: row; }
+.cal-item > .badge { flex: none; }
