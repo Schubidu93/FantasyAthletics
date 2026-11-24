@@ -1,7 +1,7 @@
 // Spielregeln – allgemeine Regeln plus die Einstellungen der aktuellen Liga
 import { html } from '../vendor/preact-htm.js';
 import { draftCosts, fmtDate, q, sb, useLoad } from '../lib.js';
-import { AREA_GROUPS, AREAS, discLabel, GENDER_LABEL, GROUP_LABEL, groupArea, leagueAreas, leagueSlots, positionGroups, RUN_GROUPS, slotLabel } from './lib.js';
+import { AREA_GROUPS, AREAS, NATION_TEXT, nationText, discLabel, GENDER_LABEL, GROUP_LABEL, groupArea, leagueAreas, leagueSlots, positionGroups, RUN_GROUPS, slotLabel } from './lib.js';
 
 const DRAFT = {
   live: 'Live-Auktion',
@@ -29,6 +29,7 @@ function factorRows(disciplines, areas) {
 
 export function Rules({ c }) {
   const l = c.league;
+  const nt = nationText(l.nation);
   const cfg = useLoad(() => q(sb.from('scoring_config').select('*').eq('id', 1)).then((r) => r[0]), []).data;
   const disciplines = useLoad(() => q(sb.from('disciplines').select('name,factor,event_group')), []).data || [];
   const mf = Number(disciplines.find((d) => d.name === 'Marathon')?.factor || 1);
@@ -52,7 +53,7 @@ export function Rules({ c }) {
     <section class="card">
       <h2>So funktioniert Athletics Fantasy</h2>
       <ol class="rule-steps">
-        <li><strong>Team draften:</strong> ${l.roster_size} deutsche ${runOnly ? 'Läuferinnen und Läufer' : 'Leichtathletinnen und Leichtathleten'} pro Manager.</li>
+        <li><strong>Team draften:</strong> ${l.roster_size} ${nt.adj} ${runOnly ? 'Läuferinnen und Läufer' : 'Leichtathletinnen und Leichtathleten'} pro Manager.</li>
         ${lineup ? html`<li><strong>Aufstellen:</strong> vor jedem Spieltag ${slots.length} Positionen besetzen.</li>` : html`<li><strong>Alle zählen:</strong> jeder Athlet im Kader punktet.</li>`}
         <li><strong>Punkte sammeln:</strong> für Leistung (WA-Punkte) und Platzierung jedes Ergebnisses.</li>
         <li><strong>Kader verbessern:</strong> per Waiver und Tausch. Am Saisonende gewinnt, wer die meisten Punkte hat.</li>
@@ -103,7 +104,7 @@ export function Rules({ c }) {
     <details class="card rule-sec">
       <summary><h3>Athleten und Aufstellung</h3></summary>
       <ul>
-        <li><strong>Wer ist dabei:</strong> Deutsche mit mindestens ${cfg ? cfg.pool_threshold : 975} WA-Punkten in der deutschen Topliste (dieses oder letztes Jahr).
+        <li><strong>Wer ist dabei:</strong> ${nt.people} mit mindestens ${cfg ? cfg.pool_threshold : 975} WA-Punkten in der ${nt.adj}n Topliste (dieses oder letztes Jahr).
           Wer für ein anderes Land startet, fällt raus.</li>
         <li><strong>Diese Liga:</strong> ${areas.length === AREAS.length ? 'Athleten aller Disziplinen' : `nur Athleten mit Schwerpunkt in ${areaText}`}${l.gender !== 'mixed' ? `, nur ${GENDER_LABEL[l.gender]}` : ''}.
           Es zählen <strong>alle</strong> ihre Ergebnisse, auch in anderen Disziplinen${runOnly ? ' (z. B. die 400 m eines 800-m-Läufers)' : ''}.</li>
@@ -153,7 +154,7 @@ export function Rules({ c }) {
       <h4 class="rule-sub">Bonus</h4>
       <table class="tbl rule-tbl"><tbody>
         ${row(`+ ${cfg?.pb_points ?? 10}`, 'Persönliche Bestleistung („=PB“ halb)')}
-        ${row(`+ ${cfg?.record_dr ?? 50} / ${cfg?.record_er ?? 100} / ${cfg?.record_wr ?? 200}`, 'Deutscher / Europa- / Weltrekord (eingestellt halb, nur der höchste)')}
+        ${row(`+ ${cfg?.record_dr ?? 50} / ${cfg?.record_er ?? 100} / ${cfg?.record_wr ?? 200}`, `${nt.record} (${nt.rec}) / Europa- / Weltrekord (eingestellt halb, nur der höchste)`)}
       </tbody></table>
       <p class="muted small">Bestleistung: besser als alles davor (auch vor 2025; Halle, Bahn, Straße getrennt), ab ${thr} WA-Punkten, nicht beim ersten Start.
         Rekorde erkennt die App täglich an den Listen von World Athletics.</p>
@@ -212,12 +213,12 @@ export function Rules({ c }) {
 
     <details class="card rule-sec">
       <summary><h3>Daten</h3></summary>
-      <p class="muted small">Alles von World Athletics (deutsche Toplisten und Ergebnislisten), Ergebnisse ab 2025.</p>
+      <p class="muted small">Alles von World Athletics (${nt.adj} Toplisten und Ergebnislisten), Ergebnisse ab 2025.</p>
       <table class="tbl rule-tbl"><tbody>
         ${row('Ergebnisse', 'stündlich 8–23 Uhr, sobald World Athletics sie veröffentlicht (kleine Wettkämpfe manchmal Tage später).')}
         ${row('Kontrolle', 'nachts alle Kader-Athleten komplett, die übrigen wöchentlich – Korrekturen werden übernommen.')}
         ${row('Athletenpool', 'täglich 6 Uhr, danach Bestleistungen und Rekorde.')}
-        ${row('Kalender', 'täglich 6 Uhr: weltweit ab Gold Label, Europa ab A, Deutschland ab E.')}
+        ${row('Kalender', `täglich 6 Uhr: weltweit ab Gold Label, Europa ab A, ${NATION_TEXT.GER.name} ab E.`)}
         ${row('„Punkte 2026“', 'alle Wettkämpfe vom 1.1. bis 31.12.2026.')}
       </tbody></table>
       <h4 class="rule-sub">Was der Admin kann</h4>
