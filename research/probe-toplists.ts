@@ -2,7 +2,7 @@
 // Grundlage für die Erweiterung auf alle Disziplinen. Prüft auch, ob die Toplisten-Pfade bei WA stimmen.
 // Ergebnis: research/out/toplists/summary.txt (+ Konsole)
 import { mkdirSync, writeFileSync } from "node:fs";
-import { COUNTRY, TOPLIST_DISCIPLINES } from "../importer/disciplines";
+import { TOPLIST_DISCIPLINES } from "../importer/disciplines";
 import { fetchToplist, sleep, type Gender } from "../importer/wa";
 
 const OUT = "research/out/toplists";
@@ -50,7 +50,7 @@ for (const d of ALL) {
   for (const gender of ["M", "W"] as Gender[]) {
     for (const y of years) {
       try {
-        const rows = await fetchToplist(d.path, gender, y, COUNTRY, 950, 10);
+        const rows = await fetchToplist(d.path, gender, y, "ger", 950, 10);
         const n975 = rows.filter((r) => r.score >= 975);
         const g = byGroup.get(d.group) ?? { a950: new Set(), a975: new Set() };
         rows.forEach((r) => g.a950.add(r.athleteId));

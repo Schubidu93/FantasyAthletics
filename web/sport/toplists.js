@@ -4,7 +4,7 @@ import { flag, Loading, openRider, q, rpc, sb, useLoad } from '../lib.js';
 import { BackToAthlete, discLabel, discSections, leagueAreas, SexBadge } from './lib.js';
 
 export function Toplists({ c, sub, sub2, sub3 }) {
-  const idx = useLoad(() => rpc('toplist_index'), []);
+  const idx = useLoad(() => rpc('toplist_index', { p_nation: c.league.nation || 'GER' }), []);
   const dis = useLoad(() => q(sb.from('disciplines').select('name,event_group')), []);
   const groupOf = Object.fromEntries((dis.data || []).map((d) => [d.name, d.event_group]));
   const rows = idx.data || [];
@@ -16,7 +16,7 @@ export function Toplists({ c, sub, sub2, sub3 }) {
     groupOf, leagueAreas(c.league));
   const discs = sections.flatMap((x) => x.discs);
   const disc = discs.includes(sub2 && decodeURIComponent(sub2)) ? decodeURIComponent(sub2) : discs[0];
-  const list = useLoad(() => (year && disc ? rpc('toplist', { p_year: year, p_discipline: disc, p_gender: gender, p_limit: 20 }) : Promise.resolve([])),
+  const list = useLoad(() => (year && disc ? rpc('toplist', { p_year: year, p_discipline: disc, p_gender: gender, p_limit: 20, p_nation: c.league.nation || 'GER' }) : Promise.resolve([])),
     [year, disc, gender]);
   const go = (y, d, g) => { location.hash = `#/league/${c.league.id}/toplists/${y}/${encodeURIComponent(d || '')}/${g}`; };
   if (!idx.data || !dis.data) return html`<${Loading} error=${idx.error || dis.error} />`;

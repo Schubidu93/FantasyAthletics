@@ -65,4 +65,4 @@ export const gendersOf = (d: ToplistDiscipline): Gender[] => d.genders ?? ["M", 
 /** Sprung, Wurf und Mehrkampf: mehr ist besser (wie `disciplines.higher_better` in der Datenbank). */
 export const higherBetter = (discipline: string) => /Jump|Vault|Put|Throw|athlon/.test(discipline);
 
-export const COUNTRY = "ger";
+

@@ -1,11 +1,12 @@
 // Liga-Einstellungen der Leichtathletik: Startwerte, eigene Felder (Positionen je Disziplin), zusätzliche gespeicherte Werte.
 import { html, useState } from '../vendor/preact-htm.js';
+import { q, sb, useLoad } from '../lib.js';
 import { AREA_PRESETS, AREAS, BLOCK_LABEL, GENDER_LABEL, GROUP_LABEL, leagueSlots, positionGroups, positionSections, positionsFor, groupArea, RUN_GROUPS } from './lib.js';
 
 /** Startwerte beim Anlegen einer Liga (zusätzlich zu den gemeinsamen) */
 export const LEAGUE_DEFAULTS = {
   roster_size: 11, scoring_mode: 'lineup', draft_mode: 'snake', bid_seconds: 30,
-  gender: 'mixed', lineup_mode: 'free', ...AREA_PRESETS.all, wildcards: 2,
+  gender: 'mixed', lineup_mode: 'free', ...AREA_PRESETS.all, wildcards: 2, nation: 'GER',
 };
 export const SEASON_END = '12-31';
 export const GENDER_OPTIONS = [['mixed', 'Mixed (Männer und Frauen)'], ['men', 'Nur Männer'], ['women', 'Nur Frauen']];
@@ -49,6 +50,7 @@ export const settingsInit = (l) => ({ ...l });
 /** Zusätzliche Werte für create_league / update_league_settings (Positionen nur vor dem Draft änderbar) */
 export const settingsPayload = (f, { locked = false } = {}) => (locked ? {} : {
   lineup_mode: f.gender === 'mixed' ? f.lineup_mode : 'free', lineup_groups: f.lineup_groups, wildcards: +f.wildcards, areas: f.areas,
+  nation: f.nation || 'GER',   // nur beim Anlegen wirksam, danach fest
 });
 
 /** Felder zwischen „Anzahl Mitspieler“ und „Draft-Modus“: Disziplinen, Wertung, Kadergröße, Positionen */
@@ -62,7 +64,12 @@ export function SquadFields({ f, set, locked }) {
   const groups = f.lineup_groups || RUN_GROUPS;
   const toggleGroup = (g) => set('lineup_groups')({ target: { value: groups.includes(g) ? groups.filter((x) => x !== g) : positions.filter((x) => x === g || groups.includes(x)) } });
   const slots = leagueSlots({ ...f, lineup_mode: f.gender === 'mixed' ? f.lineup_mode : 'free', wildcards: +f.wildcards });
-  return html`<label>Disziplinen
+  const nations = useLoad(() => q(sb.from('pool_nations').select('code,name').order('sort')), []);
+  return html`${(nations.data || []).length > 1 && html`<label>Land
+      <select value=${f.nation || 'GER'} onChange=${set('nation')} disabled=${locked || !!f.id}>
+        ${nations.data.map((n) => html`<option value=${n.code}>${n.name}</option>`)}</select></label>
+    ${!f.id && html`<p class="muted small span2">Nur Athleten dieses Landes. Kann später nicht mehr geändert werden.</p>`}`}
+    <label>Disziplinen
       <select value=${preset} disabled=${locked}
         onChange=${(e) => { setCustom(e.target.value === 'custom'); if (e.target.value !== 'custom') setAreas(AREA_PRESETS[e.target.value].areas); }}>
         ${Object.entries(AREA_PRESETS).map(([k, p]) => html`<option value=${k}>${p.label}</option>`)}<option value="custom">Eigene Auswahl</option>
