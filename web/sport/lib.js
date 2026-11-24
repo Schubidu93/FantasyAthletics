@@ -16,9 +16,9 @@ export const GROUP_LABEL = { 800: '800 m', 1500: '1500 m', 5000: '5000 m', 10000
   Mittel: 'Mittelstrecke', Lang: 'Langstrecke', Sprint: 'Sprint', Hürden: 'Hürden', Sprung: 'Sprung', Wurf: 'Wurf' };
 export const riderGroup = (r) => (r ? r.group_override || r.event_group : null);
 export const leagueAreas = (l) => l?.areas || ['Lauf'];
-/** Darf in dieser Liga geholt werden? Im Pool, aus dem Land der Liga (von Hand hinzugefügte immer) und in einem Bereich der Liga
+/** Darf in dieser Liga geholt werden? Im Pool, aus dem Land der Liga (auch von Hand hinzugefügte) und in einem Bereich der Liga
  *  (wie _eligible in der Datenbank) */
-export const fromLeagueCountry = (r, l) => !!r && (r.manual || (r.nation || 'GER') === (l?.nation || 'GER'));
+export const fromLeagueCountry = (r, l) => !!r && (r.nation || 'GER') === (l?.nation || 'GER');
 export const eligible = (r, l) => r?.pool_rank != null && fromLeagueCountry(r, l)
   && (!groupArea(riderGroup(r)) || leagueAreas(l).includes(groupArea(riderGroup(r))));
 

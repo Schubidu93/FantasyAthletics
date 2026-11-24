@@ -54,7 +54,7 @@ function RaceList({ c, races }) {
   const [disc, setDiscRaw] = useState(saved.disc);
   const setDisc = keep('disc', setDiscRaw);
   // Disziplinen je Wettkampf (für den Disziplin-Filter)
-  const discs = useLoad(async () => Object.fromEntries((await rpcAll('competition_disciplines')).map((r) => [r.competition_id, r])), []);
+  const discs = useLoad(async () => Object.fromEntries((await rpcAll('competition_disciplines', { p_nation: c.league.nation || 'GER' })).map((r) => [r.competition_id, r])), []);
   const discNames = useMemo(() => [...new Set(Object.values(discs.data || {}).flatMap((x) => x.disciplines))], [discs.data]);
   const setCatV = keep('cat', setCatRaw), setCountry = keep('country', setCountryRaw), setTerm = keep('term', setTermRaw);
   const setYear = keep('year', setYearRaw), setMine = keep('mine', setMineRaw);
@@ -74,7 +74,8 @@ function RaceList({ c, races }) {
   const countries = useMemo(() => [...new Set(races.map((r) => r.country).filter(Boolean))].sort(), [races]);
   const md = (c.matchdays || []).find((m) => m.id === mdId);
   const t = normName(term);
-  const list = races.filter((r) => matchCat(r, catV) && (!country || r.country === country)
+  // nur Wettkämpfe mit Ergebnissen von Athleten aus dem Land der Liga
+  const list = races.filter((r) => discs.data?.[r.id] && matchCat(r, catV) && (!country || r.country === country)
     && (!year || (r.start_date || '').slice(0, 4) === year)
     && (!md || (r.start_date <= md.ends_on && (r.end_date || r.start_date) >= md.starts_on))
     && (!mine || owned.data?.has(r.id))
@@ -93,7 +94,7 @@ function RaceList({ c, races }) {
       <select value=${country} onChange=${(e) => setCountry(e.target.value)}><option value="">Alle Länder</option>${countries.map((x) => html`<option value=${x}>${withFlag(x)}</option>`)}</select>
       <label class="check small"><input type="checkbox" checked=${mine} onChange=${(e) => setMine(e.target.checked)} /> nur mit Athleten aus Kadern</label>
     </div>
-    ${disc && !discs.data ? html`<${Loading} error=${discs.error} />` : list.length === 0 ? html`<p class="muted">Keine Wettkämpfe gefunden.</p>` : months(list.slice(0, 300)).map((m) => html`
+    ${!discs.data ? html`<${Loading} error=${discs.error} />` : list.length === 0 ? html`<p class="muted">Keine Wettkämpfe gefunden.</p>` : months(list.slice(0, 300)).map((m) => html`
       <h3 class="cal-month" key=${m.key}>${MONTHS[+m.key.slice(5, 7) - 1]} ${m.key.slice(0, 4)}</h3>
       <ul class="list race-list">${m.items.map((r) => html`<li key=${r.id} class=${r.country === (c.league.nation || 'GER') ? 'cal-de' : ''}>
       <a class="race-link cal-item" href=${`#/league/${c.league.id}/races/${encodeURIComponent(r.id)}`}>
@@ -111,18 +112,9 @@ function RaceDetail({ c, slug }) {
   const [only, setOnly] = useState(saved.disc);
   const data = useLoad(async () => {
     const [race] = await q(sb.from('competitions').select('*').eq('id', slug));
-    const id = slug.startsWith('wa-c') ? +slug.slice(4) : null;
-    const cols = 'id,athlete_id,date,competition,discipline,category,race,place,wa_race,wa_place,placing_round,placing_place,mark,result_score,remark,wa_event_id,champ_place,source_url';
-    // WA-Wettkämpfe über die Wettkampf-ID, Nachträge über Name und Datum (wie in save_manual_result)
-    const rows = id ? await all(() => sb.from('wa_results').select(cols).eq('wa_competition_id', id).order('date').order('id'))
-      : race ? await all(() => sb.from('wa_results').select(cols).eq('source', 'manual').eq('competition', race.name)
-        .gte('date', race.start_date).lte('date', race.end_date || race.start_date).order('date').order('id')) : [];
-    const pts = {};
-    const ids = rows.map((r) => r.id);
-    for (let i = 0; i < ids.length; i += 150) {
-      for (const p of await q(sb.from('results').select('wa_result_id,points').in('wa_result_id', ids.slice(i, i + 150)))) pts[p.wa_result_id] = p.points;
-    }
-    return { race, rows: rows.map((r) => ({ ...r, pts: pts[r.id] })) };
+    // nur Ergebnisse von Athleten aus dem Land der Liga (mit Fantasy-Punkten)
+    const rows = race ? await rpcAll('competition_results', { p_competition: slug, p_nation: c.league.nation || 'GER' }) : [];
+    return { race, rows };
   }, [slug]);
   if (!data.data) return html`<${Loading} error=${data.error} />`;
   const { race, rows: allRows } = data.data;
