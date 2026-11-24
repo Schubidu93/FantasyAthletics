@@ -163,6 +163,27 @@ describe("Draft", () => {
   });
 });
 
+describe("Land der Liga", () => {
+  it("Niederländer nur in niederländischen Ligen, Athleten anderer Länder fliegen aus dem Pool", async () => {
+    await athlete(db, 1, "Deutscher", "men", "800 Metres", 1150);
+    await athlete(db, 2, "Niederländer", "men", "800 Metres", 1160);
+    await athlete(db, 3, "Belgier", "men", "800 Metres", 1170);
+    await db.query("update athletes set nation = 'NED' where id = 'wa-2'");
+    await db.query("update athletes set nation = 'BEL' where id = 'wa-3'");
+    await db.query("select refresh_pool(null)");
+    expect((await db.all("select id from athletes where pool_rank is not null order by id")).map((r) => r.id)).toEqual(["wa-1", "wa-2"]);
+    const de = await league({});
+    const nl = await league({ nation: "NED" });
+    const ok = (l: string, a: string) => db.one("select _eligible(l, a) ok from leagues l, athletes a where l.id = $1 and a.id = $2", [l, a]).then((r) => r.ok);
+    expect([await ok(de.id, "wa-1"), await ok(de.id, "wa-2")]).toEqual([true, false]);
+    expect([await ok(nl.id, "wa-1"), await ok(nl.id, "wa-2")]).toEqual([false, true]);
+    // Land ist nach dem Anlegen fest
+    await db.query("select update_league_settings($1, '{\"nation\": \"GER\"}')", [nl.id]);
+    expect((await db.one("select nation from leagues where id = $1", [nl.id])).nation).toBe("NED");
+    expect((await db.all("select athlete_id from toplist($1, '800 Metres', 'men', 20, 'NED')", [new Date().getFullYear() - 1])).map((r) => r.athlete_id)).toEqual(["wa-2"]);
+  });
+});
+
 describe("Wettkämpfe ohne Ergebnisse", () => {
   it("verschwinden beim Aufräumen, solche mit Ergebnissen bleiben", async () => {
     await athlete(db, 1, "M", "men", "800 Metres", 1150);

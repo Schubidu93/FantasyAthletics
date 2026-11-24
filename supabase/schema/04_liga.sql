@@ -9,7 +9,7 @@ begin
   if auth.uid() is null then raise exception 'Bitte zuerst anmelden.'; end if;
   insert into leagues (name, admin_user, max_managers, roster_size, scoring_mode, max_per_team,
                        draft_mode, draft_order, bid_seconds, waiver_mode, gender, season_start, season_end, transfer_mode,
-                       lineup_mode, lineup_groups, wildcards, areas)
+                       lineup_mode, lineup_groups, wildcards, areas, nation)
   values (p_name, auth.uid(),
           coalesce((s->>'max_managers')::int, 8),
           coalesce((s->>'roster_size')::int, 11),
@@ -28,7 +28,8 @@ begin
                    array['800', '1500', '5000', '10000', 'Marathon', 'Hindernis']),
           coalesce((s->>'wildcards')::int, 2),
           case when s ? 'areas' then (select coalesce(array_agg(x), '{}') from jsonb_array_elements_text(s->'areas') x)
-               else array['Lauf'] end)
+               else array['Lauf'] end,
+          coalesce(s->>'nation', 'GER'))
   returning id into v_id;
   insert into managers (league_id, user_id, team_name) values (v_id, auth.uid(), p_team_name);
   insert into draft_state (league_id) values (v_id);

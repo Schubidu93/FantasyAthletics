@@ -16,8 +16,10 @@ export const GROUP_LABEL = { 800: '800 m', 1500: '1500 m', 5000: '5000 m', 10000
   Mittel: 'Mittelstrecke', Lang: 'Langstrecke', Sprint: 'Sprint', Hürden: 'Hürden', Sprung: 'Sprung', Wurf: 'Wurf' };
 export const riderGroup = (r) => (r ? r.group_override || r.event_group : null);
 export const leagueAreas = (l) => l?.areas || ['Lauf'];
-/** Darf in dieser Liga geholt werden? Im Pool und in einem Bereich der Liga (wie _eligible in der Datenbank) */
-export const eligible = (r, l) => r?.pool_rank != null && (!groupArea(riderGroup(r)) || leagueAreas(l).includes(groupArea(riderGroup(r))));
+/** Darf in dieser Liga geholt werden? Im Pool, aus dem Land der Liga (von Hand hinzugefügte immer) und in einem Bereich der Liga
+ *  (wie _eligible in der Datenbank) */
+export const eligible = (r, l) => r?.pool_rank != null && (r.manual || (r.nation || 'GER') === (l?.nation || 'GER'))
+  && (!groupArea(riderGroup(r)) || leagueAreas(l).includes(groupArea(riderGroup(r))));
 
 // Positionen: jede Gruppe für sich oder ein Block mehrerer Gruppen – wie _position_groups in der Datenbank:
 // „Mittel“ (800/1500), „Lang“ (5000/10.000/Hindernis) und Sprint, Hürden, Sprung, Wurf (alle Gruppen des Bereichs)

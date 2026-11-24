@@ -439,6 +439,19 @@ alter table leagues add column if not exists wildcards int not null default 2;
 -- Bereiche, die die Liga spielt (Lauf, Sprint, Hürden, Sprung, Wurf, Mehrkampf, Gehen): nur Athleten mit Schwerpunkt-Disziplin
 -- darin können geholt werden; von ihnen zählen alle Ergebnisse
 alter table leagues add column if not exists areas text[] not null default array['Lauf'];
+
+-- Länder, für die es Athletenpools gibt (Toplisten, Rekorde); threshold = Pool-Schwelle (leer: scoring_config.pool_threshold)
+create table if not exists pool_nations (
+  code      text primary key,          -- IOC-Code wie athletes.nation
+  wa_code   text not null,             -- Kürzel in den WA-Toplisten (region=…)
+  name      text not null,
+  threshold numeric,
+  sort      int not null default 0
+);
+insert into pool_nations (code, wa_code, name, sort) values ('GER', 'ger', 'Deutschland', 1), ('NED', 'ned', 'Niederlande', 2)
+on conflict (code) do nothing;
+-- Land der Liga: nur Athleten dieses Landes (beim Anlegen gewählt, danach fest)
+alter table leagues add column if not exists nation text not null default 'GER' references pool_nations (code);
 do $$ begin
   alter table leagues drop constraint if exists leagues_gender_check;
   alter table leagues add constraint leagues_gender_check check (gender in ('men', 'women', 'mixed'));

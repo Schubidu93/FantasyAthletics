@@ -27,21 +27,25 @@ begin
 end $$;
 
 -- Toplisten-Ansicht: vorhandene Jahre/Disziplinen/Geschlechter und die besten Einträge einer Liste
-create or replace function toplist_index()
+-- Toplisten je Land (Land des Athleten laut WA-Profil, wie die Liga: leagues.nation)
+drop function if exists toplist_index();
+create or replace function toplist_index(p_nation text default 'GER')
 returns table (year int, discipline text, gender text, entries int)
 language sql stable security definer set search_path = public as $$
   select t.year, t.discipline, a.gender, count(*)::int
     from toplist_entries t join athletes a on a.id = t.athlete_id
+   where coalesce(a.nation, 'GER') = p_nation
    group by 1, 2, 3 order by 1 desc, 2, 3;
 $$;
-create or replace function toplist(p_year int, p_discipline text, p_gender text, p_limit int default 20)
+drop function if exists toplist(int, text, text, int);
+create or replace function toplist(p_year int, p_discipline text, p_gender text, p_limit int default 20, p_nation text default 'GER')
 returns table (rank int, athlete_id text, name text, nation text, mark text, score int)
 language plpgsql stable security definer set search_path = public as $$
 begin
   return query
   select (rank() over (order by _mark_cost(p_discipline, t.mark) nulls last))::int, t.athlete_id, a.name, a.nation, t.mark, t.score
     from toplist_entries t join athletes a on a.id = t.athlete_id
-   where t.year = p_year and t.discipline = p_discipline and a.gender = p_gender
+   where t.year = p_year and t.discipline = p_discipline and a.gender = p_gender and coalesce(a.nation, 'GER') = p_nation
    order by _mark_cost(p_discipline, t.mark) nulls last, a.name limit least(coalesce(p_limit, 20), 200);
 end $$;
 
@@ -125,9 +129,11 @@ begin
            where g is not null
            order by athlete_id, pts desc, best desc nulls last) p
    where p.athlete_id = a.id and p.total > 0;
+  -- Pool: Athleten der Länder aus pool_nations ab der Schwelle des Landes, dazu von Hand hinzugefügte
   update athletes r set pool_rank = x.rk
-    from (select id, row_number() over (order by coalesce(group_points, 0) desc, ranking_points desc nulls last, name) rk
-            from athletes where (ranking_points >= c.pool_threshold and coalesce(nation, 'GER') = 'GER') or manual) x
+    from (select a.id, row_number() over (order by coalesce(a.group_points, 0) desc, a.ranking_points desc nulls last, a.name) rk
+            from athletes a left join pool_nations n on n.code = coalesce(a.nation, 'GER')
+           where (n.code is not null and a.ranking_points >= coalesce(n.threshold, c.pool_threshold)) or a.manual) x
    where x.id = r.id;
   get diagnostics n = row_count;
   -- beste Leistung der letzten 12 Monate (nach WA-Punkten; ohne Staffeln, Zwischenzeiten, Mehrkampf-Einzeldisziplinen)
@@ -156,7 +162,7 @@ create or replace function prune_athletes(p_foreign_only boolean default false) 
 language plpgsql security definer set search_path = public as $$
 declare cond text := ' and not exists (select 1 from score_snapshot x where x.athlete_id = a.id)'; r record; n int;
 begin
-  if p_foreign_only then cond := cond || ' and coalesce(a.nation, ''GER'') <> ''GER'''; end if;
+  if p_foreign_only then cond := cond || ' and coalesce(a.nation, ''GER'') not in (select code from pool_nations)'; end if;
   for r in select c.conrelid::regclass tbl, att.attname col
              from pg_constraint c join pg_attribute att on att.attrelid = c.conrelid and att.attnum = c.conkey[1]
             where c.contype = 'f' and c.confrelid = 'athletes'::regclass and c.confdeltype <> 'c' loop
