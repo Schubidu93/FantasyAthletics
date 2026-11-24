@@ -112,9 +112,11 @@ function RaceDetail({ c, slug }) {
   const data = useLoad(async () => {
     const [race] = await q(sb.from('competitions').select('*').eq('id', slug));
     const id = slug.startsWith('wa-c') ? +slug.slice(4) : null;
-    const rows = id ? await all(() => sb.from('wa_results')
-      .select('id,athlete_id,date,competition,discipline,category,race,place,wa_race,wa_place,placing_round,placing_place,mark,result_score,remark,wa_event_id,champ_place')
-      .eq('wa_competition_id', id).order('date').order('id')) : [];
+    const cols = 'id,athlete_id,date,competition,discipline,category,race,place,wa_race,wa_place,placing_round,placing_place,mark,result_score,remark,wa_event_id,champ_place,source_url';
+    // WA-Wettkämpfe über die Wettkampf-ID, Nachträge über Name und Datum (wie in save_manual_result)
+    const rows = id ? await all(() => sb.from('wa_results').select(cols).eq('wa_competition_id', id).order('date').order('id'))
+      : race ? await all(() => sb.from('wa_results').select(cols).eq('source', 'manual').eq('competition', race.name)
+        .gte('date', race.start_date).lte('date', race.end_date || race.start_date).order('date').order('id')) : [];
     const pts = {};
     const ids = rows.map((r) => r.id);
     for (let i = 0; i < ids.length; i += 150) {
@@ -153,7 +155,8 @@ function RaceDetail({ c, slug }) {
         ${race.category ? html` <${CatBadge} cat=${race.category} />` : ''}</p>
       ${only && html`<p class="small">Nur ${discLabel(only)} ·${' '}
         <button type="button" class="linkish" onClick=${() => setOnly('')}>alle Disziplinen zeigen</button></p>`}
-      ${race.id?.startsWith('wa-c') && html`<a class="small" href=${waResultUrl(race.id.slice(4))} target="_blank" rel="noopener">WA-Ergebnisse ↗</a>`}
+      ${race.id?.startsWith('wa-c') ? html`<a class="small" href=${waResultUrl(race.id.slice(4))} target="_blank" rel="noopener">WA-Ergebnisse ↗</a>`
+        : allRows.find((r) => r.source_url) && html`<a class="small" href=${allRows.find((r) => r.source_url).source_url} target="_blank" rel="noopener">Ergebnisliste ↗</a>`}
     </div>
     ${groups.length === 0 ? html`<p class="muted">Keine Ergebnisse von Pool-Athleten.</p>` : groups.map((g) => html`<div class="detail-rider" key=${g.key}>
       <div class="row between"><strong>${g.disc}${g.race && g.race !== 'F' ? ` · ${raceLabel(g.race)}` : ''}${g.sex

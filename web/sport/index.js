@@ -35,7 +35,10 @@ export const labelText = (l) => {
 };
 
 /** Name mit Kurzinfo (Gruppe/Jahrgang bzw. Nation/Team), antippen öffnet das Profil */
-export function RiderCell({ r }) {
+/** Zusatz zu einem Kader-Athleten in der Liga-Übersicht: Position in der Liga (Leichtathletik) */
+export const RosterNote = ({ r }) => html`<span class="muted">${r?.pos_label || (r?.pos_wildcard ? 'Wildcard' : GROUP_LABEL[riderGroup(r)] || '')}</span>`;
+
+export function RiderCell({ r, noRank }) {
   if (!r) return html`<span class="muted">unbekannt</span>`;
   const g = riderGroup(r);
   const meta = [g && (GROUP_LABEL[g] || g), r.birth_date && `Jg. ${r.birth_date.slice(0, 4)}`]
@@ -44,7 +47,7 @@ export function RiderCell({ r }) {
   const best = r.recent_mark && `${discLabel(r.recent_discipline)} ${r.recent_mark}${r.recent_score ? ` · ${r.recent_score} P.` : ''}`;
   return html`<span class="rider">
     <span class="rider-line">
-      <span>${r.league_rank
+      <span>${r.league_rank && !noRank
           ? html`<strong class="res-place" title="Platz unter den Athleten dieser Liga (nach Punkten im Vorjahr der Saison)">${r.league_rank}.</strong> ` : ''}<button type="button" class="rider-name linkish" title="Ergebnisse anzeigen"
         onClick=${(e) => { e.stopPropagation(); openRider(r.id); }}>${r.name}</button></span>
       ${r.pos_rank ? html`<span class="rank-chip" title="Platz unter den Athleten dieser Position der Liga (nach Punkten im Vorjahr der Saison)">#${r.pos_rank} ${r.pos_label}</span>`
