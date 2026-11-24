@@ -38,14 +38,15 @@ export function calendarAreas(units: { events: string[] }[] | null, kinds: strin
   return AREAS.filter((a) => set.has(a));
 }
 
-// Meisterschaften und Spiele anderer Kontinente bzw. Länder – dort starten keine Deutschen
+// Meisterschaften und Spiele anderer Kontinente bzw. Länder – dort starten keine Athleten aus den Pool-Ländern (homes)
 export const OTHER_REGION = /\b(asian|african|africa|oceania|south american|pan[- ]?american|nacac|central american|caribbean|carifta|arab|gulf|commonwealth|bolivarian|francophonie|sea games|asean|mediterranean|island games|ibero-?american|balkan)\b/i;
-export function irrelevantChampionship(e: { name: string; area?: string | null; country?: string | null; competitionGroup?: string | null }) {
+export function irrelevantChampionship(e: { name: string; area?: string | null; country?: string | null; competitionGroup?: string | null },
+                                       homes: readonly string[] = ["GER"]) {
   const text = `${e.name} ${e.competitionGroup ?? ""}`;
   if (OTHER_REGION.test(text)) return true;
   // Kontinentalmeisterschaften außerhalb Europas
   if (/\barea\b.*championships/i.test(e.competitionGroup ?? "") && e.area && e.area !== "Europe") return true;
   // nationale Meisterschaften anderer Länder
-  if (/national.*championships|national championships/i.test(text) && e.country !== "GER") return true;
+  if (/national.*championships|national championships/i.test(text) && !homes.includes(e.country ?? "")) return true;
   return false;
 }

@@ -50,6 +50,8 @@ describe("Kalender", () => {
     expect(irrelevantChampionship({ name: "USATF Championships", area: "North and Central America", country: "USA", competitionGroup: "National Senior Championships" })).toBe(true);
     expect(irrelevantChampionship({ name: "European Athletics Championships", area: "Europe", country: "GBR", competitionGroup: "Area Senior Outdoor Championships" })).toBe(false);
     expect(irrelevantChampionship({ name: "German Championships", area: "Europe", country: "GER", competitionGroup: "National Senior Championships" })).toBe(false);
+    expect(irrelevantChampionship({ name: "NK Atletiek", area: "Europe", country: "NED", competitionGroup: "National Senior Championships" }, ["GER", "NED"])).toBe(false);
+    expect(irrelevantChampionship({ name: "NK Atletiek", area: "Europe", country: "NED", competitionGroup: "National Senior Championships" })).toBe(true);
     expect(irrelevantChampionship({ name: "World Athletics Championships", area: "Asia", country: "CHN", competitionGroup: "World Athletics Championships" })).toBe(false);
     expect(irrelevantChampionship({ name: "Wanda Diamond League", area: "Asia", country: "CHN", competitionGroup: "Wanda Diamond League" })).toBe(false);
   });

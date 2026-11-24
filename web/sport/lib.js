@@ -83,8 +83,8 @@ export const AREA_PRESETS = {
 export const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 /** Texte je Land der Liga bzw. des Athleten (Länder selbst: Tabelle pool_nations). rec = Kürzel des Landesrekords */
 export const NATION_TEXT = {
-  GER: { name: 'Deutschland', people: 'Deutsche', adj: 'deutsche', record: 'Deutscher Rekord', rec: 'DR', champs: 'DM' },
-  NED: { name: 'Niederlande', people: 'Niederländer', adj: 'niederländische', record: 'Niederländischer Rekord', rec: 'NR', champs: 'NK' },
+  GER: { name: 'Deutschland', inName: 'in Deutschland', people: 'Deutsche', adj: 'deutsche', record: 'Deutscher Rekord', rec: 'DR', champs: 'DM' },
+  NED: { name: 'Niederlande', inName: 'in den Niederlanden', people: 'Niederländer', adj: 'niederländische', record: 'Niederländischer Rekord', rec: 'NR', champs: 'NK' },
 };
 export const nationText = (code) => NATION_TEXT[code || 'GER'] || NATION_TEXT.GER;
 /** Rekord-Kürzel und -Name für die Anzeige: intern heißt der Landesrekord immer „DR“ */

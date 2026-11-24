@@ -1,6 +1,7 @@
 // Wettkampfkalender: kommende Wettkämpfe aus dem öffentlichen WA-Kalender (GraphQL getCalendarEvents).
 // Grenzen (wie im Scriptable-Widget „Leichtathletik“, Deutschland erweitert):
-//   weltweit ab Gold Label (OW, DF, GW, GL), in Europa ab A, in Deutschland ab E – für Bahn, Straße und Cross
+//   weltweit ab Gold Label (OW, DF, GW, GL), in Europa ab A, in den Ländern aus pool_nations (Deutschland, Niederlande) ab E –
+//   für Bahn, Straße und Cross (B–E: Abfrage für Europa, behalten werden nur Wettkämpfe in diesen Ländern)
 // Programm („Events to be staged“) aus getCompetitionOrganiserInfo: Disziplinen für Erwachsene (keine Staffeln) und daraus die
 // Bereiche (calendar_events.areas: Lauf, Sprint, Hürden, Sprung, Wurf, Mehrkampf, Gehen); ohne Programm Art und Name.
 // Wettkämpfe ganz ohne Disziplinen für Erwachsene fallen weg.
@@ -12,17 +13,17 @@ import { calendarAreas, irrelevantChampionship, seniorEvents } from "./calendar-
 
 const db = adminClient();
 const DAYS_AHEAD = 365;
-const GERMANY = { regionType: "country", regionId: 13188422 };
 const EUROPE = { regionType: "area", regionId: 3 };
 const WORLD = {};
 const CATEGORY_IDS: Record<string, number> = { OW: 4, DF: 11, GW: 5, GL: 6, A: 1, B: 2, C: 3, D: 9, E: 7 };
 const KINDS = { track: 5, road: 2, cross: 6 } as const;
 type Kind = keyof typeof KINDS;
 const TOP = ["OW", "DF", "GW", "GL"];
+const NATIONAL = ["B", "C", "D", "E"];   // nur in den Pool-Ländern
 const QUERIES: Record<Kind, { region: Record<string, unknown>; categories: string[] }[]> = {
-  track: [{ region: WORLD, categories: TOP }, { region: EUROPE, categories: ["A"] }, { region: GERMANY, categories: ["B", "C", "D", "E"] }],
-  road: [{ region: WORLD, categories: TOP }, { region: EUROPE, categories: ["A"] }, { region: GERMANY, categories: ["B", "C", "D", "E"] }],
-  cross: [{ region: WORLD, categories: TOP }, { region: EUROPE, categories: ["A"] }, { region: GERMANY, categories: ["B", "C", "D", "E"] }],
+  track: [{ region: WORLD, categories: TOP }, { region: EUROPE, categories: ["A", "B", "C", "D", "E"] }],
+  road: [{ region: WORLD, categories: TOP }, { region: EUROPE, categories: ["A", "B", "C", "D", "E"] }],
+  cross: [{ region: WORLD, categories: TOP }, { region: EUROPE, categories: ["A", "B", "C", "D", "E"] }],
 };
 
 
@@ -81,6 +82,9 @@ const main = async () => {
   const api: ApiConfig = process.env.WA_API_URL && process.env.WA_API_KEY
     ? { url: process.env.WA_API_URL, key: process.env.WA_API_KEY } : await discoverApiConfig();
 
+  const { data: nations, error: nErr } = await db.from("pool_nations").select("code");
+  if (nErr) throw nErr;
+  const homes = (nations as { code: string }[]).map((n) => n.code);
   const byId = new Map<number, Record<string, unknown> & { kinds: Set<Kind>; events?: unknown; events_checked_at?: string | null; areas?: string[] | null }>();
   const skipped = new Set<string>();
   let failures = 0;
@@ -89,7 +93,8 @@ const main = async () => {
       for (const cat of categories) {
         try {
           for (const e of await load(api, { startDate: from, endDate: to, disciplineId: KINDS[kind], rankingCategoryId: CATEGORY_IDS[cat], ...region })) {
-            if (irrelevantChampionship(e)) { skipped.add(e.name); continue; }
+            if (NATIONAL.includes(cat) && !homes.includes(e.country ?? "")) continue;
+            if (irrelevantChampionship(e, homes)) { skipped.add(e.name); continue; }
             const prev = byId.get(Number(e.id));
             if (prev) { prev.kinds.add(kind); continue; }
             byId.set(Number(e.id), {
