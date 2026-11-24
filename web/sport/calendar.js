@@ -1,5 +1,5 @@
 // Kalender: kommende Wettkämpfe in den Bereichen der Liga (aus dem WA-Kalender, täglich aktualisiert)
-// International ab Gold Label, Europa ab Kategorie A, Deutschland ab E – siehe importer/sync-calendar.ts
+// International ab Gold Label, Europa ab Kategorie A, im Land der Liga ab E – siehe importer/sync-calendar.ts
 import { html, useState } from '../vendor/preact-htm.js';
 import { all, flag, Loading, nationCode, normName, sb, today, useLoad } from '../lib.js';
 import { CatBadge, eventGroup, GroupFilter, groupFilterMatch, leagueAreas, MONTHS, nationText, SexBadge } from './lib.js';
@@ -17,12 +17,16 @@ const saved = { kind: '', area: '', term: '', disc: '' };
 // Hat der Wettkampf laut Programm eine Disziplin der gewählten Gruppe bzw. des Blocks? (ohne Programm: unbekannt → nein)
 const hasDisc = (e, value) => (e.events || []).some((u) => u.events.some((ev) => groupFilterMatch(value, { event_group: eventGroup(ev) })));
 
+const INTERNATIONAL = ['OW', 'DF', 'GW', 'GL', 'A'];
+
 export function Calendar({ c }) {
   const home = c?.league?.nation || 'GER';   // Wettkämpfe im Land der Liga hervorheben
   const events = useLoad(() => all(() => sb.from('calendar_events')
     .select('id,name,venue,country,category,kinds,competition_group,start_date,end_date,events,areas')
     .gte('start_date', new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10))
-    .order('start_date').order('id')), []);
+    // international ab A, kleinere Wettkämpfe (B–E) nur aus dem Land der Liga
+    .or(`category.in.(${INTERNATIONAL.join(',')}),country.eq.${home}`)
+    .order('start_date').order('id')), [home]);
   const [kind, setKind] = useState(saved.kind);
   const [area, setArea] = useState(saved.area);
   const [term, setTerm] = useState(saved.term);
@@ -52,7 +56,7 @@ export function Calendar({ c }) {
   return html`<section class="card">
     <div class="row between"><h2>Kalender</h2><span class="muted small">${list.length} Wettkämpfe</span></div>
     <p class="muted small">Kommende Wettkämpfe mit Disziplinen dieser Liga (${areas.join(', ')}): international ab Gold Label, in Europa ab Kategorie A,
-      in Deutschland ab Kategorie E. Das Programm stammt von World Athletics, sobald der Veranstalter es eingetragen hat.</p>
+      ${nationText(home).inName} ab Kategorie E. Das Programm stammt von World Athletics, sobald der Veranstalter es eingetragen hat.</p>
     <div class="filters">
       <input type="search" placeholder="Name oder Ort" value=${term} onInput=${set('term', setTerm)} />
       <select value=${kind} onChange=${set('kind', setKind)}>

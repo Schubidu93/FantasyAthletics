@@ -1,7 +1,7 @@
 // Spielregeln – allgemeine Regeln plus die Einstellungen der aktuellen Liga
 import { html } from '../vendor/preact-htm.js';
 import { draftCosts, fmtDate, q, sb, useLoad } from '../lib.js';
-import { AREA_GROUPS, AREAS, NATION_TEXT, nationText, discLabel, GENDER_LABEL, GROUP_LABEL, groupArea, leagueAreas, leagueSlots, positionGroups, RUN_GROUPS, slotLabel } from './lib.js';
+import { AREA_GROUPS, AREAS, nationText, discLabel, GENDER_LABEL, GROUP_LABEL, groupArea, leagueAreas, leagueSlots, positionGroups, RUN_GROUPS, slotLabel } from './lib.js';
 
 const DRAFT = {
   live: 'Live-Auktion',
@@ -218,7 +218,7 @@ export function Rules({ c }) {
         ${row('Ergebnisse', 'stündlich 8–23 Uhr, sobald World Athletics sie veröffentlicht (kleine Wettkämpfe manchmal Tage später).')}
         ${row('Kontrolle', 'nachts alle Kader-Athleten komplett, die übrigen wöchentlich – Korrekturen werden übernommen.')}
         ${row('Athletenpool', 'täglich 6 Uhr, danach Bestleistungen und Rekorde.')}
-        ${row('Kalender', `täglich 6 Uhr: weltweit ab Gold Label, Europa ab A, ${NATION_TEXT.GER.name} ab E.`)}
+        ${row('Kalender', `täglich 6 Uhr: weltweit ab Gold Label, Europa ab A, ${nt.inName} ab E.`)}
         ${row('„Punkte 2026“', 'alle Wettkämpfe vom 1.1. bis 31.12.2026.')}
       </tbody></table>
       <h4 class="rule-sub">Was der Admin kann</h4>
