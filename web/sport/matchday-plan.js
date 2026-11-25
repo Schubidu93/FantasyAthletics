@@ -26,48 +26,62 @@ const CHAMPIONSHIPS = [
   ['Cross-EM', /european (athletics )?cross country championships/i, ['Lauf']],
   ['Straßen-EM', /european (running|road running) championships/i, ['Lauf']],
   ['EM', /european athletics championships/i],
-  ['Mehrkampf-DM', /(german|deutsche).*(combined events|mehrkampf)/i, ['Mehrkampf']],
-  ['Winterwurf-DM', /(german|deutsche).*(winter throw|winterwurf)/i, ['Wurf']],
-  ['Hallen-DM', /(german|deutsche).*(indoor|hallen).*(championships|meisterschaften)/i],
-  ['DM', /(german|deutsche) (athletics )?(championships|meisterschaften)/i],
+];
+// Landesmeisterschaften je Land der Liga (Name im WA-Kalender, z. B. „German Championships“, „Dutch Indoor Championships“).
+// Bezeichnungen in der Sprache der Liga; fed = Verband, bei dem fehlende Termine nachgeschlagen werden.
+export const NATIONAL = {
+  GER: { who: '(german|deutsche)', main: 'DM', indoor: 'Hallen-DM', ce: 'Mehrkampf-DM', throw: 'Winterwurf-DM', fed: 'DLV' },
+  NED: { who: '(dutch|nederlandse)', main: 'NK', indoor: 'NK indoor', ce: 'NK meerkamp', throw: 'NK winterwerpen', fed: 'Atletiekunie' },
+};
+export const national = (nation) => NATIONAL[nation || 'GER'] || NATIONAL.GER;
+const CHAMP = '(championships|meisterschaften|kampioenschappen)';
+// [Art, Muster nach dem Land, Bereiche einer Fachmeisterschaft]
+const NATIONAL_KINDS = [
+  ['ce', '.*(combined events|mehrkampf|meerkamp)', ['Mehrkampf']],
+  ['throw', '.*(winter throw|winterwurf|winterwerp)', ['Wurf']],
+  ['indoor', `.*(indoor|hallen).*${CHAMP}`],
+  ['main', ` (athletics )?${CHAMP}`],
 ];
 const NOT_SENIOR_CHAMPS = /u\s?1[68]|u\s?2[03]|youth|junior|jugend|team|relays|staffel|masters|senioren|mountain|trail|10\s?km|half|marathon/i;
-/** Meisterschaft mit eigenem Spieltag? areas = Bereiche der Liga (ohne: alle Meisterschaften) */
-export const championshipLabel = (e, areas = null) => {
+/** Meisterschaft mit eigenem Spieltag? areas = Bereiche der Liga (ohne: alle Meisterschaften), nation = Land der Liga */
+export const championshipLabel = (e, areas = null, nation = 'GER') => {
   if (NOT_SENIOR_CHAMPS.test(e.name)) return null;
-  const c = CHAMPIONSHIPS.find(([, re]) => re.test(e.name));
+  const n = national(nation);
+  const c = CHAMPIONSHIPS.find(([, re]) => re.test(e.name))
+    || NATIONAL_KINDS.map(([k, re, a]) => [n[k], new RegExp(n.who + re, 'i'), a]).find(([, re]) => re.test(e.name));
   if (!c) return null;
   return !areas || !c[2] || areas.every((a) => c[2].includes(a)) ? c[0] : null;
 };
 
-// DM und Hallen-DM stehen oft erst spät im WA-Kalender → Termine aus anderen Quellen (DLV-Terminliste,
+// Landesmeisterschaften stehen oft erst spät im WA-Kalender → Termine aus anderen Quellen (Terminliste des Verbands,
 // Tabelle extra_calendar_events) ergänzen, solange WA für das Jahr keine hat. Geraten wird nichts.
-export function withExtraChampionships(events, extras = []) {
+export function withExtraChampionships(events, extras = [], nation = 'GER') {
   const out = [...events];
   for (const x of extras) {
-    const label = championshipLabel(x);
-    if (!label || events.some((e) => championshipLabel(e) === label && e.start_date.slice(0, 4) === x.start_date.slice(0, 4))) continue;
+    const label = championshipLabel(x, null, nation);
+    if (!label || events.some((e) => championshipLabel(e, null, nation) === label && e.start_date.slice(0, 4) === x.start_date.slice(0, 4))) continue;
     out.push({ ...x, extra: true });
   }
   return out;
 }
-// Jahre der Saison, für die weder WA noch eine andere Quelle einen DM-/Hallen-DM-Termin kennt
-export function missingChampionships(start, end, events) {
+// Jahre der Saison, für die weder WA noch eine andere Quelle einen Termin der Landes-/Hallenmeisterschaft kennt
+export function missingChampionships(start, end, events, nation = 'GER') {
+  const n = national(nation);
   const miss = [];
   for (let y = +start.slice(0, 4); y <= +end.slice(0, 4); y++) {
-    for (const [label, month] of [['Hallen-DM', '02'], ['DM', '07']]) {
+    for (const [label, month] of [[n.indoor, '02'], [n.main, '07']]) {
       if (`${y}-${month}-15` < start || `${y}-${month}-15` > end) continue;
-      if (!events.some((e) => championshipLabel(e) === label && e.start_date.startsWith(String(y)))) miss.push(`${label} ${y}`);
+      if (!events.some((e) => championshipLabel(e, null, nation) === label && e.start_date.startsWith(String(y)))) miss.push(`${label} ${y}`);
     }
   }
   return miss;
 }
 
 // Meisterschaften → Blöcke Montag bis Sonntag der Meisterschaftswoche (überschneidende zusammengelegt)
-function championshipBlocks(start, end, events, areas) {
+function championshipBlocks(start, end, events, areas, nation) {
   const champs = [];
   for (const e of events) {
-    const label = championshipLabel(e, areas);
+    const label = championshipLabel(e, areas, nation);
     if (!label) continue;
     const s = mondayOnOrBefore(e.start_date < start ? start : e.start_date);
     const t = sundayOnOrAfter((e.end_date || e.start_date) > end ? end : (e.end_date || e.start_date));
@@ -85,8 +99,8 @@ function championshipBlocks(start, end, events, areas) {
 
 // Meisterschaften in einen anderen Vorschlag einbauen: eigener Spieltag, die übrigen Spieltage werden drumherum gekürzt.
 // onlyIfSplit: nur, wenn die Meisterschaft sonst auf zwei Spieltage fiele (Wöchentlich).
-export function withChampionshipMatchdays(list, start, end, events, { onlyIfSplit = false, renumber = null, areas = null } = {}) {
-  let champs = championshipBlocks(start, end, events, areas);
+export function withChampionshipMatchdays(list, start, end, events, { onlyIfSplit = false, renumber = null, areas = null, nation = 'GER' } = {}) {
+  let champs = championshipBlocks(start, end, events, areas, nation);
   const over = (a, b) => a.starts_on <= b.ends_on && a.ends_on >= b.starts_on;
   if (onlyIfSplit) champs = champs.filter((c) => {
     const ev = { starts_on: c.ev_start, ends_on: c.ev_end };
@@ -130,9 +144,9 @@ function mergeShort(out, isShort) {
   }
 }
 
-export function monthlyProposal(start, end, events = [], areas = null) {
+export function monthlyProposal(start, end, events = [], areas = null, nation = 'GER') {
   // 1. Meisterschaften → eigene Spieltage (zusammengelegt, wenn sie sich überschneiden)
-  const champs = championshipBlocks(start, end, events, areas);
+  const champs = championshipBlocks(start, end, events, areas, nation);
   const big = events.filter((e) => ['OW', 'DF', 'GW', 'GL'].includes(e.category));
   // 2. Lücken dazwischen in Abschnitte von etwa einem Monat teilen
   const fill = (from, to) => {

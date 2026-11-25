@@ -1,7 +1,7 @@
 // Spieltag-Vorschläge je nach Bereichen der Liga (web/sport/matchday-plan.js)
 import { describe, expect, it } from "vitest";
 // @ts-expect-error – reines JavaScript der App
-import { championshipLabel, monthlyProposal, seasonProposal, withChampionshipMatchdays } from "../web/sport/matchday-plan.js";
+import { championshipLabel, missingChampionships, monthlyProposal, seasonProposal, withChampionshipMatchdays, withExtraChampionships } from "../web/sport/matchday-plan.js";
 
 const ev = (name: string, start: string, end = start, category = "B") => ({ name, start_date: start, end_date: end, category });
 const EVENTS = [
@@ -22,6 +22,24 @@ describe("Spieltag-Vorschläge je Liga", () => {
     expect(hdm.ends_on).toBe(addOne(l.find((m) => m.name === "Hallen-EM")!.starts_on, -1));
     expect(l.every((m) => (Date.parse(m.ends_on) - Date.parse(m.starts_on)) / 864e5 + 1 >= 7)).toBe(true);
     expect(names(l)).not.toContain("Februar II");
+  });
+
+  it("Landesmeisterschaften nach dem Land der Liga: NK statt DM in niederländischen Ligen", () => {
+    const evs = [...EVENTS, ev("Dutch Championships", "2027-07-31", "2027-08-01"), ev("Dutch Indoor Championships", "2027-02-27", "2027-02-28"),
+      ev("Dutch Combined Events Championships", "2027-07-03", "2027-07-04"), ev("ASICS Dutch U20 Championships", "2027-06-25"),
+      ev("SplitTime NK Teams", "2027-05-29")];
+    const nl: Md[] = monthlyProposal("2027-01-01", "2027-12-31", evs, ["Lauf"], "NED");
+    expect(names(nl)).toEqual(expect.arrayContaining(["NK", "NK indoor"]));
+    expect(names(nl).some((n) => /DM/.test(n))).toBe(false);
+    expect(championshipLabel(evs[6], ["Mehrkampf"], "NED")).toBe("NK meerkamp");
+    expect([championshipLabel(evs[7], null, "NED"), championshipLabel(evs[8], null, "NED")]).toEqual([null, null]);
+    const de: Md[] = monthlyProposal("2027-01-01", "2027-12-31", evs, ["Lauf"]);
+    expect(names(de)).toContain("DM");
+    expect(names(de).some((n) => /NK/.test(n))).toBe(false);
+    // Termine aus der Terminliste des Verbands nur für das eigene Land; fehlende werden gemeldet
+    const dlv = [{ name: "Deutsche Hallenmeisterschaften", start_date: "2027-02-19", end_date: "2027-02-21", source_url: "x" }];
+    expect(withExtraChampionships([], dlv, "NED")).toEqual([]);
+    expect(missingChampionships("2027-01-01", "2027-12-31", [], "NED")).toEqual(["NK indoor 2027", "NK 2027"]);
   });
 
   it("Fachmeisterschaften nur, wenn die Liga nichts anderes spielt", () => {
