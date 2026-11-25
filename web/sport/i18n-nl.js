@@ -527,6 +527,12 @@ registerTexts('nl', { ...UI, ...VIEWS, ...ADMIN, ...RULES }, [
   [/^in (\d+) Std\. (\d+) Min\.$/, 'over $1 uur $2 min.'],
   [/^in (\d+) Min\.$/, 'over $1 min.'],
   [/^(.+) ([MF])$/, (_, a, g) => `${tr(a)} ${g}`],   // Aufstellungsplätze („Hindernis M“)
+  [/^Lauf (\d+)$/, 'Race $1'],   // Lauf einer Runde (raceLabel), nicht der Bereich „Lauf“
   [/^(.+) \(Halle\)$/, (_, a) => `${tr(a)} (indoor)`],
+  // Disziplinen mit Strecke („3000 m Hindernis“, „4x400 m Staffel Mixed“, „Halbmarathon Gehen“): Wörter einzeln
+  [/^(?:\d|4x|Meile|Halbmarathon|Marathon|Berglauf).*\b(?:Hindernis|Hürden|Gehen|Staffel|Meilen?|Straße|Berglauf|Halbmarathon|Mixed)(?![\wäöüß])/,
+    (s) => s.replace(/Halbmarathon/g, 'halve marathon').replace(/Hindernis/g, 'steeple').replace(/Hürden/g, 'horden')
+      .replace(/Gehen/g, 'snelwandelen').replace(/Staffel/g, 'estafette').replace(/Meilen?/g, 'mijl').replace(/Straße/g, 'weg')
+      .replace(/Berglauf/g, 'Bergloop').replace(/Mixed/g, 'gemengd').replace(/^halve/, 'Halve')],
   [/^(Mo|Di|Mi|Do|Fr|Sa|So)\.,/, (w) => ({ Mo: 'ma', Di: 'di', Mi: 'wo', Do: 'do', Fr: 'vr', Sa: 'za', So: 'zo' })[w.slice(0, 2)] + '.,'],
 ]);
