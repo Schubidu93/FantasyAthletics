@@ -17,6 +17,8 @@ export const SPORT = {
   bestBy: 'nach WA-Punkten', orderLabel: 'nach WA-Punkten',   // Draft: automatische Wahl, Reihenfolge
   csvNameHint: 'Name wie bei World Athletics, z. B. „Robert FARKEN“', inPoolWord: 'im Pool',   // Offline-Draft (CSV)
   resultsSchedule: 'Ergebnisse werden stündlich von 8 bis 23 Uhr abgerufen.',
+  // Sprache der Oberfläche je Liga (Wörterbuch in i18n-nl.js); ohne Angabe Deutsch
+  uiLang: (league) => (league?.nation === 'NED' ? 'nl' : 'de'),
 };
 /** Schlüssel einer Person (Athlet bzw. Fahrer) */
 export const pid = (r) => r?.id;

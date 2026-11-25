@@ -3,6 +3,7 @@
 import { html, useState } from '../vendor/preact-htm.js';
 export * from './config.js';
 import { SPORT, pid } from './config.js';
+import './i18n-nl.js';   // niederländische Texte (Ligen in den Niederlanden)
 import { normName, openRider } from '../lib.js';
 import { discLabel, eligible, GROUP_LABEL, GroupFilter, groupFilterMatch, raceLabel, riderGroup, SexBadge } from './lib.js';
 
