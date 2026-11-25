@@ -67,3 +67,6 @@ select.mini { font-size: .75rem; padding: 2px 6px; width: auto; min-height: 0; }
 
 .race-list a.race-link.cal-item { flex-direction: row; }
 .cal-item > .badge { flex: none; }
+
+/* Athletenliste: am großen Bildschirm steht der Platz in der Spalte „#“ – neben dem Namen nur in der Handy-Ansicht */
+@media (min-width: 721px) { .people-tbl .rider-line .res-place { display: none; } }

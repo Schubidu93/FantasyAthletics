@@ -83,7 +83,6 @@ const main = async () => {
     if (error) throw new Error(`Name ${n.id}: ${error.message}`);
     console.log(`Name geändert: ${n.id} → ${n.name}`);
   }
-  if (nations.length) await rpc(db, "refresh_pool", {});
   // PB-Bonus hängt an athlete_pb_before → Punkte ab 2025 neu
   const scored = await rpc<number>(db, "rebuild_results", { p_from: `${FIRST_YEAR}-01-01` });
   for (let y = FIRST_YEAR; y <= currentYear(); y++) await rpc(db, "refresh_season_stats", { p_year: y });
