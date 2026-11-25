@@ -1,26 +1,29 @@
 // Athleten-Übersicht: alle Athleten der Wertung mit Punkten der Saison und Besitzer in der Liga
 import { html, useState, useMemo } from '../vendor/preact-htm.js';
-import { fmtPts, Loading, normName, rpc, rpcAll, useLoad } from '../lib.js';
+import { cached, fmtPts, Loading, normName, rpc, rpcAll, useLoad } from '../lib.js';
 import { GroupFilter, groupFilterMatch } from './lib.js';
 import { rank, RiderCell } from './index.js';
 
 export function Riders({ c }) {
-  const years = useLoad(() => rpc('result_years'), []);
+  // Punkte ändern sich nur mit dem Ergebnisabruf: beim Wechsel zwischen den Seiten kurz behalten (cached)
+  const nation = c.league.nation || 'GER';
+  const recentPts = () => cached(`recent:${c.league.gender}:${nation}`, () => rpcAll('athlete_points_recent', { p_gender: c.league.gender, p_days: 30, p_nation: nation }));
+  const years = useLoad(() => cached('result_years', () => rpc('result_years')), []);
   const [sort, setSort] = useState(String(new Date().getFullYear()));   // Jahr oder 'rank'
   // Punkte des gewählten Jahres; bei Sortierung nach Pool-Rang die des laufenden Jahres
   // gewähltes Jahr noch ohne Ergebnisse (z. B. Jahresanfang) → neuestes Jahr mit Ergebnissen
   const ys = (years.data || []).map(String);
   // Pool-Rang = Reihenfolge nach den Punkten im Vorjahr des Spieljahrs → eigene Sortierung nur, wenn es dieses Jahr nicht gibt
-  const gy = useLoad(() => rpc('game_year'), []);
+  const gy = useLoad(() => cached('game_year', () => rpc('game_year')), []);
   const showRank = !ys.includes(String((gy.data || new Date().getFullYear()) - 1));
   const sel0 = (sort === 'rank' && showRank) || (sort !== 'rank' && (!ys.length || ys.includes(sort))) ? sort : ys[0] || sort;
   const recent = sort === 'recent';
   const sel = recent ? 'recent' : sel0;
   const year = sel === 'rank' || recent ? +(ys[0] || new Date().getFullYear()) : +sel;
-  const pts = useLoad(() => recent ? rpcAll('athlete_points_recent', { p_gender: c.league.gender, p_days: 30, p_nation: c.league.nation || 'GER' })
-    : rpcAll('athlete_points', { p_gender: c.league.gender, p_year: year, p_nation: c.league.nation || 'GER' }), [c.league.gender, year, recent]);
+  const pts = useLoad(() => recent ? recentPts()
+    : cached(`points:${c.league.gender}:${nation}:${year}`, () => rpcAll('athlete_points', { p_gender: c.league.gender, p_year: year, p_nation: nation })), [c.league.gender, year, recent]);
   // Heiße freie Athleten: die 10 freien mit den meisten Punkten der letzten 30 Tage (🔥 in der Liste)
-  const hot = useLoad(() => rpcAll('athlete_points_recent', { p_gender: c.league.gender, p_days: 30, p_nation: c.league.nation || 'GER' }), [c.league.gender]);
+  const hot = useLoad(recentPts, [c.league.gender]);
   const hotSet = useMemo(() => new Set((hot.data || []).filter((p) => !c.owner[p.athlete_id] && c.riderMap[p.athlete_id])
     .sort((a, b) => b.points - a.points).slice(0, 10).map((p) => p.athlete_id)), [hot.data]);
   const [term, setTerm] = useState('');
