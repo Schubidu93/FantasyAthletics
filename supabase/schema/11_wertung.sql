@@ -353,6 +353,7 @@ begin
    where p + plc2 + rec + pb > 0
   on conflict (athlete_id, competition_id, label) do nothing;
   get diagnostics n = row_count;
+  perform refresh_pool();   -- Pool-Rang und Gruppe hängen an den Punkten im Bezugsjahr
   return n;
 end $$;
 

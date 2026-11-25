@@ -196,6 +196,20 @@ describe("Land der Liga", () => {
   });
 });
 
+describe("Pool-Rang", () => {
+  it("folgt den Punkten im Bezugsjahr, sobald Punkte neu berechnet werden (z. B. nach einem Rekord)", async () => {
+    await athlete(db, 1, "Vorn", "men", "800 Metres", 1150);
+    await athlete(db, 2, "Hinten", "men", "800 Metres", 1140);
+    await db.query("select refresh_pool(null)");
+    const ranks = async () => (await db.all("select id from athletes where pool_rank is not null order by pool_rank")).map((r) => r.id);
+    expect(await ranks()).toEqual(["wa-1", "wa-2"]);
+    await db.query(`insert into wa_results (athlete_id, date, competition, discipline, category, race, wa_race, place, mark, result_score, wa_competition_id)
+                    values ('wa-2', make_date(game_year() - 1, 7, 1), 'M', '800 Metres', 'A', 'F', 'F', 1, '1:44.00', 1200, 1)`);
+    await db.query("select rebuild_results(null)");   // ohne eigenen refresh_pool
+    expect(await ranks()).toEqual(["wa-2", "wa-1"]);
+  });
+});
+
 describe("Wettkämpfe ohne Ergebnisse", () => {
   it("verschwinden beim Aufräumen, solche mit Ergebnissen bleiben", async () => {
     await athlete(db, 1, "M", "men", "800 Metres", 1150);
