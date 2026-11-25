@@ -171,6 +171,7 @@ export function Rules({ c }) {
         ${areas.includes('Mehrkampf') && row('Mehrkampf-Einzeldisziplin', `Leistung ab ${thr} WA-Punkten und Bonus, keine Platzierung (die zählt im Gesamtergebnis).`)}
         ${row('Staffel', 'Leistung und Platzierung wie die Einzelstrecke, davon ¼ (4er) bzw. ⅓ (3er); kein Bestleistungs-Bonus.')}
         ${row('Zwischenzeit', 'nur Bestleistungs- und Rekord-Bonus.')}
+        ${row('Rückenwind über 2,0 m/s', 'Platz zählt; Leistung aus dem besseren WA-Wert (WA rechnet den Wind ein) und der besten gültigen Leistung; Bestleistungs- und Rekord-Bonus nur für gültige Leistungen.')}
         ${areas.includes('Lauf') && row('Cross', `fester Wert je Platz und Kategorie (z. B. GL-Sieg 1200) statt WA-Punkten, × ${cfg ? fmtNum(cfg.cross_factor) : '0,1'} × Länge (bis 3 km 1 · 6 km 1,5 · 12 km 2 · länger 2,5).`)}
       </tbody></table>
       <p class="muted small">Punkte zählen nur, solange der Athlet in deinem Kader${lineup ? ' und aufgestellt' : ''} ist. Korrekturen von World Athletics werden übernommen, bis der Spieltag eingefroren ist.</p>

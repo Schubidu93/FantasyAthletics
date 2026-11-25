@@ -80,14 +80,15 @@ $$;
 
 -- Ergebnisse eines Wettkampfs (WA über die Wettkampf-ID, Nachträge über Name und Datum) mit Fantasy-Punkten,
 -- nur von Athleten des Landes (p_nation null = alle)
+drop function if exists competition_results(text, text);   -- Rückgabe um wind/not_legal erweitert
 create or replace function competition_results(p_competition text, p_nation text default null)
 returns table (id bigint, athlete_id text, date date, competition text, discipline text, category text, race text, place int,
                wa_race text, wa_place int, placing_round text, placing_place int, mark text, result_score int, remark text,
-               wa_event_id bigint, champ_place int, source_url text, pts numeric)
+               wa_event_id bigint, champ_place int, source_url text, pts numeric, wind text, not_legal boolean)
 language sql stable security definer set search_path = public as $$
   select w.id, w.athlete_id, w.date, w.competition, w.discipline, w.category, w.race, w.place, w.wa_race, w.wa_place,
          w.placing_round, w.placing_place, w.mark, w.result_score, w.remark, w.wa_event_id, w.champ_place, w.source_url,
-         (select r.points from results r where r.wa_result_id = w.id limit 1)
+         (select r.points from results r where r.wa_result_id = w.id limit 1), w.wind, w.not_legal
     from wa_results w join athletes a on a.id = w.athlete_id, competitions c
    where c.id = p_competition and _nation_ok(p_nation, a)
      and (case when c.id ~ '^wa-c' then w.wa_competition_id = substr(c.id, 5)::bigint
@@ -132,7 +133,7 @@ begin
     from (select distinct on (w.athlete_id) w.athlete_id, w.discipline, w.mark, w.result_score score,
                  extract(year from w.date)::int as yr, _result_group(w.discipline, w.competition) g
             from wa_results w join athletes a on a.id = w.athlete_id
-           where a.manual and extract(year from w.date) in (y, y - 1) and w.result_score > 0
+           where a.manual and extract(year from w.date) in (y, y - 1) and w.result_score > 0 and not w.not_legal
              and _result_group(w.discipline, w.competition) is not null
            order by w.athlete_id, w.result_score desc) b
    where b.athlete_id = r.id and r.ranking_points is null;
@@ -176,7 +177,7 @@ begin
             left join lateral (select w.discipline, w.mark, w.result_score from wa_results w
                                 where w.athlete_id = a2.id and w.date > current_date - 365 and w.result_score > 0
                                   and w.relay is null and not _is_relay(w.discipline) and w.wa_race not like 'CE%'
-                                  and not _is_split(w.competition, w.remark)
+                                  and not _is_split(w.competition, w.remark) and not w.not_legal   -- Rückenwind zählt nicht als Bestwert
                                 order by w.result_score desc, w.date desc limit 1) w on true) b
    where b.id = a.id and (a.recent_mark, a.recent_score, a.recent_discipline) is distinct from (b.mark, b.result_score, b.discipline);
   -- wer für ein anderes Land startet, verschwindet ganz (außer er wird in einer Liga verwendet)
@@ -281,7 +282,8 @@ language sql stable as $$
                  least(b.cost, min(w.cost) over (partition by w.athlete_id, w.discipline order by w.date
                                                  range between unbounded preceding and interval '1 day' preceding)) prior
             from (select o.id, o.athlete_id, o.discipline, o.date, _mark_cost(d.higher_better, o.mark) cost
-                    from wa_results o left join disciplines d on d.name = o.discipline where o.relay is null and not _is_relay(o.discipline)) w
+                    from wa_results o left join disciplines d on d.name = o.discipline
+                   where o.relay is null and not _is_relay(o.discipline) and not o.not_legal) w   -- Rückenwind: nie PB
             left join (select pb.athlete_id, pb.discipline, _mark_cost(d.higher_better, pb.mark) cost
                          from athlete_pb_before pb left join disciplines d on d.name = pb.discipline) b
               on b.athlete_id = w.athlete_id and b.discipline = w.discipline) x;
@@ -303,6 +305,11 @@ begin
             from (select x.*, row_number() over (partition by athlete_id, competition_id, base
                                                   order by perf + plc desc, perf + plc + rec + pb desc, date desc, id) rn
                     from (
+      -- Rückenwind (WA: zwei Zeilen derselben Runde, siehe wa_results.not_legal) = ein Ergebnis: Platz aus der gewerteten Leistung,
+      -- Leistungspunkte aus dem besseren WA-Wert (WA rechnet den Wind schon ein), PB-/Rekord-Bonus nur aus der gültigen
+      select (array_agg(id order by place is null, perf desc, id))[1] id, athlete_id, max(date) date, max(place) place,
+             competition_id, label, base, max(perf) perf, max(plc) plc, max(rec) rec, max(pb) pb
+        from (
       select w.id, w.athlete_id, w.date, w.place,
              -- Staffel: Leistungs- und Platzierungspunkte nur anteilig (1/3 bzw. 1/4)
              case w.record when 'WR' then c.record_wr when 'ER' then c.record_er when 'DR' then c.record_dr
@@ -349,7 +356,7 @@ begin
          and not (w.source = 'manual' and w.relay is null and exists (select 1 from wa_results o
                    where o.athlete_id = w.athlete_id and o.source = 'wa' and o.discipline = w.discipline
                      and abs(o.date - w.date) <= 1))
-    ) x) y) z
+    ) r group by athlete_id, competition_id, label, base) x) y) z
    where p + plc2 + rec + pb > 0
   on conflict (athlete_id, competition_id, label) do nothing;
   get diagnostics n = row_count;
@@ -438,7 +445,7 @@ begin
   with x as (
     select distinct on (w.id) w.id, j.record
       from jsonb_to_recordset(p_rows) j(athlete_id text, discipline text, date date, mark text, record text)
-      join wa_results w on w.athlete_id = j.athlete_id and w.discipline = j.discipline and w.date = j.date
+      join wa_results w on w.athlete_id = j.athlete_id and w.discipline = j.discipline and w.date = j.date and not w.not_legal
                        and mark_seconds(w.mark) = mark_seconds(j.mark)
      where _record_rank(j.record) > 0
      order by w.id, _record_rank(j.record) desc)

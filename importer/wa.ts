@@ -28,6 +28,8 @@ export type WaResult = {
   remark: string | null;
   competitionId: number | null;
   eventId: number | null;
+  wind: string | null;     // z. B. "+2.5"
+  notLegal: boolean;       // Rückenwind über 2,0 m/s: WA führt dann zusätzlich die beste gültige Leistung als eigene Zeile
 };
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -178,7 +180,7 @@ const RESULTS_QUERY = `
   query GetSingleCompetitorResultsDate($id: Int, $resultsByYearOrderBy: String, $resultsByYear: Int) {
     getSingleCompetitorResultsDate(id: $id, resultsByYear: $resultsByYear, resultsByYearOrderBy: $resultsByYearOrderBy) {
       resultsByDate {
-        date competition venue discipline country category race place mark resultScore remark competitionId eventId
+        date competition venue discipline country category race place mark wind notLegal resultScore remark competitionId eventId
       }
     }
   }`;
@@ -208,6 +210,8 @@ export function mapResult(r: RawResult): WaResult | null {
     remark: str(r.remark),
     competitionId: num(r.competitionId),
     eventId: num(r.eventId),
+    wind: str(r.wind),
+    notLegal: String(r.notLegal) === "true",
   };
 }
 

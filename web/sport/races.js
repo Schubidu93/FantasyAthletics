@@ -1,7 +1,7 @@
 // Wettkämpfe: alle Wettkämpfe, bei denen Athleten aus dem Pool gestartet sind, mit deren Ergebnissen und Punkten
 import { html, useState, useMemo } from '../vendor/preact-htm.js';
 import { all, flag, fmtDate, fmtPts, Loading, nationCode, normName, openRider, q, rpcAll, sb, useLoad, withFlag } from '../lib.js';
-import { BackToAthlete, CatBadge, DiscFilter, discLabel, discOrder, discWithKm, MONTHS, raceLabel, raceOrder, SexBadge, waResultUrl } from './lib.js';
+import { BackToAthlete, CatBadge, DiscFilter, discLabel, discOrder, discWithKm, foldWind, markText, MONTHS, raceLabel, raceOrder, SexBadge, waResultUrl } from './lib.js';
 
 // WA-Wettkampfkategorien (World-Ranking-Regeln): OW = Olympia/WM … F = nationale Meetings
 const CATS = [['', 'Alle Kategorien'], ['top', 'OW, DF, GW, GL'], ['OW', 'OW – Olympia/WM'], ['DF', 'DF – DL-Finale'],
@@ -118,7 +118,8 @@ function RaceDetail({ c, slug }) {
   }, [slug]);
   if (!data.data) return html`<${Loading} error=${data.error} />`;
   const { race, rows: allRows } = data.data;
-  const rows = only ? allRows.filter((r) => r.discipline === only) : allRows;
+  // Rückenwind: gewertete und gültige Leistung einer Runde in einer Zeile
+  const rows = foldWind(only ? allRows.filter((r) => r.discipline === only) : allRows);
   const back = html`<div class="row between"><a href=${`#/league/${c.league.id}/races`} class="small-link">← Alle Wettkämpfe</a><${BackToAthlete} /></div>`;
   if (!race) return html`<section class="card">${back}<p class="muted">Wettkampf nicht gefunden.</p></section>`;
   // nach Disziplin und Lauf gruppieren, innerhalb nach Platz
@@ -160,7 +161,7 @@ function RaceDetail({ c, slug }) {
         return html`<li key=${r.id} class=${owner && owner.id === c.me?.id ? 'me' : ''}>
           <span><span class="res-place">${r.wa_place ? `${r.wa_place}.` : r.remark || '–'}</span>${' '}
             <button type="button" class="linkish" onClick=${() => openRider(r.athlete_id)}>${name}</button>
-            <small class="muted"> ${r.mark || ''}${r.champ_place ? ` · ${r.champ_place === 1 ? '🏆 ' : ''}Meisterschaft ${r.champ_place}.` : ''}${owner ? ` · ${owner.team_name}` : ''}</small></span>
+            <small class="muted"> ${markText(r)}${r.champ_place ? ` · ${r.champ_place === 1 ? '🏆 ' : ''}Meisterschaft ${r.champ_place}.` : ''}${owner ? ` · ${owner.team_name}` : ''}</small></span>
           <span>${r.pts ? html`<strong>${fmtPts(r.pts)}</strong>` : ''}</span></li>`;
       })}</ul></div>`)}
   </section>`;

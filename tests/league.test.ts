@@ -210,6 +210,31 @@ describe("Pool-Rang", () => {
   });
 });
 
+describe("Rückenwind", () => {
+  it("windunterstützte und gültige Leistung derselben Runde zählen als ein Ergebnis", async () => {
+    await athlete(db, 1, "Springerin", "women", "Long Jump", 1100);
+    await db.query("insert into athlete_pb_before (athlete_id, discipline, mark) values ('wa-1', 'Long Jump', '6.50')");
+    // wie bei WA (NK 2025): 6,76 bei +2,5 mit Platz 1 (WA-Punkte schon windkorrigiert) und die beste gültige Weite 6,63 ohne Platz
+    await db.query(`insert into wa_results (athlete_id, date, competition, discipline, category, race, wa_race, place, wa_place, mark, wind,
+                      not_legal, result_score, wa_competition_id)
+                    values ('wa-1', '2025-08-03', 'NK', 'Long Jump', 'B', 'F', 'F', 1, 1, '6.76', '+2.5', true, 1150, 7),
+                           ('wa-1', '2025-08-03', 'NK', 'Long Jump', 'B', 'F', 'F', null, null, '6.63', '+1.7', false, 1136, 7)`);
+    await db.query("select rebuild_results(null)");
+    const r = await db.all(`select r.rank, r.perf_points::float perf, r.placing_points::float plc, r.pb_points::float pb, w.mark
+                              from results r join wa_results w on w.id = r.wa_result_id where r.athlete_id = 'wa-1'`);
+    expect(r).toHaveLength(1);
+    expect(r[0]).toMatchObject({ rank: 1, mark: "6.76", perf: (1150 - 1000) * 1.3 });   // besserer WA-Wert, Faktor Weitsprung 1,3
+    expect(r[0].plc).toBeGreaterThan(0);                                                // Platz 1 zählt
+    expect(r[0].pb).toBeGreaterThan(0);                                                 // PB aus der gültigen 6,63
+    // nur Rückenwind: kein PB, keine beste Leistung der letzten 12 Monate
+    await db.query("delete from wa_results where not_legal = false");
+    await db.query("update wa_results set date = current_date - 10");
+    await db.query("select rebuild_results(null)");
+    expect(Number((await db.one("select pb_points from results where athlete_id = 'wa-1'")).pb_points)).toBe(0);
+    expect((await db.one("select recent_mark from athletes where id = 'wa-1'")).recent_mark).toBeNull();
+  });
+});
+
 describe("Wettkämpfe ohne Ergebnisse", () => {
   it("verschwinden beim Aufräumen, solche mit Ergebnissen bleiben", async () => {
     await athlete(db, 1, "M", "men", "800 Metres", 1150);

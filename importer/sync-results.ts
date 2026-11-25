@@ -146,7 +146,7 @@ await run(db, async () => {
             discipline: r.discipline, country: r.country, category: r.category,
             race: r.race, place: r.place, wa_race: r.race, wa_place: r.place,
             placing_round: null, placing_place: null,
-            mark: r.mark, result_score: r.resultScore, remark: r.remark,
+            mark: r.mark, result_score: r.resultScore, remark: r.remark, wind: r.wind, not_legal: r.notLegal,
             wa_competition_id: r.competitionId, wa_event_id: r.eventId, imported_at: new Date().toISOString(), source: "wa",
           });
         }
@@ -169,19 +169,19 @@ await run(db, async () => {
   const years = [...new Set(loaded.map((j) => j.year))];
 
   // Doppelte Schlüssel innerhalb eines Batches würden den Upsert abbrechen.
-  const key = (r: Row) => [r.athlete_id, r.date, r.discipline, r.wa_race, r.competition].join("|");
-  const unique = [...new Map(rows.map((r) => [key(r), r])).values()];
+  const unique = [...new Map(rows.map((r) => [resultKey(r), r])).values()];
 
   const { summary: placings, champs } = years.length ? await resolveEventPlacings(unique, api, years, names) : { summary: "", champs: [] };
 
   await chunked(unique, 500, async (chunk) => {
-    const { error } = await db.from("wa_results").upsert(chunk, { onConflict: "athlete_id,date,discipline,wa_race,competition" });
+    const { error } = await db.from("wa_results").upsert(chunk, { onConflict: "athlete_id,date,discipline,wa_race,competition,not_legal" });
     if (error) throw new Error(`wa_results: ${error.message}`);
   });
   // Eingebettete Meisterschaften: Platz separat setzen (nicht im Upsert, damit Einträge des Admins bleiben)
   for (const c of champs) {
     const { error } = await db.from("wa_results").update({ champ_place: c.place, champ_category: c.category })
-      .match({ athlete_id: c.athlete_id, date: c.date, discipline: c.discipline, wa_race: c.wa_race, competition: c.competition });
+      .match({ athlete_id: c.athlete_id, date: c.date, discipline: c.discipline, wa_race: c.wa_race, competition: c.competition,
+               not_legal: c.not_legal });
     if (error) throw new Error(`Meisterschaftsplatz: ${error.message}`);
   }
   // Ergebnisse, die WA nicht mehr führt (Korrekturen), für die erfolgreich geladenen Athleten entfernen
@@ -244,6 +244,12 @@ await run(db, async () => {
     (failures.length ? `\n${failures.length} Fehler:\n${failures.slice(0, 20).join("\n")}` : "");
 });
 
+/** Schlüssel eines WA-Ergebnisses (wie der eindeutige Schlüssel von wa_results): Rückenwind-Leistung und gültige Leistung
+ *  derselben Runde sind zwei Ergebnisse */
+function resultKey(r: { athlete_id?: unknown; date?: unknown; discipline?: unknown; wa_race?: unknown; competition?: unknown; not_legal?: unknown }) {
+  return [r.athlete_id, r.date, r.discipline, r.wa_race, r.competition, r.not_legal ? "w" : ""].join("|");
+}
+
 /**
  * Platzierungen aus den Detailergebnissen des Events:
  * - Finals mit mehreren Läufen (F1, F2, ...) -> kombinierte Platzierung, gewertet als Lauf "F"
@@ -251,7 +257,8 @@ await run(db, async () => {
  * Bereits aufgelöste Ergebnisse werden aus der DB übernommen, jedes Event nur einmal geladen.
  */
 async function resolveEventPlacings(rows: Row[], api: ApiConfig, years: number[], names: Map<string, string>) {
-  type Champ = { athlete_id: string; date: string; discipline: string; wa_race: string; competition: string; place: number; category: string | null };
+  type Champ = { athlete_id: string; date: string; discipline: string; wa_race: string; competition: string; not_legal: boolean;
+                 place: number; category: string | null };
   const champs: Champ[] = [];
   const split = rows.filter((r) => isSplitFinal(String(r.wa_race)));
   const prelims = rows.filter((r) => isPrelimRace(String(r.wa_race)) && PRELIM_CATEGORIES.includes(String(r.category)));
@@ -259,13 +266,13 @@ async function resolveEventPlacings(rows: Row[], api: ApiConfig, years: number[]
   const champRows = rows.filter((r) => /\bCh\.|Championships?/i.test(String(r.competition)) && r.wa_competition_id && r.wa_event_id);
   if (!split.length && !prelims.length && !champRows.length) return { summary: "keine Detailergebnisse nötig", champs };
 
-  const key = (r: Row) => [r.athlete_id, r.date, r.discipline, r.wa_race, r.competition].join("|");
-  type Known = { athlete_id: string; date: string; discipline: string; wa_race: string; competition: string;
+  const key = resultKey;
+  type Known = { athlete_id: string; date: string; discipline: string; wa_race: string; competition: string; not_legal: boolean;
                  race: string; place: number | null; placing_round: string | null; placing_place: number | null;
                  category: string | null; champ_place: number | null };
   const known = new Map<string, Known>();
   const prev = await selectAll<Known>((a, b) => db.from("wa_results")
-    .select("athlete_id, date, discipline, wa_race, competition, race, place, placing_round, placing_place, category, champ_place")
+    .select("athlete_id, date, discipline, wa_race, competition, not_legal, race, place, placing_round, placing_place, category, champ_place")
     .or("and(race.eq.F,wa_race.neq.F,wa_race.neq.),placing_round.not.is.null,champ_place.not.is.null")
     .gte("date", `${Math.min(...years)}-01-01`).lte("date", `${Math.max(...years)}-12-31`)
     .order("id").range(a, b));
@@ -297,7 +304,7 @@ async function resolveEventPlacings(rows: Row[], api: ApiConfig, years: number[]
     if (!c) continue;
     if (c.mainCategory) r.category = c.mainCategory;
     champs.push({ athlete_id: String(r.athlete_id), date: String(r.date), discipline: String(r.discipline), wa_race: String(r.wa_race),
-                  competition: String(r.competition), place: c.place, category: c.category });
+                  competition: String(r.competition), not_legal: !!r.not_legal, place: c.place, category: c.category });
     champCount++;
     console.log(`Meisterschaft: ${key(r)} → ${c.title} Platz ${c.place} (${c.category}), Rennen ${c.mainCategory}`);
   }

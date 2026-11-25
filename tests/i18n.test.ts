@@ -48,6 +48,7 @@ describe("Niederländisch", () => {
       .toContain("in Europa vanaf categorie A, in Nederland vanaf categorie E.");
     expect(nl("Fünfkampf (Halle)")).toBe("Vijfkamp (indoor)");
     expect(nl("Halbfinale 2")).toBe("Halve finale 2");
+    expect(nl("6.76 w (+2.5) · gültig 6.63")).toBe("6.76 w (+2.5) · geldig 6.63");
     expect(nl("Isabel VAN DEN BERG")).toBe("Isabel VAN DEN BERG");   // Namen bleiben, auch mit „ab“ darin
     expect(nl("in dieser Liga · Platz 3 von 104 auf der Position Mittelstrecke"))
       .toBe("in deze competitie · plaats 3 van 104 op de positie Middellange afstand");

@@ -481,7 +481,10 @@ const RULES = {
   'Meisterschaft im offenen Rennen': 'Kampioenschap in een open wedstrijd', 'der bessere Wert aus Rennplatz und Meisterschaftsplatz (🏆 = Titel).': 'de betere waarde van wedstrijdplaats en kampioenschapsplaats (🏆 = titel).',
   'Mehrkampf-Einzeldisziplin': 'Onderdeel van een meerkamp', 'Leistung ab {} WA-Punkten und Bonus, keine Platzierung (die zählt im Gesamtergebnis).': 'Prestatie vanaf {0} WA-punten en bonus, geen klassering (die telt in de einduitslag).',
   'Leistung und Platzierung wie die Einzelstrecke, davon ¼ (4er) bzw. ⅓ (3er); kein Bestleistungs-Bonus.': 'Prestatie en klassering zoals de losse afstand, daarvan ¼ (4 lopers) of ⅓ (3 lopers); geen PR-bonus.',
-  'Zwischenzeit': 'Tussentijd', 'nur Bestleistungs- und Rekord-Bonus.': 'alleen PR- en recordbonus.',
+  'Zwischenzeit': 'Tussentijd', 'Rückenwind über 2,0 m/s': 'Rugwind boven 2,0 m/s',
+  'Platz zählt; Leistung aus dem besseren WA-Wert (WA rechnet den Wind ein) und der besten gültigen Leistung; Bestleistungs- und Rekord-Bonus nur für gültige Leistungen.':
+    'Plaats telt; prestatie uit de betere WA-waarde (WA rekent de wind mee) en de beste geldige prestatie; PR- en recordbonus alleen voor geldige prestaties.',
+  '· gültig {}': '· geldig {0}', 'gültig': 'geldig', 'nur Bestleistungs- und Rekord-Bonus.': 'alleen PR- en recordbonus.',
   'fester Wert je Platz und Kategorie (z. B. GL-Sieg 1200) statt WA-Punkten, × {} × Länge (bis 3 km 1 · 6 km 1,5 · 12 km 2 · länger 2,5).':
     'vaste waarde per plaats en categorie (bijv. GL-zege 1200) in plaats van WA-punten, × {0} × afstand (tot 3 km 1 · 6 km 1,5 · 12 km 2 · langer 2,5).',
   'und aufgestellt': 'en opgesteld',
