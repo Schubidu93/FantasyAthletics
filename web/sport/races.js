@@ -1,6 +1,6 @@
 // Wettkämpfe: alle Wettkämpfe, bei denen Athleten aus dem Pool gestartet sind, mit deren Ergebnissen und Punkten
 import { html, useState, useMemo } from '../vendor/preact-htm.js';
-import { all, flag, fmtDate, fmtPts, Loading, nationCode, normName, openRider, q, rpcAll, sb, useLoad, withFlag } from '../lib.js';
+import { all, cached, flag, fmtDate, fmtPts, Loading, nationCode, normName, openRider, q, rpcAll, sb, useLoad, withFlag } from '../lib.js';
 import { BackToAthlete, CatBadge, DiscFilter, discLabel, discOrder, discWithKm, foldWind, markText, MONTHS, raceLabel, raceOrder, SexBadge, waResultUrl } from './lib.js';
 
 // WA-Wettkampfkategorien (World-Ranking-Regeln): OW = Olympia/WM … F = nationale Meetings
@@ -12,16 +12,6 @@ const matchCat = (r, g) => !g || (g === 'top' ? ['OW', 'DF', 'GW', 'GL'].include
 // Filter bleiben beim Zurückkehren aus einem Wettkampf erhalten
 const saved = { cat: '', country: '', term: '', year: String(new Date().getFullYear()), md: '', mine: false, disc: '' };
 const keep = (key, setter) => (v) => { saved[key] = v; setter(v); };
-// Wettkampfliste und Disziplinen ändern sich nur mit dem Ergebnisabruf: beim Wechsel zwischen den Reitern kurz behalten
-const CACHE = new Map();
-function cached(key, load) {
-  const hit = CACHE.get(key);
-  if (hit && Date.now() - hit.at < 5 * 60e3) return hit.promise;
-  const promise = load();
-  CACHE.set(key, { at: Date.now(), promise });
-  promise.catch(() => CACHE.delete(key));
-  return promise;
-}
 
 export function Races({ c, sub }) {
   const races = useLoad(() => cached('competitions', () => all(() => sb.from('competitions').select('id,name,category,country,venue,start_date,end_date')
