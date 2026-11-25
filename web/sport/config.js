@@ -7,6 +7,7 @@ export const SPORT = {
   app: 'Athletics Fantasy', emoji: '🏃', source: 'World Athletics',
   // Begriffe in den gebrauchten Fällen: ein Athlet, einen Athleten, die Athleten, den Athleten (Dativ Plural), des Athleten
   one: 'Athlet', oneAcc: 'Athleten', many: 'Athleten', manyDat: 'Athleten', oneGen: 'Athleten',
+  waiver: 'Wechsel',                         // Anträge auf freie Athleten (UCI Fantasy: „Waiver“); der Wechsel, die Wechsel
   pointsWord: 'Punkten',                       // „Sortiert nach …“
   ptsFormat: { minimumFractionDigits: 2, maximumFractionDigits: 2 },   // Anzeige der Punkte
   // Texte

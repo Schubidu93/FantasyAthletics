@@ -40,7 +40,7 @@ export function Lineup({ c }) {
           ${options.map((r) => html`<option value=${r.id}>${r.name}${used.has(r.id) && sel[slot] !== r.id ? ' (andere Position)' : ''}</option>`)}
         </select></li>`;
     })}</ul>
-    ${filled < slots.length && html`<p class="muted small">Für leere Positionen fehlt dir ein passender Athlet – hol dir einen per Waiver.</p>`}
+    ${filled < slots.length && html`<p class="muted small">Für leere Positionen fehlt dir ein passender Athlet – hol dir einen per Wechsel-Antrag.</p>`}
     <div class="row">
       <button class="primary" disabled=${a.busy}
         onClick=${() => a.run(() => rpc('set_lineup', { p_matchday: md.id, p_lineup: sel }), 'Aufstellung gespeichert.')}>

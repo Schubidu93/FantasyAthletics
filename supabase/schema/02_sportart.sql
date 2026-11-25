@@ -10,7 +10,7 @@ language sql immutable as $$
   select case p_key when 'one' then 'Athlet' when 'oneAcc' then 'Athleten' when 'many' then 'Athleten'
                     when 'manyDat' then 'Athleten' when 'team' then 'Team' when 'teamGen' then 'Teams'
                     when 'pool' then 'im Athletenpool' when 'importHint' then 'Workflow "Athletenpool laden"'
-                    when 'emoji' then '🏃' end;
+                    when 'emoji' then '🏃' when 'waiver' then 'Wechsel' end;
 $$;
 
 -- Punkte in Nachrichten wie in der App: zwei Nachkommastellen mit Komma (z. B. 30,00)

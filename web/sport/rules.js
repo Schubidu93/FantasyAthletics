@@ -56,7 +56,7 @@ export function Rules({ c }) {
         <li><strong>Team draften:</strong> ${l.roster_size} ${nt.adj} ${runOnly ? 'Läuferinnen und Läufer' : 'Leichtathletinnen und Leichtathleten'} pro Manager.</li>
         ${lineup ? html`<li><strong>Aufstellen:</strong> vor jedem Spieltag ${slots.length} Positionen besetzen.</li>` : html`<li><strong>Alle zählen:</strong> jeder Athlet im Kader punktet.</li>`}
         <li><strong>Punkte sammeln:</strong> für Leistung (WA-Punkte) und Platzierung jedes Ergebnisses.</li>
-        <li><strong>Kader verbessern:</strong> per Waiver und Tausch. Am Saisonende gewinnt, wer die meisten Punkte hat.</li>
+        <li><strong>Kader verbessern:</strong> per Wechsel-Antrag und Tausch. Am Saisonende gewinnt, wer die meisten Punkte hat.</li>
       </ol>
     </section>
 
@@ -72,9 +72,9 @@ export function Rules({ c }) {
         ${lineup && row('Positionen', slots.map(slotLabel).join(', '))}
         ${row('Draft', DRAFT[l.draft_mode] + (auction ? ` · ${l.draft_order === 'ranking' ? 'nach WA-Punkten' : 'reihum nominieren'}` : ''))}
         ${l.draft_mode !== 'offline' && row(l.draft_mode === 'snake' ? 'Zeit pro Pick' : l.draft_mode === 'blind' ? 'Zeit pro Athlet' : 'Zeit pro Gebot', `${l.bid_seconds} Sekunden`)}
-        ${draftCosts(l) ? row('Budget', `${l.budget} Punkte pro Manager`) : l.waiver_mode === 'faab' && row('FAAB-Budget', `${l.budget} Punkte für Waiver-Gebote`)}
-        ${row('Transfers', two ? 'Waiver-Runde, dann freie Phase' : 'nur Waiver')}
-        ${row('Waiver', l.waiver_mode === 'faab' ? 'FAAB (verdeckt bieten)' : 'Priorität (Letzter zuerst)')}
+        ${draftCosts(l) ? row('Budget', `${l.budget} Punkte pro Manager`) : l.waiver_mode === 'faab' && row('FAAB-Budget', `${l.budget} Punkte für Wechsel-Gebote`)}
+        ${row('Transfers', two ? 'Wechsel-Runde, dann freie Phase' : 'nur Wechsel-Runde')}
+        ${row('Wechsel', l.waiver_mode === 'faab' ? 'FAAB (verdeckt bieten)' : 'Priorität (Letzter zuerst)')}
         ${l.keeper_count > 0 && row('Keeper', `bis ${l.keeper_count}, Preis Vorjahr + ${l.keeper_surcharge}`)}
       </tbody></table>
     </section>
@@ -85,7 +85,7 @@ export function Rules({ c }) {
         ${l.draft_mode === 'snake' ? html`
           <li>Reihum je ein Athlet, jede Runde in umgekehrter Reihenfolge (1–2–3, 3–2–1). Startreihenfolge wird ausgelost.</li>
           <li>${l.bid_seconds} Sekunden pro Pick – sonst wird automatisch der beste freie Athlet gewählt.</li>
-          <li>Athleten kosten nichts${l.waiver_mode === 'faab' ? `; die ${l.budget} Punkte bleiben für FAAB-Waiver` : ''}.</li>`
+          <li>Athleten kosten nichts${l.waiver_mode === 'faab' ? `; die ${l.budget} Punkte bleiben für FAAB-Wechsel` : ''}.</li>`
         : l.draft_mode === 'live' ? html`
           <li><strong>${l.budget} Budgetpunkte</strong> pro Manager. Athleten kommen ${l.draft_order === 'ranking' ? 'nach WA-Punkten' : 'reihum nominiert'} unter den Hammer.</li>
           <li>Jedes Gebot +1 oder mehr, die Uhr springt auf ${l.bid_seconds} Sekunden zurück. Läuft sie ab, gewinnt das Höchstgebot.</li>
@@ -119,7 +119,7 @@ export function Rules({ c }) {
           <li>Wer auf welche Position darf, entscheidet die Schwerpunkt-Disziplin des Athleten (siehe unten).
             ${wildOnly.length ? `${wildOnly.join(', ')} ${wildOnly.length > 1 ? 'haben' : 'hat'} keine eigene Position, nur Wildcards.` : ''}</li>
           <li>Änderbar bis zum Stichtag, dann fest. Ohne Änderung gilt die Aufstellung vom vorigen Spieltag (beim ersten: automatisch die besten passenden).</li>
-          <li>Wird ein Athlet per Waiver ersetzt, rückt der neue nach, wenn er auf die Position passt.</li>
+          <li>Wird ein Athlet per Wechsel-Antrag ersetzt, rückt der neue nach, wenn er auf die Position passt.</li>
         </ul>` : html`<h4 class="rule-sub">Disziplinen</h4><table class="tbl rule-tbl"><tbody>
         ${AREAS.filter((a) => areas.includes(a)).map((a) => html`<tr key=${a}><td>${a}</td><td>${AREA_GROUPS[a].map((g) => GROUP_LABEL[g]).join(' · ')}</td></tr>`)}
       </tbody></table>`}
@@ -177,37 +177,37 @@ export function Rules({ c }) {
     </details>
 
     <details class="card rule-sec">
-      <summary><h3>Spieltage, Waiver und Tausch</h3></summary>
+      <summary><h3>Spieltage, Wechsel und Tausch</h3></summary>
       <h4 class="rule-sub">Ablauf vor jedem Spieltag</h4>
       <table class="tbl rule-tbl"><tbody>
         ${two ? html`
-          ${row('Waiver-Runde', 'bis eine Woche vor Spieltagstart (bei kurzen Spieltagen bis zur Hälfte des vorigen), dann Auswertung.')}
+          ${row('Wechsel-Runde', 'bis eine Woche vor Spieltagstart (bei kurzen Spieltagen bis zur Hälfte des vorigen), dann Auswertung.')}
           ${row('Freie Phase', 'danach bis zum Stichtag: freie Athleten sofort holen und abgeben – wer zuerst kommt.')}
           ${row('Stichtag', `Ende des Vortags: Tausche ausgeführt, Kader${lineup ? ' und Aufstellung' : ''} fest.`)}`
         : html`
-          ${row('Waiver', 'Anträge vom vorigen bis zum eigenen Stichtag.')}
-          ${row('Stichtag', `Vortag 20 Uhr: Waiver und Tausche ausgeführt, Kader${lineup ? ' und Aufstellung' : ''} fest.`)}`}
+          ${row('Wechsel', 'Anträge vom vorigen bis zum eigenen Stichtag.')}
+          ${row('Stichtag', `Vortag 20 Uhr: Wechsel und Tausche ausgeführt, Kader${lineup ? ' und Aufstellung' : ''} fest.`)}`}
         ${row('Spieltag', 'Wechsel gelten erst ab dem nächsten Spieltag. Punkte zwischen zwei Spieltagen verfallen.')}
         ${row('Danach', '7 Tage nach Ende eingefroren; bis dahin werden Korrekturen übernommen.')}
       </tbody></table>
-      <h4 class="rule-sub">Waiver</h4>
+      <h4 class="rule-sub">Wechsel</h4>
       <ul>
         <li>Freien Athleten wählen und einen eigenen abgeben (Kader bleibt voll); mehrere Anträge in Wunschreihenfolge.</li>
         <li>${l.waiver_mode === 'faab'
           ? 'FAAB: verdeckt mit dem Restbudget bieten; Höchstgebot gewinnt, bei Gleichstand der schlechter Platzierte.'
           : 'Priorität: Tabellenletzter zuerst, höchstens ein Athlet pro Runde; vor dem ersten Spieltag umgekehrte Draft-Reihenfolge.'}</li>
-        <li>${two ? 'In der Waiver-Runde Abgegebene sind ab der freien Phase wieder frei, in der freien Phase Abgegebene sofort.' : 'Abgegebene sind bis zum nächsten Stichtag gesperrt.'}</li>
+        <li>${two ? 'In der Wechsel-Runde Abgegebene sind ab der freien Phase wieder frei, in der freien Phase Abgegebene sofort.' : 'Abgegebene sind bis zum nächsten Stichtag gesperrt.'}</li>
         <li>Verletzte, gesperrte oder zurückgetretene Athleten (vom Admin markiert) sind sofort ersetzbar.</li>
       </ul>
       <h4 class="rule-sub">Tausch</h4>
       <ul>
         <li>Beide stimmen zu, dann 24 Stunden Veto für den Admin; ausgeführt zum nächsten Stichtag.</li>
-        <li>Ungleich möglich (1 gegen 2): Wer mehr bekommt, gibt dafür eigene Athleten ab; wer weniger bekommt, füllt per Waiver auf.</li>
+        <li>Ungleich möglich (1 gegen 2): Wer mehr bekommt, gibt dafür eigene Athleten ab; wer weniger bekommt, füllt per Wechsel-Antrag auf.</li>
       </ul>
       <h4 class="rule-sub">Tabelle und Nachrichten</h4>
       <ul>
         <li>Gleichstand: mehr Spieltagssiege, dann bester Einzelspieltag${draftCosts(l) ? ', dann weniger Budget ausgegeben' : ''}.</li>
-        <li>Push: „Neue Punkte“, Wochen-Zusammenfassung (montags 9 Uhr), Waiver-Ergebnisse und alles rund um Tausche.</li>
+        <li>Push: „Neue Punkte“, Wochen-Zusammenfassung (montags 9 Uhr), Wechsel-Ergebnisse und alles rund um Tausche.</li>
       </ul>
     </details>
 
