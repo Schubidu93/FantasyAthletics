@@ -63,19 +63,34 @@ drop function if exists competition_disciplines(text);
 create or replace function competition_disciplines(p_nation text default null)
 returns table (competition_id text, disciplines text[], men text[], women text[])
 language sql stable security definer set search_path = public as $$
-  with r as (
-    select 'wa-c' || w.wa_competition_id cid, w.discipline, a.gender
-      from wa_results w join athletes a on a.id = w.athlete_id
-     where w.wa_competition_id is not null and _nation_ok(p_nation, a)
-    union all
-    select c.id, w.discipline, a.gender
-      from wa_results w join athletes a on a.id = w.athlete_id
-      join competitions c on c.id !~ '^wa-c' and c.name = w.competition and w.date between c.start_date and coalesce(c.end_date, c.start_date)
-     where w.source = 'manual' and _nation_ok(p_nation, a))
-  select cid, array_agg(distinct discipline order by discipline),
-         coalesce(array_agg(distinct discipline order by discipline) filter (where gender = 'men'), '{}'),
-         coalesce(array_agg(distinct discipline order by discipline) filter (where gender = 'women'), '{}')
-    from r group by cid order by cid;
+  select x.competition_id, array_agg(distinct x.discipline order by x.discipline),
+         coalesce(array_agg(distinct x.discipline order by x.discipline) filter (where x.gender = 'men'), '{}'),
+         coalesce(array_agg(distinct x.discipline order by x.discipline) filter (where x.gender = 'women'), '{}')
+    from competition_discipline_index x
+   where p_nation is null or x.nation = p_nation   -- wie _nation_ok (nation ist schon mit GER ergänzt)
+   group by x.competition_id order by x.competition_id;
+$$;
+
+-- Wettkämpfe, in denen diese Athleten Ergebnisse haben (Filter „nur mit Athleten aus Kadern“)
+create or replace function athlete_competitions(p_athletes text[]) returns table (competition_id text)
+language sql stable security definer set search_path = public as $$
+  select distinct 'wa-c' || w.wa_competition_id from wa_results w
+   where w.athlete_id = any (p_athletes) and w.wa_competition_id is not null;
+$$;
+
+-- Auszug für competition_disciplines neu bilden (WA-Wettkämpfe über die ID, Nachträge über Name und Datum)
+create or replace function refresh_competition_index() returns void
+language sql security definer set search_path = public as $$
+  delete from competition_discipline_index;
+  insert into competition_discipline_index (competition_id, discipline, gender, nation)
+  select 'wa-c' || w.wa_competition_id, w.discipline, a.gender, coalesce(a.nation, 'GER')
+    from wa_results w join athletes a on a.id = w.athlete_id
+   where w.wa_competition_id is not null
+  union
+  select c.id, w.discipline, a.gender, coalesce(a.nation, 'GER')
+    from wa_results w join athletes a on a.id = w.athlete_id
+    join competitions c on c.id !~ '^wa-c' and c.name = w.competition and w.date between c.start_date and coalesce(c.end_date, c.start_date)
+   where w.source = 'manual';
 $$;
 
 -- Ergebnisse eines Wettkampfs (WA über die Wettkampf-ID, Nachträge über Name und Datum) mit Fantasy-Punkten,
@@ -182,6 +197,7 @@ begin
    where b.id = a.id and (a.recent_mark, a.recent_score, a.recent_discipline) is distinct from (b.mark, b.result_score, b.discipline);
   -- wer für ein anderes Land startet, verschwindet ganz (außer er wird in einer Liga verwendet)
   perform prune_athletes(true);
+  perform refresh_competition_index();   -- Wettkampfliste: Disziplinen je Land (nach dem Aufräumen)
   return n;
 end $$;
 

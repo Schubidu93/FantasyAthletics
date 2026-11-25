@@ -12,10 +12,20 @@ const matchCat = (r, g) => !g || (g === 'top' ? ['OW', 'DF', 'GW', 'GL'].include
 // Filter bleiben beim Zurückkehren aus einem Wettkampf erhalten
 const saved = { cat: '', country: '', term: '', year: String(new Date().getFullYear()), md: '', mine: false, disc: '' };
 const keep = (key, setter) => (v) => { saved[key] = v; setter(v); };
+// Wettkampfliste und Disziplinen ändern sich nur mit dem Ergebnisabruf: beim Wechsel zwischen den Reitern kurz behalten
+const CACHE = new Map();
+function cached(key, load) {
+  const hit = CACHE.get(key);
+  if (hit && Date.now() - hit.at < 5 * 60e3) return hit.promise;
+  const promise = load();
+  CACHE.set(key, { at: Date.now(), promise });
+  promise.catch(() => CACHE.delete(key));
+  return promise;
+}
 
 export function Races({ c, sub }) {
-  const races = useLoad(() => all(() => sb.from('competitions').select('id,name,category,country,venue,start_date,end_date')
-    .gte('start_date', '2025-01-01').order('start_date', { ascending: false }).order('id')), []);
+  const races = useLoad(() => cached('competitions', () => all(() => sb.from('competitions').select('id,name,category,country,venue,start_date,end_date')
+    .gte('start_date', '2025-01-01').order('start_date', { ascending: false }).order('id'))), []);
   if (sub) return html`<${RaceDetail} key=${sub} c=${c} slug=${decodeURIComponent(sub)} />`;
   if (!races.data) return html`<${Loading} error=${races.error} />`;
   return html`<${RaceList} c=${c} races=${races.data.map((r) => ({ ...r, country: r.country && nationCode(r.country) }))} />`;
@@ -54,22 +64,16 @@ function RaceList({ c, races }) {
   const [disc, setDiscRaw] = useState(saved.disc);
   const setDisc = keep('disc', setDiscRaw);
   // Disziplinen je Wettkampf (für den Disziplin-Filter)
-  const discs = useLoad(async () => Object.fromEntries((await rpcAll('competition_disciplines', { p_nation: c.league.nation || 'GER' })).map((r) => [r.competition_id, r])), []);
+  const nation = c.league.nation || 'GER';
+  const discs = useLoad(() => cached(`discs:${nation}`, async () =>
+    Object.fromEntries((await rpcAll('competition_disciplines', { p_nation: nation })).map((r) => [r.competition_id, r]))), []);
   const discNames = useMemo(() => [...new Set(Object.values(discs.data || {}).flatMap((x) => x.disciplines))], [discs.data]);
   const setCatV = keep('cat', setCatRaw), setCountry = keep('country', setCountryRaw), setTerm = keep('term', setTermRaw);
   const setYear = keep('year', setYearRaw), setMine = keep('mine', setMineRaw);
   const setMd = (v) => { keep('md', setMdRaw)(v); if (v) setYear(''); };
   // Wettkämpfe mit Athleten aus Kadern dieser Liga (für den Filter „nur mit Liga-Athleten“)
-  const owned = useLoad(async () => {
-    const slugs = Object.keys(c.owner);
-    const out = new Set();
-    for (let i = 0; i < slugs.length; i += 150) {
-      for (const r of await all(() => sb.from('wa_results').select('wa_competition_id').in('athlete_id', slugs.slice(i, i + 150)).order('id'))) {
-        if (r.wa_competition_id) out.add(`wa-c${r.wa_competition_id}`);
-      }
-    }
-    return out;
-  }, [c.league.id]);
+  const owned = useLoad(async () => new Set((await rpcAll('athlete_competitions', { p_athletes: Object.keys(c.owner) }))
+    .map((r) => r.competition_id)), [c.league.id]);
   const years = useMemo(() => [...new Set(races.map((r) => (r.start_date || '').slice(0, 4)).filter(Boolean))].sort().reverse(), [races]);
   const countries = useMemo(() => [...new Set(races.map((r) => r.country).filter(Boolean))].sort(), [races]);
   const md = (c.matchdays || []).find((m) => m.id === mdId);

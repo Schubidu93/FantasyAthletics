@@ -37,6 +37,7 @@ alter table pool_nations enable row level security;
 alter table calendar_events enable row level security;
 alter table extra_calendar_events enable row level security;
 alter table athlete_sync    enable row level security;   -- keine Policies: nur Service-Key
+alter table competition_discipline_index enable row level security;   -- keine Policies: nur über competition_disciplines()
 alter table athlete_feed    enable row level security;   -- keine Policies: nur Service-Key
 alter table push_subscriptions enable row level security;
 alter table notifications   enable row level security;

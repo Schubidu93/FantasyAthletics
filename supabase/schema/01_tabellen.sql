@@ -307,6 +307,15 @@ create table if not exists scoring_coefficients (
   primary key (discipline, gender)
 );
 create index if not exists wa_results_date on wa_results (date);
+-- Disziplinen je Wettkampf, Geschlecht und Land (Wettkampfliste, Disziplin-Filter): Auszug aus wa_results, den
+-- refresh_competition_index() mit jedem refresh_pool (also auch nach jeder Punkteberechnung) neu bildet – die Liste lädt so ohne Rechnen über alle Ergebnisse
+create table if not exists competition_discipline_index (
+  competition_id text not null,
+  discipline     text not null,
+  gender         text not null,
+  nation         text not null,
+  primary key (competition_id, discipline, gender, nation)
+);
 
 -- Wettkämpfe (aus den Ergebnissen der Pool-Athleten): id = 'wa-c<WA-Wettkampf-ID>'
 create table if not exists competitions (
