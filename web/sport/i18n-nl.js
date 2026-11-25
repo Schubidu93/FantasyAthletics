@@ -2,7 +2,9 @@
 // wird die fertige Seite (registerTexts/tr in web/lib.js). Schlüssel = deutscher Text wie im Code, eingesetzte Werte ${…} als {};
 // in der Übersetzung stehen sie als {0}, {1} … (werden selbst übersetzt) oder fallen weg, wenn der Wert hier fest ist (z. B. „Athlet“).
 // tests/i18n.test.ts findet jeden deutschen Text der App und scheitert, wenn hier eine Übersetzung fehlt.
-import { registerTexts, tr } from '../lib.js';
+import { registerTexts, translate } from '../i18n.js';
+
+const tr = (s) => translate(s, 'nl');
 
 const UI = {
   // App, Navigation, Menü
