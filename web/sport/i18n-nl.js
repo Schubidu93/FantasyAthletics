@@ -120,7 +120,10 @@ const UI = {
   'nimmt jeden Athleten des Bereichs auf, eine einzelne Disziplin nur ihre Spezialisten.': 'neemt elke atleet van het onderdeel op, een los onderdeel alleen zijn specialisten.',
   '{} Positionen:': '{0} posities:', 'je ein Mann und eine Frau in': 'telkens een man en een vrouw in', 'je eine in': 'telkens een in',
   'eine Wildcard': 'een wildcard', '{} Wildcards': '{0} wildcards', 'Der Kader muss mindestens {} Athleten haben.': 'De selectie moet minstens {0} atleten hebben.',
-  'Land': 'Land', 'offen': 'open', '{}, {} Uhr': '{0}, {1} uur', 'letzte 30 Tage': 'laatste 30 dagen', 'in den Niederlanden': 'in Nederland',
+  'Land': 'Land', 'offen': 'open', ', zählt zu 1/{}': ', telt voor 1/{0}', 'alle {}': 'alle {0}',
+  '· Platz {} von {} auf der Position {}': '· plaats {0} van {1} op de positie {2}', ', auch {}': ', ook {0}',
+  'jede Disziplin der Liga{}': 'elk onderdeel van de competitie{0}', 'bis {}': 'tot {0}', 'Pick {} von {} · Runde {}': 'Pick {0} van {1} · ronde {2}',
+  'Saison läuft · {}': 'Seizoen loopt · {0}', 'Saison läuft · nächster Spieltag {} ab {}': 'Seizoen loopt · volgende speelronde {0} vanaf {1}', '{}, {} Uhr': '{0}, {1} uur', 'letzte 30 Tage': 'laatste 30 dagen', 'in den Niederlanden': 'in Nederland',
   'in Deutschland': 'in Duitsland', ', dazu {} (beliebige Disziplin)': ', plus {0} (elk onderdeel)',
   'abgeschlossen (Korrekturen 7 Tage)': 'afgesloten (correcties 7 dagen)', 'vom Admin korrigiert': 'door de beheerder gecorrigeerd',
 };
