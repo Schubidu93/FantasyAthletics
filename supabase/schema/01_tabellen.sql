@@ -370,6 +370,16 @@ insert into extra_calendar_events (name, start_date, end_date, venue, source_url
   ('Deutsche Meisterschaften', '2027-07-31', '2027-08-01', null,
    'https://www.leichtathletik.de/fileadmin/user_upload/002_Wettkaempfe/06_Service/04_DM-Bewerbung/Termine_Deutsche_Meisterschaften_2027.pdf')
 on conflict (name, start_date) do update set end_date = excluded.end_date, venue = excluded.venue, source_url = excluded.source_url;
+-- Niederlande (Atletiekunie, Toewijzing NK's 2027–2030 / Nederlandse kampioenschappen)
+insert into extra_calendar_events (name, start_date, end_date, venue, source_url, nation) values
+  ('Dutch Indoor Combined Events Championships', '2027-02-06', '2027-02-07', 'Apeldoorn',
+   'https://www.atletiek.nl/wedstrijdsport/wedstrijden/nederlandse-kampioenschappen/', 'NED'),
+  ('Dutch Indoor Championships', '2027-02-20', '2027-02-21', 'Apeldoorn',
+   'https://www.atletiek.nl/wedstrijdsport/wedstrijden/nederlandse-kampioenschappen/', 'NED'),
+  ('Dutch Championships', '2027-07-31', '2027-08-01', 'Hilversum',
+   'https://www.atletiek.nl/wedstrijdsport/wedstrijden/nederlandse-kampioenschappen/', 'NED')
+on conflict (name, start_date) do update set end_date = excluded.end_date, venue = excluded.venue, source_url = excluded.source_url,
+  nation = excluded.nation;
 
 -- Ergebnisabruf: wann wurden die Ergebnisse eines Athleten für ein Jahr zuletzt komplett geladen?
 create table if not exists athlete_sync (

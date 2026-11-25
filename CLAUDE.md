@@ -61,7 +61,7 @@
   Gemeinsam sind auch `datasync/db.py`, `send_push.py`, `send_feedback.py` (App-Name aus `datasync/app_info.py`), `web/vendor/`,
   `tsconfig.json` und der Testablauf `ci.yml`; ihre Tests stehen in `tests/datasync/test_common.py`.
 - Sprache: Die App ist deutsch geschrieben. `SPORT.uiLang(liga)` (in `sport/config.js`) wählt die Sprache je Liga (Niederlande → `nl`);
-  `setLang`/`registerTexts` in `web/lib.js` übersetzen dann die fertige Seite Textstück für Textstück aus dem Wörterbuch
+  `setLang`/`registerTexts` in `web/i18n.js` (gemeinsam) übersetzen dann die fertige Seite Satz für Satz aus dem Wörterbuch
   `web/sport/i18n-nl.js` (Test `tests/i18n.test.ts`: jeder Schlüssel kommt in der App vor). Neue Texte dort mit eintragen. UCI Fantasy bleibt deutsch.
 - Tests: `tests/sql/NN_*.sql` (Spiellogik, in beiden Apps gleich), `tests/*.test.ts` (u. a. `workflows.test.ts`: jeder von der
   Datenbank gestartete Ablauf existiert), Oberflächentest `tests/ui/smoke.test.ts`

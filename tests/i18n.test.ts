@@ -2,17 +2,12 @@
 // Übersetzung, und jeder Schlüssel muss in der App vorkommen (sonst ist er veraltet und die Stelle bliebe deutsch).
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { germanTexts } from "./i18n-extract";
 
-type Pattern = [RegExp, string | ((...a: string[]) => string)];
-const { texts, patterns } = vi.hoisted(() => ({ texts: {} as Record<string, string>, patterns: [] as Pattern[] }));
-vi.mock("../web/lib.js", () => ({ registerTexts: (_l: string, t: Record<string, string>, p: Pattern[] = []) => {
-  Object.assign(texts, t); patterns.push(...p);
-} }));
-const viaPattern = (s: string) => { for (const [re, rep] of patterns) if (re.test(s)) return s.replace(re, rep as string); return s; };
-
-import "../web/sport/i18n-nl.js";   // meldet sein Wörterbuch über das (nachgebildete) registerTexts an
+// @ts-expect-error – reines JavaScript der App
+import { dictionary, translate } from "../web/i18n.js";
+import "../web/sport/i18n-nl.js";   // meldet das niederländische Wörterbuch an
 
 const WEB = join(import.meta.dirname, "..", "web");
 // keine sichtbaren Texte (Code-Werte, Fehlertexte von Supabase, Zeitzone)
@@ -21,7 +16,8 @@ const squash = (s: string) => s.replace(/\s+/g, " ").trim();
 
 describe("Niederländisch", () => {
   const found = germanTexts(WEB);
-  const keys = new Set(Object.keys(texts).map(squash));
+  const entries: [string, string | ((...a: string[]) => string)][] = dictionary("nl");
+  const keys = new Set(entries.map(([k]) => k));
 
   it("jeder deutsche Text der App hat eine Übersetzung", () => {
     const missing = [...found.keys()].filter((t) => !keys.has(t) && !NOT_TEXT.has(t)).map((t) => `${t}   (${found.get(t)!.join(", ")})`);
@@ -38,17 +34,30 @@ describe("Niederländisch", () => {
   });
 
   it("Platzhalter der Übersetzung passen zum Schlüssel", () => {
-    const bad = Object.entries(texts).filter(([k, v]) => {
-      const n = squash(k).split("{}").length - 1;
-      return (v.match(/\{(\d)\}/g) ?? []).some((m) => Number(m[1]) >= n);
-    }).map(([k]) => k);
+    const bad = entries.filter(([k, v]) => typeof v === "string"
+      && (v.match(/\{(\d)\}/g) ?? []).some((m) => Number(m[1]) >= k.split("{}").length - 1)).map(([k]) => k);
     expect(bad).toEqual([]);
   });
 
+  it("übersetzt Sätze, Teile und Muster", () => {
+    const nl = (x: string) => translate(x, "nl");
+    expect(nl("Stabhochsprung · Jg. 1994")).toBe("Polsstokhoogspringen · geb. 1994");   // „{} ab {}“ passt nicht mitten ins Wort
+    // Zeilenumbruch neben eingesetztem Wert fehlt (htm): „A,in den …“
+    expect(nl("Kommende Wettkämpfe mit Disziplinen dieser Liga (Lauf): international ab Gold Label, in Europa ab Kategorie A,"
+      + "in den Niederlanden ab Kategorie E. Das Programm stammt von World Athletics, sobald der Veranstalter es eingetragen hat."))
+      .toContain("in Europa vanaf categorie A, in Nederland vanaf categorie E.");
+    expect(nl("Fünfkampf (Halle)")).toBe("Vijfkamp (indoor)");
+    expect(nl("Halbfinale 2")).toBe("Halve finale 2");
+    expect(nl("Isabel VAN DEN BERG")).toBe("Isabel VAN DEN BERG");   // Namen bleiben, auch mit „ab“ darin
+    expect(nl("in dieser Liga · Platz 3 von 104 auf der Position Mittelstrecke"))
+      .toBe("in deze competitie · plaats 3 van 104 op de positie Middellange afstand");
+    expect(nl("Mutig. Sehr mutig. Auf diesen Kader wettet niemand.")).toBe("Moedig. Heel moedig. Op deze selectie wedt niemand.");
+  });
+
   it("Muster: Restzeit, Wochentag", () => {
-    expect(viaPattern("in 1 Tag")).toBe("over 1 dag");
-    expect(viaPattern("in 2 Tagen 16 Std.")).toBe("over 2 dagen 16 uur");
-    expect(viaPattern("in 3 Std. 5 Min.")).toBe("over 3 uur 5 min.");
-    expect(viaPattern("Fr., 27.11.26")).toBe("vr., 27.11.26");
+    expect(translate("in 1 Tag", "nl")).toBe("over 1 dag");
+    expect(translate("in 2 Tagen 16 Std.", "nl")).toBe("over 2 dagen 16 uur");
+    expect(translate("in 3 Std. 5 Min.", "nl")).toBe("over 3 uur 5 min.");
+    expect(translate("Fr., 27.11.26", "nl")).toBe("vr., 27.11.26");
   });
 });
