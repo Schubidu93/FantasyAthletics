@@ -81,7 +81,7 @@ $$;
 -- Auszug für competition_disciplines neu bilden (WA-Wettkämpfe über die ID, Nachträge über Name und Datum)
 create or replace function refresh_competition_index() returns void
 language sql security definer set search_path = public as $$
-  delete from competition_discipline_index;
+  delete from competition_discipline_index where true;   -- Supabase verbietet DELETE ohne WHERE (pg_safeupdate)
   insert into competition_discipline_index (competition_id, discipline, gender, nation)
   select 'wa-c' || w.wa_competition_id, w.discipline, a.gender, coalesce(a.nation, 'GER')
     from wa_results w join athletes a on a.id = w.athlete_id
