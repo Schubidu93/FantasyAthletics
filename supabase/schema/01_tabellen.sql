@@ -362,6 +362,8 @@ create table if not exists extra_calendar_events (
   source_url text not null,
   primary key (name, start_date)
 );
+-- Land der Meisterschaft (Spieltag-Vorschläge zeigen nur die des Landes der Liga)
+alter table extra_calendar_events add column if not exists nation text not null default 'GER';
 insert into extra_calendar_events (name, start_date, end_date, venue, source_url) values
   ('Deutsche Hallenmeisterschaften', '2027-02-19', '2027-02-21', null,
    'https://www.leichtathletik.de/fileadmin/user_upload/002_Wettkaempfe/06_Service/04_DM-Bewerbung/Termine_Deutsche_Meisterschaften_2027.pdf'),
