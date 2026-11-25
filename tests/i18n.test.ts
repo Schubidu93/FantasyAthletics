@@ -48,6 +48,15 @@ describe("Niederländisch", () => {
       .toContain("in Europa vanaf categorie A, in Nederland vanaf categorie E.");
     expect(nl("Fünfkampf (Halle)")).toBe("Vijfkamp (indoor)");
     expect(nl("Halbfinale 2")).toBe("Halve finale 2");
+    expect(nl(" · Vorlauf 2")).toBe(" · Serie 2");
+    expect(nl("2026: 791,46 Punkte · Platz 1")).toBe("2026: 791,46 punten · Plaats 1");
+    expect(nl("2 Meilen · Hochsprung · 3000 m Hindernis · Halbmarathon Gehen · Fünfkampf (Halle)"))
+      .toBe("2 mijl · Hoogspringen · 3000 m steeple · Halve marathon snelwandelen · Vijfkamp (indoor)");   // Faktoren-Liste in den Regeln
+    expect(["Siebenkampf U18 (Halle)", "Diskuswurf (1,5kg)", "60 m Hürden (91.4cm)", "Fünfkampf Girls (Halle)"].map(nl))
+      .toEqual(["Zevenkamp U18 (indoor)", "Discuswerpen (1,5kg)", "60 m horden (91.4cm)", "Vijfkamp meisjes (indoor)"]);
+    expect(["3000 m Hindernis", "4x400 m Staffel Mixed", "20 km Gehen", "2 Meilen (Halle)", "Halbmarathon Gehen"].map(nl))
+      .toEqual(["3000 m steeple", "4x400 m estafette gemengd", "20 km snelwandelen", "2 mijl (indoor)", "Halve marathon snelwandelen"]);   // Textstück hinter einem eingesetzten Wert
+    expect(nl("6.76 w (+2.5) · gültig 6.63")).toBe("6.76 w (+2.5) · geldig 6.63");
     expect(nl("Isabel VAN DEN BERG")).toBe("Isabel VAN DEN BERG");   // Namen bleiben, auch mit „ab“ darin
     expect(nl("in dieser Liga · Platz 3 von 104 auf der Position Mittelstrecke"))
       .toBe("in deze competitie · plaats 3 van 104 op de positie Middellange afstand");

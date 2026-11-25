@@ -50,7 +50,7 @@ describe("Zwischenzeiten und Rekorde", () => {
     await db.query("select set_result_record($1, 'WR')", [id]);
     await db.query(`insert into wa_results (athlete_id, date, competition, discipline, wa_race, mark, result_score)
       values ('wa-1', '${Y}-07-18', 'London Meet, London - Diamond Discipline', 'Mile', 'F', '3:46.82', 1242)
-      on conflict (athlete_id, date, discipline, wa_race, competition) do update set mark = excluded.mark`);
+      on conflict (athlete_id, date, discipline, wa_race, competition, not_legal) do update set mark = excluded.mark`);
     expect((await db.one("select record from wa_results where id = $1", [id])).record).toBe("WR");
   });
 });

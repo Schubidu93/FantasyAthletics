@@ -120,7 +120,9 @@ const UI = {
   'nimmt jeden Athleten des Bereichs auf, eine einzelne Disziplin nur ihre Spezialisten.': 'neemt elke atleet van het onderdeel op, een los onderdeel alleen zijn specialisten.',
   '{} Positionen:': '{0} posities:', 'je ein Mann und eine Frau in': 'telkens een man en een vrouw in', 'je eine in': 'telkens een in',
   'eine Wildcard': 'een wildcard', '{} Wildcards': '{0} wildcards', 'Der Kader muss mindestens {} Athleten haben.': 'De selectie moet minstens {0} atleten hebben.',
-  'Land': 'Land', 'offen': 'open', ', zählt zu 1/{}': ', telt voor 1/{0}', 'alle {}': 'alle {0}',
+  'Land': 'Land', 'offen': 'open', 'OW – Olympia/WM': 'OW – Olympische Spelen/WK', 'DF – DL-Finale': 'DF – DL-finale',
+  'GW – Hallen-WM, Diamond League': 'GW – WK indoor, Diamond League', 'GL – EM, Gold-Meetings': 'GL – EK, Gold-meetings',
+  'B – u. a. DM': 'B – o.a. NK', ', zählt zu 1/{}': ', telt voor 1/{0}', 'alle {}': 'alle {0}',
   '· Platz {} von {} auf der Position {}': '· plaats {0} van {1} op de positie {2}', ', auch {}': ', ook {0}',
   'jede Disziplin der Liga{}': 'elk onderdeel van de competitie{0}', 'bis {}': 'tot {0}', 'Pick {} von {} · Runde {}': 'Pick {0} van {1} · ronde {2}',
   'Saison läuft · {}': 'Seizoen loopt · {0}', 'Saison läuft · nächster Spieltag {} ab {}': 'Seizoen loopt · volgende speelronde {0} vanaf {1}', '{}, {} Uhr': '{0}, {1} uur', 'letzte 30 Tage': 'laatste 30 dagen', 'in den Niederlanden': 'in Nederland',
@@ -481,7 +483,10 @@ const RULES = {
   'Meisterschaft im offenen Rennen': 'Kampioenschap in een open wedstrijd', 'der bessere Wert aus Rennplatz und Meisterschaftsplatz (🏆 = Titel).': 'de betere waarde van wedstrijdplaats en kampioenschapsplaats (🏆 = titel).',
   'Mehrkampf-Einzeldisziplin': 'Onderdeel van een meerkamp', 'Leistung ab {} WA-Punkten und Bonus, keine Platzierung (die zählt im Gesamtergebnis).': 'Prestatie vanaf {0} WA-punten en bonus, geen klassering (die telt in de einduitslag).',
   'Leistung und Platzierung wie die Einzelstrecke, davon ¼ (4er) bzw. ⅓ (3er); kein Bestleistungs-Bonus.': 'Prestatie en klassering zoals de losse afstand, daarvan ¼ (4 lopers) of ⅓ (3 lopers); geen PR-bonus.',
-  'Zwischenzeit': 'Tussentijd', 'nur Bestleistungs- und Rekord-Bonus.': 'alleen PR- en recordbonus.',
+  'Zwischenzeit': 'Tussentijd', 'Rückenwind über 2,0 m/s': 'Rugwind boven 2,0 m/s',
+  'Platz zählt; Leistung aus dem besseren WA-Wert (WA rechnet den Wind ein) und der besten gültigen Leistung; Bestleistungs- und Rekord-Bonus nur für gültige Leistungen.':
+    'Plaats telt; prestatie uit de betere WA-waarde (WA rekent de wind mee) en de beste geldige prestatie; PR- en recordbonus alleen voor geldige prestaties.',
+  '· gültig {}': '· geldig {0}', 'gültig': 'geldig', 'nur Bestleistungs- und Rekord-Bonus.': 'alleen PR- en recordbonus.',
   'fester Wert je Platz und Kategorie (z. B. GL-Sieg 1200) statt WA-Punkten, × {} × Länge (bis 3 km 1 · 6 km 1,5 · 12 km 2 · länger 2,5).':
     'vaste waarde per plaats en categorie (bijv. GL-zege 1200) in plaats van WA-punten, × {0} × afstand (tot 3 km 1 · 6 km 1,5 · 12 km 2 · langer 2,5).',
   'und aufgestellt': 'en opgesteld',
@@ -524,6 +529,15 @@ registerTexts('nl', { ...UI, ...VIEWS, ...ADMIN, ...RULES }, [
   [/^in (\d+) Std\. (\d+) Min\.$/, 'over $1 uur $2 min.'],
   [/^in (\d+) Min\.$/, 'over $1 min.'],
   [/^(.+) ([MF])$/, (_, a, g) => `${tr(a)} ${g}`],   // Aufstellungsplätze („Hindernis M“)
-  [/^(.+) \(Halle\)$/, (_, a) => `${tr(a)} (indoor)`],
+  [/^Lauf (\d+)$/, 'Race $1'],   // Lauf einer Runde (raceLabel), nicht der Bereich „Lauf“
+  // Zusätze hinter der Disziplin: Halle, Gewicht/Höhe, Altersklasse („Siebenkampf U18 (Halle)“, „Diskuswurf (1,5kg)“)
+  [/^(?!.*(?: · |, ))(.+?)((?: (?:U\d{2}|Boys|Girls)| \((?:Halle|[\d.,]+\s?(?:kg|g|cm))\))+)$/, (_, a, rest) => `${tr(a)}${rest
+    .replace('(Halle)', '(indoor)').replace(' Boys', ' jongens').replace(' Girls', ' meisjes')}`],
+  // Disziplinen mit Strecke („3000 m Hindernis“, „4x400 m Staffel Mixed“, „Halbmarathon Gehen“): Wörter einzeln
+  // (nur einzelne Namen – Listen mit „ · “ werden vorher geteilt)
+  [/^(?!.*(?: · |, ))(?=\d|4x|Meile|Halbmarathon|Marathon|Berglauf|Hour ).*\b(?:Hindernis|Hürden|Gehen|Staffel|Meilen?|Straße|Berglauf|Halbmarathon|Mixed)(?![\wäöüß])/,
+    (s) => s.replace(/Halbmarathon/g, 'halve marathon').replace(/Hindernis/g, 'steeple').replace(/Hürden/g, 'horden')
+      .replace(/Gehen/g, 'snelwandelen').replace(/Staffel/g, 'estafette').replace(/Meilen?/g, 'mijl').replace(/Straße/g, 'weg')
+      .replace(/Berglauf/g, 'Bergloop').replace(/Mixed/g, 'gemengd').replace(/^Hour /, 'Uur ').replace(/^halve/, 'Halve')],
   [/^(Mo|Di|Mi|Do|Fr|Sa|So)\.,/, (w) => ({ Mo: 'ma', Di: 'di', Mi: 'wo', Do: 'do', Fr: 'vr', Sa: 'za', So: 'zo' })[w.slice(0, 2)] + '.,'],
 ]);

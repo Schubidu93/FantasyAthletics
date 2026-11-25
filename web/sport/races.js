@@ -1,7 +1,7 @@
 // Wettkämpfe: alle Wettkämpfe, bei denen Athleten aus dem Pool gestartet sind, mit deren Ergebnissen und Punkten
 import { html, useState, useMemo } from '../vendor/preact-htm.js';
 import { all, flag, fmtDate, fmtPts, Loading, nationCode, normName, openRider, q, rpcAll, sb, useLoad, withFlag } from '../lib.js';
-import { BackToAthlete, CatBadge, DiscFilter, discLabel, discOrder, discWithKm, MONTHS, raceLabel, raceOrder, SexBadge, waResultUrl } from './lib.js';
+import { BackToAthlete, CatBadge, DiscFilter, discLabel, discOrder, discWithKm, foldWind, markText, MONTHS, raceLabel, raceOrder, SexBadge, waResultUrl } from './lib.js';
 
 // WA-Wettkampfkategorien (World-Ranking-Regeln): OW = Olympia/WM … F = nationale Meetings
 const CATS = [['', 'Alle Kategorien'], ['top', 'OW, DF, GW, GL'], ['OW', 'OW – Olympia/WM'], ['DF', 'DF – DL-Finale'],
@@ -12,10 +12,20 @@ const matchCat = (r, g) => !g || (g === 'top' ? ['OW', 'DF', 'GW', 'GL'].include
 // Filter bleiben beim Zurückkehren aus einem Wettkampf erhalten
 const saved = { cat: '', country: '', term: '', year: String(new Date().getFullYear()), md: '', mine: false, disc: '' };
 const keep = (key, setter) => (v) => { saved[key] = v; setter(v); };
+// Wettkampfliste und Disziplinen ändern sich nur mit dem Ergebnisabruf: beim Wechsel zwischen den Reitern kurz behalten
+const CACHE = new Map();
+function cached(key, load) {
+  const hit = CACHE.get(key);
+  if (hit && Date.now() - hit.at < 5 * 60e3) return hit.promise;
+  const promise = load();
+  CACHE.set(key, { at: Date.now(), promise });
+  promise.catch(() => CACHE.delete(key));
+  return promise;
+}
 
 export function Races({ c, sub }) {
-  const races = useLoad(() => all(() => sb.from('competitions').select('id,name,category,country,venue,start_date,end_date')
-    .gte('start_date', '2025-01-01').order('start_date', { ascending: false }).order('id')), []);
+  const races = useLoad(() => cached('competitions', () => all(() => sb.from('competitions').select('id,name,category,country,venue,start_date,end_date')
+    .gte('start_date', '2025-01-01').order('start_date', { ascending: false }).order('id'))), []);
   if (sub) return html`<${RaceDetail} key=${sub} c=${c} slug=${decodeURIComponent(sub)} />`;
   if (!races.data) return html`<${Loading} error=${races.error} />`;
   return html`<${RaceList} c=${c} races=${races.data.map((r) => ({ ...r, country: r.country && nationCode(r.country) }))} />`;
@@ -54,22 +64,16 @@ function RaceList({ c, races }) {
   const [disc, setDiscRaw] = useState(saved.disc);
   const setDisc = keep('disc', setDiscRaw);
   // Disziplinen je Wettkampf (für den Disziplin-Filter)
-  const discs = useLoad(async () => Object.fromEntries((await rpcAll('competition_disciplines', { p_nation: c.league.nation || 'GER' })).map((r) => [r.competition_id, r])), []);
+  const nation = c.league.nation || 'GER';
+  const discs = useLoad(() => cached(`discs:${nation}`, async () =>
+    Object.fromEntries((await rpcAll('competition_disciplines', { p_nation: nation })).map((r) => [r.competition_id, r]))), []);
   const discNames = useMemo(() => [...new Set(Object.values(discs.data || {}).flatMap((x) => x.disciplines))], [discs.data]);
   const setCatV = keep('cat', setCatRaw), setCountry = keep('country', setCountryRaw), setTerm = keep('term', setTermRaw);
   const setYear = keep('year', setYearRaw), setMine = keep('mine', setMineRaw);
   const setMd = (v) => { keep('md', setMdRaw)(v); if (v) setYear(''); };
   // Wettkämpfe mit Athleten aus Kadern dieser Liga (für den Filter „nur mit Liga-Athleten“)
-  const owned = useLoad(async () => {
-    const slugs = Object.keys(c.owner);
-    const out = new Set();
-    for (let i = 0; i < slugs.length; i += 150) {
-      for (const r of await all(() => sb.from('wa_results').select('wa_competition_id').in('athlete_id', slugs.slice(i, i + 150)).order('id'))) {
-        if (r.wa_competition_id) out.add(`wa-c${r.wa_competition_id}`);
-      }
-    }
-    return out;
-  }, [c.league.id]);
+  const owned = useLoad(async () => new Set((await rpcAll('athlete_competitions', { p_athletes: Object.keys(c.owner) }))
+    .map((r) => r.competition_id)), [c.league.id]);
   const years = useMemo(() => [...new Set(races.map((r) => (r.start_date || '').slice(0, 4)).filter(Boolean))].sort().reverse(), [races]);
   const countries = useMemo(() => [...new Set(races.map((r) => r.country).filter(Boolean))].sort(), [races]);
   const md = (c.matchdays || []).find((m) => m.id === mdId);
@@ -118,7 +122,8 @@ function RaceDetail({ c, slug }) {
   }, [slug]);
   if (!data.data) return html`<${Loading} error=${data.error} />`;
   const { race, rows: allRows } = data.data;
-  const rows = only ? allRows.filter((r) => r.discipline === only) : allRows;
+  // Rückenwind: gewertete und gültige Leistung einer Runde in einer Zeile
+  const rows = foldWind(only ? allRows.filter((r) => r.discipline === only) : allRows);
   const back = html`<div class="row between"><a href=${`#/league/${c.league.id}/races`} class="small-link">← Alle Wettkämpfe</a><${BackToAthlete} /></div>`;
   if (!race) return html`<section class="card">${back}<p class="muted">Wettkampf nicht gefunden.</p></section>`;
   // nach Disziplin und Lauf gruppieren, innerhalb nach Platz
@@ -160,7 +165,7 @@ function RaceDetail({ c, slug }) {
         return html`<li key=${r.id} class=${owner && owner.id === c.me?.id ? 'me' : ''}>
           <span><span class="res-place">${r.wa_place ? `${r.wa_place}.` : r.remark || '–'}</span>${' '}
             <button type="button" class="linkish" onClick=${() => openRider(r.athlete_id)}>${name}</button>
-            <small class="muted"> ${r.mark || ''}${r.champ_place ? ` · ${r.champ_place === 1 ? '🏆 ' : ''}Meisterschaft ${r.champ_place}.` : ''}${owner ? ` · ${owner.team_name}` : ''}</small></span>
+            <small class="muted"> ${markText(r)}${r.champ_place ? ` · ${r.champ_place === 1 ? '🏆 ' : ''}Meisterschaft ${r.champ_place}.` : ''}${owner ? ` · ${owner.team_name}` : ''}</small></span>
           <span>${r.pts ? html`<strong>${fmtPts(r.pts)}</strong>` : ''}</span></li>`;
       })}</ul></div>`)}
   </section>`;

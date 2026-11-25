@@ -80,6 +80,20 @@ export const AREA_PRESETS = {
   throw: { label: 'Nur Wurf', areas: ['Wurf'], lineup_groups: [...AREA_GROUPS.Wurf], suggest: { max_managers: 6, roster_size: 7 },
     hint: 'Im Wurf gibt es nur wenige deutsche Spitzenathleten (z. B. etwa 8 Hammerwerfer je Geschlecht) – empfohlen: höchstens 6 Mitspieler und kleine Kader.' },
 };
+// Rückenwind über 2,0 m/s: WA führt die gewertete Leistung (mit Platz) und die beste gültige Leistung derselben Runde als
+// zwei Zeilen (wa_results.not_legal). In Listen eine Zeile: die gewertete bekommt die gültige als `legal`.
+const windKey = (r) => [r.athlete_id, r.date, r.discipline, r.wa_race, r.competition].join('|');
+export function foldWind(rows) {
+  const windy = new Map(rows.filter((r) => r.not_legal).map((r) => [windKey(r), r]));
+  return rows.filter((r) => {
+    const w = !r.not_legal && windy.get(windKey(r));
+    if (w) w.legal = r;
+    return !w;
+  });
+}
+/** Leistung mit Rückenwind-Kennzeichen: „6.76 w (+2.5)“, dahinter die gültige Leistung */
+export const markText = (r) => `${r.mark || ''}${r.not_legal ? ` w${r.wind ? ` (${r.wind})` : ''}` : ''}${r.legal?.mark ? ` · gültig ${r.legal.mark}` : ''}`;
+
 export const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 /** Texte je Land der Liga bzw. des Athleten (Länder selbst: Tabelle pool_nations). rec = Kürzel des Landesrekords */
 export const NATION_TEXT = {

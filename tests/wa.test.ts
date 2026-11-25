@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { athleteIdFromHref, mapResult, parsePlace, parseToplist, parseWaDate, toplistUrl } from "../importer/wa";
 
@@ -48,8 +50,18 @@ describe("WA-Parser", () => {
     })).toEqual({
       date: "2026-03-20", competition: "World Indoor", venue: "Toruń (POL) (i)", discipline: "800 Metres Short Track",
       country: "POL", category: "GW", race: "H3", place: null, mark: "1:46.60", resultScore: 1182, remark: null,
-      competitionId: 7190000, eventId: 10229556,
+      competitionId: 7190000, eventId: 10229556, wind: null, notLegal: false,
     });
+  });
+});
+
+describe("Rückenwind (echte WA-Daten: Pauline Hondema 2025)", () => {
+  it("liefert Wind und notLegal; WA führt die gewertete und die gültige Leistung als zwei Zeilen", () => {
+    const raw = JSON.parse(readFileSync(join(import.meta.dirname, "fixtures", "wa-athlete-hondema-2025.json"), "utf8"));
+    const nk = raw.data.getSingleCompetitorResultsDate.resultsByDate.map(mapResult)
+      .filter((r: ReturnType<typeof mapResult>) => r?.competition.startsWith("Dutch Championships"));
+    expect(nk.map((r: NonNullable<ReturnType<typeof mapResult>>) => [r.mark, r.wind, r.notLegal, r.place, r.resultScore]))
+      .toEqual([["6.76", "+2.5", true, 1, 1150], ["6.63", "+1.7", false, null, 1136]]);
   });
 });
 

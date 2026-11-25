@@ -189,6 +189,7 @@ describe("Land der Liga", () => {
     for (const [id, comp] of [["wa-1", 7400001], ["wa-2", 7400002]] as const) {
       await db.query("insert into wa_results (athlete_id, date, competition, discipline, mark, result_score, wa_competition_id) values ($1, current_date - 3, 'M', '800 Metres', '1:46.00', 1150, $2)", [id, comp]);
     }
+    await db.query("select refresh_competition_index()");   // läuft sonst mit jeder Pool-Berechnung
     expect((await db.all("select competition_id from competition_disciplines('NED')")).map((r) => r.competition_id)).toEqual(["wa-c7400002"]);
     await db.query("insert into competitions (id, name, start_date, end_date) values ('wa-c7400001', 'M', current_date - 3, current_date - 3)");
     expect(await db.all("select athlete_id from competition_results('wa-c7400001', 'NED')")).toEqual([]);
@@ -207,6 +208,31 @@ describe("Pool-Rang", () => {
                     values ('wa-2', make_date(game_year() - 1, 7, 1), 'M', '800 Metres', 'A', 'F', 'F', 1, '1:44.00', 1200, 1)`);
     await db.query("select rebuild_results(null)");   // ohne eigenen refresh_pool
     expect(await ranks()).toEqual(["wa-2", "wa-1"]);
+  });
+});
+
+describe("Rückenwind", () => {
+  it("windunterstützte und gültige Leistung derselben Runde zählen als ein Ergebnis", async () => {
+    await athlete(db, 1, "Springerin", "women", "Long Jump", 1100);
+    await db.query("insert into athlete_pb_before (athlete_id, discipline, mark) values ('wa-1', 'Long Jump', '6.50')");
+    // wie bei WA (NK 2025): 6,76 bei +2,5 mit Platz 1 (WA-Punkte schon windkorrigiert) und die beste gültige Weite 6,63 ohne Platz
+    await db.query(`insert into wa_results (athlete_id, date, competition, discipline, category, race, wa_race, place, wa_place, mark, wind,
+                      not_legal, result_score, wa_competition_id)
+                    values ('wa-1', '2025-08-03', 'NK', 'Long Jump', 'B', 'F', 'F', 1, 1, '6.76', '+2.5', true, 1150, 7),
+                           ('wa-1', '2025-08-03', 'NK', 'Long Jump', 'B', 'F', 'F', null, null, '6.63', '+1.7', false, 1136, 7)`);
+    await db.query("select rebuild_results(null)");
+    const r = await db.all(`select r.rank, r.perf_points::float perf, r.placing_points::float plc, r.pb_points::float pb, w.mark
+                              from results r join wa_results w on w.id = r.wa_result_id where r.athlete_id = 'wa-1'`);
+    expect(r).toHaveLength(1);
+    expect(r[0]).toMatchObject({ rank: 1, mark: "6.76", perf: (1150 - 1000) * 1.3 });   // besserer WA-Wert, Faktor Weitsprung 1,3
+    expect(r[0].plc).toBeGreaterThan(0);                                                // Platz 1 zählt
+    expect(r[0].pb).toBeGreaterThan(0);                                                 // PB aus der gültigen 6,63
+    // nur Rückenwind: kein PB, keine beste Leistung der letzten 12 Monate
+    await db.query("delete from wa_results where not_legal = false");
+    await db.query("update wa_results set date = current_date - 10");
+    await db.query("select rebuild_results(null)");
+    expect(Number((await db.one("select pb_points from results where athlete_id = 'wa-1'")).pb_points)).toBe(0);
+    expect((await db.one("select recent_mark from athletes where id = 'wa-1'")).recent_mark).toBeNull();
   });
 });
 

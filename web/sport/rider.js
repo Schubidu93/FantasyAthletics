@@ -1,7 +1,7 @@
 // Athleten-Fenster: Stammdaten, Toplisten und alle Ergebnisse (Lauf, Zeit, WA-Punkte, Fantasy-Punkte)
 import { html, useState, useEffect } from '../vendor/preact-htm.js';
 import { all, flag, fmtPts, q, rpc, sb } from '../lib.js';
-import { CatBadge, discLabel, discOrder, discWithKm, GROUP_LABEL, leagueRank, raceLabel, recordName, recordShort, RELAYS, rememberAthlete, riderGroup, SexBadge, waAthleteUrl, waResultUrl } from './lib.js';
+import { CatBadge, discLabel, discOrder, discWithKm, foldWind, GROUP_LABEL, markText, leagueRank, raceLabel, recordName, recordShort, RELAYS, rememberAthlete, riderGroup, SexBadge, waAthleteUrl, waResultUrl } from './lib.js';
 
 // Ergebnisse werden ab dieser Saison gespeichert
 const FIRST_YEAR = 2025;
@@ -49,7 +49,7 @@ async function loadRider(slug, league) {
   // Liga-Admins dürfen Rekorde an Ergebnissen eintragen
   const admin = !!lg && lg.admin_user === (await sb.auth.getUser()).data?.user?.id;
   const rows = await all(() => sb.from('wa_results')
-    .select('id,date,competition,discipline,category,race,place,wa_race,wa_place,placing_round,placing_place,mark,result_score,remark,wa_competition_id,wa_event_id,source,source_url,country,record,relay,champ_place,champ_category')
+    .select('id,date,competition,discipline,category,race,place,wa_race,wa_place,placing_round,placing_place,mark,wind,not_legal,result_score,remark,wa_competition_id,wa_event_id,source,source_url,country,record,relay,champ_place,champ_category')
     .eq('athlete_id', slug).gte('date', `${FIRST_YEAR}-01-01`).order('date', { ascending: false }).order('id'));
   const pts = Object.fromEntries((await all(() => sb.from('results').select('wa_result_id,points,perf_points,placing_points,record_points,pb_points')
     .eq('athlete_id', slug).order('id'))).map((r) => [r.wa_result_id, r]));
@@ -63,7 +63,8 @@ async function loadRider(slug, league) {
     .map((x) => [x.year, mixed && x.overall_rank ? { ...x, season_rank: x.overall_rank, athletes: x.overall_athletes } : x]));
   // voller PB-Bonus (zum Erkennen von =PB, das halb zählt)
   const pbFull = Number((await q(sb.from('scoring_config').select('pb_points').eq('id', 1)))[0]?.pb_points ?? 10);
-  const results = rows.map((r) => ({ ...r, pts: pts[r.id] || null, pbFull }));
+  // Rückenwind: gewertete und gültige Leistung einer Runde in einer Zeile (Punkte stehen an der gewerteten)
+  const results = foldWind(rows).map((r) => ({ ...r, pts: pts[r.id] || null, pbFull }));
   return { rider, results, toplists, season, admin, pbs };
 }
 
@@ -177,7 +178,7 @@ export function RiderModal() {
             <button type="button" class=${`sort-head res-pts ${byPoints ? 'active' : ''}`} onClick=${() => setByPoints(true)}>Pkt.</button></div>
           <div class="res-table">${shown.map((x) => html`<div key=${x.id} class=${`res-row ${L && x.wa_competition_id ? 'clickable' : ''}`} onClick=${() => go(x)}>
             <span class="res-date">${shortDate(x.date)}</span>
-            <span class="res-what"><b>${x.relay ? `Staffel ${RELAYS[x.relay]?.label || x.relay}` : discWithKm(x.discipline, x.competition)}${x.race && x.race !== 'F' ? ` · ${raceLabel(x.race)}` : ''} · <span class="nowrap">${x.mark || '–'}</span></b>
+            <span class="res-what"><b>${x.relay ? `Staffel ${RELAYS[x.relay]?.label || x.relay}` : discWithKm(x.discipline, x.competition)}${x.race && x.race !== 'F' ? ` · ${raceLabel(x.race)}` : ''} · <span class="nowrap">${x.mark ? markText(x) : '–'}</span></b>
               ${(x.record || isTitle(x) || Number(x.pts?.pb_points) > 0) && html`<span class="res-tags">
                 ${isTitle(x) && html`<span>🏆 Meister</span>`}
                 ${x.record && html`<span><span class="badge b-rec">${recordShort(x.record, r?.nation)}</span> ${recordName(x.record, r?.nation)}</span>`}

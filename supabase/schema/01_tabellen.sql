@@ -232,9 +232,25 @@ create table if not exists wa_results (
   remark            text,
   wa_competition_id bigint,
   wa_event_id       bigint,
-  imported_at       timestamptz not null default now(),
-  unique (athlete_id, date, discipline, wa_race, competition)
+  imported_at       timestamptz not null default now()
 );
+-- Rückenwind über 2,0 m/s (Sprint, Hürden, Weit/Drei): WA führt die gewertete Leistung (mit Platz; WA-Punkte schon mit
+-- Windkorrektur) und die beste gültige Leistung derselben Runde als zwei Zeilen – not_legal unterscheidet sie. Beide zählen
+-- in rebuild_results als ein Ergebnis (Platz der Wertung, besserer WA-Wert); PB und Rekorde nur aus gültigen Leistungen.
+alter table wa_results add column if not exists wind text;
+alter table wa_results add column if not exists not_legal boolean not null default false;
+do $$
+declare k text;
+begin
+  -- früherer Schlüssel ohne not_legal (Name von Postgres vergeben) weicht dem neuen
+  for k in select c.conname from pg_constraint c where c.conrelid = 'wa_results'::regclass and c.contype = 'u'
+             and c.conname <> 'wa_results_result_key' loop
+    execute format('alter table wa_results drop constraint %I', k);
+  end loop;
+  if not exists (select 1 from pg_constraint where conname = 'wa_results_result_key') then
+    alter table wa_results add constraint wa_results_result_key unique (athlete_id, date, discipline, wa_race, competition, not_legal);
+  end if;
+end $$;
 -- Herkunft: 'wa' = vom Importer, 'manual' = vom Admin nachgetragen (z. B. aus RaceResult), mit Link als Quelle
 alter table wa_results add column if not exists source text not null default 'wa';
 alter table wa_results add column if not exists source_url text;
@@ -291,6 +307,15 @@ create table if not exists scoring_coefficients (
   primary key (discipline, gender)
 );
 create index if not exists wa_results_date on wa_results (date);
+-- Disziplinen je Wettkampf, Geschlecht und Land (Wettkampfliste, Disziplin-Filter): Auszug aus wa_results, den
+-- refresh_competition_index() mit jedem refresh_pool (also auch nach jeder Punkteberechnung) neu bildet – die Liste lädt so ohne Rechnen über alle Ergebnisse
+create table if not exists competition_discipline_index (
+  competition_id text not null,
+  discipline     text not null,
+  gender         text not null,
+  nation         text not null,
+  primary key (competition_id, discipline, gender, nation)
+);
 
 -- Wettkämpfe (aus den Ergebnissen der Pool-Athleten): id = 'wa-c<WA-Wettkampf-ID>'
 create table if not exists competitions (
