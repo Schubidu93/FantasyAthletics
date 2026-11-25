@@ -49,6 +49,7 @@ describe("Niederländisch", () => {
     expect(nl("Fünfkampf (Halle)")).toBe("Vijfkamp (indoor)");
     expect(nl("Halbfinale 2")).toBe("Halve finale 2");
     expect(nl(" · Vorlauf 2")).toBe(" · Serie 2");
+    expect(nl("2026: 791,46 Punkte · Platz 1")).toBe("2026: 791,46 punten · Plaats 1");
     expect(nl("2 Meilen · Hochsprung · 3000 m Hindernis · Halbmarathon Gehen · Fünfkampf (Halle)"))
       .toBe("2 mijl · Hoogspringen · 3000 m steeple · Halve marathon snelwandelen · Vijfkamp (indoor)");   // Faktoren-Liste in den Regeln
     expect(["Siebenkampf U18 (Halle)", "Diskuswurf (1,5kg)", "60 m Hürden (91.4cm)", "Fünfkampf Girls (Halle)"].map(nl))

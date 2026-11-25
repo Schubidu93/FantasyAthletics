@@ -34,14 +34,16 @@ describe("Standardwerte wie im alten Spiel (Faktor 0,1)", () => {
   });
 });
 
+// jeder Wettkampf eine eigene WA-Wettkampf-ID (zufällige IDs konnten zusammenfallen und zwei Wettkämpfe zu einem machen)
+let compId = 7000000;
 async function result(slug: string, discipline: string, category: string, race: string, place: number | null, score: number,
   extra: { competition?: string; placing_round?: string; placing_place?: number } = {}) {
   await db.query(
     `insert into wa_results (athlete_id, date, competition, discipline, category, race, wa_race, place, wa_place, result_score,
                              wa_competition_id, placing_round, placing_place)
-     values ($1, $2, $3, $4, $5, $6, $6, $7, $7, $8, 7000000 + (random() * 1000)::int, $9, $10)`,
+     values ($1, $2, $3, $4, $5, $6, $6, $7, $7, $8, $11, $9, $10)`,
     [slug, D, extra.competition ?? `${discipline} ${race}`, discipline, category, race, place, score,
-     extra.placing_round ?? null, extra.placing_place ?? null],
+     extra.placing_round ?? null, extra.placing_place ?? null, ++compId],
   );
 }
 
