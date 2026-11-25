@@ -18,6 +18,7 @@ export function isGerman(s: string): boolean {
   if (!/[a-zA-ZäöüÄÖÜß]{2}/.test(t)) return false;
   if (/^https?:|var\(--|=>|^[A-Z][a-zA-Z]+[A-Z]\w*$/.test(s)) return false;   // Links, CSS, Code, Namen wie „RiderCell“
   if (LABEL.test(t)) return true;
+  if (/^[A-Z]{1,4} – \S/.test(t)) return true;   // Kürzel mit Erklärung („OW – Olympia/WM“)
   if (CODE.test(s.replace(/\{\}/g, ""))) return false;   // eingesetzte Werte {} sind kein Code
   return GERMAN.test(t);
 }
