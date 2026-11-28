@@ -2,7 +2,7 @@
 <defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e5532d"/><stop offset="1" stop-color="#b23214"/></linearGradient></defs>
 <rect width="128" height="128" rx="28" fill="url(#bg)"/>
 <!-- Läufer -->
-<g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="5" transform="translate(-9,-14) scale(1.15)">
+<g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="5.3" transform="translate(4,-2) scale(0.95)">
  <circle cx="77" cy="28" r="8"/>
  <path d="M71 41 L60 64"/>
  <path d="M70 44 L82 56 L93 51"/>
@@ -10,6 +10,9 @@
  <path d="M60 64 L79 74 L76 95 L83 95"/>
  <path d="M60 64 L50 83 L33 86"/>
 </g>
-<!-- Streifen in Schwarz-Rot-Gold -->
-<clipPath id="band"><rect x="34" y="104" width="60" height="6" rx="3"/></clipPath>
-<g clip-path="url(#band)"><rect x="34" y="104" width="20" height="6" fill="#111"/><rect x="54" y="104" width="20" height="6" fill="#ff3b30"/><rect x="74" y="104" width="20" height="6" fill="#ffd60a"/></g></svg>
+<!-- Bahnlinien (neutral, ohne Landesfarben) -->
+<g fill="none" stroke="#fff" stroke-linecap="round" stroke-width="3" opacity=".85">
+ <path d="M10 106 Q64 88 118 106"/>
+ <path d="M10 118 Q64 100 118 118"/>
+</g>
+</svg>
