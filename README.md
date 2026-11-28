@@ -1,6 +1,6 @@
 # Athletics Fantasy
 
-Fantasy-Leichtathletik mit deutschen Athletinnen und Athleten (Lauf, Sprint, Hürden, Sprung, Wurf, Mehrkampf, Gehen): Draft (Snake, Live-Auktion, Blind-Auktion oder offline),
+Fantasy-Leichtathletik mit Athletinnen und Athleten aus Deutschland und den Niederlanden (Lauf, Sprint, Hürden, Sprung, Wurf, Mehrkampf, Gehen): Draft (Snake, Live-Auktion, Blind-Auktion oder offline),
 Waiver und freie Transferphase, Tausch, frei setzbare Spieltage, Aufstellung mit festen Positionen je Disziplin und Liga-Tabelle.
 Gewertet werden die Ergebnisse von **World Athletics**: Leistungspunkte (WA-Punkte über einer Schwelle) plus
 Platzierungspunkte genau nach den World-Ranking-Regeln 2026.
